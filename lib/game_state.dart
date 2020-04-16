@@ -22,22 +22,55 @@ enum TurnPhase {
   review,
 }
 
+class Word {
+  final int id;
+  final String text;
+
+  Word(this.id, this.text);
+}
+
+enum WordInTurnStatus {
+  notExplained,
+  explained,
+  discarded,
+}
+
+class WordInTurn {
+  int id;
+  WordInTurnStatus status = WordInTurnStatus.notExplained;
+
+  WordInTurn(this.id);
+}
+
+class WordInTurnViewData {
+  String text;
+  WordInTurnStatus status;
+
+  WordInTurnViewData(this.text, this.status);
+}
+
 class GameState {
   final List<Player> _players;
   final TeamingStrategy _teamingStrategy;
-  final _wordsInHat = <String>[];
-  TurnPhase _turnPhase;
   Team _currentTeam;
+
+  // Store word IDs rather than words themselves for disambigution in case
+  // two words are equal.
+  final _words = <Word>[];
+  final _wordsInHat = <int>[];
+  final _wordsInThisTurn = <WordInTurn>[];
+  int _currentWord;
+
   int _turn = 0;
+  TurnPhase _turnPhase;
 
   GameState(this._players)
       : _teamingStrategy = TeamsOfTwoStrategy(_players.length) {
-    final words = Set<String>();
-    while (words.length < 20) {
-      words.add(
-          russian_words.nouns[Random().nextInt(russian_words.nouns.length)]);
+    for (int i = 0; i < 5; ++i) {
+      _words.add(Word(i,
+          russian_words.nouns[Random().nextInt(russian_words.nouns.length)]));
+      _wordsInHat.add(i);
     }
-    _wordsInHat.addAll(words);
     _initTurn();
   }
 
@@ -46,9 +79,54 @@ class GameState {
     _currentTeam = _teamingStrategy.getTeam(_turn);
   }
 
+  void _drawNextWord() {
+    assert(_turnPhase == TurnPhase.explain);
+    if (_wordsInHat.isEmpty) {
+      finishExplanation();
+      return;
+    }
+    _currentWord = _wordsInHat[Random().nextInt(_wordsInHat.length)];
+    _wordsInThisTurn.add(WordInTurn(_currentWord));
+  }
+
+  TurnPhase turnPhase() => _turnPhase;
+
+  String currentWord() {
+    assert(_turnPhase == TurnPhase.explain);
+    return _words[_currentWord].text;
+  }
+
+  List<WordInTurnViewData> wordsInThisTurnViewData() {
+    return _wordsInThisTurn
+        .map((w) => WordInTurnViewData(_words[w.id].text, w.status))
+        .toList();
+  }
+
   void newTurn() {
+    assert(_turnPhase == TurnPhase.review);
     _turn++;
     _initTurn();
+  }
+
+  void startExplaning() {
+    assert(_turnPhase == TurnPhase.prepare);
+    _turnPhase = TurnPhase.explain;
+    _drawNextWord();
+  }
+
+  void wordGuessed() {
+    assert(_turnPhase == TurnPhase.explain);
+    assert(_wordsInThisTurn.isNotEmpty);
+    assert(_wordsInThisTurn.last.id == _currentWord);
+    _wordsInThisTurn.last.status = WordInTurnStatus.explained;
+    final removed = _wordsInHat.remove(_currentWord);
+    assert(removed);
+    _drawNextWord();
+  }
+
+  void finishExplanation() {
+    assert(_turnPhase == TurnPhase.explain);
+    _turnPhase = TurnPhase.review;
   }
 
   TeamViewData currentTeamViewData() {
@@ -57,10 +135,6 @@ class GameState {
   }
 
   // TODO: delete
-  String someWord() {
-    return _wordsInHat.first;
-  }
-
   GameState.example()
       : this([
           Player('Vasya'),
