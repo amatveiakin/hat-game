@@ -9,6 +9,13 @@ class Player {
   Player(this.name);
 }
 
+class TeamViewData {
+  final Player performer;
+  final List<Player> recipients;
+
+  TeamViewData(this.performer, this.recipients);
+}
+
 enum TurnPhase {
   prepare,
   explain,
@@ -19,7 +26,9 @@ class GameState {
   final List<Player> _players;
   final TeamingStrategy _teamingStrategy;
   final _wordsInHat = <String>[];
-  final _turnPhase = TurnPhase.prepare;
+  TurnPhase _turnPhase;
+  Team _currentTeam;
+  int _turn = 0;
 
   GameState(this._players)
       : _teamingStrategy = TeamsOfTwoStrategy(_players.length) {
@@ -29,10 +38,29 @@ class GameState {
           russian_words.nouns[Random().nextInt(russian_words.nouns.length)]);
     }
     _wordsInHat.addAll(words);
+    _initTurn();
+  }
+
+  void _initTurn() {
+    _turnPhase = TurnPhase.prepare;
+    _currentTeam = _teamingStrategy.getTeam(_turn);
+  }
+
+  void newTurn() {
+    _turn++;
+    _initTurn();
+  }
+
+  TeamViewData currentTeamViewData() {
+    return TeamViewData(_players[_currentTeam.performer],
+        _currentTeam.recipients.map((id) => _players[id]).toList());
   }
 
   // TODO: delete
-  String someWord() { return _wordsInHat.first; }
+  String someWord() {
+    return _wordsInHat.first;
+  }
+
   GameState.example()
       : this([
           Player('Vasya'),
