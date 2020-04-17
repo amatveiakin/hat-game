@@ -85,7 +85,10 @@ class GameState {
   void _finishTurn() {
     _turnPhase = null;
     for (final w in _wordsInThisTurn) {
-      if (w.status == WordInTurnStatus.notExplained) _wordsInHat.add(w.id);
+      if (w.status == WordInTurnStatus.notExplained) {
+        assert(!_wordsInHat.contains(w.id));
+        _wordsInHat.add(w.id);
+      }
     }
     final List<int> wordsExplained = _wordsInThisTurn
         .where((w) => w.status == WordInTurnStatus.explained)
@@ -106,7 +109,11 @@ class GameState {
     }
     _currentWord = _wordsInHat[Random().nextInt(_wordsInHat.length)];
     _wordsInThisTurn.add(WordInTurn(_currentWord));
+    final removed = _wordsInHat.remove(_currentWord);
+    assert(removed);
   }
+
+  int currentTurn() => _turn;
 
   TurnPhase turnPhase() => _turnPhase;
 
@@ -139,13 +146,15 @@ class GameState {
     assert(_wordsInThisTurn.isNotEmpty);
     assert(_wordsInThisTurn.last.id == _currentWord);
     _wordsInThisTurn.last.status = WordInTurnStatus.explained;
-    final removed = _wordsInHat.remove(_currentWord);
-    assert(removed);
     _drawNextWord();
   }
 
-  void finishExplanation() {
-    assert(_turnPhase == TurnPhase.explain);
+  void finishExplanation({int turnRestriction}) {
+    if (turnRestriction != null) {
+      if (turnRestriction != _turn || _turnPhase != TurnPhase.explain) return;
+    } else {
+      assert(_turnPhase == TurnPhase.explain);
+    }
     _turnPhase = TurnPhase.review;
   }
 

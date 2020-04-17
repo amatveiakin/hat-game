@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hatgame/game_settings.dart';
 import 'package:hatgame/game_state.dart';
 import 'package:hatgame/timer.dart';
 
@@ -67,17 +68,29 @@ class TeamViewState extends State<TeamView> with TickerProviderStateMixin {
 class WordView extends StatelessWidget {
   final GameViewState _gameViewState;
   final GameState gameState;
+  final GameSettings gameSettings;
 
-  WordView(this._gameViewState) : gameState = _gameViewState.gameState;
+  WordView(this._gameViewState)
+      : gameState = _gameViewState.gameState,
+        gameSettings = _gameViewState.gameSettings;
 
   @override
   Widget build(BuildContext context) {
     switch (gameState.turnPhase()) {
       case TurnPhase.prepare:
         return RaisedButton(
-          onPressed: () => _gameViewState.update(() {
-            gameState.startExplaning();
-          }),
+          onPressed: () {
+            _gameViewState.update(() {
+              gameState.startExplaning();
+              int turn = gameState.currentTurn();
+              Future.delayed(Duration(seconds: gameSettings.explanationSeconds),
+                  () {
+                _gameViewState.update(() {
+                  gameState.finishExplanation(turnRestriction: turn);
+                });
+              });
+            });
+          },
           child: Text("Go!"),
         );
       case TurnPhase.explain:
@@ -99,7 +112,7 @@ class WordView extends StatelessWidget {
           Expanded(
             child: Center(
               child: TimerView(
-                duration: Duration(seconds: 5),
+                duration: Duration(seconds: gameSettings.explanationSeconds),
               ),
             ),
           ),
@@ -145,6 +158,7 @@ class GameView extends StatefulWidget {
 
 class GameViewState extends State<GameView> {
   final GameState gameState = GameState.example();
+  final GameSettings gameSettings = GameSettings.dev();
 
   void update(Function updater) {
     setState(updater);
