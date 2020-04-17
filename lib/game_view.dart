@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hatgame/game_settings.dart';
 import 'package:hatgame/game_state.dart';
+import 'package:hatgame/theme.dart';
 import 'package:hatgame/timer.dart';
 
 class TeamView extends StatefulWidget {
@@ -91,7 +92,12 @@ class WordView extends StatelessWidget {
               });
             });
           },
-          child: Text("Go!"),
+          color: MyColors.accent,
+          padding: EdgeInsets.symmetric(horizontal: 28.0, vertical: 12.0),
+          child: Text(
+            "Start!",
+            style: TextStyle(fontSize: 24.0),
+          ),
         );
       case TurnPhase.explain:
         return Column(children: [
@@ -144,7 +150,12 @@ class WordView extends StatelessWidget {
             onPressed: () => _gameViewState.update(() {
               gameState.newTurn();
             }),
-            child: Text('Next round'),
+            color: MyColors.accent,
+            padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
+            child: Text(
+              'Next round',
+              style: TextStyle(fontSize: 20.0),
+            ),
           ),
         ]);
     }
