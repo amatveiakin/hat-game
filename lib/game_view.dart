@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hatgame/game_state.dart';
+import 'package:hatgame/timer.dart';
 
 class TeamView extends StatefulWidget {
   final TeamViewData teamData;
@@ -80,12 +81,29 @@ class WordView extends StatelessWidget {
           child: Text("Go!"),
         );
       case TurnPhase.explain:
-        return RaisedButton(
-          onPressed: () => _gameViewState.update(() {
-            gameState.wordGuessed();
-          }),
-          child: Text(gameState.currentWord()),
-        );
+        return Column(children: [
+          Expanded(
+            child: Center(
+              child: RaisedButton(
+                onPressed: () => _gameViewState.update(() {
+                  gameState.wordGuessed();
+                }),
+                padding: EdgeInsets.symmetric(horizontal: 28.0, vertical: 12.0),
+                child: Text(
+                  gameState.currentWord(),
+                  style: TextStyle(fontSize: 24.0),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Center(
+              child: TimerView(
+                duration: Duration(seconds: 5),
+              ),
+            ),
+          ),
+        ]);
       case TurnPhase.review:
         return Column(children: [
           Expanded(
