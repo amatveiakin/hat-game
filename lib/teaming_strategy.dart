@@ -10,6 +10,7 @@ abstract class TeamingStrategy {
 
   TeamingStrategy(this.numPlayers);
 
+  bool teamsAreFixed();
   Team getTeam(int turn);
 }
 
@@ -17,6 +18,9 @@ class TeamsOfTwoStrategy extends TeamingStrategy {
   TeamsOfTwoStrategy(int numPlayers) : super(numPlayers) {
     assert(numPlayers % 2 == 0);
   }
+
+  @override
+  bool teamsAreFixed() => true;
 
   @override
   Team getTeam(int turn) {

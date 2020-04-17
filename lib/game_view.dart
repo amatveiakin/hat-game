@@ -73,20 +73,35 @@ class WordView extends StatelessWidget {
           child: Text(gameState.currentWord()),
         );
       case TurnPhase.review:
-        return ListView(
-          children: ListTile.divideTiles(
-            context: context,
-            tiles: gameState
-                .wordsInThisTurnViewData()
-                .map((w) => CheckboxListTile(
-                    onChanged: (bool checked) {
-                      // TODO: Change word status.
-                    },
-                    value: w.status == WordInTurnStatus.explained,
-                    title: Text(w.text)))
-                .toList(),
-          ).toList(),
-        );
+        return Column(children: [
+          Expanded(
+            child: ListView(
+              children: ListTile.divideTiles(
+                context: context,
+                tiles: gameState
+                    .wordsInThisTurnViewData()
+                    .map((w) => CheckboxListTile(
+                        onChanged: (bool checked) => _gameViewState.update(() {
+                              gameState.setWordStatus(
+                                  w.id,
+                                  checked
+                                      ? WordInTurnStatus.explained
+                                      : WordInTurnStatus.notExplained);
+                            }),
+                        value: w.status == WordInTurnStatus.explained,
+                        title: Text(w.text),
+                        controlAffinity: ListTileControlAffinity.leading))
+                    .toList(),
+              ).toList(),
+            ),
+          ),
+          RaisedButton(
+            onPressed: () => _gameViewState.update(() {
+              gameState.newTurn();
+            }),
+            child: Text('Next round'),
+          ),
+        ]);
     }
   }
 }

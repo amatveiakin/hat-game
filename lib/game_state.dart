@@ -5,6 +5,8 @@ import 'package:russian_words/russian_words.dart' as russian_words;
 
 class Player {
   final String name;
+  var wordsExplained = <int>[];
+  var wordsGuessed = <int>[];
 
   Player(this.name);
 }
@@ -43,10 +45,11 @@ class WordInTurn {
 }
 
 class WordInTurnViewData {
+  int id;
   String text;
   WordInTurnStatus status;
 
-  WordInTurnViewData(this.text, this.status);
+  WordInTurnViewData(this.id, this.text, this.status);
 }
 
 class GameState {
@@ -79,6 +82,22 @@ class GameState {
     _currentTeam = _teamingStrategy.getTeam(_turn);
   }
 
+  void _finishTurn() {
+    _turnPhase = null;
+    for (final w in _wordsInThisTurn) {
+      if (w.status == WordInTurnStatus.notExplained) _wordsInHat.add(w.id);
+    }
+    final List<int> wordsExplained = _wordsInThisTurn
+        .where((w) => w.status == WordInTurnStatus.explained)
+        .map((w) => w.id)
+        .toList();
+    _players[_currentTeam.performer].wordsExplained.addAll(wordsExplained);
+    for (final recipient in _currentTeam.recipients) {
+      _players[recipient].wordsGuessed.addAll(wordsExplained);
+    }
+    _wordsInThisTurn.clear();
+  }
+
   void _drawNextWord() {
     assert(_turnPhase == TurnPhase.explain);
     if (_wordsInHat.isEmpty) {
@@ -98,12 +117,13 @@ class GameState {
 
   List<WordInTurnViewData> wordsInThisTurnViewData() {
     return _wordsInThisTurn
-        .map((w) => WordInTurnViewData(_words[w.id].text, w.status))
+        .map((w) => WordInTurnViewData(w.id, _words[w.id].text, w.status))
         .toList();
   }
 
   void newTurn() {
     assert(_turnPhase == TurnPhase.review);
+    _finishTurn();
     _turn++;
     _initTurn();
   }
@@ -127,6 +147,11 @@ class GameState {
   void finishExplanation() {
     assert(_turnPhase == TurnPhase.explain);
     _turnPhase = TurnPhase.review;
+  }
+
+  void setWordStatus(int wordId, WordInTurnStatus newStatus) {
+    assert(_turnPhase == TurnPhase.review);
+    _wordsInThisTurn.singleWhere((w) => w.id == wordId).status = newStatus;
   }
 
   TeamViewData currentTeamViewData() {
