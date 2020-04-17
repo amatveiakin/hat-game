@@ -117,6 +117,8 @@ class GameState {
 
   TurnPhase turnPhase() => _turnPhase;
 
+  int numWordsInHat() => _wordsInHat.length;
+
   String currentWord() {
     assert(_turnPhase == TurnPhase.explain);
     return _words[_currentWord].text;

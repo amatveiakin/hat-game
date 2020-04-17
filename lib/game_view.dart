@@ -24,7 +24,7 @@ class TeamViewState extends State<TeamView> with TickerProviderStateMixin {
     return AnimatedDefaultTextStyle(
       duration: animationDuration,
       style: TextStyle(
-        fontSize: 18.0,
+        fontSize: 20.0,
         fontWeight: widget.turnPhase == TurnPhase.prepare
             ? FontWeight.bold
             : FontWeight.normal,
@@ -79,25 +79,39 @@ class WordView extends StatelessWidget {
   Widget build(BuildContext context) {
     switch (gameState.turnPhase()) {
       case TurnPhase.prepare:
-        return RaisedButton(
-          onPressed: () {
-            _gameViewState.update(() {
-              gameState.startExplaning();
-              int turn = gameState.currentTurn();
-              Future.delayed(Duration(seconds: gameSettings.explanationSeconds),
-                  () {
-                _gameViewState.update(() {
-                  gameState.finishExplanation(turnRestriction: turn);
-                });
-              });
-            });
-          },
-          color: MyColors.accent,
-          padding: EdgeInsets.symmetric(horizontal: 28.0, vertical: 12.0),
-          child: Text(
-            "Start!",
-            style: TextStyle(fontSize: 24.0),
-          ),
+        return Column(
+          children: [
+            Expanded(
+              child: Center(
+                child: RaisedButton(
+                  onPressed: () {
+                    _gameViewState.update(() {
+                      gameState.startExplaning();
+                      int turn = gameState.currentTurn();
+                      Future.delayed(
+                          Duration(seconds: gameSettings.explanationSeconds),
+                          () {
+                        _gameViewState.update(() {
+                          gameState.finishExplanation(turnRestriction: turn);
+                        });
+                      });
+                    });
+                  },
+                  color: MyColors.accent,
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 28.0, vertical: 12.0),
+                  child: Text(
+                    'Start!',
+                    style: TextStyle(fontSize: 24.0),
+                  ),
+                ),
+              ),
+            ),
+            Text(
+              'Word in hat: ${gameState.numWordsInHat()}',
+              style: TextStyle(fontSize: 16.0),
+            )
+          ],
         );
       case TurnPhase.explain:
         return Column(children: [
@@ -187,9 +201,7 @@ class GameViewState extends State<GameView> {
           children: [
             TeamView(gameState.currentTeamViewData(), gameState.turnPhase()),
             Expanded(
-              child: Center(
-                child: WordView(this),
-              ),
+              child: WordView(this),
             ),
           ],
         ),
