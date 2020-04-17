@@ -35,31 +35,34 @@ class TeamViewState extends State<TeamView> with TickerProviderStateMixin {
       child: AnimatedOpacity(
         duration: animationDuration,
         opacity: widget.turnPhase == TurnPhase.prepare ? 1.0 : 0.5,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              child: Text(
-                widget.teamData.performer.name,
-                textAlign: TextAlign.right,
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 12.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Text(
+                  widget.teamData.performer.name,
+                  textAlign: TextAlign.right,
+                ),
               ),
-            ),
-            Text(
-              ' → ',
-              textAlign: TextAlign.center,
-            ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: widget.teamData.recipients
-                    .map((player) => Text(
-                          player.name,
-                          textAlign: TextAlign.left,
-                        ))
-                    .toList(),
+              Text(
+                ' → ',
+                textAlign: TextAlign.center,
               ),
-            ),
-          ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: widget.teamData.recipients
+                      .map((player) => Text(
+                            player.name,
+                            textAlign: TextAlign.left,
+                          ))
+                      .toList(),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -107,10 +110,13 @@ class WordView extends StatelessWidget {
                 ),
               ),
             ),
-            Text(
-              'Word in hat: ${gameState.numWordsInHat()}',
-              style: TextStyle(fontSize: 16.0),
-            )
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 12.0),
+              child: Text(
+                'Words in hat: ${gameState.numWordsInHat()}',
+                style: TextStyle(fontSize: 16.0),
+              ),
+            ),
           ],
         );
       case TurnPhase.explain:
@@ -160,15 +166,18 @@ class WordView extends StatelessWidget {
               ).toList(),
             ),
           ),
-          RaisedButton(
-            onPressed: () => _gameViewState.update(() {
-              gameState.newTurn();
-            }),
-            color: MyColors.accent,
-            padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
-            child: Text(
-              'Next round',
-              style: TextStyle(fontSize: 20.0),
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 12.0),
+            child: RaisedButton(
+              onPressed: () => _gameViewState.update(() {
+                gameState.newTurn();
+              }),
+              color: MyColors.accent,
+              padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
+              child: Text(
+                'Next round',
+                style: TextStyle(fontSize: 20.0),
+              ),
             ),
           ),
         ]);
@@ -196,7 +205,6 @@ class GameViewState extends State<GameView> {
         title: Text('Hat Game'),
       ),
       body: Container(
-        padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
         child: Column(
           children: [
             TeamView(gameState.currentTeamViewData(), gameState.turnPhase()),
