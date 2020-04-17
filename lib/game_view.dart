@@ -14,6 +14,7 @@ class TeamView extends StatefulWidget {
   createState() => TeamViewState();
 }
 
+// TODO: Add haptic feedback for main events.
 // TODO: Swicth to animation controllers or make the widget stateless.
 class TeamViewState extends State<TeamView> with TickerProviderStateMixin {
   @override
@@ -86,6 +87,7 @@ class WordView extends StatelessWidget {
           children: [
             Expanded(
               child: Center(
+                // TODO: Align with the word button position.
                 child: RaisedButton(
                   onPressed: () {
                     _gameViewState.update(() {
@@ -123,14 +125,17 @@ class WordView extends StatelessWidget {
         return Column(children: [
           Expanded(
             child: Center(
-              child: RaisedButton(
-                onPressed: () => _gameViewState.update(() {
-                  gameState.wordGuessed();
-                }),
-                padding: EdgeInsets.symmetric(horizontal: 28.0, vertical: 12.0),
-                child: Text(
-                  gameState.currentWord(),
-                  style: TextStyle(fontSize: 24.0),
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width * 0.8,
+                child: RaisedButton(
+                  onPressed: () => _gameViewState.update(() {
+                    gameState.wordGuessed();
+                  }),
+                  padding: EdgeInsets.symmetric(vertical: 12.0),
+                  child: Text(
+                    gameState.currentWord(),
+                    style: TextStyle(fontSize: 24.0),
+                  ),
                 ),
               ),
             ),
