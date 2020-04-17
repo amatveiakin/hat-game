@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hatgame/game_config_view.dart';
 import 'package:hatgame/game_view.dart';
 import 'package:hatgame/theme.dart';
 
@@ -14,9 +15,8 @@ class StartScreen extends StatelessWidget {
       body: Center(
         child: RaisedButton(
           onPressed: () {
-            // TODO: remove "back" button
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => GameView()));
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => GameConfigView()));
           },
           child: Text('New Game'),
         ),
