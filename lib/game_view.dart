@@ -105,7 +105,23 @@ class WordReviewItem extends StatelessWidget {
               },
             ),
             Expanded(
-              child: Text(text),
+              child: Text(
+                text,
+                style: TextStyle(
+                    decoration: status == WordInTurnStatus.discarded
+                        ? TextDecoration.lineThrough
+                        : TextDecoration.none),
+              ),
+            ),
+            IconButton(
+              icon: Icon(status == WordInTurnStatus.discarded
+                  ? Icons.restore_from_trash
+                  : Icons.delete_outline),
+              onPressed: () {
+                onChanged(status == WordInTurnStatus.discarded
+                    ? WordInTurnStatus.notExplained
+                    : WordInTurnStatus.discarded);
+              },
             ),
           ],
         ),
@@ -148,7 +164,7 @@ class PlayArea extends StatelessWidget {
                   },
                   color: MyColors.accent,
                   padding:
-                      EdgeInsets.symmetric(horizontal: 28.0, vertical: 12.0),
+                      EdgeInsets.symmetric(horizontal: 36.0, vertical: 12.0),
                   child: Text(
                     'Start!',
                     style: TextStyle(fontSize: 24.0),
@@ -170,6 +186,7 @@ class PlayArea extends StatelessWidget {
           Expanded(
             child: Center(
               child: SizedBox(
+                // Get screen size using MediaQuery
                 width: MediaQuery.of(context).size.width * 0.8,
                 child: RaisedButton(
                   onPressed: () => _gameViewState.update(() {
