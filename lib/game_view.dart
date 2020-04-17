@@ -1,50 +1,64 @@
 import 'package:flutter/material.dart';
 import 'package:hatgame/game_state.dart';
 
-class TeamView extends StatelessWidget {
-  final TeamViewData _teamData;
-  final TurnPhase _turnPhase;
-  final TextStyle _textStyle;
+class TeamView extends StatefulWidget {
+  final TeamViewData teamData;
+  final TurnPhase turnPhase;
 
-  TeamView(this._teamData, this._turnPhase)
-      : _textStyle = TextStyle(
-            fontSize: 16.0,
-            // TODO: Use theme colors.
-            // TODO: Fade out animation.
-            color: _turnPhase == TurnPhase.prepare
-                ? Colors.black
-                : Colors.black45);
+  TeamView(this.teamData, this.turnPhase);
 
   @override
+  createState() => TeamViewState();
+}
+
+// TODO: Swicth to animation controllers or make the widget stateless.
+class TeamViewState extends State<TeamView> with TickerProviderStateMixin {
+  @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(
-          child: Text(
-            _teamData.performer.name,
-            textAlign: TextAlign.right,
-            style: _textStyle,
-          ),
+    final animationDuration = widget.turnPhase == TurnPhase.prepare
+        ? Duration.zero
+        : Duration(milliseconds: 300);
+    return AnimatedDefaultTextStyle(
+      duration: animationDuration,
+      style: TextStyle(
+        fontSize: 18.0,
+        fontWeight: widget.turnPhase == TurnPhase.prepare
+            ? FontWeight.bold
+            : FontWeight.normal,
+        // TODO: Why do we need to specify color?
+        // TODO: Take color from the theme.
+        color: Colors.black,
+      ),
+      child: AnimatedOpacity(
+        duration: animationDuration,
+        opacity: widget.turnPhase == TurnPhase.prepare ? 1.0 : 0.5,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Text(
+                widget.teamData.performer.name,
+                textAlign: TextAlign.right,
+              ),
+            ),
+            Text(
+              ' → ',
+              textAlign: TextAlign.center,
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: widget.teamData.recipients
+                    .map((player) => Text(
+                          player.name,
+                          textAlign: TextAlign.left,
+                        ))
+                    .toList(),
+              ),
+            ),
+          ],
         ),
-        Text(
-          ' → ',
-          textAlign: TextAlign.center,
-          style: _textStyle,
-        ),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: _teamData.recipients
-                .map((player) => Text(
-                      player.name,
-                      textAlign: TextAlign.left,
-                      style: _textStyle,
-                    ))
-                .toList(),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -124,15 +138,18 @@ class GameViewState extends State<GameView> {
       appBar: AppBar(
         title: Text('Hat Game'),
       ),
-      body: Column(
-        children: [
-          TeamView(gameState.currentTeamViewData(), gameState.turnPhase()),
-          Expanded(
-            child: Center(
-              child: WordView(this),
+      body: Container(
+        padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+        child: Column(
+          children: [
+            TeamView(gameState.currentTeamViewData(), gameState.turnPhase()),
+            Expanded(
+              child: Center(
+                child: WordView(this),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
