@@ -70,12 +70,56 @@ class TeamViewState extends State<TeamView> with TickerProviderStateMixin {
   }
 }
 
-class WordView extends StatelessWidget {
+class WordReviewItem extends StatelessWidget {
+  final String text;
+  final WordInTurnStatus status;
+  final Function onChanged;
+
+  WordReviewItem(
+      {@required this.text, @required this.status, @required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    bool _statusToChecked(WordInTurnStatus status) {
+      return status == WordInTurnStatus.explained;
+    }
+
+    WordInTurnStatus _checkedToStatus(bool checked) {
+      return checked
+          ? WordInTurnStatus.explained
+          : WordInTurnStatus.notExplained;
+    }
+
+    return InkWell(
+      onTap: () {
+        onChanged(_checkedToStatus(!_statusToChecked(status)));
+      },
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 2.0, vertical: 4.0),
+        child: Row(
+          children: [
+            Checkbox(
+              value: _statusToChecked(status),
+              onChanged: (bool newValue) {
+                onChanged(_checkedToStatus(newValue));
+              },
+            ),
+            Expanded(
+              child: Text(text),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class PlayArea extends StatelessWidget {
   final GameViewState _gameViewState;
   final GameState gameState;
   final GameSettings gameSettings;
 
-  WordView(this._gameViewState)
+  PlayArea(this._gameViewState)
       : gameState = _gameViewState.gameState,
         gameSettings = _gameViewState.gameSettings;
 
@@ -156,17 +200,14 @@ class WordView extends StatelessWidget {
                 context: context,
                 tiles: gameState
                     .wordsInThisTurnViewData()
-                    .map((w) => CheckboxListTile(
-                        onChanged: (bool checked) => _gameViewState.update(() {
-                              gameState.setWordStatus(
-                                  w.id,
-                                  checked
-                                      ? WordInTurnStatus.explained
-                                      : WordInTurnStatus.notExplained);
-                            }),
-                        value: w.status == WordInTurnStatus.explained,
-                        title: Text(w.text),
-                        controlAffinity: ListTileControlAffinity.leading))
+                    .map((w) => WordReviewItem(
+                          text: w.text,
+                          status: w.status,
+                          onChanged: (WordInTurnStatus status) =>
+                              _gameViewState.update(() {
+                            gameState.setWordStatus(w.id, status);
+                          }),
+                        ))
                     .toList(),
               ).toList(),
             ),
@@ -214,7 +255,7 @@ class GameViewState extends State<GameView> {
           children: [
             TeamView(gameState.currentTeamViewData(), gameState.turnPhase()),
             Expanded(
-              child: WordView(this),
+              child: PlayArea(this),
             ),
           ],
         ),
