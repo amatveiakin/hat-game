@@ -159,7 +159,6 @@ class WordReviewItem extends StatelessWidget {
               child: Text(
                 text,
                 style: TextStyle(
-                    fontSize: 16.0,
                     decoration: status == WordInTurnStatus.discarded
                         ? TextDecoration.lineThrough
                         : TextDecoration.none),
@@ -249,10 +248,7 @@ class PlayArea extends StatelessWidget {
             ),
             Container(
               padding: EdgeInsets.symmetric(vertical: 12.0),
-              child: Text(
-                'Words in hat: ${gameState.numWordsInHat()}',
-                style: TextStyle(fontSize: 16.0),
-              ),
+              child: Text('Words in hat: ${gameState.numWordsInHat()}'),
             ),
           ],
         );
