@@ -37,9 +37,18 @@ enum WordInTurnStatus {
   discarded,
 }
 
+enum WordFeedback {
+  none,
+  good,
+  bad,
+  tooEasy,
+  tooHard,
+}
+
 class WordInTurn {
   int id;
   WordInTurnStatus status = WordInTurnStatus.notExplained;
+  WordFeedback feedback = WordFeedback.none;
 
   WordInTurn(this.id);
 }
@@ -48,8 +57,9 @@ class WordInTurnViewData {
   int id;
   String text;
   WordInTurnStatus status;
+  WordFeedback feedback;
 
-  WordInTurnViewData(this.id, this.text, this.status);
+  WordInTurnViewData(this.id, this.text, this.status, this.feedback);
 }
 
 class GameState {
@@ -126,7 +136,8 @@ class GameState {
 
   List<WordInTurnViewData> wordsInThisTurnViewData() {
     return _wordsInThisTurn
-        .map((w) => WordInTurnViewData(w.id, _words[w.id].text, w.status))
+        .map((w) =>
+            WordInTurnViewData(w.id, _words[w.id].text, w.status, w.feedback))
         .toList();
   }
 
@@ -163,6 +174,11 @@ class GameState {
   void setWordStatus(int wordId, WordInTurnStatus newStatus) {
     assert(_turnPhase == TurnPhase.review);
     _wordsInThisTurn.singleWhere((w) => w.id == wordId).status = newStatus;
+  }
+
+  void setWordFeedback(int wordId, WordFeedback newFeedback) {
+    assert(_turnPhase == TurnPhase.review);
+    _wordsInThisTurn.singleWhere((w) => w.id == wordId).feedback = newFeedback;
   }
 
   TeamViewData currentTeamViewData() {

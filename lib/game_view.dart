@@ -3,6 +3,7 @@ import 'package:hatgame/game_settings.dart';
 import 'package:hatgame/game_state.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/timer.dart';
+import 'package:outline_material_icons/outline_material_icons.dart';
 
 class TeamView extends StatefulWidget {
   final TeamViewData teamData;
@@ -70,13 +71,63 @@ class TeamViewState extends State<TeamView> with TickerProviderStateMixin {
   }
 }
 
+Icon _GetWordFeedbackIcon(WordFeedback feedback, bool menuButton, bool active) {
+  assert(feedback != null);
+  switch (feedback) {
+    case WordFeedback.none:
+      return menuButton ? Icon(OMIcons.thumbsUpDown) : Icon(OMIcons.clear);
+    case WordFeedback.good:
+      return active
+          ? Icon(Icons.thumb_up, color: MyColors.accent)
+          : Icon(OMIcons.thumbUp);
+    case WordFeedback.bad:
+      return active
+          ? Icon(Icons.thumb_down, color: MyColors.accent)
+          : Icon(OMIcons.thumbDown);
+    case WordFeedback.tooEasy:
+      // TODO: Find a proper icon.
+      return active
+          ? Icon(Icons.cake, color: MyColors.accent)
+          : Icon(OMIcons.cake);
+    case WordFeedback.tooHard:
+      // TODO: Find a proper icon.
+      return active
+          ? Icon(Icons.sentiment_very_dissatisfied, color: MyColors.accent)
+          : Icon(OMIcons.sentimentVeryDissatisfied);
+  }
+  throw AssertionError("Reached end of _GetWordFeedbackIcon");
+}
+
+String _GetWordFeedbackText(WordFeedback feedback) {
+  assert(feedback != null);
+  switch (feedback) {
+    case WordFeedback.none:
+      return 'Clear';
+    case WordFeedback.good:
+      return 'Nice';
+    case WordFeedback.bad:
+      return 'Ugly';
+    case WordFeedback.tooEasy:
+      return 'Too easy';
+    case WordFeedback.tooHard:
+      return 'Too hard';
+  }
+  throw AssertionError("Reached end of _GetWordFeedbackText");
+}
+
 class WordReviewItem extends StatelessWidget {
   final String text;
   final WordInTurnStatus status;
-  final Function onChanged;
+  final WordFeedback feedback;
+  final Function setStatus;
+  final Function setFeedback;
 
   WordReviewItem(
-      {@required this.text, @required this.status, @required this.onChanged});
+      {@required this.text,
+      @required this.status,
+      @required this.feedback,
+      @required this.setStatus,
+      @required this.setFeedback});
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +143,7 @@ class WordReviewItem extends StatelessWidget {
 
     return InkWell(
       onTap: () {
-        onChanged(_checkedToStatus(!_statusToChecked(status)));
+        setStatus(_checkedToStatus(!_statusToChecked(status)));
       },
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 2.0, vertical: 4.0),
@@ -101,13 +152,14 @@ class WordReviewItem extends StatelessWidget {
             Checkbox(
               value: _statusToChecked(status),
               onChanged: (bool newValue) {
-                onChanged(_checkedToStatus(newValue));
+                setStatus(_checkedToStatus(newValue));
               },
             ),
             Expanded(
               child: Text(
                 text,
                 style: TextStyle(
+                    fontSize: 16.0,
                     decoration: status == WordInTurnStatus.discarded
                         ? TextDecoration.lineThrough
                         : TextDecoration.none),
@@ -117,12 +169,35 @@ class WordReviewItem extends StatelessWidget {
               icon: Icon(status == WordInTurnStatus.discarded
                   ? Icons.restore_from_trash
                   : Icons.delete_outline),
+              tooltip:
+                  status == WordInTurnStatus.discarded ? 'Restore' : 'Discard',
               onPressed: () {
-                onChanged(status == WordInTurnStatus.discarded
+                setStatus(status == WordInTurnStatus.discarded
                     ? WordInTurnStatus.notExplained
                     : WordInTurnStatus.discarded);
               },
             ),
+            PopupMenuButton(
+              icon: _GetWordFeedbackIcon(feedback, true, true),
+              itemBuilder: (BuildContext context) {
+                var result = <PopupMenuItem<WordFeedback>>[];
+                result.addAll(WordFeedback.values
+                    .where((wf) => (wf != WordFeedback.none))
+                    .map((wf) => PopupMenuItem<WordFeedback>(
+                          value: wf,
+                          child: ListTile(
+                              leading: _GetWordFeedbackIcon(
+                                  wf, false, wf == feedback),
+                              title: Text(_GetWordFeedbackText(wf))),
+                        ))
+                    .toList());
+                return result;
+              },
+              onSelected: (WordFeedback newFeedback) {
+                setFeedback(
+                    newFeedback == feedback ? WordFeedback.none : newFeedback);
+              },
+            )
           ],
         ),
       ),
@@ -220,9 +295,14 @@ class PlayArea extends StatelessWidget {
                     .map((w) => WordReviewItem(
                           text: w.text,
                           status: w.status,
-                          onChanged: (WordInTurnStatus status) =>
+                          feedback: w.feedback,
+                          setStatus: (WordInTurnStatus status) =>
                               _gameViewState.update(() {
                             gameState.setWordStatus(w.id, status);
+                          }),
+                          setFeedback: (WordFeedback feedback) =>
+                              _gameViewState.update(() {
+                            gameState.setWordFeedback(w.id, feedback);
                           }),
                         ))
                     .toList(),
