@@ -1,16 +1,9 @@
-# hatgame
+# Hat Game
 
-A new Flutter project.
+> :warning: This is a work in progress, not a finished project.
 
-## Getting Started
+Hat is a Russian party game in which participants try to explain words as quickly as possible without using cognates.
 
-This project is a starting point for a Flutter application.
+This helper app is designed to streamline the game process: break participants into teams, generate words, keep track of time and score.
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+The app is written in Flutter, so it's supposed to work on Android, iOS and web. Well, we'll see about that.
