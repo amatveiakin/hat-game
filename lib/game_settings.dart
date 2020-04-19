@@ -1,4 +1,5 @@
 class GameSettings {
+  List<List<String>> teamPlayers;
   int explanationSeconds;
 
   GameSettings.defaults() : explanationSeconds = 15;

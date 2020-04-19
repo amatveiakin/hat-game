@@ -211,7 +211,7 @@ class PlayArea extends StatelessWidget {
 
   PlayArea(this._gameViewState)
       : gameState = _gameViewState.gameState,
-        gameSettings = _gameViewState.gameSettings;
+        gameSettings = _gameViewState.widget.gameSettings;
 
   @override
   Widget build(BuildContext context) {
@@ -325,13 +325,19 @@ class PlayArea extends StatelessWidget {
 }
 
 class GameView extends StatefulWidget {
+  final GameSettings gameSettings;
+
+  GameView(this.gameSettings);
+
   @override
-  createState() => GameViewState();
+  createState() => GameViewState(gameSettings);
 }
 
 class GameViewState extends State<GameView> {
-  final GameState gameState = GameState.example();
-  final GameSettings gameSettings = GameSettings.dev();
+  final GameState gameState;
+
+  GameViewState(GameSettings gameSettings)
+      : gameState = GameState(gameSettings);
 
   void update(Function updater) {
     setState(updater);

@@ -1,10 +1,14 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:hatgame/game_settings.dart';
 import 'package:hatgame/game_view.dart';
 import 'package:hatgame/theme.dart';
 
 class PlayersView extends StatefulWidget {
+  // TODO: Find a proper way to pass players data.
+  final players = <_PlayerData>[];
+
   @override
   createState() => _PlayersViewState();
 }
@@ -23,8 +27,9 @@ class _PlayerData {
 }
 
 class _PlayersViewState extends State<PlayersView> {
-  var _players = <_PlayerData>[];
   List<Widget> _items = [];
+
+  players() => widget.players;
 
   void _addPlayer(String name) {
     setState(() {
@@ -35,14 +40,14 @@ class _PlayersViewState extends State<PlayersView> {
         playerData.name = playerData.controller.text;
       });
       playerData.focusNode.requestFocus();
-      _players.add(playerData);
+      players().add(playerData);
     });
   }
 
   void _deletePlayer(_PlayerData player) {
     player.dispose();
     setState(() {
-      _players.remove(player);
+      players().remove(player);
     });
   }
 
@@ -69,7 +74,7 @@ class _PlayersViewState extends State<PlayersView> {
     for (int i = 0; i < itemIndex; i++) {
       if (!(_items[i] is Divider)) playerIndex++;
     }
-    return min(playerIndex, _players.length - 1);
+    return min(playerIndex, players().length - 1);
   }
 
   void _makeItems() {
@@ -77,8 +82,8 @@ class _PlayersViewState extends State<PlayersView> {
     final listItemPaddingSmallRight = EdgeInsets.fromLTRB(listItemPadding.left,
         listItemPadding.top, listItemPadding.right / 2, listItemPadding.bottom);
     var _playerItems = <ListTile>[];
-    for (int i = 0; i < _players.length; ++i) {
-      final player = _players[i];
+    for (int i = 0; i < players().length; ++i) {
+      final player = players()[i];
       _playerItems.add(ListTile(
         key: UniqueKey(),
         contentPadding: listItemPaddingSmallRight,
@@ -138,7 +143,7 @@ class _PlayersViewState extends State<PlayersView> {
 
   @override
   void dispose() {
-    for (final player in _players) {
+    for (final player in players()) {
       player.dispose();
     }
     super.dispose();
@@ -155,8 +160,8 @@ class _PlayersViewState extends State<PlayersView> {
           if (newIndex > oldIndex) {
             newIndex--;
           }
-          final p = _players.removeAt(oldIndex);
-          _players.insert(newIndex, p);
+          final p = players().removeAt(oldIndex);
+          players().insert(newIndex, p);
         });
       },
       scrollDirection: Axis.vertical,
@@ -182,6 +187,27 @@ class _GameConfigViewState extends State<GameConfigView> {
     ),
   ];
 
+  final PlayersView _playersView = PlayersView();
+
+  void _startGame() {
+    var settings = GameSettings.dev();
+    // TODO: Programmatically guarantee that this is synced with the view.
+    // TODO: Don't crash on invalid input (odd number of player)
+    //   OR make every inpit valid.
+    int playerIdx = 0;
+    settings.teamPlayers = [];
+    for (final name in _playersView.players.map((p) => p.name)) {
+      if (playerIdx % 2 == 0) {
+        settings.teamPlayers.add([]);
+      }
+      settings.teamPlayers.last.add(name);
+      playerIdx++;
+    }
+    // TODO: Remove "back" button.
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => GameView(settings)));
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -197,16 +223,12 @@ class _GameConfigViewState extends State<GameConfigView> {
         ),
         body: TabBarView(
           children: [
-            Center(child: PlayersView()),
+            Center(child: _playersView),
             Center(child: Text('settings')),
           ],
         ),
         floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
-            // TODO: remove "back" button
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => GameView()));
-          },
+          onPressed: _startGame,
           label: Text('Start Game'),
           icon: Icon(Icons.arrow_forward),
         ),

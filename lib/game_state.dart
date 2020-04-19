@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:hatgame/game_settings.dart';
 import 'package:hatgame/teaming_strategy.dart';
 import 'package:russian_words/russian_words.dart' as russian_words;
 
@@ -77,8 +78,13 @@ class GameState {
   int _turn = 0;
   TurnPhase _turnPhase;
 
-  GameState(this._players)
-      : _teamingStrategy = TeamsOfTwoStrategy(_players.length) {
+  GameState(GameSettings settings)
+      : _players = settings.teamPlayers
+            .expand((t) => t)
+            .map((p) => Player(p))
+            .toList(),
+        _teamingStrategy = FixedTeamsEverybodyRecipientStrategy(
+            settings.teamPlayers.map((t) => t.length).toList()) {
     for (int i = 0; i < 5; ++i) {
       _words.add(Word(i,
           russian_words.nouns[Random().nextInt(russian_words.nouns.length)]));
@@ -185,13 +191,4 @@ class GameState {
     return TeamViewData(_players[_currentTeam.performer],
         _currentTeam.recipients.map((id) => _players[id]).toList());
   }
-
-  // TODO: delete
-  GameState.example()
-      : this([
-          Player('Vasya'),
-          Player('Petya'),
-          Player('Masha'),
-          Player('Dasha'),
-        ]);
 }
