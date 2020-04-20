@@ -3,120 +3,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:hatgame/game_settings.dart';
 import 'package:hatgame/game_view.dart';
+import 'package:hatgame/teaming_config_view.dart';
 import 'package:hatgame/theme.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
-
-enum SinglePlayStyle {
-  FullGraph,
-  Circle,
-}
-
-class SinglePlayStyleSelector extends StatefulWidget {
-  final SinglePlayStyle initialPlayStyle;
-  final Function changeCallback;
-
-  SinglePlayStyleSelector(this.initialPlayStyle, this.changeCallback);
-
-  @override
-  createState() => _SinglePlayStyleSelectorState(initialPlayStyle);
-}
-
-class _SinglePlayStyleSelectorState extends State<SinglePlayStyleSelector> {
-  SinglePlayStyle value;
-
-  _SinglePlayStyleSelectorState(this.value);
-
-  void _valueChanged(SinglePlayStyle newValue) {
-    setState(() {
-      value = newValue;
-    });
-    widget.changeCallback(newValue);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Select Play Style'),
-      ),
-      body: ListView(
-        children: [
-          RadioListTile<SinglePlayStyle>(
-            // TODO: Add icon.
-            title: Text('Clique'),
-            // TODO: Detailed description.
-            subtitle: Text('Everybody explains to everybody.'),
-            value: SinglePlayStyle.FullGraph,
-            groupValue: value,
-            onChanged: _valueChanged,
-          ),
-          RadioListTile<SinglePlayStyle>(
-            // TODO: Add icon.
-            title: Text('Circle'),
-            // TODO: Detailed description (mention start seating).
-            subtitle: Text('The hat goes in a circle. '
-                'Each player explains to the next person.'),
-            value: SinglePlayStyle.Circle,
-            groupValue: value,
-            onChanged: _valueChanged,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class TeamingSettingsView extends StatefulWidget {
-  @override
-  createState() => _TeamingSettingsViewState();
-}
-
-class _TeamingSettingsViewState extends State<TeamingSettingsView> {
-  bool teamPlay = true;
-  bool randomizeTeams = false;
-  SinglePlayStyle singlePlayStyle = SinglePlayStyle.FullGraph;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        SwitchListTile(
-          title: Text('Team play'),
-          value: teamPlay,
-          onChanged: (bool checked) => setState(() {
-            teamPlay = checked;
-          }),
-        ),
-        SwitchListTile(
-          title: Text(teamPlay ? 'Random teams' : 'Random turn order'),
-          value: randomizeTeams,
-          onChanged: (bool checked) => setState(() {
-            randomizeTeams = checked;
-          }),
-        ),
-        if (!teamPlay)
-          ListTile(
-            title: Text(singlePlayStyle == SinglePlayStyle.FullGraph
-                ? 'Play style: Clique'
-                : 'Play style: Circle'),
-            subtitle: Text(singlePlayStyle == SinglePlayStyle.FullGraph
-                ? 'Everybody explains to everybody'
-                : 'Each player explains to the next person'),
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => SinglePlayStyleSelector(
-                          singlePlayStyle,
-                          (SinglePlayStyle newValue) => setState(() {
-                                singlePlayStyle = newValue;
-                              }))));
-            },
-          )
-      ],
-    );
-  }
-}
 
 class PlayersView extends StatefulWidget {
   final Function playersUpdatedCallback;
@@ -359,7 +248,7 @@ class _GameConfigViewState extends State<GameConfigView> {
           padding: EdgeInsets.only(top: 6),
           child: TabBarView(
             children: [
-              TeamingSettingsView(),
+              TeamingConfigView(),
               _playersView,
               Center(child: Text('settings')),
             ],
