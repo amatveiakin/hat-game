@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hatgame/multi_line_radio_list_tile.dart';
+import 'package:hatgame/multi_line_list_tile.dart';
 
 class OptionDescription<E> {
   final E value;
