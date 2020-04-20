@@ -118,7 +118,7 @@ class TeamSizeSelectorState
 // =============================================================================
 // ExcessivePlayers
 
-getAllExcessivePlayerss() {
+getAllExcessivePlayerActions() {
   return [
     OptionDescription(
       value: ExcessivePlayers.expandTeams,
@@ -143,7 +143,7 @@ class ExcessivePlayersSelector extends EnumOptionSelector<ExcessivePlayers> {
       ExcessivePlayers initialValue, Function changeCallback)
       : super(
           windowTitle: 'Unequal teams',
-          allValues: getAllExcessivePlayerss(),
+          allValues: getAllExcessivePlayerActions(),
           initialValue: initialValue,
           changeCallback: changeCallback,
         );

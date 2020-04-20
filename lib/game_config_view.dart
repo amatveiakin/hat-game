@@ -160,21 +160,24 @@ class _PlayersViewState extends State<PlayersView> {
 
   @override
   Widget build(BuildContext context) {
-    return ReorderableListView(
-      onReorder: (int oldIndex, int newIndex) {
-        setState(() {
-          // TODO: Swap teams instead (?)
-          oldIndex = _getPlayerIndex(oldIndex);
-          newIndex = _getPlayerIndex(newIndex);
-          if (newIndex > oldIndex) {
-            newIndex--;
-          }
-          final p = _players.removeAt(oldIndex);
-          _players.insert(newIndex, p);
-        });
-      },
-      scrollDirection: Axis.vertical,
-      children: _items,
+    return Padding(
+      padding: EdgeInsets.only(top: 6),
+      child: ReorderableListView(
+        onReorder: (int oldIndex, int newIndex) {
+          setState(() {
+            // TODO: Swap teams instead (?)
+            oldIndex = _getPlayerIndex(oldIndex);
+            newIndex = _getPlayerIndex(newIndex);
+            if (newIndex > oldIndex) {
+              newIndex--;
+            }
+            final p = _players.removeAt(oldIndex);
+            _players.insert(newIndex, p);
+          });
+        },
+        scrollDirection: Axis.vertical,
+        children: _items,
+      ),
     );
   }
 }
@@ -185,6 +188,9 @@ class GameConfigView extends StatefulWidget {
 }
 
 class _GameConfigViewState extends State<GameConfigView> {
+  // TODO: Change tab order: Options, Teaming, Players (?)
+  // TODO: Consider: make FAB advance to the next screen unless on the
+  // last screen alreay. (Are there best practices?)
   final tabs = <Tab>[
     Tab(
       text: 'Teaming',
@@ -244,15 +250,12 @@ class _GameConfigViewState extends State<GameConfigView> {
             ),
           ),
         ),
-        body: Padding(
-          padding: EdgeInsets.only(top: 6),
-          child: TabBarView(
-            children: [
-              TeamingConfigView(),
-              _playersView,
-              Center(child: Text('settings')),
-            ],
-          ),
+        body: TabBarView(
+          children: [
+            TeamingConfigView(),
+            _playersView,
+            Center(child: Text('settings')),
+          ],
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: _startGame,
