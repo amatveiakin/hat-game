@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hatgame/enum_option_selector.dart';
 
 // TODO: Add explanation images (ideally: animated) for the selection option
 // on top of each subwindow, as in Android settings.
@@ -25,61 +26,40 @@ enum LargeTeamPlayStyle {
   broadcast,
 }
 
-class SinglePlayStyleSelector extends StatefulWidget {
-  final SinglePlayStyle initialPlayStyle;
-  final Function changeCallback;
-
-  SinglePlayStyleSelector(this.initialPlayStyle, this.changeCallback);
-
-  @override
-  createState() => _SinglePlayStyleSelectorState(initialPlayStyle);
+getAllSinglePlayStyles() {
+  return [
+    OptionDescription(
+      value: SinglePlayStyle.circle,
+      title: 'Circle',
+      // TODO: Detailed description (mention star seating).
+      subtitle: 'The hat goes in a circle. '
+          'Each player explains to the next person.',
+    ),
+    OptionDescription(
+      value: SinglePlayStyle.clique,
+      title: 'Clique',
+      // TODO: Detailed description.
+      subtitle: 'Everybody explains to everybody.',
+    ),
+  ];
 }
 
-class _SinglePlayStyleSelectorState extends State<SinglePlayStyleSelector> {
-  SinglePlayStyle value;
-
-  _SinglePlayStyleSelectorState(this.value);
-
-  void _valueChanged(SinglePlayStyle newValue) {
-    setState(() {
-      value = newValue;
-    });
-    widget.changeCallback(newValue);
-  }
+class SinglePlayStyleSelector extends EnumOptionSelector<SinglePlayStyle> {
+  SinglePlayStyleSelector(
+      SinglePlayStyle initialPlayStyle, Function changeCallback)
+      : super(
+          windowTitle: 'Select Play Style',
+          allValues: getAllSinglePlayStyles(),
+          initialValue: initialPlayStyle,
+          changeCallback: changeCallback,
+        );
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Select Play Style'),
-      ),
-      body: ListView(
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: RadioListTile<SinglePlayStyle>(
-              title: Text('Circle'),
-              // TODO: Detailed description (mention star seating).
-              subtitle: Text('The hat goes in a circle. '
-                  'Each player explains to the next person.'),
-              value: SinglePlayStyle.circle,
-              groupValue: value,
-              onChanged: _valueChanged,
-            ),
-          ),
-          RadioListTile<SinglePlayStyle>(
-            title: Text('Clique'),
-            // TODO: Detailed description.
-            subtitle: Text('Everybody explains to everybody.'),
-            value: SinglePlayStyle.clique,
-            groupValue: value,
-            onChanged: _valueChanged,
-          ),
-        ],
-      ),
-    );
-  }
+  createState() => SinglePlayStyleSelectorState();
 }
+
+class SinglePlayStyleSelectorState
+    extends EnumOptionSelectorState<SinglePlayStyle, SinglePlayStyleSelector> {}
 
 class TeamingConfigView extends StatefulWidget {
   @override
