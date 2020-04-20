@@ -4,6 +4,118 @@ import 'package:flutter/material.dart';
 import 'package:hatgame/game_settings.dart';
 import 'package:hatgame/game_view.dart';
 import 'package:hatgame/theme.dart';
+import 'package:outline_material_icons/outline_material_icons.dart';
+
+enum SinglePlayStyle {
+  FullGraph,
+  Circle,
+}
+
+class SinglePlayStyleSelector extends StatefulWidget {
+  final SinglePlayStyle initialPlayStyle;
+  final Function changeCallback;
+
+  SinglePlayStyleSelector(this.initialPlayStyle, this.changeCallback);
+
+  @override
+  createState() => _SinglePlayStyleSelectorState(initialPlayStyle);
+}
+
+class _SinglePlayStyleSelectorState extends State<SinglePlayStyleSelector> {
+  SinglePlayStyle value;
+
+  _SinglePlayStyleSelectorState(this.value);
+
+  void _valueChanged(SinglePlayStyle newValue) {
+    setState(() {
+      value = newValue;
+    });
+    widget.changeCallback(newValue);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Select Play Style'),
+      ),
+      body: ListView(
+        children: [
+          RadioListTile<SinglePlayStyle>(
+            // TODO: Add icon.
+            title: Text('Clique'),
+            // TODO: Detailed description.
+            subtitle: Text('Everybody explains to everybody.'),
+            value: SinglePlayStyle.FullGraph,
+            groupValue: value,
+            onChanged: _valueChanged,
+          ),
+          RadioListTile<SinglePlayStyle>(
+            // TODO: Add icon.
+            title: Text('Circle'),
+            // TODO: Detailed description (mention start seating).
+            subtitle: Text('The hat goes in a circle. '
+                'Each player explains to the next person.'),
+            value: SinglePlayStyle.Circle,
+            groupValue: value,
+            onChanged: _valueChanged,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class TeamingSettingsView extends StatefulWidget {
+  @override
+  createState() => _TeamingSettingsViewState();
+}
+
+class _TeamingSettingsViewState extends State<TeamingSettingsView> {
+  bool teamPlay = true;
+  bool randomizeTeams = false;
+  SinglePlayStyle singlePlayStyle = SinglePlayStyle.FullGraph;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      children: [
+        SwitchListTile(
+          title: Text('Team play'),
+          value: teamPlay,
+          onChanged: (bool checked) => setState(() {
+            teamPlay = checked;
+          }),
+        ),
+        SwitchListTile(
+          title: Text(teamPlay ? 'Random teams' : 'Random turn order'),
+          value: randomizeTeams,
+          onChanged: (bool checked) => setState(() {
+            randomizeTeams = checked;
+          }),
+        ),
+        if (!teamPlay) ListTile(
+          title: Text(singlePlayStyle == SinglePlayStyle.FullGraph
+              ? 'Play style: Clique'
+              : 'Play style: Circle'),
+          subtitle: Text(singlePlayStyle == SinglePlayStyle.FullGraph
+              ? 'Everybody explains to everybody'
+              : 'Each player explains to the next person'),
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => SinglePlayStyleSelector(
+                        singlePlayStyle,
+                        (SinglePlayStyle newValue) => setState(() {
+                              singlePlayStyle = newValue;
+                            }))));
+          },
+        )
+      ],
+    );
+  }
+}
 
 class PlayersView extends StatefulWidget {
   // TODO: Find a proper way to pass players data.
@@ -178,8 +290,14 @@ class GameConfigView extends StatefulWidget {
 class _GameConfigViewState extends State<GameConfigView> {
   final tabs = <Tab>[
     Tab(
-      text: 'Players',
+      text: 'Teaming',
+      // TODO: Add arrows (or several group of people)
       icon: Icon(Icons.people),
+    ),
+    Tab(
+      text: 'Players',
+      // TODO: Replace squares with person icons.
+      icon: Icon(OMIcons.ballot),
     ),
     Tab(
       text: 'Options',
@@ -221,11 +339,15 @@ class _GameConfigViewState extends State<GameConfigView> {
             ),
           ),
         ),
-        body: TabBarView(
-          children: [
-            Center(child: _playersView),
-            Center(child: Text('settings')),
-          ],
+        body: Padding(
+          padding: EdgeInsets.only(top: 6),
+          child: TabBarView(
+            children: [
+              TeamingSettingsView(),
+              _playersView,
+              Center(child: Text('settings')),
+            ],
+          ),
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: _startGame,

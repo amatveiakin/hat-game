@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(
         // Increase default font sizes
-        textTheme: Theme.of(context).textTheme.apply(fontSizeDelta: 4.0),
+        textTheme: Theme.of(context).textTheme.apply(fontSizeDelta: 2.0),
         primaryColor: MyColors.primary,
         primaryColorDark: MyColors.primaryDark,
         accentColor: MyColors.accent,
