@@ -94,32 +94,34 @@ class _TeamingSettingsViewState extends State<TeamingSettingsView> {
             randomizeTeams = checked;
           }),
         ),
-        if (!teamPlay) ListTile(
-          title: Text(singlePlayStyle == SinglePlayStyle.FullGraph
-              ? 'Play style: Clique'
-              : 'Play style: Circle'),
-          subtitle: Text(singlePlayStyle == SinglePlayStyle.FullGraph
-              ? 'Everybody explains to everybody'
-              : 'Each player explains to the next person'),
-          onTap: () {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => SinglePlayStyleSelector(
-                        singlePlayStyle,
-                        (SinglePlayStyle newValue) => setState(() {
-                              singlePlayStyle = newValue;
-                            }))));
-          },
-        )
+        if (!teamPlay)
+          ListTile(
+            title: Text(singlePlayStyle == SinglePlayStyle.FullGraph
+                ? 'Play style: Clique'
+                : 'Play style: Circle'),
+            subtitle: Text(singlePlayStyle == SinglePlayStyle.FullGraph
+                ? 'Everybody explains to everybody'
+                : 'Each player explains to the next person'),
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => SinglePlayStyleSelector(
+                          singlePlayStyle,
+                          (SinglePlayStyle newValue) => setState(() {
+                                singlePlayStyle = newValue;
+                              }))));
+            },
+          )
       ],
     );
   }
 }
 
 class PlayersView extends StatefulWidget {
-  // TODO: Find a proper way to pass players data.
-  final players = <_PlayerData>[];
+  final Function playersUpdatedCallback;
+
+  PlayersView(this.playersUpdatedCallback);
 
   @override
   createState() => _PlayersViewState();
@@ -139,9 +141,12 @@ class _PlayerData {
 }
 
 class _PlayersViewState extends State<PlayersView> {
-  List<Widget> _items = [];
+  final _players = <_PlayerData>[];
+  final List<Widget> _items = [];
 
-  players() => widget.players;
+  void _notifyPlayersUpdate() {
+    widget.playersUpdatedCallback(_players.map((p) => p.name).toList());
+  }
 
   void _addPlayer(String name) {
     setState(() {
@@ -150,16 +155,17 @@ class _PlayersViewState extends State<PlayersView> {
       playerData.controller.addListener(() {
         // Don't call setState, because TextField updates itself.
         playerData.name = playerData.controller.text;
+        _notifyPlayersUpdate();
       });
       playerData.focusNode.requestFocus();
-      players().add(playerData);
+      _players.add(playerData);
     });
   }
 
   void _deletePlayer(_PlayerData player) {
     player.dispose();
     setState(() {
-      players().remove(player);
+      _players.remove(player);
     });
   }
 
@@ -186,7 +192,7 @@ class _PlayersViewState extends State<PlayersView> {
     for (int i = 0; i < itemIndex; i++) {
       if (!(_items[i] is Divider)) playerIndex++;
     }
-    return min(playerIndex, players().length - 1);
+    return min(playerIndex, _players.length - 1);
   }
 
   void _makeItems() {
@@ -194,8 +200,8 @@ class _PlayersViewState extends State<PlayersView> {
     final listItemPaddingSmallRight = EdgeInsets.fromLTRB(listItemPadding.left,
         listItemPadding.top, listItemPadding.right / 2, listItemPadding.bottom);
     var _playerItems = <ListTile>[];
-    for (int i = 0; i < players().length; ++i) {
-      final player = players()[i];
+    for (int i = 0; i < _players.length; ++i) {
+      final player = _players[i];
       _playerItems.add(ListTile(
         key: UniqueKey(),
         contentPadding: listItemPaddingSmallRight,
@@ -233,7 +239,8 @@ class _PlayersViewState extends State<PlayersView> {
           }),
           child: Text('Add player'),
         )));
-    _items = _addDividers(_playerItems);
+    _items.clear();
+    _items.addAll(_addDividers(_playerItems));
   }
 
   @override
@@ -251,11 +258,12 @@ class _PlayersViewState extends State<PlayersView> {
   void setState(fn) {
     super.setState(fn);
     _makeItems();
+    _notifyPlayersUpdate();
   }
 
   @override
   void dispose() {
-    for (final player in players()) {
+    for (final player in _players) {
       player.dispose();
     }
     super.dispose();
@@ -272,8 +280,8 @@ class _PlayersViewState extends State<PlayersView> {
           if (newIndex > oldIndex) {
             newIndex--;
           }
-          final p = players().removeAt(oldIndex);
-          players().insert(newIndex, p);
+          final p = _players.removeAt(oldIndex);
+          _players.insert(newIndex, p);
         });
       },
       scrollDirection: Axis.vertical,
@@ -305,7 +313,15 @@ class _GameConfigViewState extends State<GameConfigView> {
     ),
   ];
 
-  final PlayersView _playersView = PlayersView();
+  final List<String> _players;
+  final PlayersView _playersView;
+
+  _GameConfigViewState._(this._players)
+      : _playersView = PlayersView((List<String> newPlayers) {
+          _players.clear();
+          _players.addAll(newPlayers);
+        });
+  _GameConfigViewState() : this._([]);
 
   void _startGame() {
     var settings = GameSettings.dev();
@@ -314,11 +330,11 @@ class _GameConfigViewState extends State<GameConfigView> {
     //   OR make every inpit valid.
     int playerIdx = 0;
     settings.teamPlayers = [];
-    for (final name in _playersView.players.map((p) => p.name)) {
+    for (final player in _players) {
       if (playerIdx % 2 == 0) {
         settings.teamPlayers.add([]);
       }
-      settings.teamPlayers.last.add(name);
+      settings.teamPlayers.last.add(player);
       playerIdx++;
     }
     // TODO: Remove "back" button.
