@@ -37,7 +37,7 @@ class _PlayersViewState extends State<PlayersView> {
     widget.playersUpdatedCallback(_players.map((p) => p.name).toList());
   }
 
-  void _addPlayer(String name) {
+  void _addPlayer(String name, {@required bool focus}) {
     setState(() {
       final playerData = _PlayerData(name);
       playerData.controller.text = (name);
@@ -46,7 +46,9 @@ class _PlayersViewState extends State<PlayersView> {
         playerData.name = playerData.controller.text;
         _notifyPlayersUpdate();
       });
-      playerData.focusNode.requestFocus();
+      if (focus) {
+        playerData.focusNode.requestFocus();
+      }
       _players.add(playerData);
     });
   }
@@ -124,7 +126,7 @@ class _PlayersViewState extends State<PlayersView> {
         title: OutlineButton(
           padding: EdgeInsets.symmetric(vertical: 10.0),
           onPressed: () => setState(() {
-            _addPlayer('');
+            _addPlayer('', focus: true);
           }),
           child: Text('Add player'),
         )));
@@ -135,10 +137,10 @@ class _PlayersViewState extends State<PlayersView> {
   @override
   void initState() {
     // TODO: Delete before prod release.
-    _addPlayer('Vasya');
-    _addPlayer('Petya');
-    _addPlayer('Masha');
-    _addPlayer('Dasha');
+    _addPlayer('Vasya', focus: false);
+    _addPlayer('Petya', focus: false);
+    _addPlayer('Masha', focus: false);
+    _addPlayer('Dasha', focus: false);
     super.initState();
     _makeItems();
   }
@@ -187,7 +189,8 @@ class GameConfigView extends StatefulWidget {
   createState() => _GameConfigViewState();
 }
 
-class _GameConfigViewState extends State<GameConfigView> {
+class _GameConfigViewState extends State<GameConfigView>
+    with SingleTickerProviderStateMixin {
   // TODO: Change tab order: Options, Teaming, Players (?)
   // TODO: Consider: make FAB advance to the next screen unless on the
   // last screen alreay. (Are there best practices?)
@@ -210,6 +213,7 @@ class _GameConfigViewState extends State<GameConfigView> {
 
   final List<String> _players;
   final PlayersView _playersView;
+  TabController _tabController;
 
   _GameConfigViewState._(this._players)
       : _playersView = PlayersView((List<String> newPlayers) {
@@ -217,6 +221,21 @@ class _GameConfigViewState extends State<GameConfigView> {
           _players.addAll(newPlayers);
         });
   _GameConfigViewState() : this._([]);
+
+  @override
+  void initState() {
+    _tabController = TabController(vsync: this, length: tabs.length);
+    _tabController.addListener(() {
+      FocusScope.of(context).unfocus();
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   void _startGame() {
     var settings = GameSettings.dev();
@@ -239,31 +258,30 @@ class _GameConfigViewState extends State<GameConfigView> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: tabs.length,
-      child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          flexibleSpace: SafeArea(
-            child: TabBar(
-              tabs: tabs,
-            ),
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        flexibleSpace: SafeArea(
+          child: TabBar(
+            controller: _tabController,
+            tabs: tabs,
           ),
         ),
-        body: TabBarView(
-          children: [
-            TeamingConfigView(),
-            _playersView,
-            Center(child: Text('settings')),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: _startGame,
-          label: Text('Start Game'),
-          icon: Icon(Icons.arrow_forward),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          TeamingConfigView(),
+          _playersView,
+          Center(child: Text('settings')),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _startGame,
+        label: Text('Start Game'),
+        icon: Icon(Icons.arrow_forward),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
