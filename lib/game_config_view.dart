@@ -226,6 +226,7 @@ class _GameConfigViewState extends State<GameConfigView>
   void initState() {
     _tabController = TabController(vsync: this, length: tabs.length);
     _tabController.addListener(() {
+      // Hide virtual keyboard
       FocusScope.of(context).unfocus();
     });
     super.initState();
@@ -251,6 +252,8 @@ class _GameConfigViewState extends State<GameConfigView>
       settings.teamPlayers.last.add(player);
       playerIdx++;
     }
+    // Hide virtual keyboard
+    FocusScope.of(context).unfocus();
     // TODO: Remove "back" button.
     Navigator.push(
         context, MaterialPageRoute(builder: (context) => GameView(settings)));
