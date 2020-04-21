@@ -79,21 +79,21 @@ Icon _GetWordFeedbackIcon(WordFeedback feedback, bool menuButton, bool active) {
       return menuButton ? Icon(OMIcons.thumbsUpDown) : Icon(OMIcons.clear);
     case WordFeedback.good:
       return active
-          ? Icon(Icons.thumb_up, color: MyColors.accent)
+          ? Icon(Icons.thumb_up, color: MyTheme.accent)
           : Icon(OMIcons.thumbUp);
     case WordFeedback.bad:
       return active
-          ? Icon(Icons.thumb_down, color: MyColors.accent)
+          ? Icon(Icons.thumb_down, color: MyTheme.accent)
           : Icon(OMIcons.thumbDown);
     case WordFeedback.tooEasy:
       // TODO: Find a proper icon.
       return active
-          ? Icon(Icons.cake, color: MyColors.accent)
+          ? Icon(Icons.cake, color: MyTheme.accent)
           : Icon(OMIcons.cake);
     case WordFeedback.tooHard:
       // TODO: Find a proper icon.
       return active
-          ? Icon(Icons.sentiment_very_dissatisfied, color: MyColors.accent)
+          ? Icon(Icons.sentiment_very_dissatisfied, color: MyTheme.accent)
           : Icon(OMIcons.sentimentVeryDissatisfied);
   }
   throw AssertionError("Reached end of _GetWordFeedbackIcon");
@@ -249,7 +249,7 @@ class PlayArea extends StatelessWidget {
                             });
                           }
                         : null,
-                    color: MyColors.accent,
+                    color: MyTheme.accent,
                     padding: EdgeInsets.symmetric(vertical: 12.0),
                     child: Text(
                       'Start!',
@@ -334,7 +334,7 @@ class PlayArea extends StatelessWidget {
                 onPressed: () => _gameViewState.update(() {
                   gameState.newTurn();
                 }),
-                color: MyColors.accent,
+                color: MyTheme.accent,
                 padding: EdgeInsets.symmetric(vertical: 12.0),
                 child: Text(
                   'Next round',

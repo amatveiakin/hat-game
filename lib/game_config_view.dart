@@ -67,7 +67,7 @@ class _PlayersViewState extends State<PlayersView> {
       if (i > 0 && i % 2 == 0) {
         result.add(Divider(
           key: UniqueKey(),
-          color: MyColors.accent,
+          color: MyTheme.accent,
           thickness: 3.0,
           height: 20.0,
         ));

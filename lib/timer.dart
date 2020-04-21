@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:hatgame/colors.dart';
 import 'package:hatgame/theme.dart';
 
 class _TimerPainter extends CustomPainter {
@@ -12,12 +13,12 @@ class _TimerPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
     final arcPaint = Paint()
-      ..color = MyColors.accent
+      ..color = MyTheme.accent
       ..style = PaintingStyle.stroke
       ..strokeWidth = 5.0
       ..strokeCap = StrokeCap.butt;
     final backgroundPaint = Paint()
-      ..color = Colors.black.withOpacity(0.1)
+      ..color = MyColors.black(220)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 5.0
       ..strokeCap = StrokeCap.butt;
@@ -78,7 +79,7 @@ class _TimerViewState extends State<TimerView>
             style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 36.0,
-              color: MyColors.accent,
+              color: MyTheme.accent,
             ),
           ),
         ),

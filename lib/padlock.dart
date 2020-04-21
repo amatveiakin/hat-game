@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:hatgame/colors.dart';
 import 'package:hatgame/theme.dart';
 
 // TODO: Add dynamism: padlock shacking / circle pulsating.
@@ -12,13 +13,11 @@ class _PadlockPainter extends CustomPainter {
 
   _PadlockPainter(this.padlockOpen, this.padlockPos);
 
-  static _black(int v) => Color.fromARGB(255, v, v, v);
-
   @override
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
     var borderPaint = Paint()
-      ..color = _black(120)
+      ..color = MyColors.black(120)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 5.0
       ..strokeCap = StrokeCap.butt;
@@ -34,7 +33,7 @@ class _PadlockPainter extends CustomPainter {
         style: TextStyle(
           fontSize: 60.0,
           fontFamily: icon.fontFamily,
-          color: MyColors.accent,
+          color: MyTheme.accent,
         ));
     textPainter.layout();
     textPainter.paint(

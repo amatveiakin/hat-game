@@ -32,9 +32,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         // Increase default font sizes
         textTheme: Theme.of(context).textTheme.apply(fontSizeDelta: 2.0),
-        primaryColor: MyColors.primary,
-        primaryColorDark: MyColors.primaryDark,
-        accentColor: MyColors.accent,
+        primaryColor: MyTheme.primary,
+        primaryColorDark: MyTheme.primaryDark,
+        accentColor: MyTheme.accent,
       ),
       title: 'Hat Game',
       home: StartScreen(),
