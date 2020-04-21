@@ -8,7 +8,7 @@ import 'package:hatgame/theme.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
 
 class PlayersView extends StatefulWidget {
-  final Function playersUpdatedCallback;
+  final void Function(List<String>) playersUpdatedCallback;
 
   PlayersView(this.playersUpdatedCallback);
 
