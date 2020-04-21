@@ -29,7 +29,7 @@ class _PadlockPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
     var borderPaint = Paint()
-      ..color = MyColors.black(140)
+      ..color = Color.lerp(MyTheme.accent, MyColors.black(180), 0.5)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 5.0
       ..strokeCap = StrokeCap.butt;
