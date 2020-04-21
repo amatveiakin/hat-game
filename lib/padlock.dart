@@ -31,7 +31,8 @@ class _PadlockPainter extends CustomPainter {
       ..color = Color.lerp(MyTheme.accent, MyColors.black(180), 0.5)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 5.0
-      ..strokeCap = StrokeCap.butt;
+      ..strokeCap = StrokeCap.butt
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 0.5);
     if (padlockOpen) {
       borderPaint
         ..color = MyTheme.accent
@@ -49,7 +50,7 @@ class _PadlockPainter extends CustomPainter {
     textPainter.text = TextSpan(
         text: String.fromCharCode(icon.codePoint),
         style: TextStyle(
-          fontSize: 60.0,
+          fontSize: 72.0,
           fontFamily: icon.fontFamily,
           color: MyTheme.accent,
           shadows: _elevationToShadow(2, MyTheme.accent),
