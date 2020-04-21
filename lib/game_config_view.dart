@@ -31,6 +31,7 @@ class _PlayerData {
 
 class _PlayersViewState extends State<PlayersView> {
   final _players = <_PlayerData>[];
+  final _playersToDispose = <_PlayerData>[];
   final List<Widget> _items = [];
 
   void _notifyPlayersUpdate() {
@@ -54,8 +55,8 @@ class _PlayersViewState extends State<PlayersView> {
   }
 
   void _deletePlayer(_PlayerData player) {
-    player.dispose();
     setState(() {
+      _playersToDispose.add(player);
       _players.remove(player);
     });
   }
@@ -146,6 +147,14 @@ class _PlayersViewState extends State<PlayersView> {
   }
 
   @override
+  void didUpdateWidget(PlayersView oldWidget) {
+    for (final player in _playersToDispose) {
+      player.dispose();
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   void setState(fn) {
     super.setState(fn);
     _makeItems();
@@ -154,7 +163,7 @@ class _PlayersViewState extends State<PlayersView> {
 
   @override
   void dispose() {
-    for (final player in _players) {
+    for (final player in _playersToDispose + _players) {
       player.dispose();
     }
     super.dispose();
