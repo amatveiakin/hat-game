@@ -88,15 +88,17 @@ class _ConfigViewState extends State<ConfigView>
       return;
     }
 
+    final PlayersConfig playersConfig = settings.players;
     int playerIdx = 0;
-    settings.teamPlayers = [];
+    playersConfig.teamPlayers = [];
     for (final player in _players) {
       if (playerIdx % 2 == 0) {
-        settings.teamPlayers.add([]);
+        playersConfig.teamPlayers.add([]);
       }
-      settings.teamPlayers.last.add(player);
+      playersConfig.teamPlayers.last.add(player);
       playerIdx++;
     }
+
     // Hide virtual keyboard
     FocusScope.of(context).unfocus();
     // TODO: Remove "back" button.

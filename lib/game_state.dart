@@ -80,12 +80,12 @@ class GameState {
   TurnPhase _turnPhase;
 
   GameState(GameConfig settings)
-      : _players = settings.teamPlayers
+      : _players = settings.players.teamPlayers
             .expand((t) => t)
             .map((p) => Player(p))
             .toList(),
         _teamingStrategy = FixedTeamsEverybodyRecipientStrategy(
-            settings.teamPlayers.map((t) => t.length).toList()) {
+            settings.players.teamPlayers.map((t) => t.length).toList()) {
     for (int i = 0; i < 5; ++i) {
       _words.add(Word(i,
           russian_words.nouns[Random().nextInt(russian_words.nouns.length)]));

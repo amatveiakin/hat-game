@@ -266,7 +266,7 @@ class PlayAreaState extends State<PlayArea>
                                 Future.delayed(
                                     Duration(
                                         seconds: gameSettings
-                                            .explanationSeconds), () {
+                                            .rules.explanationSeconds), () {
                                   _gameViewState.update(() {
                                     gameState.finishExplanation(
                                         turnRestriction: turn);
@@ -326,7 +326,8 @@ class PlayAreaState extends State<PlayArea>
           Expanded(
             child: Center(
               child: TimerView(
-                duration: Duration(seconds: gameSettings.explanationSeconds),
+                duration:
+                    Duration(seconds: gameSettings.rules.explanationSeconds),
               ),
             ),
           ),
@@ -394,8 +395,7 @@ class GameViewState extends State<GameView> {
   final GameState gameState;
   bool startButtonEnabled = false;
 
-  GameViewState(GameConfig gameSettings)
-      : gameState = GameState(gameSettings);
+  GameViewState(GameConfig gameSettings) : gameState = GameState(gameSettings);
 
   void update(Function updater) {
     setState(updater);
