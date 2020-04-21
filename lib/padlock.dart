@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:hatgame/assertion.dart';
 import 'package:hatgame/colors.dart';
 import 'package:hatgame/theme.dart';
 
@@ -115,7 +116,7 @@ class _PadlockState extends State<Padlock> {
         : GestureDetector(
             behavior: HitTestBehavior.opaque,
             onPanStart: (DragStartDetails details) {
-              assert(!_panActive);
+              Assert.holds(!_panActive);
               if ((details.localPosition - _padlockPos).distance <
                   _dragStartTolerance) {
                 setState(() {

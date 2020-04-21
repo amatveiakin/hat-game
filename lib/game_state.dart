@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:hatgame/assertion.dart';
 import 'package:hatgame/game_settings.dart';
 import 'package:hatgame/teaming_strategy.dart';
 import 'package:russian_words/russian_words.dart' as russian_words;
@@ -102,7 +103,7 @@ class GameState {
     _turnPhase = null;
     for (final w in _wordsInThisTurn) {
       if (w.status == WordInTurnStatus.notExplained) {
-        assert(!_wordsInHat.contains(w.id));
+        Assert.holds(!_wordsInHat.contains(w.id));
         _wordsInHat.add(w.id);
       }
     }
@@ -118,7 +119,7 @@ class GameState {
   }
 
   void _drawNextWord() {
-    assert(_turnPhase == TurnPhase.explain);
+    Assert.eq(_turnPhase, TurnPhase.explain);
     if (_wordsInHat.isEmpty) {
       finishExplanation();
       return;
@@ -126,7 +127,7 @@ class GameState {
     _currentWord = _wordsInHat[Random().nextInt(_wordsInHat.length)];
     _wordsInThisTurn.add(WordInTurn(_currentWord));
     final removed = _wordsInHat.remove(_currentWord);
-    assert(removed);
+    Assert.holds(removed);
   }
 
   int currentTurn() => _turn;
@@ -136,7 +137,7 @@ class GameState {
   int numWordsInHat() => _wordsInHat.length;
 
   String currentWord() {
-    assert(_turnPhase == TurnPhase.explain);
+    Assert.eq(_turnPhase, TurnPhase.explain);
     return _words[_currentWord].text;
   }
 
@@ -148,22 +149,22 @@ class GameState {
   }
 
   void newTurn() {
-    assert(_turnPhase == TurnPhase.review);
+    Assert.eq(_turnPhase, TurnPhase.review);
     _finishTurn();
     _turn++;
     _initTurn();
   }
 
   void startExplaning() {
-    assert(_turnPhase == TurnPhase.prepare);
+    Assert.eq(_turnPhase, TurnPhase.prepare);
     _turnPhase = TurnPhase.explain;
     _drawNextWord();
   }
 
   void wordGuessed() {
-    assert(_turnPhase == TurnPhase.explain);
-    assert(_wordsInThisTurn.isNotEmpty);
-    assert(_wordsInThisTurn.last.id == _currentWord);
+    Assert.eq(_turnPhase, TurnPhase.explain);
+    Assert.holds(_wordsInThisTurn.isNotEmpty);
+    Assert.eq(_wordsInThisTurn.last.id, _currentWord);
     _wordsInThisTurn.last.status = WordInTurnStatus.explained;
     _drawNextWord();
   }
@@ -172,18 +173,18 @@ class GameState {
     if (turnRestriction != null) {
       if (turnRestriction != _turn || _turnPhase != TurnPhase.explain) return;
     } else {
-      assert(_turnPhase == TurnPhase.explain);
+      Assert.eq(_turnPhase, TurnPhase.explain);
     }
     _turnPhase = TurnPhase.review;
   }
 
   void setWordStatus(int wordId, WordInTurnStatus newStatus) {
-    assert(_turnPhase == TurnPhase.review);
+    Assert.eq(_turnPhase, TurnPhase.review);
     _wordsInThisTurn.singleWhere((w) => w.id == wordId).status = newStatus;
   }
 
   void setWordFeedback(int wordId, WordFeedback newFeedback) {
-    assert(_turnPhase == TurnPhase.review);
+    Assert.eq(_turnPhase, TurnPhase.review);
     _wordsInThisTurn.singleWhere((w) => w.id == wordId).feedback = newFeedback;
   }
 

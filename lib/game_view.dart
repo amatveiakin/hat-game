@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hatgame/assertion.dart';
 import 'package:hatgame/game_settings.dart';
 import 'package:hatgame/game_state.dart';
 import 'package:hatgame/padlock.dart';
@@ -73,7 +74,7 @@ class TeamViewState extends State<TeamView> with TickerProviderStateMixin {
 }
 
 Icon _GetWordFeedbackIcon(WordFeedback feedback, bool menuButton, bool active) {
-  assert(feedback != null);
+  Assert.holds(feedback != null);
   switch (feedback) {
     case WordFeedback.none:
       return menuButton ? Icon(OMIcons.thumbsUpDown) : Icon(OMIcons.clear);
@@ -100,7 +101,7 @@ Icon _GetWordFeedbackIcon(WordFeedback feedback, bool menuButton, bool active) {
 }
 
 String _GetWordFeedbackText(WordFeedback feedback) {
-  assert(feedback != null);
+  Assert.holds(feedback != null);
   switch (feedback) {
     case WordFeedback.none:
       return 'Clear';

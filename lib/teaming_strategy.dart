@@ -1,3 +1,5 @@
+import 'package:hatgame/assertion.dart';
+
 class Team {
   int performer;
   List<int> recipients;
@@ -34,7 +36,7 @@ abstract class FixedTeamsStrategy extends TeamingStrategy {
     final List<List<int>> players = [];
     int playerIdx = 0;
     for (final s in teamSizes) {
-      assert(s > 1);
+      Assert.holds(s > 1);
       players.add([]);
       final List<int> playersInTeam = players.last;
       for (int i = 0; i < s; i++) {
@@ -46,7 +48,7 @@ abstract class FixedTeamsStrategy extends TeamingStrategy {
   }
 
   static List<int> _generateTeamsOfTwo(int numPlayers) {
-    assert(numPlayers % 2 == 0);
+    Assert.holds(numPlayers % 2 == 0);
     return List<int>.generate(numPlayers ~/ 2, (index) => 2);
   }
 }
