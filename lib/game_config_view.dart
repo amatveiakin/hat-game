@@ -219,6 +219,9 @@ class _GameConfigViewState extends State<GameConfigView>
       icon: Icon(Icons.settings),
     ),
   ];
+  final int teamingTabIndex = 0;
+  final int playersTabIndex = 1;
+  final int optionsTabIndex = 2;
 
   final List<String> _players;
   final PlayersView _playersView;
@@ -249,9 +252,30 @@ class _GameConfigViewState extends State<GameConfigView>
 
   void _startGame() {
     var settings = GameSettings.dev();
-    // TODO: Programmatically guarantee that this is synced with the view.
-    // TODO: Don't crash on invalid input (odd number of player)
-    //   OR make every inpit valid.
+
+    // TODO: Use TeamingStrategy to check teaming validity.
+    if (_players.length < 2 || _players.length % 2 == 1) {
+      showDialog(
+        context: context,
+        // TODO: Add context or replace with a SnackBar.
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Invalid number of players: ${_players.length}'),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('I see'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+      _tabController.animateTo(playersTabIndex);
+      return;
+    }
+
     int playerIdx = 0;
     settings.teamPlayers = [];
     for (final player in _players) {
