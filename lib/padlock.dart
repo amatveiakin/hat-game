@@ -45,6 +45,9 @@ class _PadlockPainter extends CustomPainter {
     final double rotateAngle =
         sin(animationProgress * pi * shakeReps) * shakeAmplitude;
 
+    const double maxSizeIncrement = 0.25;
+    final double scale = 1.0 + sin(animationProgress * pi) * maxSizeIncrement;
+
     final icon = padlockOpen ? Icons.lock_open : Icons.lock_outline;
     final textPainter = TextPainter(textDirection: TextDirection.rtl);
     textPainter.text = TextSpan(
@@ -60,6 +63,7 @@ class _PadlockPainter extends CustomPainter {
     canvas.save();
     canvas.translate(padlockPos.dx, padlockPos.dy);
     canvas.rotate(rotateAngle);
+    canvas.scale(scale);
     textPainter.paint(canvas, -textPainter.size.center(Offset.zero));
     canvas.restore();
   }
