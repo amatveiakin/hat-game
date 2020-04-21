@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hatgame/assertion.dart';
 import 'package:hatgame/game_config.dart';
 import 'package:hatgame/game_view.dart';
 import 'package:hatgame/player_config_view.dart';
@@ -18,7 +19,7 @@ class _ConfigViewState extends State<ConfigView>
   final tabs = <Tab>[
     Tab(
       text: 'Teaming',
-      // TODO: Add arrows (or several group of people)
+      // TODO: Add arrows / several groups of people / gearwheel.
       icon: Icon(Icons.people),
     ),
     Tab(
@@ -37,7 +38,7 @@ class _ConfigViewState extends State<ConfigView>
 
   final _rulesConfig = RulesConfig.dev();
   final _teamingConfig = TeamingConfig();
-  final List<String> _players = [];
+  var _playersConfig = IntermediatePlayersConfig.dev();
 
   TabController _tabController;
 
@@ -58,40 +59,47 @@ class _ConfigViewState extends State<ConfigView>
   }
 
   void _startGame() {
-    var settings = GameConfig.dev();
-
-    // TODO: Use TeamingStrategy to check teaming validity.
-    if (_players.length < 2 || _players.length % 2 == 1) {
-      showDialog(
-        context: context,
-        // TODO: Add context or replace with a SnackBar.
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Invalid number of players: ${_players.length}'),
-            actions: <Widget>[
-              FlatButton(
-                child: Text('I see'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-      _tabController.animateTo(playersTabIndex);
-      return;
-    }
-
+    final settings = GameConfig();
+    settings.rules = _rulesConfig;
+    settings.teaming = _teamingConfig;
     final PlayersConfig playersConfig = settings.players;
-    int playerIdx = 0;
-    playersConfig.teamPlayers = [];
-    for (final player in _players) {
-      if (playerIdx % 2 == 0) {
-        playersConfig.teamPlayers.add([]);
+
+    if (_playersConfig.players != null) {
+      final players = _playersConfig.players;
+      // TODO: Use TeamingStrategy to check teaming validity.
+      if (players.length < 2 || players.length % 2 == 1) {
+        showDialog(
+          context: context,
+          // TODO: Add context or replace with a SnackBar.
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Invalid number of players: ${players.length}'),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text('I see'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+        _tabController.animateTo(playersTabIndex);
+        return;
       }
-      playersConfig.teamPlayers.last.add(player);
-      playerIdx++;
+      int playerIdx = 0;
+      playersConfig.teamPlayers = [];
+      for (final player in players) {
+        if (playerIdx % 2 == 0) {
+          playersConfig.teamPlayers.add([]);
+        }
+        playersConfig.teamPlayers.last.add(player);
+        playerIdx++;
+      }
+    } else {
+      Assert.holds(_playersConfig.teamPlayers != null);
+      playersConfig.teamPlayers = _playersConfig.teamPlayers;
     }
 
     // Hide virtual keyboard
@@ -116,12 +124,17 @@ class _ConfigViewState extends State<ConfigView>
       body: TabBarView(
         controller: _tabController,
         children: [
-          TeamingConfigView(config: _teamingConfig),
+          TeamingConfigView(
+            config: _teamingConfig,
+            onUpdate: (updater) => setState(() => updater()),
+          ),
           PlayersConfigView(
-            onPlayersUpdated: (List<String> newPlayers) {
-              _players.clear();
-              _players.addAll(newPlayers);
-            },
+            teamingConfig: _teamingConfig,
+            initialPlayersConfig: _playersConfig,
+            onPlayersUpdated: (IntermediatePlayersConfig newConfig) =>
+                setState(() {
+              _playersConfig = newConfig;
+            }),
           ),
           Center(child: Text('settings')),
         ],

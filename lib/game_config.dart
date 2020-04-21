@@ -56,8 +56,4 @@ class GameConfig {
   RulesConfig rules;
   var teaming = TeamingConfig();
   var players = PlayersConfig();
-
-  // TODO: delete
-  GameConfig();
-  GameConfig.dev() : rules = RulesConfig.dev();
 }

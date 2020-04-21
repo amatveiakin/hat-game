@@ -28,11 +28,24 @@ class Assert {
     }
   }
 
+  static fail(String message,
+      {AssertInRelease inRelease = defaultReleaseBehavior}) {
+    holds(false, message: message, inRelease: inRelease);
+  }
+
   static eq<T>(T a, T b,
       {String message, AssertInRelease inRelease = defaultReleaseBehavior}) {
     holds(a == b,
         message:
             _combineMessages(message, a.toString() + ' == ' + b.toString()),
+        inRelease: inRelease);
+  }
+
+  static ne<T>(T a, T b,
+      {String message, AssertInRelease inRelease = defaultReleaseBehavior}) {
+    holds(a != b,
+        message:
+            _combineMessages(message, a.toString() + ' != ' + b.toString()),
         inRelease: inRelease);
   }
 

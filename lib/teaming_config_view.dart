@@ -175,17 +175,11 @@ class GuessingInLargeTeamSelectorState extends EnumOptionSelectorState<
 // =============================================================================
 // Main part
 
-class TeamingConfigView extends StatefulWidget {
+class TeamingConfigView extends StatelessWidget {
   final TeamingConfig config;
+  final void Function(void Function()) onUpdate;
 
-  TeamingConfigView({@required this.config});
-
-  @override
-  createState() => _TeamingConfigViewState();
-}
-
-class _TeamingConfigViewState extends State<TeamingConfigView> {
-  get config => widget.config;
+  TeamingConfigView({@required this.config, @required this.onUpdate});
 
   // TODO: Irrelevant settings: hide or disable?
   @override
@@ -202,7 +196,7 @@ class _TeamingConfigViewState extends State<TeamingConfigView> {
             ? 'Fixed teams. Score is per team.'
             : 'Fluid pairing. Score is per player.'),
         value: config.teamPlay,
-        onChanged: (bool checked) => setState(() {
+        onChanged: (bool checked) => onUpdate(() {
           config.teamPlay = checked;
         }),
       ),
@@ -222,7 +216,7 @@ class _TeamingConfigViewState extends State<TeamingConfigView> {
                 ? 'Manually specify teams and turn order.'
                 : 'Manually specify turn order.')),
         value: config.randomizeTeams,
-        onChanged: (bool checked) => setState(() {
+        onChanged: (bool checked) => onUpdate(() {
           config.randomizeTeams = checked;
         }),
       ),
@@ -232,7 +226,7 @@ class _TeamingConfigViewState extends State<TeamingConfigView> {
         Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => IndividualPlayStyleSelector(
                 config.individualPlayStyle,
-                (IndividualPlayStyle newValue) => setState(() {
+                (IndividualPlayStyle newValue) => onUpdate(() {
                       config.individualPlayStyle = newValue;
                     }))));
       };
@@ -261,7 +255,7 @@ class _TeamingConfigViewState extends State<TeamingConfigView> {
         Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => DesiredTeamSizeSelector(
                 config.desiredTeamSize,
-                (DesiredTeamSize newValue) => setState(() {
+                (DesiredTeamSize newValue) => onUpdate(() {
                       config.desiredTeamSize = newValue;
                     }))));
       };
@@ -301,7 +295,7 @@ class _TeamingConfigViewState extends State<TeamingConfigView> {
         Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => UnequalTeamSizeSelector(
                 config.unequalTeamSize,
-                (UnequalTeamSize newValue) => setState(() {
+                (UnequalTeamSize newValue) => onUpdate(() {
                       config.unequalTeamSize = newValue;
                     }))));
       };
@@ -359,7 +353,7 @@ class _TeamingConfigViewState extends State<TeamingConfigView> {
         Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => GuessingInLargeTeamSelector(
                 config.guessingInLargeTeam,
-                (GuessingInLargeTeam newValue) => setState(() {
+                (GuessingInLargeTeam newValue) => onUpdate(() {
                       config.guessingInLargeTeam = newValue;
                     }))));
       };
