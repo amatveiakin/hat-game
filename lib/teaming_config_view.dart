@@ -5,129 +5,131 @@ import 'package:hatgame/multi_line_list_tile.dart';
 // TODO: Add explanation images (ideally: animated) for the selection option
 // on top of each subwindow, as in Android settings.
 
-// TODO: Rename enums and enum values to better match UI names.
-// (This data is not entirely private, as it will probably leak to JSON.)
-enum SinglePlayStyle {
-  circle,
-  clique,
+enum IndividualPlayStyle {
+  chain,
+  fluidPairs,
   // TODO: Add "each to all" (non-competitive) mode?
 }
 
-enum TeamSize {
+enum DesiredTeamSize {
   teamsOf2,
   teamsOf3,
   teamsOf4,
   twoTeams,
 }
 
-enum ExcessivePlayers {
+enum UnequalTeamSize {
   expandTeams,
-  drop,
+  dropPlayers,
 }
 
-enum LargeTeamPlayStyle {
-  duplex,
-  broadcast,
+enum GuessingInLargeTeam {
+  oneGuesser,
+  everybodyGuesser,
 }
 
 // =============================================================================
-// SinglePlayStyle
+// IndividualPlayStyle
 
-getAllSinglePlayStyles() {
+getIndividualPlayStyleOptions() {
   return [
     OptionDescription(
-      value: SinglePlayStyle.circle,
+      value: IndividualPlayStyle.chain,
       title: 'Chain sequence',
       subtitle: 'The “hat” goes in a circle. '
-          'Each player explains to the next person.',
+          'You always explain to the next person in sequence.',
     ),
     OptionDescription(
-      value: SinglePlayStyle.clique,
-      title: 'Each to each',
-      subtitle: 'Everybody will eventually explain to everybody.',
+      value: IndividualPlayStyle.fluidPairs,
+      title: 'Fluid pairs',
+      subtitle: 'You explain to a new person every time '
+          '(until you\'ve been paired up with every other player, '
+          'at which point the loop starts anew).',
     ),
   ];
 }
 
-class SinglePlayStyleSelector extends EnumOptionSelector<SinglePlayStyle> {
-  SinglePlayStyleSelector(SinglePlayStyle initialValue, Function changeCallback)
+class IndividualPlayStyleSelector
+    extends EnumOptionSelector<IndividualPlayStyle> {
+  IndividualPlayStyleSelector(
+      IndividualPlayStyle initialValue, Function changeCallback)
       : super(
-          windowTitle: 'Play Style',
-          allValues: getAllSinglePlayStyles(),
+          windowTitle: 'Individual Play Style',
+          allValues: getIndividualPlayStyleOptions(),
           initialValue: initialValue,
           changeCallback: changeCallback,
         );
 
   @override
-  createState() => SinglePlayStyleSelectorState();
+  createState() => IndividualPlayStyleSelectorState();
 }
 
-class SinglePlayStyleSelectorState
-    extends EnumOptionSelectorState<SinglePlayStyle, SinglePlayStyleSelector> {}
+class IndividualPlayStyleSelectorState extends EnumOptionSelectorState<
+    IndividualPlayStyle, IndividualPlayStyleSelector> {}
 
 // =============================================================================
-// TeamSize
+// DesiredTeamSize
 
-getTeamSize() {
+getDesiredTeamSizeOptions() {
   return [
     OptionDescription(
-      value: TeamSize.teamsOf2,
+      value: DesiredTeamSize.teamsOf2,
       title: 'Teams of 2',
       subtitle: 'Each teams has 2 players. '
           'If unequal teams are allowed, teams will be bigger '
           'when the total number of players is odd.',
     ),
     OptionDescription(
-      value: TeamSize.teamsOf3,
+      value: DesiredTeamSize.teamsOf3,
       title: 'Teams of 3',
       subtitle: 'Each teams has 3 players. '
           'If unequal teams are allowed, teams will be bigger '
           'when the total number of players is not divisible by 3.',
     ),
     OptionDescription(
-      value: TeamSize.teamsOf4,
+      value: DesiredTeamSize.teamsOf4,
       title: 'Teams of 4',
       subtitle: 'Each teams has 4 players. '
           'If unequal teams are allowed, teams will be bigger '
           'when the total number of players is not divisible by 4.',
     ),
     OptionDescription(
-      value: TeamSize.twoTeams,
+      value: DesiredTeamSize.twoTeams,
       title: 'Two teams',
       subtitle: 'Divide all player into two teams.',
     ),
   ];
 }
 
-class TeamSizeSelector extends EnumOptionSelector<TeamSize> {
-  TeamSizeSelector(TeamSize initialValue, Function changeCallback)
+class DesiredTeamSizeSelector extends EnumOptionSelector<DesiredTeamSize> {
+  DesiredTeamSizeSelector(DesiredTeamSize initialValue, Function changeCallback)
       : super(
           windowTitle: 'Team Size',
-          allValues: getTeamSize(),
+          allValues: getDesiredTeamSizeOptions(),
           initialValue: initialValue,
           changeCallback: changeCallback,
         );
 
   @override
-  createState() => TeamSizeSelectorState();
+  createState() => DesiredTeamSizeSelectorState();
 }
 
-class TeamSizeSelectorState
-    extends EnumOptionSelectorState<TeamSize, TeamSizeSelector> {}
+class DesiredTeamSizeSelectorState
+    extends EnumOptionSelectorState<DesiredTeamSize, DesiredTeamSizeSelector> {}
 
 // =============================================================================
-// ExcessivePlayers
+// UnequalTeamSize
 
-getAllExcessivePlayerActions() {
+getUnequalTeamSizeOptions() {
   return [
     OptionDescription(
-      value: ExcessivePlayers.expandTeams,
+      value: UnequalTeamSize.expandTeams,
       title: 'Allow unequal teams',
       subtitle: 'If players cannot be divided into teams of equal sizes, '
           'some teams are going to be bigger.',
     ),
     OptionDescription(
-      value: ExcessivePlayers.drop,
+      value: UnequalTeamSize.dropPlayers,
       title: 'Teams must be equal',
       // TODO: Make the lot fair (don't ban the same person twice in a row)
       // and comment on this.
@@ -138,36 +140,35 @@ getAllExcessivePlayerActions() {
   ];
 }
 
-class ExcessivePlayersSelector extends EnumOptionSelector<ExcessivePlayers> {
-  ExcessivePlayersSelector(
-      ExcessivePlayers initialValue, Function changeCallback)
+class UnequalTeamSizeSelector extends EnumOptionSelector<UnequalTeamSize> {
+  UnequalTeamSizeSelector(UnequalTeamSize initialValue, Function changeCallback)
       : super(
           windowTitle: 'Unequal teams',
-          allValues: getAllExcessivePlayerActions(),
+          allValues: getUnequalTeamSizeOptions(),
           initialValue: initialValue,
           changeCallback: changeCallback,
         );
 
   @override
-  createState() => ExcessivePlayersSelectorState();
+  createState() => UnequalTeamSizeSelectorState();
 }
 
-class ExcessivePlayersSelectorState extends EnumOptionSelectorState<
-    ExcessivePlayers, ExcessivePlayersSelector> {}
+class UnequalTeamSizeSelectorState
+    extends EnumOptionSelectorState<UnequalTeamSize, UnequalTeamSizeSelector> {}
 
 // =============================================================================
-// LargeTeamPlayStyle
+// GuessingInLargeTeam
 
-getAllLargeTeamPlayStyles() {
+getGuessingInLargeTeamOptions() {
   return [
     OptionDescription(
-      value: LargeTeamPlayStyle.duplex,
+      value: GuessingInLargeTeam.oneGuesser,
       title: 'Always one guesser',
       subtitle: 'Exactly one person guesses every turn. '
           'Teams with more than two players rotate roles.',
     ),
     OptionDescription(
-      value: LargeTeamPlayStyle.broadcast,
+      value: GuessingInLargeTeam.everybodyGuesser,
       title: 'The whole team guesses',
       subtitle: 'In teams with more than two players '
           'each team member except the presenter can guess.',
@@ -175,23 +176,23 @@ getAllLargeTeamPlayStyles() {
   ];
 }
 
-class LargeTeamPlayStyleSelector
-    extends EnumOptionSelector<LargeTeamPlayStyle> {
-  LargeTeamPlayStyleSelector(
-      LargeTeamPlayStyle initialValue, Function changeCallback)
+class GuessingInLargeTeamSelector
+    extends EnumOptionSelector<GuessingInLargeTeam> {
+  GuessingInLargeTeamSelector(
+      GuessingInLargeTeam initialValue, Function changeCallback)
       : super(
           windowTitle: 'Guessing in large teams',
-          allValues: getAllLargeTeamPlayStyles(),
+          allValues: getGuessingInLargeTeamOptions(),
           initialValue: initialValue,
           changeCallback: changeCallback,
         );
 
   @override
-  createState() => LargeTeamPlayStyleSelectorState();
+  createState() => GuessingInLargeTeamSelectorState();
 }
 
-class LargeTeamPlayStyleSelectorState extends EnumOptionSelectorState<
-    LargeTeamPlayStyle, LargeTeamPlayStyleSelector> {}
+class GuessingInLargeTeamSelectorState extends EnumOptionSelectorState<
+    GuessingInLargeTeam, GuessingInLargeTeamSelector> {}
 
 // =============================================================================
 // Main part
@@ -204,17 +205,18 @@ class TeamingConfigView extends StatefulWidget {
 class _TeamingConfigViewState extends State<TeamingConfigView> {
   bool teamPlay = true;
   bool randomizeTeams = false;
-  SinglePlayStyle singlePlayStyle = SinglePlayStyle.clique;
-  TeamSize teamSize = TeamSize.teamsOf2;
-  ExcessivePlayers excessivePlayers = ExcessivePlayers.expandTeams;
-  LargeTeamPlayStyle largeTeamPlayStyle = LargeTeamPlayStyle.duplex;
+  IndividualPlayStyle individualPlayStyle = IndividualPlayStyle.fluidPairs;
+  DesiredTeamSize desiredTeamSize = DesiredTeamSize.teamsOf2;
+  UnequalTeamSize unequalTeamSize = UnequalTeamSize.expandTeams;
+  GuessingInLargeTeam guessingInLargeTeam = GuessingInLargeTeam.oneGuesser;
 
   // TODO: Irrelevant settings: hide or disable?
   @override
   Widget build(BuildContext context) {
-    final bool largeTeamsPossible = teamSize != TeamSize.teamsOf2 ||
-        excessivePlayers == ExcessivePlayers.expandTeams ||
-        !randomizeTeams;
+    final bool largeTeamsPossible =
+        desiredTeamSize != DesiredTeamSize.teamsOf2 ||
+            unequalTeamSize == UnequalTeamSize.expandTeams ||
+            !randomizeTeams;
     var items = <Widget>[];
     items.add(
       MultiLineSwitchListTile(
@@ -251,28 +253,27 @@ class _TeamingConfigViewState extends State<TeamingConfigView> {
     if (!teamPlay) {
       final onTap = () {
         Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => SinglePlayStyleSelector(
-                singlePlayStyle,
-                (SinglePlayStyle newValue) => setState(() {
-                      singlePlayStyle = newValue;
+            builder: (context) => IndividualPlayStyleSelector(
+                individualPlayStyle,
+                (IndividualPlayStyle newValue) => setState(() {
+                      individualPlayStyle = newValue;
                     }))));
       };
-      switch (singlePlayStyle) {
-        case SinglePlayStyle.circle:
+      switch (individualPlayStyle) {
+        case IndividualPlayStyle.chain:
           items.add(
             MultiLineListTile(
                 title: Text('Chain sequence'),
                 subtitle: Text('The “hat” goes in a circle. '
-                    'Each player explains to the next person.'),
+                    'You always explain to the next person in sequence.'),
                 onTap: onTap),
           );
           break;
-        case SinglePlayStyle.clique:
+        case IndividualPlayStyle.fluidPairs:
           items.add(
             MultiLineListTile(
-                title: Text('Each to each'),
-                subtitle:
-                    Text('Everybody will eventually explain to everybody.'),
+                title: Text('Fluid pairs'),
+                subtitle: Text('You explain to a new person every time.'),
                 onTap: onTap),
           );
           break;
@@ -281,35 +282,35 @@ class _TeamingConfigViewState extends State<TeamingConfigView> {
     if (teamPlay && randomizeTeams) {
       final onTap = () {
         Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => TeamSizeSelector(
-                teamSize,
-                (TeamSize newValue) => setState(() {
-                      teamSize = newValue;
+            builder: (context) => DesiredTeamSizeSelector(
+                desiredTeamSize,
+                (DesiredTeamSize newValue) => setState(() {
+                      desiredTeamSize = newValue;
                     }))));
       };
-      switch (teamSize) {
-        case TeamSize.teamsOf2:
+      switch (desiredTeamSize) {
+        case DesiredTeamSize.teamsOf2:
           items.add(MultiLineListTile(
             title: Text('Teams of 2'),
             subtitle: Text('Minimum team size is 2 players.'),
             onTap: onTap,
           ));
           break;
-        case TeamSize.teamsOf3:
+        case DesiredTeamSize.teamsOf3:
           items.add(MultiLineListTile(
             title: Text('Teams of 3'),
             subtitle: Text('Minimum team size is 3 players.'),
             onTap: onTap,
           ));
           break;
-        case TeamSize.teamsOf4:
+        case DesiredTeamSize.teamsOf4:
           items.add(MultiLineListTile(
             title: Text('Teams of 4'),
             subtitle: Text('Minimum team size is 4 players.'),
             onTap: onTap,
           ));
           break;
-        case TeamSize.twoTeams:
+        case DesiredTeamSize.twoTeams:
           items.add(MultiLineListTile(
             title: Text('Two teams'),
             subtitle: Text('Divide all player into two teams.'),
@@ -321,26 +322,26 @@ class _TeamingConfigViewState extends State<TeamingConfigView> {
     if (teamPlay && randomizeTeams) {
       final onTap = () {
         Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => ExcessivePlayersSelector(
-                excessivePlayers,
-                (ExcessivePlayers newValue) => setState(() {
-                      excessivePlayers = newValue;
+            builder: (context) => UnequalTeamSizeSelector(
+                unequalTeamSize,
+                (UnequalTeamSize newValue) => setState(() {
+                      unequalTeamSize = newValue;
                     }))));
       };
-      switch (excessivePlayers) {
-        case ExcessivePlayers.expandTeams:
+      switch (unequalTeamSize) {
+        case UnequalTeamSize.expandTeams:
           String subtitle;
-          switch (teamSize) {
-            case TeamSize.teamsOf2:
-            case TeamSize.twoTeams:
+          switch (desiredTeamSize) {
+            case DesiredTeamSize.teamsOf2:
+            case DesiredTeamSize.twoTeams:
               subtitle = 'Teams will be unequal '
                   'if the total number of players is odd.';
               break;
-            case TeamSize.teamsOf3:
+            case DesiredTeamSize.teamsOf3:
               subtitle = 'Teams will be unequal '
                   'if the total number of players is not divisible by 3.';
               break;
-            case TeamSize.teamsOf4:
+            case DesiredTeamSize.teamsOf4:
               subtitle = 'Teams will be unequal '
                   'if the total number of players is not divisible by 4.';
               break;
@@ -351,19 +352,19 @@ class _TeamingConfigViewState extends State<TeamingConfigView> {
             onTap: onTap,
           ));
           break;
-        case ExcessivePlayers.drop:
+        case UnequalTeamSize.dropPlayers:
           String subtitle;
-          switch (teamSize) {
-            case TeamSize.teamsOf2:
-            case TeamSize.twoTeams:
+          switch (desiredTeamSize) {
+            case DesiredTeamSize.teamsOf2:
+            case DesiredTeamSize.twoTeams:
               subtitle = 'One player will skip the round '
                   'if the total number of players is odd.';
               break;
-            case TeamSize.teamsOf3:
+            case DesiredTeamSize.teamsOf3:
               subtitle = 'Some players will skip the round '
                   'if the total number of players is not divisible by 3.';
               break;
-            case TeamSize.teamsOf4:
+            case DesiredTeamSize.teamsOf4:
               subtitle = 'Some players will skip the round '
                   'if the total number of players is not divisible by 4.';
               break;
@@ -379,14 +380,14 @@ class _TeamingConfigViewState extends State<TeamingConfigView> {
     if (teamPlay && largeTeamsPossible) {
       final onTap = () {
         Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => LargeTeamPlayStyleSelector(
-                largeTeamPlayStyle,
-                (LargeTeamPlayStyle newValue) => setState(() {
-                      largeTeamPlayStyle = newValue;
+            builder: (context) => GuessingInLargeTeamSelector(
+                guessingInLargeTeam,
+                (GuessingInLargeTeam newValue) => setState(() {
+                      guessingInLargeTeam = newValue;
                     }))));
       };
-      switch (largeTeamPlayStyle) {
-        case LargeTeamPlayStyle.duplex:
+      switch (guessingInLargeTeam) {
+        case GuessingInLargeTeam.oneGuesser:
           items.add(
             MultiLineListTile(
                 title: Text('Always one guesser'),
@@ -395,7 +396,7 @@ class _TeamingConfigViewState extends State<TeamingConfigView> {
                 onTap: onTap),
           );
           break;
-        case LargeTeamPlayStyle.broadcast:
+        case GuessingInLargeTeam.everybodyGuesser:
           items.add(
             MultiLineListTile(
                 title: Text('The whole team guesses'),
