@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hatgame/game_settings.dart';
 import 'package:hatgame/game_state.dart';
+import 'package:hatgame/padlock.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/timer.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
@@ -215,50 +216,68 @@ class PlayArea extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get screen size using MediaQuery
+    final double wideButtonWidth = MediaQuery.of(context).size.width * 0.8;
+    final wordsInHatWidget = Container(
+      padding: EdgeInsets.symmetric(vertical: 12.0),
+      child: Text('Words in hat: ${gameState.numWordsInHat()}'),
+    );
     switch (gameState.turnPhase()) {
       case TurnPhase.prepare:
         return Column(
           children: [
             Expanded(
               child: Center(
-                // TODO: Align with the word button position.
-                child: RaisedButton(
-                  onPressed: () {
-                    _gameViewState.update(() {
-                      gameState.startExplaning();
-                      int turn = gameState.currentTurn();
-                      Future.delayed(
-                          Duration(seconds: gameSettings.explanationSeconds),
-                          () {
-                        _gameViewState.update(() {
-                          gameState.finishExplanation(turnRestriction: turn);
-                        });
-                      });
-                    });
-                  },
-                  color: MyColors.accent,
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 36.0, vertical: 12.0),
-                  child: Text(
-                    'Start!',
-                    style: TextStyle(fontSize: 24.0),
+                child: SizedBox(
+                  width: wideButtonWidth,
+                  child: RaisedButton(
+                    onPressed: _gameViewState.startButtonEnabled
+                        ? () {
+                            _gameViewState.update(() {
+                              _gameViewState.startButtonEnabled = false;
+                              gameState.startExplaning();
+                              int turn = gameState.currentTurn();
+                              Future.delayed(
+                                  Duration(
+                                      seconds: gameSettings.explanationSeconds),
+                                  () {
+                                _gameViewState.update(() {
+                                  gameState.finishExplanation(
+                                      turnRestriction: turn);
+                                });
+                              });
+                            });
+                          }
+                        : null,
+                    color: MyColors.accent,
+                    padding: EdgeInsets.symmetric(vertical: 12.0),
+                    child: Text(
+                      'Start!',
+                      style: TextStyle(fontSize: 24.0),
+                    ),
                   ),
                 ),
               ),
             ),
-            Container(
-              padding: EdgeInsets.symmetric(vertical: 12.0),
-              child: Text('Words in hat: ${gameState.numWordsInHat()}'),
+            Expanded(
+              child: Center(
+                child: Padlock(
+                  onUnlocked: () => _gameViewState.update(() {
+                    _gameViewState.startButtonEnabled = true;
+                  }),
+                ),
+              ),
             ),
+            wordsInHatWidget,
           ],
         );
+      // TODO: Fix colors on the explanation page. Accent = the thing to click.
       case TurnPhase.explain:
         return Column(children: [
           Expanded(
             child: Center(
               child: SizedBox(
-                // Get screen size using MediaQuery
-                width: MediaQuery.of(context).size.width * 0.8,
+                width: wideButtonWidth,
                 child: RaisedButton(
                   onPressed: () => _gameViewState.update(() {
                     gameState.wordGuessed();
@@ -279,6 +298,8 @@ class PlayArea extends StatelessWidget {
               ),
             ),
           ),
+          // TODO: Dim text color similarly to team name.
+          wordsInHatWidget,
         ]);
       case TurnPhase.review:
         return Column(children: [
@@ -307,18 +328,22 @@ class PlayArea extends StatelessWidget {
           ),
           Container(
             padding: EdgeInsets.symmetric(vertical: 12.0),
-            child: RaisedButton(
-              onPressed: () => _gameViewState.update(() {
-                gameState.newTurn();
-              }),
-              color: MyColors.accent,
-              padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
-              child: Text(
-                'Next round',
-                style: TextStyle(fontSize: 20.0),
+            child: SizedBox(
+              width: wideButtonWidth,
+              child: RaisedButton(
+                onPressed: () => _gameViewState.update(() {
+                  gameState.newTurn();
+                }),
+                color: MyColors.accent,
+                padding: EdgeInsets.symmetric(vertical: 12.0),
+                child: Text(
+                  'Next round',
+                  style: TextStyle(fontSize: 20.0),
+                ),
               ),
             ),
           ),
+          SizedBox(height: 12),
         ]);
     }
   }
@@ -335,6 +360,7 @@ class GameView extends StatefulWidget {
 
 class GameViewState extends State<GameView> {
   final GameState gameState;
+  bool startButtonEnabled = false;
 
   GameViewState(GameSettings gameSettings)
       : gameState = GameState(gameSettings);

@@ -70,7 +70,7 @@ class _TimerViewState extends State<TimerView>
       isComplex: false,
       willChange: true,
       child: SizedBox.fromSize(
-        size: Size.square(100.0),
+        size: Size.square(120.0),
         child: Center(
           child: Text(
             _seconds.toString(),
