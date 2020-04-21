@@ -206,14 +206,38 @@ class WordReviewItem extends StatelessWidget {
   }
 }
 
-class PlayArea extends StatelessWidget {
+class PlayArea extends StatefulWidget {
+  final GameViewState _gameViewState;
+
+  PlayArea(this._gameViewState);
+
+  @override
+  State<StatefulWidget> createState() => PlayAreaState(_gameViewState);
+}
+
+class PlayAreaState extends State<PlayArea>
+    with SingleTickerProviderStateMixin {
   final GameViewState _gameViewState;
   final GameState gameState;
   final GameSettings gameSettings;
+  AnimationController _padlockAnimationController;
 
-  PlayArea(this._gameViewState)
+  PlayAreaState(this._gameViewState)
       : gameState = _gameViewState.gameState,
         gameSettings = _gameViewState.widget.gameSettings;
+
+  @override
+  void initState() {
+    super.initState();
+    _padlockAnimationController =
+        AnimationController(duration: Duration(milliseconds: 500), vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _padlockAnimationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -231,31 +255,38 @@ class PlayArea extends StatelessWidget {
               child: Center(
                 child: SizedBox(
                   width: wideButtonWidth,
-                  child: RaisedButton(
-                    onPressed: _gameViewState.startButtonEnabled
-                        ? () {
-                            _gameViewState.update(() {
-                              _gameViewState.startButtonEnabled = false;
-                              gameState.startExplaning();
-                              int turn = gameState.currentTurn();
-                              Future.delayed(
-                                  Duration(
-                                      seconds: gameSettings.explanationSeconds),
-                                  () {
-                                _gameViewState.update(() {
-                                  gameState.finishExplanation(
-                                      turnRestriction: turn);
+                  child: GestureDetector(
+                    child: RaisedButton(
+                      onPressed: _gameViewState.startButtonEnabled
+                          ? () {
+                              _gameViewState.update(() {
+                                _gameViewState.startButtonEnabled = false;
+                                gameState.startExplaning();
+                                int turn = gameState.currentTurn();
+                                Future.delayed(
+                                    Duration(
+                                        seconds: gameSettings
+                                            .explanationSeconds), () {
+                                  _gameViewState.update(() {
+                                    gameState.finishExplanation(
+                                        turnRestriction: turn);
+                                  });
                                 });
                               });
-                            });
-                          }
-                        : null,
-                    color: MyTheme.accent,
-                    padding: EdgeInsets.symmetric(vertical: 12.0),
-                    child: Text(
-                      'Start!',
-                      style: TextStyle(fontSize: 24.0),
+                            }
+                          : null,
+                      color: MyTheme.accent,
+                      padding: EdgeInsets.symmetric(vertical: 12.0),
+                      child: Text(
+                        'Start!',
+                        style: TextStyle(fontSize: 24.0),
+                      ),
                     ),
+                    // Cannot put this into the button, because it will become
+                    // enabled if it has a callback.
+                    onTap: _gameViewState.startButtonEnabled
+                        ? null
+                        : () => _padlockAnimationController.forward(from: 0.0),
                   ),
                 ),
               ),
@@ -266,6 +297,7 @@ class PlayArea extends StatelessWidget {
                   onUnlocked: () => _gameViewState.update(() {
                     _gameViewState.startButtonEnabled = true;
                   }),
+                  animationController: _padlockAnimationController,
                 ),
               ),
             ),

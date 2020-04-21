@@ -39,17 +39,10 @@ class _PadlockPainter extends CustomPainter {
     }
     canvas.drawOval(rect, borderPaint);
 
-    double rotateAngle = 0.0;
-    const double shakeStart = 0.5;
-    const double shareDuration = 0.1;
     const double shakeReps = 4.0;
     const double shakeAmplitude = pi / 24;
-    if (animationProgress > shakeStart &&
-        animationProgress < shakeStart + shareDuration) {
-      final double shakeProgress =
-          (animationProgress - shakeStart) / shareDuration;
-      rotateAngle = sin(shakeProgress * pi * shakeReps) * shakeAmplitude;
-    }
+    final double rotateAngle =
+        sin(animationProgress * pi * shakeReps) * shakeAmplitude;
 
     final icon = padlockOpen ? Icons.lock_open : Icons.lock_outline;
     final textPainter = TextPainter(textDirection: TextDirection.rtl);
@@ -79,15 +72,16 @@ class _PadlockPainter extends CustomPainter {
 }
 
 class Padlock extends StatefulWidget {
+  final AnimationController animationController;
   final void Function() onUnlocked;
 
-  Padlock({@required this.onUnlocked});
+  Padlock({@required this.onUnlocked, @required this.animationController});
 
   @override
-  createState() => _PadlockState();
+  createState() => PadlockState();
 }
 
-class _PadlockState extends State<Padlock> with SingleTickerProviderStateMixin {
+class PadlockState extends State<Padlock> with SingleTickerProviderStateMixin {
   static const double _dragStartTolerance = 50.0;
   Size _size = Size.zero;
   bool _panActive = false;
@@ -97,27 +91,16 @@ class _PadlockState extends State<Padlock> with SingleTickerProviderStateMixin {
 
   var _animationProgress = 0.0;
   Animation<double> _animation;
-  AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
-
-    _animationController =
-        AnimationController(duration: Duration(seconds: 4), vsync: this);
-    _animation =
-        Tween(begin: 0.0, end: 1.0.toDouble()).animate(_animationController)
-          ..addListener(() {
-            setState(() {
-              _animationProgress = _animation.value;
-            });
-          })
-          ..addStatusListener((status) {
-            if (status == AnimationStatus.completed) {
-              _animationController.repeat();
-            }
-          });
-    _animationController.forward();
+    _animation = Tween(begin: 0.0, end: 1.0).animate(widget.animationController)
+      ..addListener(() {
+        setState(() {
+          _animationProgress = _animation.value;
+        });
+      });
   }
 
   // Use didChangeDependencies instead of initState, because MediaQuery
@@ -161,7 +144,6 @@ class _PadlockState extends State<Padlock> with SingleTickerProviderStateMixin {
               if ((details.localPosition - _padlockPos).distance <
                   _dragStartTolerance) {
                 setState(() {
-                  _animationController.reset();
                   _panActive = true;
                 });
               }
@@ -180,8 +162,6 @@ class _PadlockState extends State<Padlock> with SingleTickerProviderStateMixin {
                 _resetPadlockPos();
                 if (padlockOpen) {
                   _padlockHidden = true;
-                } else {
-                  _animationController.forward();
                 }
               });
               if (padlockOpen) {
