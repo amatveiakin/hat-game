@@ -7,6 +7,17 @@ import 'package:hatgame/theme.dart';
 
 // TODO: Add dynamism: padlock shacking / circle pulsating.
 
+List<BoxShadow> _elevationToShadow(int elevation, Color color) {
+  return kElevationToShadow[elevation]
+      .map((s) => BoxShadow(
+            color: color.withOpacity(s.color.opacity),
+            offset: s.offset,
+            blurRadius: s.blurRadius,
+            spreadRadius: s.spreadRadius,
+          ))
+      .toList();
+}
+
 class _PadlockPainter extends CustomPainter {
   final bool padlockOpen;
   final Offset padlockPos;
@@ -17,12 +28,14 @@ class _PadlockPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
     var borderPaint = Paint()
-      ..color = MyColors.black(120)
+      ..color = MyColors.black(140)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 5.0
       ..strokeCap = StrokeCap.butt;
     if (padlockOpen) {
-      borderPaint..maskFilter = MaskFilter.blur(BlurStyle.normal, 5.0);
+      borderPaint
+        ..color = MyTheme.accent
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, 5.0);
     }
     canvas.drawOval(rect, borderPaint);
 
@@ -34,6 +47,7 @@ class _PadlockPainter extends CustomPainter {
           fontSize: 60.0,
           fontFamily: icon.fontFamily,
           color: MyTheme.accent,
+          shadows: _elevationToShadow(2, MyTheme.accent),
         ));
     textPainter.layout();
     textPainter.paint(
