@@ -271,7 +271,6 @@ class PlayArea extends StatelessWidget {
             wordsInHatWidget,
           ],
         );
-      // TODO: Fix colors on the explanation page. Accent = the thing to click.
       case TurnPhase.explain:
         return Column(children: [
           Expanded(
