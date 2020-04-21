@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hatgame/assertion.dart';
-import 'package:hatgame/game_settings.dart';
+import 'package:hatgame/game_config.dart';
 import 'package:hatgame/game_state.dart';
 import 'package:hatgame/padlock.dart';
 import 'package:hatgame/theme.dart';
@@ -219,7 +219,7 @@ class PlayAreaState extends State<PlayArea>
     with SingleTickerProviderStateMixin {
   final GameViewState _gameViewState;
   final GameState gameState;
-  final GameSettings gameSettings;
+  final GameConfig gameSettings;
   AnimationController _padlockAnimationController;
 
   PlayAreaState(this._gameViewState)
@@ -382,7 +382,7 @@ class PlayAreaState extends State<PlayArea>
 }
 
 class GameView extends StatefulWidget {
-  final GameSettings gameSettings;
+  final GameConfig gameSettings;
 
   GameView(this.gameSettings);
 
@@ -394,7 +394,7 @@ class GameViewState extends State<GameView> {
   final GameState gameState;
   bool startButtonEnabled = false;
 
-  GameViewState(GameSettings gameSettings)
+  GameViewState(GameConfig gameSettings)
       : gameState = GameState(gameSettings);
 
   void update(Function updater) {

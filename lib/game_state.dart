@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:hatgame/assertion.dart';
-import 'package:hatgame/game_settings.dart';
+import 'package:hatgame/game_config.dart';
 import 'package:hatgame/teaming_strategy.dart';
 import 'package:russian_words/russian_words.dart' as russian_words;
 
@@ -79,7 +79,7 @@ class GameState {
   int _turn = 0;
   TurnPhase _turnPhase;
 
-  GameState(GameSettings settings)
+  GameState(GameConfig settings)
       : _players = settings.teamPlayers
             .expand((t) => t)
             .map((p) => Player(p))

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:hatgame/game_settings.dart';
+import 'package:hatgame/game_config.dart';
 import 'package:hatgame/game_view.dart';
 import 'package:hatgame/player_config_view.dart';
 import 'package:hatgame/teaming_config_view.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
 
-class GameConfigView extends StatefulWidget {
+class ConfigView extends StatefulWidget {
   @override
-  createState() => _GameConfigViewState();
+  createState() => _ConfigViewState();
 }
 
-class _GameConfigViewState extends State<GameConfigView>
+class _ConfigViewState extends State<ConfigView>
     with SingleTickerProviderStateMixin {
   // TODO: Change tab order: Options, Teaming, Players (?)
   // TODO: Consider: make FAB advance to the next screen unless on the
@@ -39,12 +39,12 @@ class _GameConfigViewState extends State<GameConfigView>
   final PlayersConfigView _playersView;
   TabController _tabController;
 
-  _GameConfigViewState._(this._players)
+  _ConfigViewState._(this._players)
       : _playersView = PlayersConfigView((List<String> newPlayers) {
           _players.clear();
           _players.addAll(newPlayers);
         });
-  _GameConfigViewState() : this._([]);
+  _ConfigViewState() : this._([]);
 
   @override
   void initState() {
@@ -63,7 +63,7 @@ class _GameConfigViewState extends State<GameConfigView>
   }
 
   void _startGame() {
-    var settings = GameSettings.dev();
+    var settings = GameConfig.dev();
 
     // TODO: Use TeamingStrategy to check teaming validity.
     if (_players.length < 2 || _players.length % 2 == 1) {
