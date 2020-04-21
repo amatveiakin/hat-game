@@ -4,9 +4,9 @@ import 'package:hatgame/theme.dart';
 import 'package:flutter/material.dart';
 
 class PlayersConfigView extends StatefulWidget {
-  final void Function(List<String>) playersUpdatedCallback;
+  final void Function(List<String>) onPlayersUpdated;
 
-  PlayersConfigView(this.playersUpdatedCallback);
+  PlayersConfigView({@required this.onPlayersUpdated});
 
   @override
   createState() => _PlayersConfigViewState();
@@ -31,7 +31,7 @@ class _PlayersConfigViewState extends State<PlayersConfigView> {
   final List<Widget> _items = [];
 
   void _notifyPlayersUpdate() {
-    widget.playersUpdatedCallback(_players.map((p) => p.name).toList());
+    widget.onPlayersUpdated(_players.map((p) => p.name).toList());
   }
 
   void _addPlayer(String name, {@required bool focus}) {

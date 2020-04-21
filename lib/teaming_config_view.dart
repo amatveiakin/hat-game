@@ -1,32 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hatgame/enum_option_selector.dart';
+import 'package:hatgame/game_config.dart';
 import 'package:hatgame/multi_line_list_tile.dart';
 
 // TODO: Add explanation images (ideally: animated) for the selection option
 // on top of each subwindow, as in Android settings.
-
-enum IndividualPlayStyle {
-  chain,
-  fluidPairs,
-  // TODO: Add "each to all" (non-competitive) mode?
-}
-
-enum DesiredTeamSize {
-  teamsOf2,
-  teamsOf3,
-  teamsOf4,
-  twoTeams,
-}
-
-enum UnequalTeamSize {
-  expandTeams,
-  dropPlayers,
-}
-
-enum GuessingInLargeTeam {
-  oneGuesser,
-  everybodyGuesser,
-}
 
 // =============================================================================
 // IndividualPlayStyle
@@ -198,68 +176,67 @@ class GuessingInLargeTeamSelectorState extends EnumOptionSelectorState<
 // Main part
 
 class TeamingConfigView extends StatefulWidget {
+  final TeamingConfig config;
+
+  TeamingConfigView({@required this.config});
+
   @override
   createState() => _TeamingConfigViewState();
 }
 
 class _TeamingConfigViewState extends State<TeamingConfigView> {
-  bool teamPlay = true;
-  bool randomizeTeams = false;
-  IndividualPlayStyle individualPlayStyle = IndividualPlayStyle.fluidPairs;
-  DesiredTeamSize desiredTeamSize = DesiredTeamSize.teamsOf2;
-  UnequalTeamSize unequalTeamSize = UnequalTeamSize.expandTeams;
-  GuessingInLargeTeam guessingInLargeTeam = GuessingInLargeTeam.oneGuesser;
+  get config => widget.config;
 
   // TODO: Irrelevant settings: hide or disable?
   @override
   Widget build(BuildContext context) {
     final bool largeTeamsPossible =
-        desiredTeamSize != DesiredTeamSize.teamsOf2 ||
-            unequalTeamSize == UnequalTeamSize.expandTeams ||
-            !randomizeTeams;
+        config.desiredTeamSize != DesiredTeamSize.teamsOf2 ||
+            config.unequalTeamSize == UnequalTeamSize.expandTeams ||
+            !config.randomizeTeams;
     var items = <Widget>[];
     items.add(
       MultiLineSwitchListTile(
-        title: Text(teamPlay ? 'Team play: on' : 'Team play: off'),
-        subtitle: Text(teamPlay
+        title: Text(config.teamPlay ? 'Team play: on' : 'Team play: off'),
+        subtitle: Text(config.teamPlay
             ? 'Fixed teams. Score is per team.'
             : 'Fluid pairing. Score is per player.'),
-        value: teamPlay,
+        value: config.teamPlay,
         onChanged: (bool checked) => setState(() {
-          teamPlay = checked;
+          config.teamPlay = checked;
         }),
       ),
     );
     items.add(
       MultiLineSwitchListTile(
-        title: Text(teamPlay
-            ? (randomizeTeams ? 'Random teams: on' : 'Random teams: off')
-            : (randomizeTeams
+        title: Text(config.teamPlay
+            ? (config.randomizeTeams ? 'Random teams: on' : 'Random teams: off')
+            : (config.randomizeTeams
                 ? 'Random turn order: on'
                 : 'Random turn order: off')),
-        subtitle: Text(randomizeTeams
-            ? (teamPlay
+        subtitle: Text(config.randomizeTeams
+            ? (config.teamPlay
                 ? 'Generate random teams and turn order.'
                 : 'Generate random turn order.')
-            : (teamPlay
+            : (config.teamPlay
                 ? 'Manually specify teams and turn order.'
                 : 'Manually specify turn order.')),
-        value: randomizeTeams,
+        value: config.randomizeTeams,
         onChanged: (bool checked) => setState(() {
-          randomizeTeams = checked;
+          config.randomizeTeams = checked;
         }),
       ),
     );
-    if (!teamPlay) {
+    if (!config.teamPlay) {
       final onTap = () {
         Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => IndividualPlayStyleSelector(
-                individualPlayStyle,
+                config.individualPlayStyle,
                 (IndividualPlayStyle newValue) => setState(() {
-                      individualPlayStyle = newValue;
+                      config.individualPlayStyle = newValue;
                     }))));
       };
-      switch (individualPlayStyle) {
+      switch (config.individualPlayStyle) {
         case IndividualPlayStyle.chain:
           items.add(
             MultiLineListTile(
@@ -279,16 +256,16 @@ class _TeamingConfigViewState extends State<TeamingConfigView> {
           break;
       }
     }
-    if (teamPlay && randomizeTeams) {
+    if (config.teamPlay && config.randomizeTeams) {
       final onTap = () {
         Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => DesiredTeamSizeSelector(
-                desiredTeamSize,
+                config.desiredTeamSize,
                 (DesiredTeamSize newValue) => setState(() {
-                      desiredTeamSize = newValue;
+                      config.desiredTeamSize = newValue;
                     }))));
       };
-      switch (desiredTeamSize) {
+      switch (config.desiredTeamSize) {
         case DesiredTeamSize.teamsOf2:
           items.add(MultiLineListTile(
             title: Text('Teams of 2'),
@@ -319,19 +296,19 @@ class _TeamingConfigViewState extends State<TeamingConfigView> {
           break;
       }
     }
-    if (teamPlay && randomizeTeams) {
+    if (config.teamPlay && config.randomizeTeams) {
       final onTap = () {
         Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => UnequalTeamSizeSelector(
-                unequalTeamSize,
+                config.unequalTeamSize,
                 (UnequalTeamSize newValue) => setState(() {
-                      unequalTeamSize = newValue;
+                      config.unequalTeamSize = newValue;
                     }))));
       };
-      switch (unequalTeamSize) {
+      switch (config.unequalTeamSize) {
         case UnequalTeamSize.expandTeams:
           String subtitle;
-          switch (desiredTeamSize) {
+          switch (config.desiredTeamSize) {
             case DesiredTeamSize.teamsOf2:
             case DesiredTeamSize.twoTeams:
               subtitle = 'Teams will be unequal '
@@ -354,7 +331,7 @@ class _TeamingConfigViewState extends State<TeamingConfigView> {
           break;
         case UnequalTeamSize.dropPlayers:
           String subtitle;
-          switch (desiredTeamSize) {
+          switch (config.desiredTeamSize) {
             case DesiredTeamSize.teamsOf2:
             case DesiredTeamSize.twoTeams:
               subtitle = 'One player will skip the round '
@@ -377,16 +354,16 @@ class _TeamingConfigViewState extends State<TeamingConfigView> {
           break;
       }
     }
-    if (teamPlay && largeTeamsPossible) {
+    if (config.teamPlay && largeTeamsPossible) {
       final onTap = () {
         Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => GuessingInLargeTeamSelector(
-                guessingInLargeTeam,
+                config.guessingInLargeTeam,
                 (GuessingInLargeTeam newValue) => setState(() {
-                      guessingInLargeTeam = newValue;
+                      config.guessingInLargeTeam = newValue;
                     }))));
       };
-      switch (guessingInLargeTeam) {
+      switch (config.guessingInLargeTeam) {
         case GuessingInLargeTeam.oneGuesser:
           items.add(
             MultiLineListTile(

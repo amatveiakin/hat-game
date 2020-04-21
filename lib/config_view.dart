@@ -31,20 +31,15 @@ class _ConfigViewState extends State<ConfigView>
       icon: Icon(Icons.settings),
     ),
   ];
-  final int teamingTabIndex = 0;
-  final int playersTabIndex = 1;
-  final int optionsTabIndex = 2;
+  static const int teamingTabIndex = 0;
+  static const int playersTabIndex = 1;
+  static const int optionsTabIndex = 2;
 
-  final List<String> _players;
-  final PlayersConfigView _playersView;
+  final _rulesConfig = RulesConfig.dev();
+  final _teamingConfig = TeamingConfig();
+  final List<String> _players = [];
+
   TabController _tabController;
-
-  _ConfigViewState._(this._players)
-      : _playersView = PlayersConfigView((List<String> newPlayers) {
-          _players.clear();
-          _players.addAll(newPlayers);
-        });
-  _ConfigViewState() : this._([]);
 
   @override
   void initState() {
@@ -121,8 +116,13 @@ class _ConfigViewState extends State<ConfigView>
       body: TabBarView(
         controller: _tabController,
         children: [
-          TeamingConfigView(),
-          _playersView,
+          TeamingConfigView(config: _teamingConfig),
+          PlayersConfigView(
+            onPlayersUpdated: (List<String> newPlayers) {
+              _players.clear();
+              _players.addAll(newPlayers);
+            },
+          ),
           Center(child: Text('settings')),
         ],
       ),
