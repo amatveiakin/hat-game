@@ -207,7 +207,6 @@ class _PlayersConfigViewState extends State<PlayersConfigView> {
                     controller: player.controller,
                   ),
                 ),
-                // TODO: replace with up/down buttons
                 if (manualOrder)
                   SizedBox(width: 12),
                 // TODO: Make sure we don't have two drag handles on iOS.
@@ -316,11 +315,14 @@ class _PlayersConfigViewState extends State<PlayersConfigView> {
     };
     return Padding(
       padding: EdgeInsets.only(top: 6),
-      child: ListView(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        children: _makeTiles(),
-      ),
+      child: manualOrder
+          ? ReorderableListView(
+              onReorder: onReorder,
+              children: _makeTiles(),
+            )
+          : ListView(
+              children: _makeTiles(),
+            ),
     );
   }
 }

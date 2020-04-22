@@ -397,7 +397,7 @@ class PlayAreaState extends State<PlayArea>
               }),
               color: MyTheme.accent,
               child: Text(
-                'Next Round',
+                'Next round',
                 style: TextStyle(fontSize: 20.0),
               ),
             ),
