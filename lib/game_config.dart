@@ -2,9 +2,10 @@
 // Rules
 
 class RulesConfig {
-  int explanationSeconds = 15;
+  int turnSeconds = 15;
+  int bonusSeconds = 5;
 
-  RulesConfig.dev() : explanationSeconds = 5;
+  RulesConfig.dev() : turnSeconds = 5, bonusSeconds = 2;
 }
 
 // =============================================================================

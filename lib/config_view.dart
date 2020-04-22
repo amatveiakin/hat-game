@@ -3,6 +3,7 @@ import 'package:hatgame/assertion.dart';
 import 'package:hatgame/game_config.dart';
 import 'package:hatgame/game_view.dart';
 import 'package:hatgame/player_config_view.dart';
+import 'package:hatgame/rules_config_view.dart';
 import 'package:hatgame/teaming_config_view.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
 
@@ -136,9 +137,13 @@ class _ConfigViewState extends State<ConfigView>
               _playersConfig = newConfig;
             }),
           ),
-          Center(child: Text('settings')),
+          RulesConfigView(
+            config: _rulesConfig,
+            onUpdate: (updater) => setState(() => updater()),
+          ),
         ],
       ),
+      // TODO: Convert to normal button, similarly to 'Next round'.
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _startGame,
         label: Text('Start Game'),
