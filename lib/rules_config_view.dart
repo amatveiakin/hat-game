@@ -78,6 +78,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
   Widget build(BuildContext context) {
     return ListView(
       children: [
+        SizedBox(height: 4),
         ListTile(
           title: Row(
             children: [

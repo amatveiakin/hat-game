@@ -32,50 +32,56 @@ class NumericField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double buttonWidth = 30;
-    const double textFieldWidth = 40;
-    const double padding = 6;
-    // TODO: Center text on +/- buttons.
-    // TODO: Select on focus.
-    return Row(
-      children: [
-        SizedBox(
-          width: buttonWidth,
-          child: RaisedButton(
-            child: Text(
-              '−', // note: this is a minus sign (U+2212)
-              textAlign: TextAlign.center,
+    const double buttonWidth = 48;
+    const double textFieldWidth = 68;
+    // TODO: Select all on focus.
+    return DecoratedBox(
+      decoration: ShapeDecoration(
+        shape: RoundedRectangleBorder(
+          side: BorderSide(color: Colors.black26),
+          borderRadius: BorderRadius.circular(3.0),
+        ),
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              width: buttonWidth,
+              child: RaisedButton(
+                child: Text(
+                  '−', // minus sign (U+2212)
+                  textAlign: TextAlign.center,
+                ),
+                color: MyTheme.accent,
+                onPressed: _decValue,
+              ),
             ),
-            color: MyTheme.accent,
-            onPressed: _decValue,
-          ),
-        ),
-        SizedBox(
-          width: padding,
-        ),
-        SizedBox(
-          width: textFieldWidth,
-          child: TextField(
-            controller: controller,
-            keyboardType: TextInputType.number,
-            inputFormatters: [WhitelistingTextInputFormatter.digitsOnly],
-          ),
-        ),
-        SizedBox(
-          width: padding,
-        ),
-        SizedBox(
-          width: buttonWidth,
-          child: RaisedButton(
-            child: Text(
-              '+',
-              textAlign: TextAlign.center,
+            SizedBox(
+              width: textFieldWidth,
+              child: TextField(
+                controller: controller,
+                decoration:
+                    InputDecoration(filled: true, border: InputBorder.none),
+                textAlign: TextAlign.center,
+                keyboardType: TextInputType.number,
+                inputFormatters: [WhitelistingTextInputFormatter.digitsOnly],
+              ),
             ),
-            color: MyTheme.accent,
-            onPressed: _incValue,
-          ),
+            SizedBox(
+              width: buttonWidth,
+              child: RaisedButton(
+                child: Text(
+                  '+',
+                  textAlign: TextAlign.center,
+                ),
+                color: MyTheme.accent,
+                onPressed: _incValue,
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
