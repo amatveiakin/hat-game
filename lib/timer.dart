@@ -1,7 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:hatgame/assertion.dart';
 import 'package:hatgame/colors.dart';
+import 'package:hatgame/theme.dart';
 
 class _TimerPainter extends CustomPainter {
   final double progress; // from 0 to 1
@@ -33,8 +35,13 @@ class _TimerPainter extends CustomPainter {
 
 class TimerView extends StatefulWidget {
   final Duration duration;
+  final void Function() onTimeEnded;
+  final void Function(bool) onRunningChanged;
 
-  TimerView({@required this.duration});
+  TimerView(
+      {@required this.duration,
+      @required this.onTimeEnded,
+      this.onRunningChanged});
 
   @override
   createState() => _TimerViewState();
@@ -42,8 +49,9 @@ class TimerView extends StatefulWidget {
 
 class _TimerViewState extends State<TimerView>
     with SingleTickerProviderStateMixin {
-  var _progress = 0.0;
-  var _seconds = 0;
+  double _progress = 0.0;
+  int _seconds = 0;
+  bool _timeEnded = false;
   Animation<double> _animation;
   AnimationController _animationController;
 
@@ -59,8 +67,34 @@ class _TimerViewState extends State<TimerView>
           _progress = _animation.value;
           _seconds = ((1.0 - _progress) * widget.duration.inSeconds).ceil();
         });
+      })
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          Assert.holds(!_timeEnded);
+          _timeEnded = true;
+          widget.onTimeEnded?.call();
+        }
       });
     _animationController.forward();
+  }
+
+  bool _isRunning() {
+    return _animationController.isAnimating;
+  }
+
+  void _togglePause() {
+    if (_timeEnded) {
+      return;
+    }
+
+    setState(() {
+      if (_isRunning()) {
+        _animationController.stop();
+      } else {
+        _animationController.forward();
+      }
+    });
+    widget.onRunningChanged(_isRunning());
   }
 
   @override
@@ -69,16 +103,30 @@ class _TimerViewState extends State<TimerView>
       painter: _TimerPainter(_progress),
       isComplex: false,
       willChange: true,
-      child: SizedBox.fromSize(
-        size: Size.square(120.0),
-        child: Center(
-          child: Text(
-            _seconds.toString(),
-            maxLines: 1,
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 36.0,
-              color: MyColors.black(140),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: _togglePause,
+        child: SizedBox.fromSize(
+          size: Size.square(140.0),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  _seconds.toString(),
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 42.0,
+                    color: MyColors.black(140),
+                  ),
+                ),
+                Icon(
+                  _isRunning() ? Icons.pause : Icons.play_arrow,
+                  size: 32.0,
+                  color: MyTheme.accent,
+                )
+              ],
             ),
           ),
         ),

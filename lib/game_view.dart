@@ -222,10 +222,17 @@ class PlayAreaState extends State<PlayArea>
   final GameState gameState;
   final GameConfig gameSettings;
   AnimationController _padlockAnimationController;
+  bool _active = false;
 
   PlayAreaState(this._gameViewState)
       : gameState = _gameViewState.gameState,
         gameSettings = _gameViewState.widget.gameSettings;
+
+  void _endTurn(int turnRestriction) {
+    _gameViewState.update(() {
+      gameState.finishExplanation(turnRestriction: turnRestriction);
+    });
+  }
 
   @override
   void initState() {
@@ -260,16 +267,6 @@ class PlayAreaState extends State<PlayArea>
                               _gameViewState.update(() {
                                 _gameViewState.startButtonEnabled = false;
                                 gameState.startExplaning();
-                                int turn = gameState.currentTurn();
-                                Future.delayed(
-                                    Duration(
-                                        seconds: gameSettings
-                                            .rules.turnSeconds), () {
-                                  _gameViewState.update(() {
-                                    gameState.finishExplanation(
-                                        turnRestriction: turn);
-                                  });
-                                });
                               });
                             }
                           : null,
@@ -306,9 +303,11 @@ class PlayAreaState extends State<PlayArea>
           Expanded(
             child: Center(
               child: WideButton(
-                onPressed: () => _gameViewState.update(() {
-                  gameState.wordGuessed();
-                }),
+                onPressed: _active
+                    ? () => _gameViewState.update(() {
+                          gameState.wordGuessed();
+                        })
+                    : null,
                 child: Text(
                   gameState.currentWord(),
                   style: TextStyle(fontSize: 24.0),
@@ -319,6 +318,11 @@ class PlayAreaState extends State<PlayArea>
           Expanded(
             child: Center(
               child: TimerView(
+                // TODO: Test how this behaves when the app is minimized.
+                onTimeEnded: () => _endTurn(gameState.currentTurn()),
+                onRunningChanged: (bool running) => setState(() {
+                  _active = running;
+                }),
                 duration: Duration(seconds: gameSettings.rules.turnSeconds),
               ),
             ),
