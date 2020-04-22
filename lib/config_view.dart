@@ -16,10 +16,17 @@ class ConfigView extends StatefulWidget {
 
 class _ConfigViewState extends State<ConfigView>
     with SingleTickerProviderStateMixin {
-  // TODO: Change tab order: Options, Teaming, Players (?)
-  // TODO: Consider: make FAB advance to the next screen unless on the
-  // last screen alreay. (Are there best practices?)
+  // TODO: Consider: change 'Start Game' button to:
+  //   - advance to the next screen unless on the last screen alreay; OR
+  //   - move to player tab if players empty or incorrect
+  //     - this can be half-official, e.g. the button would be disabled and
+  //       display a warning, but still change the tab.
+  // (Are there best practices?)
   final tabs = <Tab>[
+    Tab(
+      text: 'Rules',
+      icon: Icon(Icons.settings),
+    ),
     Tab(
       text: 'Teaming',
       // TODO: Add arrows / several groups of people / gearwheel.
@@ -30,14 +37,10 @@ class _ConfigViewState extends State<ConfigView>
       // TODO: Replace squares with person icons.
       icon: Icon(OMIcons.ballot),
     ),
-    Tab(
-      text: 'Options',
-      icon: Icon(Icons.settings),
-    ),
   ];
-  static const int teamingTabIndex = 0;
-  static const int playersTabIndex = 1;
-  static const int optionsTabIndex = 2;
+  static const int rulesTabIndex = 0;
+  static const int teamingTabIndex = 1;
+  static const int playersTabIndex = 2;
 
   final _rulesConfig = RulesConfig.dev();
   final _teamingConfig = TeamingConfig();
@@ -165,6 +168,13 @@ class _ConfigViewState extends State<ConfigView>
         controller: _tabController,
         children: [
           _topBottomScrollableView(
+            top: RulesConfigView(
+              config: _rulesConfig,
+              onUpdate: (updater) => setState(() => updater()),
+            ),
+            bottom: startButton,
+          ),
+          _topBottomScrollableView(
             top: TeamingConfigView(
               config: _teamingConfig,
               onUpdate: (updater) => setState(() => updater()),
@@ -179,13 +189,6 @@ class _ConfigViewState extends State<ConfigView>
                   setState(() {
                 _playersConfig = newConfig;
               }),
-            ),
-            bottom: startButton,
-          ),
-          _topBottomScrollableView(
-            top: RulesConfigView(
-              config: _rulesConfig,
-              onUpdate: (updater) => setState(() => updater()),
             ),
             bottom: startButton,
           ),
