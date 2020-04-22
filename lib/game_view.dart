@@ -5,6 +5,7 @@ import 'package:hatgame/game_state.dart';
 import 'package:hatgame/padlock.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/timer.dart';
+import 'package:hatgame/wide_button.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
 
 class TeamView extends StatefulWidget {
@@ -241,8 +242,6 @@ class PlayAreaState extends State<PlayArea>
 
   @override
   Widget build(BuildContext context) {
-    // Get screen size using MediaQuery
-    final double wideButtonWidth = MediaQuery.of(context).size.width * 0.8;
     final wordsInHatWidget = Container(
       padding: EdgeInsets.symmetric(vertical: 12.0),
       child: Text('Words in hat: ${gameState.numWordsInHat()}'),
@@ -253,10 +252,9 @@ class PlayAreaState extends State<PlayArea>
           children: [
             Expanded(
               child: Center(
-                child: SizedBox(
-                  width: wideButtonWidth,
+                child: Container(
                   child: GestureDetector(
-                    child: RaisedButton(
+                    child: WideButton(
                       onPressed: _gameViewState.startButtonEnabled
                           ? () {
                               _gameViewState.update(() {
@@ -276,7 +274,6 @@ class PlayAreaState extends State<PlayArea>
                             }
                           : null,
                       color: MyTheme.accent,
-                      padding: EdgeInsets.symmetric(vertical: 12.0),
                       child: Text(
                         'Start!',
                         style: TextStyle(fontSize: 24.0),
@@ -308,17 +305,13 @@ class PlayAreaState extends State<PlayArea>
         return Column(children: [
           Expanded(
             child: Center(
-              child: SizedBox(
-                width: wideButtonWidth,
-                child: RaisedButton(
-                  onPressed: () => _gameViewState.update(() {
-                    gameState.wordGuessed();
-                  }),
-                  padding: EdgeInsets.symmetric(vertical: 12.0),
-                  child: Text(
-                    gameState.currentWord(),
-                    style: TextStyle(fontSize: 24.0),
-                  ),
+              child: WideButton(
+                onPressed: () => _gameViewState.update(() {
+                  gameState.wordGuessed();
+                }),
+                child: Text(
+                  gameState.currentWord(),
+                  style: TextStyle(fontSize: 24.0),
                 ),
               ),
             ),
@@ -326,8 +319,7 @@ class PlayAreaState extends State<PlayArea>
           Expanded(
             child: Center(
               child: TimerView(
-                duration:
-                    Duration(seconds: gameSettings.rules.turnSeconds),
+                duration: Duration(seconds: gameSettings.rules.turnSeconds),
               ),
             ),
           ),
@@ -361,18 +353,14 @@ class PlayAreaState extends State<PlayArea>
           ),
           Container(
             padding: EdgeInsets.symmetric(vertical: 12.0),
-            child: SizedBox(
-              width: wideButtonWidth,
-              child: RaisedButton(
-                onPressed: () => _gameViewState.update(() {
-                  gameState.newTurn();
-                }),
-                color: MyTheme.accent,
-                padding: EdgeInsets.symmetric(vertical: 12.0),
-                child: Text(
-                  'Next round',
-                  style: TextStyle(fontSize: 20.0),
-                ),
+            child: WideButton(
+              onPressed: () => _gameViewState.update(() {
+                gameState.newTurn();
+              }),
+              color: MyTheme.accent,
+              child: Text(
+                'Next round',
+                style: TextStyle(fontSize: 20.0),
               ),
             ),
           ),
