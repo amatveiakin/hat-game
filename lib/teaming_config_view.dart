@@ -379,6 +379,8 @@ class TeamingConfigView extends StatelessWidget {
       }
     }
     return ListView(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       children: items,
     );
   }

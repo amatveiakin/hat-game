@@ -76,36 +76,39 @@ class RulesConfigViewState extends State<RulesConfigView> {
 
   @override
   Widget build(BuildContext context) {
+    final options = [
+      SizedBox(height: 4),
+      ListTile(
+        title: Row(
+          children: [
+            Expanded(
+              child: Text('Turn time'),
+            ),
+            NumericField(
+              controller: _turnTimeController,
+              goldenValues: turnTimeGoldenValues,
+            ),
+          ],
+        ),
+      ),
+      ListTile(
+        title: Row(
+          children: [
+            Expanded(
+              child: Text('Bonus time'),
+            ),
+            NumericField(
+              controller: _bonusTimeController,
+              goldenValues: bonusTimeGoldenValues,
+            ),
+          ],
+        ),
+      ),
+    ];
     return ListView(
-      children: [
-        SizedBox(height: 4),
-        ListTile(
-          title: Row(
-            children: [
-              Expanded(
-                child: Text('Turn time'),
-              ),
-              NumericField(
-                controller: _turnTimeController,
-                goldenValues: turnTimeGoldenValues,
-              ),
-            ],
-          ),
-        ),
-        ListTile(
-          title: Row(
-            children: [
-              Expanded(
-                child: Text('Bonus time'),
-              ),
-              NumericField(
-                controller: _bonusTimeController,
-                goldenValues: bonusTimeGoldenValues,
-              ),
-            ],
-          ),
-        ),
-      ],
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      children: options,
     );
   }
 }

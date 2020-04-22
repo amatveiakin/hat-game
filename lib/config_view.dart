@@ -5,6 +5,8 @@ import 'package:hatgame/game_view.dart';
 import 'package:hatgame/player_config_view.dart';
 import 'package:hatgame/rules_config_view.dart';
 import 'package:hatgame/teaming_config_view.dart';
+import 'package:hatgame/theme.dart';
+import 'package:hatgame/wide_button.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
 
 class ConfigView extends StatefulWidget {
@@ -65,6 +67,8 @@ class _ConfigViewState extends State<ConfigView>
     settings.teaming = _teamingConfig;
     final PlayersConfig playersConfig = settings.players;
 
+    // TODO: Fix: change to teaming config are not applied if not navigated to
+    // players tab since then.
     if (_playersConfig.players != null) {
       final players = _playersConfig.players;
       // TODO: Use TeamingStrategy to check teaming validity.
@@ -110,8 +114,43 @@ class _ConfigViewState extends State<ConfigView>
         context, MaterialPageRoute(builder: (context) => GameView(settings)));
   }
 
+  Widget _topBottomScrollableView(
+      {@required Widget top, @required Widget bottom}) {
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints viewportConstraints) {
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: viewportConstraints.maxHeight,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                top,
+                bottom,
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    // TODO: Make the button stay in it's place on tab change (when possible).
+    final startButton = Padding(
+      padding: EdgeInsets.symmetric(vertical: 12.0),
+      child: WideButton(
+        onPressed: _startGame,
+        color: MyTheme.accent,
+        child: Text(
+          'Start Game',
+          style: TextStyle(fontSize: 20.0),
+        ),
+      ),
+    );
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -125,31 +164,33 @@ class _ConfigViewState extends State<ConfigView>
       body: TabBarView(
         controller: _tabController,
         children: [
-          TeamingConfigView(
-            config: _teamingConfig,
-            onUpdate: (updater) => setState(() => updater()),
+          _topBottomScrollableView(
+            top: TeamingConfigView(
+              config: _teamingConfig,
+              onUpdate: (updater) => setState(() => updater()),
+            ),
+            bottom: startButton,
           ),
-          PlayersConfigView(
-            teamingConfig: _teamingConfig,
-            initialPlayersConfig: _playersConfig,
-            onPlayersUpdated: (IntermediatePlayersConfig newConfig) =>
-                setState(() {
-              _playersConfig = newConfig;
-            }),
+          _topBottomScrollableView(
+            top: PlayersConfigView(
+              teamingConfig: _teamingConfig,
+              initialPlayersConfig: _playersConfig,
+              onPlayersUpdated: (IntermediatePlayersConfig newConfig) =>
+                  setState(() {
+                _playersConfig = newConfig;
+              }),
+            ),
+            bottom: startButton,
           ),
-          RulesConfigView(
-            config: _rulesConfig,
-            onUpdate: (updater) => setState(() => updater()),
+          _topBottomScrollableView(
+            top: RulesConfigView(
+              config: _rulesConfig,
+              onUpdate: (updater) => setState(() => updater()),
+            ),
+            bottom: startButton,
           ),
         ],
       ),
-      // TODO: Convert to normal button, similarly to 'Next round'.
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _startGame,
-        label: Text('Start Game'),
-        icon: Icon(Icons.arrow_forward),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
