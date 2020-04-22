@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:hatgame/assertion.dart';
 import 'package:hatgame/theme.dart';
 
-class NumericField extends StatelessWidget {
+class NumericField extends StatefulWidget {
   final TextEditingController controller;
   final List<int> goldenValues;
 
@@ -14,27 +14,53 @@ class NumericField extends StatelessWidget {
     Assert.holds(goldenValues.isNotEmpty);
   }
 
+  @override
+  State<StatefulWidget> createState() => _NumericFieldState();
+}
+
+class _NumericFieldState extends State<NumericField> {
+  final _focusNode = FocusNode();
+
   void _incValue() {
-    final int currentValue = int.tryParse(controller.text);
+    final int currentValue = int.tryParse(widget.controller.text);
     final int newValue = (currentValue != null)
-        ? goldenValues.firstWhere((v) => v > currentValue)
-        : goldenValues.first;
-    controller.text = newValue.toString();
+        ? widget.goldenValues
+            .firstWhere((v) => v > currentValue, orElse: () => currentValue)
+        : widget.goldenValues.first;
+    widget.controller.text = newValue.toString();
+    FocusScope.of(context).unfocus();
   }
 
   void _decValue() {
-    final int currentValue = int.tryParse(controller.text);
+    final int currentValue = int.tryParse(widget.controller.text);
     final int newValue = (currentValue != null)
-        ? goldenValues.lastWhere((v) => v < currentValue)
-        : goldenValues.last;
-    controller.text = newValue.toString();
+        ? widget.goldenValues
+            .lastWhere((v) => v < currentValue, orElse: () => currentValue)
+        : widget.goldenValues.last;
+    widget.controller.text = newValue.toString();
+    FocusScope.of(context).unfocus();
+  }
+
+  void initState() {
+    super.initState();
+    _focusNode.addListener(() {
+      if (_focusNode.hasFocus) {
+        widget.controller.selection = TextSelection(
+            baseOffset: 0, extentOffset: widget.controller.text.length);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     const double buttonWidth = 48;
     const double textFieldWidth = 68;
-    // TODO: Select all on focus.
     return DecoratedBox(
       decoration: ShapeDecoration(
         shape: RoundedRectangleBorder(
@@ -60,7 +86,8 @@ class NumericField extends StatelessWidget {
             SizedBox(
               width: textFieldWidth,
               child: TextField(
-                controller: controller,
+                controller: widget.controller,
+                focusNode: _focusNode,
                 decoration:
                     InputDecoration(filled: true, border: InputBorder.none),
                 textAlign: TextAlign.center,
