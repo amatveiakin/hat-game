@@ -5,8 +5,6 @@ import 'package:hatgame/game_config.dart';
 import 'package:hatgame/theme.dart';
 import 'package:flutter/material.dart';
 
-// TODO: Re-think team editing mode.
-
 class IntermediatePlayersConfig {
   // One of the two is set depending on teaming config.
   List<List<String>> teamPlayers;
@@ -175,52 +173,6 @@ class _PlayersConfigViewState extends State<PlayersConfigView> {
     _notifyPlayersUpdate();
   }
 
-  bool _canMovePlayerDown(_PlayerData player) {
-    final playerIndex = _playerItems.indexOf(player);
-    Assert.holds(playerIndex >= 0);
-    final teamDividerIndex =
-        _playerItems.indexWhere((p) => p.isTeamDivider, playerIndex);
-    return teamDividerIndex >= 0;
-  }
-
-  void _movePlayerDown(_PlayerData player) {
-    final playerIndex = _playerItems.indexOf(player);
-    Assert.holds(playerIndex >= 0);
-    final teamDividerIndex =
-        _playerItems.indexWhere((p) => p.isTeamDivider, playerIndex);
-    if (teamDividerIndex < 0) {
-      return;
-    }
-    setState(() {
-      _playerItems.removeAt(playerIndex);
-      _playerItems.insert(teamDividerIndex, player);
-    });
-    _notifyPlayersUpdate();
-  }
-
-  bool _canMovePlayerUp(_PlayerData player) {
-    final playerIndex = _playerItems.indexOf(player);
-    Assert.holds(playerIndex >= 0);
-    final teamDividerIndex =
-        _playerItems.lastIndexWhere((p) => p.isTeamDivider, playerIndex);
-    return teamDividerIndex >= 0;
-  }
-
-  void _movePlayerUp(_PlayerData player) {
-    final playerIndex = _playerItems.indexOf(player);
-    Assert.holds(playerIndex >= 0);
-    final teamDividerIndex =
-        _playerItems.lastIndexWhere((p) => p.isTeamDivider, playerIndex);
-    if (teamDividerIndex < 0) {
-      return;
-    }
-    setState(() {
-      _playerItems.removeAt(playerIndex);
-      _playerItems.insert(teamDividerIndex, player);
-    });
-    _notifyPlayersUpdate();
-  }
-
   List<Widget> _makeTiles() {
     final listItemPadding = EdgeInsets.fromLTRB(10, 1, 10, 1);
     final listItemPaddingSmallRight = EdgeInsets.fromLTRB(listItemPadding.left,
@@ -231,6 +183,7 @@ class _PlayersConfigViewState extends State<PlayersConfigView> {
       if (player.isTeamDivider) {
         tiles.add(
           Divider(
+            key: UniqueKey(),
             color: MyTheme.accent,
             thickness: 3.0,
             height: 20.0,
@@ -239,13 +192,13 @@ class _PlayersConfigViewState extends State<PlayersConfigView> {
       } else {
         tiles.add(
           ListTile(
+            key: UniqueKey(),
             contentPadding: listItemPaddingSmallRight,
             title: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
                   // TODO: Fix: `Multiple widgets used the same GlobalKey.'
-                  // (or may be this is just a hot-reload issues)
                   child: TextField(
                     decoration:
                         InputDecoration(filled: true, border: InputBorder.none),
@@ -254,24 +207,13 @@ class _PlayersConfigViewState extends State<PlayersConfigView> {
                     controller: player.controller,
                   ),
                 ),
+                // TODO: replace with up/down buttons
                 if (manualOrder)
-                  IconButton(
-                    color: MyTheme.accent,
-                    padding: EdgeInsets.zero,
-                    icon: Icon(Icons.arrow_downward),
-                    onPressed: _canMovePlayerDown(player)
-                        ? () => _movePlayerDown(player)
-                        : null,
-                  ),
+                  SizedBox(width: 12),
+                // TODO: Make sure we don't have two drag handles on iOS.
                 if (manualOrder)
-                  IconButton(
-                    color: MyTheme.accent,
-                    padding: EdgeInsets.zero,
-                    icon: Icon(Icons.arrow_upward),
-                    onPressed: _canMovePlayerUp(player)
-                        ? () => _movePlayerUp(player)
-                        : null,
-                  ),
+                  Icon(Icons.drag_handle),
+                SizedBox(width: 4),
                 IconButton(
                   padding: EdgeInsets.zero,
                   icon: Icon(Icons.clear),
@@ -284,6 +226,7 @@ class _PlayersConfigViewState extends State<PlayersConfigView> {
       }
     }
     tiles.add(ListTile(
+        key: UniqueKey(),
         contentPadding: listItemPadding,
         title: Row(children: [
           Expanded(
@@ -352,6 +295,25 @@ class _PlayersConfigViewState extends State<PlayersConfigView> {
 
   @override
   Widget build(BuildContext context) {
+    final onReorder = (int oldIndex, int newIndex) {
+      setState(() {
+        if (oldIndex >= _playerItems.length) {
+          // Cannot drag the `add' button.
+          // TODO: Make it impossible to start dragging the button.
+          return;
+        }
+        if (newIndex >= _playerItems.length) {
+          // Cannot drag an item below the `add' button.
+          newIndex = _playerItems.length;
+        }
+        if (newIndex > oldIndex) {
+          newIndex--;
+        }
+        final p = _playerItems.removeAt(oldIndex);
+        _playerItems.insert(newIndex, p);
+        _notifyPlayersUpdate();
+      });
+    };
     return Padding(
       padding: EdgeInsets.only(top: 6),
       child: ListView(
