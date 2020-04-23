@@ -1,3 +1,5 @@
+import 'package:hatgame/teaming_strategy.dart';
+
 // =============================================================================
 // Rules
 
@@ -14,7 +16,7 @@ class RulesConfig {
 enum IndividualPlayStyle {
   chain,
   fluidPairs,
-  // TODO: Add "each to all" (non-competitive) mode?
+  broadcast,  // TODO: Expose "each to all" (non-competitive) mode publicly (?)
 }
 
 enum DesiredTeamSize {
@@ -29,25 +31,21 @@ enum UnequalTeamSize {
   dropPlayers,
 }
 
-enum GuessingInLargeTeam {
-  oneGuesser,
-  everybodyGuesser,
-}
-
 class TeamingConfig {
   bool teamPlay = true;
   bool randomizeTeams = true;
   IndividualPlayStyle individualPlayStyle = IndividualPlayStyle.fluidPairs;
   DesiredTeamSize desiredTeamSize = DesiredTeamSize.teamsOf2;
   UnequalTeamSize unequalTeamSize = UnequalTeamSize.expandTeams;
-  GuessingInLargeTeam guessingInLargeTeam = GuessingInLargeTeam.oneGuesser;
+  IndividualPlayStyle guessingInLargeTeam = IndividualPlayStyle.fluidPairs;
 }
 
 // =============================================================================
 // Players
 
 class PlayersConfig {
-  List<List<String>> teamPlayers;
+  List<String> names;
+  TeamingStrategy teamingStrategy;
 }
 
 // =============================================================================

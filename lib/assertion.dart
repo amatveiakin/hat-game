@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meta/meta.dart';
 
 enum AssertInRelease {
   ignore,
@@ -28,6 +29,7 @@ class Assert {
     }
   }
 
+  @alwaysThrows
   static fail(String message,
       {AssertInRelease inRelease = defaultReleaseBehavior}) {
     holds(false, message: message, inRelease: inRelease);

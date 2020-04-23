@@ -5,6 +5,7 @@ import 'package:hatgame/game_view.dart';
 import 'package:hatgame/player_config_view.dart';
 import 'package:hatgame/rules_config_view.dart';
 import 'package:hatgame/teaming_config_view.dart';
+import 'package:hatgame/teaming_strategy.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/wide_button.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
@@ -64,50 +65,66 @@ class _ConfigViewState extends State<ConfigView>
     super.dispose();
   }
 
+  static PlayersConfig _makePlayersConfig(TeamingConfig teamingConfig,
+      IntermediatePlayersConfig intermediateConfig) {
+    final result = PlayersConfig();
+    // Coversion between `players` and `teamPlayers` might be required if
+    // teaming config changed and players haven't been modified since then.
+    Assert.ne(intermediateConfig.teamPlayers == null,
+        intermediateConfig.players == null);
+    if (teamingConfig.teamPlay && !teamingConfig.randomizeTeams) {
+      final List<List<String>> teamPlayers =
+          intermediateConfig.teamPlayers ?? [intermediateConfig.players];
+      result.names = teamPlayers.expand((t) => t).toList();
+      result.teamingStrategy = FixedTeamsStrategy.manualTeams(
+          teamPlayers.map((t) => t.length).toList(),
+          teamingConfig.guessingInLargeTeam);
+    } else {
+      final List<String> players = List.from(intermediateConfig.players) ??
+          intermediateConfig.teamPlayers.expand((t) => t).toList();
+      if (teamingConfig.randomizeTeams) {
+        players.shuffle();
+      }
+      result.names = players;
+      if (teamingConfig.teamPlay) {
+        result.teamingStrategy = FixedTeamsStrategy.generateTeams(
+            players.length,
+            teamingConfig.desiredTeamSize,
+            teamingConfig.guessingInLargeTeam);
+      } else {
+        result.teamingStrategy = IndividualStrategy(
+            players.length, teamingConfig.individualPlayStyle);
+      }
+    }
+    return result;
+  }
+
   void _startGame() {
     final settings = GameConfig();
     settings.rules = _rulesConfig;
     settings.teaming = _teamingConfig;
-    final PlayersConfig playersConfig = settings.players;
-
-    // TODO: Fix: change to teaming config are not applied if not navigated to
-    // players tab since then.
-    if (_playersConfig.players != null) {
-      final players = _playersConfig.players;
-      // TODO: Use TeamingStrategy to check teaming validity.
-      if (players.length < 2 || players.length % 2 == 1) {
-        showDialog(
-          context: context,
-          // TODO: Add context or replace with a SnackBar.
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Invalid number of players: ${players.length}'),
-              actions: <Widget>[
-                FlatButton(
-                  child: Text('I see'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            );
-          },
-        );
-        _tabController.animateTo(playersTabIndex);
-        return;
-      }
-      int playerIdx = 0;
-      playersConfig.teamPlayers = [];
-      for (final player in players) {
-        if (playerIdx % 2 == 0) {
-          playersConfig.teamPlayers.add([]);
-        }
-        playersConfig.teamPlayers.last.add(player);
-        playerIdx++;
-      }
-    } else {
-      Assert.holds(_playersConfig.teamPlayers != null);
-      playersConfig.teamPlayers = _playersConfig.teamPlayers;
+    try {
+      settings.players = _makePlayersConfig(_teamingConfig, _playersConfig);
+    } on CannotMakeTeaming catch (e) {
+      showDialog(
+        context: context,
+        // TODO: Add context or replace with a SnackBar.
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(e.message),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+      _tabController.animateTo(playersTabIndex);
+      return;
     }
 
     // Hide virtual keyboard

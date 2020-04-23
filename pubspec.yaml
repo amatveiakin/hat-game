@@ -24,6 +24,8 @@ dependencies:
   flutter:
     sdk: flutter
 
+  meta: ^1.1.8
+
   # This package provides the 'outline' theme of Material icons.
   # By default Flutter has only a very limited number of those.
   outline_material_icons: ^0.1.1

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hatgame/assertion.dart';
 import 'package:hatgame/enum_option_selector.dart';
 import 'package:hatgame/game_config.dart';
 import 'package:hatgame/multi_line_list_tile.dart';
@@ -140,13 +141,13 @@ class UnequalTeamSizeSelectorState
 getGuessingInLargeTeamOptions() {
   return [
     OptionDescription(
-      value: GuessingInLargeTeam.oneGuesser,
+      value: IndividualPlayStyle.fluidPairs,
       title: 'Always one guesser',
       subtitle: 'Exactly one person guesses every turn. '
           'Teams with more than two players rotate roles.',
     ),
     OptionDescription(
-      value: GuessingInLargeTeam.everybodyGuesser,
+      value: IndividualPlayStyle.broadcast,
       title: 'The whole team guesses',
       subtitle: 'In teams with more than two players '
           'each team member except the presenter can guess.',
@@ -155,9 +156,9 @@ getGuessingInLargeTeamOptions() {
 }
 
 class GuessingInLargeTeamSelector
-    extends EnumOptionSelector<GuessingInLargeTeam> {
+    extends EnumOptionSelector<IndividualPlayStyle> {
   GuessingInLargeTeamSelector(
-      GuessingInLargeTeam initialValue, Function changeCallback)
+      IndividualPlayStyle initialValue, Function changeCallback)
       : super(
           windowTitle: 'Guessing in large teams',
           allValues: getGuessingInLargeTeamOptions(),
@@ -170,7 +171,7 @@ class GuessingInLargeTeamSelector
 }
 
 class GuessingInLargeTeamSelectorState extends EnumOptionSelectorState<
-    GuessingInLargeTeam, GuessingInLargeTeamSelector> {}
+    IndividualPlayStyle, GuessingInLargeTeamSelector> {}
 
 // =============================================================================
 // Main part
@@ -248,6 +249,9 @@ class TeamingConfigView extends StatelessWidget {
                 onTap: onTap),
           );
           break;
+        case IndividualPlayStyle.broadcast:
+          Assert.fail('IndividualPlayStyle.broadcast is not supported '
+              'in individual mode');
       }
     }
     if (config.teamPlay && config.randomizeTeams) {
@@ -349,16 +353,17 @@ class TeamingConfigView extends StatelessWidget {
       }
     }
     if (config.teamPlay && largeTeamsPossible) {
+      // TODO: Consider uniting with IndividualPlayStyle.
       final onTap = () {
         Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => GuessingInLargeTeamSelector(
                 config.guessingInLargeTeam,
-                (GuessingInLargeTeam newValue) => onUpdate(() {
+                (IndividualPlayStyle newValue) => onUpdate(() {
                       config.guessingInLargeTeam = newValue;
                     }))));
       };
       switch (config.guessingInLargeTeam) {
-        case GuessingInLargeTeam.oneGuesser:
+        case IndividualPlayStyle.fluidPairs:
           items.add(
             MultiLineListTile(
                 title: Text('Always one guesser'),
@@ -367,7 +372,7 @@ class TeamingConfigView extends StatelessWidget {
                 onTap: onTap),
           );
           break;
-        case GuessingInLargeTeam.everybodyGuesser:
+        case IndividualPlayStyle.broadcast:
           items.add(
             MultiLineListTile(
                 title: Text('The whole team guesses'),
@@ -376,6 +381,9 @@ class TeamingConfigView extends StatelessWidget {
                 onTap: onTap),
           );
           break;
+        case IndividualPlayStyle.chain:
+          Assert.fail(
+              'IndividualPlayStyle.chain is not supported in teams mode');
       }
     }
     return ListView(

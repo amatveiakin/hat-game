@@ -1,6 +1,9 @@
 import 'package:flutter_test/flutter_test.dart' as flutter_test;
+import 'package:hatgame/game_config.dart';
 import 'package:hatgame/teaming_strategy.dart';
 import 'package:test/test.dart';
+
+// TODO: Test all strategies.
 
 teamEquals(int performer, List<int> recipients) => TypeMatcher<Team>()
     .having((t) => t.performer, 'performer', equals(performer))
@@ -8,15 +11,9 @@ teamEquals(int performer, List<int> recipients) => TypeMatcher<Team>()
 
 void main() {
   group('teams of two', () {
-    test('2 players', () {
-      final strategy = FixedTeamsStrategy.teamsOfTwo(2);
-      expect(strategy.getTeam(0), teamEquals(0, [1]));
-      expect(strategy.getTeam(1), teamEquals(1, [0]));
-      expect(strategy.getTeam(10), teamEquals(0, [1]));
-    });
-
     test('4 players', () {
-      final strategy = FixedTeamsStrategy.teamsOfTwo(4);
+      final strategy = FixedTeamsStrategy.generateTeams(
+          4, DesiredTeamSize.teamsOf2, IndividualPlayStyle.fluidPairs);
       expect(strategy.getTeam(0), teamEquals(0, [1]));
       expect(strategy.getTeam(1), teamEquals(2, [3]));
       expect(strategy.getTeam(2), teamEquals(1, [0]));
@@ -25,7 +22,8 @@ void main() {
     });
 
     test('6 players', () {
-      final strategy = FixedTeamsStrategy.teamsOfTwo(6);
+      final strategy = FixedTeamsStrategy.generateTeams(
+          6, DesiredTeamSize.teamsOf2, IndividualPlayStyle.fluidPairs);
       expect(strategy.getTeam(0), teamEquals(0, [1]));
       expect(strategy.getTeam(1), teamEquals(2, [3]));
       expect(strategy.getTeam(2), teamEquals(4, [5]));
@@ -36,8 +34,13 @@ void main() {
     });
 
     test('odd number of players', () {
-      expect(() => FixedTeamsStrategy.teamsOfTwo(3),
-          flutter_test.throwsAssertionError);
+      expect(
+        () {
+          FixedTeamsStrategy.generateTeams(
+              3, DesiredTeamSize.teamsOf2, IndividualPlayStyle.fluidPairs);
+        },
+        flutter_test.throwsA(isA<CannotMakeTeaming>()),
+      );
     });
   });
 }
