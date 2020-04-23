@@ -73,6 +73,9 @@ class _ConfigViewState extends State<ConfigView>
     Assert.ne(intermediateConfig.teamPlayers == null,
         intermediateConfig.players == null);
     if (teamingConfig.teamPlay && !teamingConfig.randomizeTeams) {
+      // TODO: Even when teams are fixed, you probable want the order to be
+      // random. This is currently unachievable. Does it even make sense to
+      // have an option for a non-random turn order?
       final List<List<String>> teamPlayers =
           intermediateConfig.teamPlayers ?? [intermediateConfig.players];
       result.names = teamPlayers.expand((t) => t).toList();
