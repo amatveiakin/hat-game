@@ -7,15 +7,20 @@ enum AssertInRelease {
   fail,
 }
 
+typedef MessageProducer = String Function();
+
 class Assert {
   // TODO: Change to log when stable.
   static const defaultReleaseBehavior = AssertInRelease.fail;
 
   static void holds(bool condition,
-      {String message, AssertInRelease inRelease = defaultReleaseBehavior}) {
-    assert(condition, message);
+      {String message,
+      MessageProducer lazyMessage,
+      AssertInRelease inRelease = defaultReleaseBehavior}) {
+    final String combinedMessage = _combine([message, lazyMessage?.call()]);
+    assert(condition, combinedMessage);
     if (!condition) {
-      final decoratedMessage = _combineMessages('Assertion failed', message);
+      final decoratedMessage = _combine(['Assertion failed', combinedMessage]);
       switch (inRelease) {
         case AssertInRelease.ignore:
           break;
@@ -31,33 +36,33 @@ class Assert {
 
   @alwaysThrows
   static fail(String message,
-      {AssertInRelease inRelease = defaultReleaseBehavior}) {
-    holds(false, message: message, inRelease: inRelease);
+      {MessageProducer lazyMessage,
+      AssertInRelease inRelease = defaultReleaseBehavior}) {
+    holds(false,
+        message: message, lazyMessage: lazyMessage, inRelease: inRelease);
   }
 
   static eq<T>(T a, T b,
-      {String message, AssertInRelease inRelease = defaultReleaseBehavior}) {
+      {String message,
+      MessageProducer lazyMessage,
+      AssertInRelease inRelease = defaultReleaseBehavior}) {
     holds(a == b,
-        message:
-            _combineMessages(message, a.toString() + ' == ' + b.toString()),
+        message: _combine([a.toString() + ' == ' + b.toString(), message]),
+        lazyMessage: lazyMessage,
         inRelease: inRelease);
   }
 
   static ne<T>(T a, T b,
-      {String message, AssertInRelease inRelease = defaultReleaseBehavior}) {
+      {String message,
+      MessageProducer lazyMessage,
+      AssertInRelease inRelease = defaultReleaseBehavior}) {
     holds(a != b,
-        message:
-            _combineMessages(message, a.toString() + ' != ' + b.toString()),
+        message: _combine([a.toString() + ' != ' + b.toString(), message]),
+        lazyMessage: lazyMessage,
         inRelease: inRelease);
   }
 
-  static bool _nullOrEmpty(String s) {
-    return s == null || s.isEmpty;
-  }
-
-  static _combineMessages(String main, String context) {
-    return _nullOrEmpty(context)
-        ? main
-        : (_nullOrEmpty(main) ? context : main + ': ' + context);
+  static _combine(List<String> messages) {
+    return messages.where((s) => s != null && s.isNotEmpty).join(': ');
   }
 }
