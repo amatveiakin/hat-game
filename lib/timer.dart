@@ -5,41 +5,56 @@ import 'package:hatgame/assertion.dart';
 import 'package:hatgame/colors.dart';
 import 'package:hatgame/theme.dart';
 
+enum TimerViewStyle {
+  turnTime,
+  bonusTime,
+}
+
 class _TimerPainter extends CustomPainter {
+  final TimerViewStyle style;
   final double progress; // from 0 to 1
 
-  _TimerPainter(this.progress);
+  _TimerPainter(this.style, this.progress);
 
   @override
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
-    final arcPaint = Paint()
-      ..color = MyColors.black(140)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 5.0
-      ..strokeCap = StrokeCap.butt;
-    final backgroundPaint = Paint()
-      ..color = MyColors.black(220)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 5.0
-      ..strokeCap = StrokeCap.butt;
-    canvas.drawOval(rect, backgroundPaint);
-    canvas.drawArc(rect, -pi / 2, progress * 2 * pi, false, arcPaint);
+    if (style == TimerViewStyle.turnTime) {
+      final paint = Paint()
+        ..color = MyColors.black(220)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 5.0
+        ..strokeCap = StrokeCap.butt;
+      canvas.drawOval(rect, paint);
+      paint..color = MyColors.black(140);
+      canvas.drawArc(rect, -pi / 2, progress * 2 * pi, false, paint);
+    } else {
+      final paint = Paint()
+        ..color = MyTheme.primary.withOpacity(0.7)
+        ..style = PaintingStyle.fill
+        ..strokeWidth = 4.0
+        ..strokeCap = StrokeCap.butt;
+      canvas.drawOval(rect, paint);
+      paint..color = MyTheme.primary;
+      canvas.drawArc(rect, -pi / 2, progress * 2 * pi, true, paint);
+    }
   }
 
   @override
   bool shouldRepaint(_TimerPainter oldPainter) {
-    return progress != oldPainter.progress;
+    return style != oldPainter.style || progress != oldPainter.progress;
   }
 }
 
 class TimerView extends StatefulWidget {
+  final TimerViewStyle style;
   final Duration duration;
   final void Function() onTimeEnded;
   final void Function(bool) onRunningChanged;
 
   TimerView(
-      {@required this.duration,
+      {@required this.style,
+      @required this.duration,
       @required this.onTimeEnded,
       this.onRunningChanged});
 
@@ -54,6 +69,10 @@ class _TimerViewState extends State<TimerView>
   bool _timeEnded = false;
   Animation<double> _animation;
   AnimationController _animationController;
+
+  bool _canPause() {
+    return widget.style == TimerViewStyle.turnTime;
+  }
 
   @override
   void initState() {
@@ -83,6 +102,7 @@ class _TimerViewState extends State<TimerView>
   }
 
   void _togglePause() {
+    Assert.holds(_canPause());
     if (_timeEnded) {
       return;
     }
@@ -100,14 +120,15 @@ class _TimerViewState extends State<TimerView>
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      painter: _TimerPainter(_progress),
+      painter: _TimerPainter(widget.style, _progress),
       isComplex: false,
       willChange: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: _togglePause,
+        onTap: _canPause() ? _togglePause : null,
         child: SizedBox.fromSize(
-          size: Size.square(140.0),
+          size: Size.square(
+              widget.style == TimerViewStyle.turnTime ? 140.0 : 80.0),
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -117,15 +138,19 @@ class _TimerViewState extends State<TimerView>
                   maxLines: 1,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    fontSize: 42.0,
-                    color: MyColors.black(140),
+                    fontSize:
+                        widget.style == TimerViewStyle.turnTime ? 42.0 : 32.0,
+                    color: widget.style == TimerViewStyle.turnTime
+                        ? MyColors.black(140)
+                        : MyColors.black(220),
                   ),
                 ),
-                Icon(
-                  _isRunning() ? Icons.pause : Icons.play_arrow,
-                  size: 32.0,
-                  color: MyTheme.accent,
-                )
+                if (_canPause())
+                  Icon(
+                    _isRunning() ? Icons.pause : Icons.play_arrow,
+                    size: 32.0,
+                    color: MyTheme.accent,
+                  )
               ],
             ),
           ),

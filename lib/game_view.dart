@@ -222,15 +222,54 @@ class PlayAreaState extends State<PlayArea>
   final GameState gameState;
   final GameConfig gameSettings;
   AnimationController _padlockAnimationController;
-  bool _active = false;
+  bool _turnActive = false;
+  bool _bonusTimeActive = false;
 
   PlayAreaState(this._gameViewState)
       : gameState = _gameViewState.gameState,
         gameSettings = _gameViewState.widget.gameSettings;
 
+  void _unlockStartExplaning() {
+    _gameViewState.update(() {
+      _gameViewState.startButtonEnabled = true;
+    });
+  }
+
+  void _startExplaning() {
+    _gameViewState.update(() {
+      _gameViewState.startButtonEnabled = false;
+      _turnActive = true;
+      gameState.startExplaning();
+    });
+  }
+
+  void _setTurnActive(bool value) {
+    setState(() {
+      _turnActive = value;
+    });
+  }
+
+  void _wordGuessed() {
+    _gameViewState.update(() {
+      gameState.wordGuessed();
+    });
+  }
+
   void _endTurn(int turnRestriction) {
     _gameViewState.update(() {
-      gameState.finishExplanation(turnRestriction: turnRestriction);
+      if (gameState.currentTurn() == turnRestriction &&
+          gameState.turnPhase() == TurnPhase.explain) {
+        gameState.finishExplanation();
+        _bonusTimeActive = gameSettings.rules.bonusSeconds > 0;
+      }
+    });
+  }
+
+  void _endBonusTime(int turnRestriction) {
+    setState(() {
+      if (gameState.currentTurn() == turnRestriction) {
+        _bonusTimeActive = false;
+      }
     });
   }
 
@@ -263,12 +302,7 @@ class PlayAreaState extends State<PlayArea>
                   child: GestureDetector(
                     child: WideButton(
                       onPressed: _gameViewState.startButtonEnabled
-                          ? () {
-                              _gameViewState.update(() {
-                                _gameViewState.startButtonEnabled = false;
-                                gameState.startExplaning();
-                              });
-                            }
+                          ? _startExplaning
                           : null,
                       color: MyTheme.accent,
                       child: Text(
@@ -288,9 +322,7 @@ class PlayAreaState extends State<PlayArea>
             Expanded(
               child: Center(
                 child: Padlock(
-                  onUnlocked: () => _gameViewState.update(() {
-                    _gameViewState.startButtonEnabled = true;
-                  }),
+                  onUnlocked: _unlockStartExplaning,
                   animationController: _padlockAnimationController,
                 ),
               ),
@@ -303,11 +335,7 @@ class PlayAreaState extends State<PlayArea>
           Expanded(
             child: Center(
               child: WideButton(
-                onPressed: _active
-                    ? () => _gameViewState.update(() {
-                          gameState.wordGuessed();
-                        })
-                    : null,
+                onPressed: _turnActive ? _wordGuessed : null,
                 child: Text(
                   gameState.currentWord(),
                   style: TextStyle(fontSize: 24.0),
@@ -318,11 +346,10 @@ class PlayAreaState extends State<PlayArea>
           Expanded(
             child: Center(
               child: TimerView(
+                style: TimerViewStyle.turnTime,
                 // TODO: Test how this behaves when the app is minimized.
                 onTimeEnded: () => _endTurn(gameState.currentTurn()),
-                onRunningChanged: (bool running) => setState(() {
-                  _active = running;
-                }),
+                onRunningChanged: _setTurnActive,
                 duration: Duration(seconds: gameSettings.rules.turnSeconds),
               ),
             ),
@@ -355,6 +382,13 @@ class PlayAreaState extends State<PlayArea>
               ).toList(),
             ),
           ),
+          if (_bonusTimeActive)
+            TimerView(
+              style: TimerViewStyle.bonusTime,
+              onTimeEnded: () => _endBonusTime(gameState.currentTurn()),
+              duration: Duration(seconds: gameSettings.rules.bonusSeconds),
+            ),
+          SizedBox(height: 40),
           Container(
             padding: EdgeInsets.symmetric(vertical: 12.0),
             child: WideButton(

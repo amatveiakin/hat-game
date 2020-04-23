@@ -169,12 +169,8 @@ class GameState {
     _drawNextWord();
   }
 
-  void finishExplanation({int turnRestriction}) {
-    if (turnRestriction != null) {
-      if (turnRestriction != _turn || _turnPhase != TurnPhase.explain) return;
-    } else {
-      Assert.eq(_turnPhase, TurnPhase.explain);
-    }
+  void finishExplanation() {
+    Assert.eq(_turnPhase, TurnPhase.explain);
     _turnPhase = TurnPhase.review;
   }
 
