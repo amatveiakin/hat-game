@@ -5,17 +5,17 @@ import 'package:hatgame/game_config.dart';
 import 'package:hatgame/teaming_strategy.dart';
 import 'package:russian_words/russian_words.dart' as russian_words;
 
-class Player {
+class PlayerState {
   final String name;
   var wordsExplained = <int>[];
   var wordsGuessed = <int>[];
 
-  Player(this.name);
+  PlayerState(this.name);
 }
 
 class TeamViewData {
-  final Player performer;
-  final List<Player> recipients;
+  final PlayerState performer;
+  final List<PlayerState> recipients;
 
   TeamViewData(this.performer, this.recipients);
 }
@@ -65,7 +65,7 @@ class WordInTurnViewData {
 }
 
 class GameState {
-  final List<Player> _players;
+  final List<PlayerState> _players;
   final TeamingStrategy _teamingStrategy;
   Team _currentTeam;
 
@@ -80,7 +80,7 @@ class GameState {
   TurnPhase _turnPhase;
 
   GameState(GameConfig settings)
-      : _players = settings.players.names.map((p) => Player(p)).toList(),
+      : _players = settings.players.names.map((p) => PlayerState(p)).toList(),
         _teamingStrategy = settings.players.teamingStrategy {
     for (int i = 0; i < 5; ++i) {
       _words.add(Word(i,
@@ -90,45 +90,8 @@ class GameState {
     _initTurn();
   }
 
-  void _initTurn() {
-    _turnPhase = TurnPhase.prepare;
-    _currentTeam = _teamingStrategy.getTeam(_turn);
-  }
-
-  void _finishTurn() {
-    _turnPhase = null;
-    for (final w in _wordsInThisTurn) {
-      if (w.status == WordInTurnStatus.notExplained) {
-        Assert.holds(!_wordsInHat.contains(w.id));
-        _wordsInHat.add(w.id);
-      }
-    }
-    final List<int> wordsExplained = _wordsInThisTurn
-        .where((w) => w.status == WordInTurnStatus.explained)
-        .map((w) => w.id)
-        .toList();
-    _players[_currentTeam.performer].wordsExplained.addAll(wordsExplained);
-    for (final recipient in _currentTeam.recipients) {
-      _players[recipient].wordsGuessed.addAll(wordsExplained);
-    }
-    _wordsInThisTurn.clear();
-  }
-
-  void _drawNextWord() {
-    Assert.eq(_turnPhase, TurnPhase.explain);
-    if (_wordsInHat.isEmpty) {
-      finishExplanation();
-      return;
-    }
-    _currentWord = _wordsInHat[Random().nextInt(_wordsInHat.length)];
-    _wordsInThisTurn.add(WordInTurn(_currentWord));
-    final removed = _wordsInHat.remove(_currentWord);
-    Assert.holds(removed);
-  }
-
-  int currentTurn() => _turn;
-
-  TurnPhase turnPhase() => _turnPhase;
+  get currentTurn => _turn;
+  get turnPhase => _turnPhase;
 
   int numWordsInHat() => _wordsInHat.length;
 
@@ -183,5 +146,41 @@ class GameState {
   TeamViewData currentTeamViewData() {
     return TeamViewData(_players[_currentTeam.performer],
         _currentTeam.recipients.map((id) => _players[id]).toList());
+  }
+
+  void _initTurn() {
+    _turnPhase = TurnPhase.prepare;
+    _currentTeam = _teamingStrategy.getTeam(_turn);
+  }
+
+  void _finishTurn() {
+    _turnPhase = null;
+    for (final w in _wordsInThisTurn) {
+      if (w.status == WordInTurnStatus.notExplained) {
+        Assert.holds(!_wordsInHat.contains(w.id));
+        _wordsInHat.add(w.id);
+      }
+    }
+    final List<int> wordsExplained = _wordsInThisTurn
+        .where((w) => w.status == WordInTurnStatus.explained)
+        .map((w) => w.id)
+        .toList();
+    _players[_currentTeam.performer].wordsExplained.addAll(wordsExplained);
+    for (final recipient in _currentTeam.recipients) {
+      _players[recipient].wordsGuessed.addAll(wordsExplained);
+    }
+    _wordsInThisTurn.clear();
+  }
+
+  void _drawNextWord() {
+    Assert.eq(_turnPhase, TurnPhase.explain);
+    if (_wordsInHat.isEmpty) {
+      finishExplanation();
+      return;
+    }
+    _currentWord = _wordsInHat[Random().nextInt(_wordsInHat.length)];
+    _wordsInThisTurn.add(WordInTurn(_currentWord));
+    final removed = _wordsInHat.remove(_currentWord);
+    Assert.holds(removed);
   }
 }

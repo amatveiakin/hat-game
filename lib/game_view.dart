@@ -257,8 +257,8 @@ class PlayAreaState extends State<PlayArea>
 
   void _endTurn(int turnRestriction) {
     _gameViewState.update(() {
-      if (gameState.currentTurn() == turnRestriction &&
-          gameState.turnPhase() == TurnPhase.explain) {
+      if (gameState.currentTurn == turnRestriction &&
+          gameState.turnPhase == TurnPhase.explain) {
         gameState.finishExplanation();
         _bonusTimeActive = gameSettings.rules.bonusSeconds > 0;
       }
@@ -267,7 +267,7 @@ class PlayAreaState extends State<PlayArea>
 
   void _endBonusTime(int turnRestriction) {
     setState(() {
-      if (gameState.currentTurn() == turnRestriction) {
+      if (gameState.currentTurn == turnRestriction) {
         _bonusTimeActive = false;
       }
     });
@@ -292,7 +292,7 @@ class PlayAreaState extends State<PlayArea>
       padding: EdgeInsets.symmetric(vertical: 12.0),
       child: Text('Words in hat: ${gameState.numWordsInHat()}'),
     );
-    switch (gameState.turnPhase()) {
+    switch (gameState.turnPhase) {
       case TurnPhase.prepare:
         return Column(
           children: [
@@ -348,7 +348,7 @@ class PlayAreaState extends State<PlayArea>
               child: TimerView(
                 style: TimerViewStyle.turnTime,
                 // TODO: Test how this behaves when the app is minimized.
-                onTimeEnded: () => _endTurn(gameState.currentTurn()),
+                onTimeEnded: () => _endTurn(gameState.currentTurn),
                 onRunningChanged: _setTurnActive,
                 duration: Duration(seconds: gameSettings.rules.turnSeconds),
               ),
@@ -385,7 +385,7 @@ class PlayAreaState extends State<PlayArea>
           if (_bonusTimeActive)
             TimerView(
               style: TimerViewStyle.bonusTime,
-              onTimeEnded: () => _endBonusTime(gameState.currentTurn()),
+              onTimeEnded: () => _endBonusTime(gameState.currentTurn),
               duration: Duration(seconds: gameSettings.rules.bonusSeconds),
             ),
           SizedBox(height: 40),
@@ -436,7 +436,7 @@ class GameViewState extends State<GameView> {
       body: Container(
         child: Column(
           children: [
-            TeamView(gameState.currentTeamViewData(), gameState.turnPhase()),
+            TeamView(gameState.currentTeamViewData(), gameState.turnPhase),
             Expanded(
               child: PlayArea(this),
             ),
