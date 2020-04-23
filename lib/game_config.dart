@@ -27,6 +27,7 @@ enum DesiredTeamSize {
 }
 
 enum UnequalTeamSize {
+  // TODO: Add 'forbid' option and make it default.
   expandTeams,
   dropPlayers,
 }

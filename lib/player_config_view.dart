@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:hatgame/assertion.dart';
 import 'package:hatgame/game_config.dart';
-import 'package:hatgame/math.dart';
 import 'package:hatgame/theme.dart';
 import 'package:flutter/material.dart';
 

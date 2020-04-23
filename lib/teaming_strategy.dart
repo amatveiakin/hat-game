@@ -81,7 +81,6 @@ class BroadcastIndividualStrategy extends IndividualStrategy {
 // =============================================================================
 // FixedTeamsStrategy
 
-// TODO: Support UnequalTeamSize.
 class FixedTeamsStrategy extends TeamingStrategy {
   final List<List<int>> teamPlayers;
   final IndividualPlayStyle individualPlayStyle;
@@ -90,9 +89,12 @@ class FixedTeamsStrategy extends TeamingStrategy {
       : teamPlayers = _generateTeamPlayers(teamSizes);
 
   FixedTeamsStrategy.generateTeams(
-      int numPlayers, DesiredTeamSize desiredTeamSize, this.individualPlayStyle)
+      int numPlayers,
+      DesiredTeamSize desiredTeamSize,
+      UnequalTeamSize unequalTeamSize,
+      this.individualPlayStyle)
       : teamPlayers = _generateTeamPlayers(
-            _generateTeamSizes(numPlayers, desiredTeamSize));
+            _generateTeamSizes(numPlayers, desiredTeamSize, unequalTeamSize));
 
   @override
   bool teamsAreFixed() => true;
@@ -134,8 +136,8 @@ class FixedTeamsStrategy extends TeamingStrategy {
     return players;
   }
 
-  static List<int> _generateTeamSizes(
-      int numPlayers, DesiredTeamSize desiredTeamSize) {
+  static List<int> _generateTeamSizes(int numPlayers,
+      DesiredTeamSize desiredTeamSize, UnequalTeamSize unequalTeamSize) {
     int teamSize;
     switch (desiredTeamSize) {
       case DesiredTeamSize.teamsOf2:
@@ -152,10 +154,22 @@ class FixedTeamsStrategy extends TeamingStrategy {
         break;
     }
     Assert.holds(teamSize != null);
-    if (numPlayers % teamSize != 0) {
-      throw CannotMakeTeaming(
-          'The number of players is not divisible by team size');
+
+    switch (unequalTeamSize) {
+      case UnequalTeamSize.expandTeams:
+        break;
+      case UnequalTeamSize.dropPlayers:
+        if (numPlayers % teamSize != 0) {
+          // TODO: Discard some player instead when we have a UI for it.
+          throw CannotMakeTeaming(
+              'Players cannot be split into teams of desired size, '
+              'and unequally sized teams are diabled.');
+        }
+        break;
     }
-    return List<int>.generate(numPlayers ~/ teamSize, (index) => teamSize);
+
+    int extraPlayers = numPlayers % teamSize;
+    return List<int>.generate(numPlayers ~/ teamSize,
+        (index) => teamSize + (index < extraPlayers ? 1 : 0));
   }
 }

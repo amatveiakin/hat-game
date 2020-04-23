@@ -90,6 +90,7 @@ class _ConfigViewState extends State<ConfigView>
         result.teamingStrategy = FixedTeamsStrategy.generateTeams(
             players.length,
             teamingConfig.desiredTeamSize,
+            teamingConfig.unequalTeamSize,
             teamingConfig.guessingInLargeTeam);
       } else {
         result.teamingStrategy = IndividualStrategy(
