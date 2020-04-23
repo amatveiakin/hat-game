@@ -5,6 +5,8 @@ import 'package:hatgame/game_view.dart';
 import 'package:hatgame/player_config_view.dart';
 import 'package:hatgame/rules_config_view.dart';
 import 'package:hatgame/teaming_config_view.dart';
+import 'package:hatgame/theme.dart';
+import 'package:hatgame/wide_button.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
 
 class ConfigView extends StatefulWidget {
@@ -127,34 +129,44 @@ class _ConfigViewState extends State<ConfigView>
           ),
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
+      body: Column(
         children: [
-          RulesConfigView(
-            config: _rulesConfig,
-            onUpdate: (updater) => setState(() => updater()),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                RulesConfigView(
+                  config: _rulesConfig,
+                  onUpdate: (updater) => setState(() => updater()),
+                ),
+                TeamingConfigView(
+                  config: _teamingConfig,
+                  onUpdate: (updater) => setState(() => updater()),
+                ),
+                PlayersConfigView(
+                  teamingConfig: _teamingConfig,
+                  initialPlayersConfig: _playersConfig,
+                  onPlayersUpdated: (IntermediatePlayersConfig newConfig) =>
+                      setState(() {
+                    _playersConfig = newConfig;
+                  }),
+                ),
+              ],
+            ),
           ),
-          TeamingConfigView(
-            config: _teamingConfig,
-            onUpdate: (updater) => setState(() => updater()),
-          ),
-          PlayersConfigView(
-            teamingConfig: _teamingConfig,
-            initialPlayersConfig: _playersConfig,
-            onPlayersUpdated: (IntermediatePlayersConfig newConfig) =>
-                setState(() {
-              _playersConfig = newConfig;
-            }),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 12.0),
+            child: WideButton(
+              onPressed: _startGame,
+              color: MyTheme.accent,
+              child: Text(
+                'Start Game',
+                style: TextStyle(fontSize: 20.0),
+              ),
+            ),
           ),
         ],
       ),
-      // TODO: Convert to normal button, similarly to 'Next round'.
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _startGame,
-        label: Text('Start Game'),
-        icon: Icon(Icons.arrow_forward),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
