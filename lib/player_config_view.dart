@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:hatgame/assertion.dart';
 import 'package:hatgame/game_config.dart';
+import 'package:hatgame/math.dart';
 import 'package:hatgame/theme.dart';
 import 'package:flutter/material.dart';
 
@@ -89,6 +90,8 @@ class _PlayerData {
 class _PlayersConfigViewState extends State<PlayersConfigView> {
   final _playerItems = <_PlayerData>[];
   final _playersToDispose = <_PlayerData>[];
+  final _autoscrollStopwatch = Stopwatch();
+  final _scrollController = ScrollController();
   bool _freezeUpdates = true;
 
   get manualTeams => widget.manualTeams;
@@ -154,11 +157,34 @@ class _PlayersConfigViewState extends State<PlayersConfigView> {
         _notifyPlayersUpdate();
       });
       if (focus) {
+        _autoscrollStopwatch.reset();
+        _autoscrollStopwatch.start();
+        void Function() scrollCallback;
+        scrollCallback = () {
+          if (!_autoscrollStopwatch.isRunning ||
+              _autoscrollStopwatch.elapsedMilliseconds > 1000) {
+            _autoscrollStopwatch.stop();
+            return;
+          }
+          _scrollController.animateTo(
+              _scrollController.position.maxScrollExtent,
+              duration: const Duration(milliseconds: 100),
+              curve: Curves.easeOut);
+          // Check again, because it doesn't always work immediately,
+          // especially when virtual keyboard is opened.
+          // TODO: Find a better way to do this.
+          Future.delayed(Duration(milliseconds: 50), scrollCallback);
+        };
+        WidgetsBinding.instance.addPostFrameCallback((_) => scrollCallback());
         playerData.focusNode.requestFocus();
       }
       _playerItems.add(playerData);
     });
     _notifyPlayersUpdate();
+  }
+
+  void _cancelAutoScroll() {
+    _autoscrollStopwatch.stop();
   }
 
   void _addDivider() {
@@ -313,16 +339,26 @@ class _PlayersConfigViewState extends State<PlayersConfigView> {
         _notifyPlayersUpdate();
       });
     };
-    return Padding(
-      padding: EdgeInsets.only(top: 6),
-      child: manualOrder
-          ? ReorderableListView(
-              onReorder: onReorder,
-              children: _makeTiles(),
-            )
-          : ListView(
-              children: _makeTiles(),
-            ),
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      // Cancel autoscroll if the user begins to interact with the widget.
+      // It seems that onTapDown is sufficient, but adding more to be sure.
+      onTapDown: (_) => _cancelAutoScroll(),
+      onVerticalDragDown: (_) => _cancelAutoScroll(),
+      onHorizontalDragDown: (_) => _cancelAutoScroll(),
+      child: Padding(
+        padding: EdgeInsets.only(top: 6),
+        child: manualOrder
+            ? ReorderableListView(
+                onReorder: onReorder,
+                scrollController: _scrollController,
+                children: _makeTiles(),
+              )
+            : ListView(
+                controller: _scrollController,
+                children: _makeTiles(),
+              ),
+      ),
     );
   }
 }
