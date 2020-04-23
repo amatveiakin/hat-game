@@ -5,6 +5,8 @@ import 'package:hatgame/game_config.dart';
 import 'package:hatgame/theme.dart';
 import 'package:flutter/material.dart';
 
+// TODO: Allow to delete teams.
+
 class IntermediatePlayersConfig {
   // One of the two is set depending on teaming config.
   List<List<String>> teamPlayers;

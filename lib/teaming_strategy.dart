@@ -112,16 +112,12 @@ class FixedTeamsStrategy extends TeamingStrategy {
   }
 
   static List<List<int>> _generateTeamPlayers(List<int> teamSizes) {
-    if (teamSizes.length == 0) {
-      throw CannotMakeTeaming('There are zero teams');
-    } else if (teamSizes.length == 1) {
-      throw CannotMakeTeaming('There is only one team');
-    }
     final List<List<int>> players = [];
     int playerIdx = 0;
     for (final s in teamSizes) {
       if (s == 0) {
-        throw CannotMakeTeaming('A team has no players');
+        // TODO: Disallow when the UI allows to delete teams.
+        continue;
       } else if (s == 1) {
         throw CannotMakeTeaming('A team has only one player');
       }
@@ -132,6 +128,11 @@ class FixedTeamsStrategy extends TeamingStrategy {
         playersInTeam.add(playerIdx);
         playerIdx++;
       }
+    }
+    if (players.length == 0) {
+      throw CannotMakeTeaming('There are zero teams');
+    } else if (players.length == 1) {
+      throw CannotMakeTeaming('There is only one team');
     }
     return players;
   }
