@@ -52,39 +52,42 @@ class _TeamScoreView extends StatelessWidget {
     return Card(
       margin: EdgeInsets.symmetric(vertical: 6, horizontal: 10),
       clipBehavior: Clip.antiAlias,
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              width: 60.0,
-              child: Container(
-                color: MyTheme.primary,
-                child: Center(
-                  child: Text(
-                    totalScore.toString(),
-                    style: TextStyle(
-                      fontSize: 28.0,
-                      // TODO: Take the color from theme.
-                      color: Colors.white,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: 40), // for non-team view
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                width: 60.0,
+                child: Container(
+                  color: MyTheme.primary,
+                  child: Center(
+                    child: Text(
+                      totalScore.toString(),
+                      style: TextStyle(
+                        fontSize: 28.0,
+                        // TODO: Take the color from theme.
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            SizedBox(width: 2),
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-                child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: addSpacing(
-                      vertical: 4,
-                      tiles: players.map(_playerView).toList(),
-                    )),
+              SizedBox(width: 2),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                  child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: addSpacing(
+                        vertical: 4,
+                        tiles: players.map(_playerView).toList(),
+                      )),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -98,25 +101,42 @@ class ScoreView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO: Sort by score.
     final teamBodies = gameState.teamingStrategy.getAllTeamBodies();
-    Assert.holds(teamBodies != null); // TODO: Support individual mode.
     final listTiles = List<Widget>();
-    for (final team in teamBodies) {
-      final players = List<_PlayerData>();
-      int totalScore = 0;
-      int totalScoreControl = 0;
-      for (final playerIdx in team) {
-        final p = gameState.players[playerIdx];
-        totalScore += p.wordsExplained.length;
-        totalScoreControl += p.wordsGuessed.length;
-        players.add(_PlayerData(
-          name: p.name,
-          wordsExplained: p.wordsExplained.length,
-          wordsGuessed: p.wordsGuessed.length,
-        ));
+    if (teamBodies != null) {
+      for (final team in teamBodies) {
+        final players = List<_PlayerData>();
+        int totalScore = 0;
+        int totalScoreControl = 0;
+        for (final playerIdx in team) {
+          final p = gameState.players[playerIdx];
+          totalScore += p.wordsExplained.length;
+          totalScoreControl += p.wordsGuessed.length;
+          players.add(_PlayerData(
+            name: p.name,
+            wordsExplained: p.wordsExplained.length,
+            wordsGuessed: p.wordsGuessed.length,
+          ));
+        }
+        Assert.eq(totalScore, totalScoreControl);
+        listTiles.add(_TeamScoreView(totalScore: totalScore, players: players));
       }
-      Assert.eq(totalScore, totalScoreControl);
-      listTiles.add(_TeamScoreView(totalScore: totalScore, players: players));
+    } else {
+      for (final p in gameState.players) {
+        listTiles.add(
+          _TeamScoreView(
+            totalScore: p.wordsExplained.length + p.wordsGuessed.length,
+            players: [
+              _PlayerData(
+                name: p.name,
+                wordsExplained: p.wordsExplained.length,
+                wordsGuessed: p.wordsGuessed.length,
+              ),
+            ],
+          ),
+        );
+      }
     }
     return Scaffold(
       appBar: AppBar(
