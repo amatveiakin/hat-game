@@ -209,36 +209,40 @@ class WordReviewItem extends StatelessWidget {
 }
 
 class PlayArea extends StatefulWidget {
-  final GameViewState _gameViewState;
+  final GameState gameState;
+  final GameConfig gameSettings;
+  final void Function(void Function()) onGameStateUpdate;
 
-  PlayArea(this._gameViewState);
+  PlayArea(
+      {@required this.gameState,
+      @required this.gameSettings,
+      @required this.onGameStateUpdate});
 
   @override
-  State<StatefulWidget> createState() => PlayAreaState(_gameViewState);
+  State<StatefulWidget> createState() => PlayAreaState();
 }
 
 class PlayAreaState extends State<PlayArea>
     with SingleTickerProviderStateMixin {
-  final GameViewState _gameViewState;
-  final GameState gameState;
-  final GameConfig gameSettings;
+  GameState get gameState => widget.gameState;
+  GameConfig get gameSettings => widget.gameSettings;
+  void Function(void Function()) get onGameStateUpdate =>
+      widget.onGameStateUpdate;
+
   AnimationController _padlockAnimationController;
+  bool _startButtonEnabled = false;
   bool _turnActive = false;
   bool _bonusTimeActive = false;
 
-  PlayAreaState(this._gameViewState)
-      : gameState = _gameViewState.gameState,
-        gameSettings = _gameViewState.widget.gameSettings;
-
   void _unlockStartExplaning() {
-    _gameViewState.update(() {
-      _gameViewState.startButtonEnabled = true;
+    setState(() {
+      _startButtonEnabled = true;
     });
   }
 
   void _startExplaning() {
-    _gameViewState.update(() {
-      _gameViewState.startButtonEnabled = false;
+    onGameStateUpdate(() {
+      _startButtonEnabled = false;
       _turnActive = true;
       gameState.startExplaning();
     });
@@ -251,13 +255,13 @@ class PlayAreaState extends State<PlayArea>
   }
 
   void _wordGuessed() {
-    _gameViewState.update(() {
+    onGameStateUpdate(() {
       gameState.wordGuessed();
     });
   }
 
   void _endTurn(int turnRestriction) {
-    _gameViewState.update(() {
+    onGameStateUpdate(() {
       if (gameState.currentTurn == turnRestriction &&
           gameState.turnPhase == TurnPhase.explain) {
         gameState.finishExplanation();
@@ -274,9 +278,21 @@ class PlayAreaState extends State<PlayArea>
     });
   }
 
+  void _setWordStatus(int wordId, WordInTurnStatus status) {
+    onGameStateUpdate(() {
+      gameState.setWordStatus(wordId, status);
+    });
+  }
+
+  void _setWordFeedback(int wordId, WordFeedback feedback) {
+    onGameStateUpdate(() {
+      gameState.setWordFeedback(wordId, feedback);
+    });
+  }
+
   void _reviewDone() {
     GameStatus gameStatus;
-    _gameViewState.update(() {
+    onGameStateUpdate(() {
       gameStatus = gameState.newTurn();
     });
     if (gameStatus == GameStatus.finished) {
@@ -316,9 +332,7 @@ class PlayAreaState extends State<PlayArea>
                 child: Container(
                   child: GestureDetector(
                     child: WideButton(
-                      onPressed: _gameViewState.startButtonEnabled
-                          ? _startExplaning
-                          : null,
+                      onPressed: _startButtonEnabled ? _startExplaning : null,
                       color: MyTheme.accent,
                       child: Text(
                         'Start!',
@@ -327,7 +341,7 @@ class PlayAreaState extends State<PlayArea>
                     ),
                     // Cannot put this into the button, because it will become
                     // enabled if it has a callback.
-                    onTap: _gameViewState.startButtonEnabled
+                    onTap: _startButtonEnabled
                         ? null
                         : () => _padlockAnimationController.forward(from: 0.0),
                   ),
@@ -385,13 +399,9 @@ class PlayAreaState extends State<PlayArea>
                           status: w.status,
                           feedback: w.feedback,
                           setStatus: (WordInTurnStatus status) =>
-                              _gameViewState.update(() {
-                            gameState.setWordStatus(w.id, status);
-                          }),
+                              _setWordStatus(w.id, status),
                           setFeedback: (WordFeedback feedback) =>
-                              _gameViewState.update(() {
-                            gameState.setWordFeedback(w.id, feedback);
-                          }),
+                              _setWordFeedback(w.id, feedback),
                         ))
                     .toList(),
               ).toList(),
@@ -434,7 +444,6 @@ class GameView extends StatefulWidget {
 
 class GameViewState extends State<GameView> {
   final GameState gameState;
-  bool startButtonEnabled = false;
 
   GameViewState(GameConfig gameSettings) : gameState = GameState(gameSettings);
 
@@ -453,7 +462,11 @@ class GameViewState extends State<GameView> {
           children: [
             TeamView(gameState.currentTeamViewData(), gameState.turnPhase),
             Expanded(
-              child: PlayArea(this),
+              child: PlayArea(
+                gameSettings: widget.gameSettings,
+                gameState: gameState,
+                onGameStateUpdate: (updater) => setState(() => updater()),
+              ),
             ),
           ],
         ),
