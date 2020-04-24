@@ -151,6 +151,8 @@ class _PlayersConfigViewState extends State<PlayersConfigView> {
         _notifyPlayersUpdate();
       });
       if (focus) {
+        // TODO: Why does it scroll far below the end of the list on my phone
+        // (not on emulator)?
         _autoscrollStopwatch.reset();
         _autoscrollStopwatch.start();
         void Function() scrollCallback;

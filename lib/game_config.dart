@@ -1,5 +1,3 @@
-import 'package:hatgame/teaming_strategy.dart';
-
 // =============================================================================
 // Rules
 
@@ -45,8 +43,9 @@ class TeamingConfig {
 // Players
 
 class PlayersConfig {
+  // Exactly one of `names` and `namesByTeam` must be set.
   List<String> names;
-  TeamingStrategy teamingStrategy;
+  List<List<String>> namesByTeam;
 }
 
 // =============================================================================

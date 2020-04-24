@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hatgame/assertion.dart';
-import 'package:hatgame/game_state.dart';
+import 'package:hatgame/game_data.dart';
 import 'package:hatgame/theme.dart';
+
+// TODO: Allow final results editing on ScoreView.
+// TODO: Does it make sense to show words guessed in modes with many guessers?
 
 class _PlayerData {
   final String name;
@@ -95,21 +98,21 @@ class _TeamScoreView extends StatelessWidget {
 }
 
 class ScoreView extends StatelessWidget {
-  final GameState gameState;
+  final GameData gameData;
 
-  ScoreView({@required this.gameState});
+  ScoreView({@required this.gameData});
 
   @override
   Widget build(BuildContext context) {
-    final teamBodies = gameState.teamingStrategy.getAllTeamBodies();
+    final teams = gameData.teams();
     final listTiles = List<_TeamScoreView>();
-    if (teamBodies != null) {
-      for (final team in teamBodies) {
+    if (teams != null) {
+      for (final team in teams) {
         final players = List<_PlayerData>();
         final totalWordsExplained = List<int>();
         final totalWordsGuessed = List<int>();
         for (final playerIdx in team) {
-          final p = gameState.players[playerIdx];
+          final p = gameData.state.players[playerIdx];
           totalWordsExplained.addAll(p.wordsExplained);
           totalWordsGuessed.addAll(p.wordsGuessed);
           players.add(_PlayerData(
@@ -128,7 +131,7 @@ class ScoreView extends StatelessWidget {
         listTiles.add(_TeamScoreView(totalScore: totalScore, players: players));
       }
     } else {
-      for (final p in gameState.players) {
+      for (final p in gameData.state.players) {
         listTiles.add(
           _TeamScoreView(
             totalScore: p.wordsExplained.length + p.wordsGuessed.length,

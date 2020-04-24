@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hatgame/assertion.dart';
+import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/game_config.dart';
-import 'package:hatgame/game_state.dart';
+import 'package:hatgame/game_controller.dart';
+import 'package:hatgame/game_data.dart';
 import 'package:hatgame/padlock.dart';
 import 'package:hatgame/score_view.dart';
 import 'package:hatgame/theme.dart';
@@ -9,19 +11,19 @@ import 'package:hatgame/timer.dart';
 import 'package:hatgame/wide_button.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
 
-class TeamView extends StatefulWidget {
-  final TeamViewData teamData;
+class PartyView extends StatefulWidget {
+  final PartyViewData teamData;
   final TurnPhase turnPhase;
 
-  TeamView(this.teamData, this.turnPhase);
+  PartyView(this.teamData, this.turnPhase);
 
   @override
-  createState() => TeamViewState();
+  createState() => PartyViewState();
 }
 
 // TODO: Add haptic feedback for main events.
 // TODO: Swicth to animation controllers or make the widget stateless.
-class TeamViewState extends State<TeamView> with TickerProviderStateMixin {
+class PartyViewState extends State<PartyView> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final animationDuration = widget.turnPhase == TurnPhase.prepare
@@ -75,11 +77,11 @@ class TeamViewState extends State<TeamView> with TickerProviderStateMixin {
   }
 }
 
-Icon _GetWordFeedbackIcon(WordFeedback feedback, bool menuButton, bool active) {
-  Assert.holds(feedback != null);
+Icon _getWordFeedbackIcon(WordFeedback feedback, bool menuButton, bool active) {
+  if (feedback == null) {
+    return menuButton ? Icon(OMIcons.thumbsUpDown) : Icon(OMIcons.clear);
+  }
   switch (feedback) {
-    case WordFeedback.none:
-      return menuButton ? Icon(OMIcons.thumbsUpDown) : Icon(OMIcons.clear);
     case WordFeedback.good:
       return active
           ? Icon(Icons.thumb_up, color: MyTheme.accent)
@@ -99,14 +101,14 @@ Icon _GetWordFeedbackIcon(WordFeedback feedback, bool menuButton, bool active) {
           ? Icon(Icons.sentiment_very_dissatisfied, color: MyTheme.accent)
           : Icon(OMIcons.sentimentVeryDissatisfied);
   }
-  throw AssertionError("Reached end of _GetWordFeedbackIcon");
+  throw AssertionError("Reached end of _getWordFeedbackIcon");
 }
 
-String _GetWordFeedbackText(WordFeedback feedback) {
-  Assert.holds(feedback != null);
+String _getWordFeedbackText(WordFeedback feedback) {
+  if (feedback == null) {
+    return 'Clear';
+  }
   switch (feedback) {
-    case WordFeedback.none:
-      return 'Clear';
     case WordFeedback.good:
       return 'Nice';
     case WordFeedback.bad:
@@ -116,12 +118,12 @@ String _GetWordFeedbackText(WordFeedback feedback) {
     case WordFeedback.tooHard:
       return 'Too hard';
   }
-  throw AssertionError("Reached end of _GetWordFeedbackText");
+  throw AssertionError("Reached end of _getWordFeedbackText");
 }
 
 class WordReviewItem extends StatelessWidget {
   final String text;
-  final WordInTurnStatus status;
+  final WordStatus status;
   final WordFeedback feedback;
   final Function setStatus;
   final Function setFeedback;
@@ -135,14 +137,12 @@ class WordReviewItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool _statusToChecked(WordInTurnStatus status) {
-      return status == WordInTurnStatus.explained;
+    bool _statusToChecked(WordStatus status) {
+      return status == WordStatus.explained;
     }
 
-    WordInTurnStatus _checkedToStatus(bool checked) {
-      return checked
-          ? WordInTurnStatus.explained
-          : WordInTurnStatus.notExplained;
+    WordStatus _checkedToStatus(bool checked) {
+      return checked ? WordStatus.explained : WordStatus.notExplained;
     }
 
     return InkWell(
@@ -163,42 +163,40 @@ class WordReviewItem extends StatelessWidget {
               child: Text(
                 text,
                 style: TextStyle(
-                    decoration: status == WordInTurnStatus.discarded
+                    decoration: status == WordStatus.discarded
                         ? TextDecoration.lineThrough
                         : TextDecoration.none),
               ),
             ),
             IconButton(
-              icon: Icon(status == WordInTurnStatus.discarded
+              icon: Icon(status == WordStatus.discarded
                   ? Icons.restore_from_trash
                   : Icons.delete_outline),
-              tooltip:
-                  status == WordInTurnStatus.discarded ? 'Restore' : 'Discard',
+              tooltip: status == WordStatus.discarded ? 'Restore' : 'Discard',
               onPressed: () {
-                setStatus(status == WordInTurnStatus.discarded
-                    ? WordInTurnStatus.notExplained
-                    : WordInTurnStatus.discarded);
+                setStatus(status == WordStatus.discarded
+                    ? WordStatus.notExplained
+                    : WordStatus.discarded);
               },
             ),
             PopupMenuButton(
-              icon: _GetWordFeedbackIcon(feedback, true, true),
+              icon: _getWordFeedbackIcon(feedback, true, true),
               itemBuilder: (BuildContext context) {
                 var result = <PopupMenuItem<WordFeedback>>[];
                 result.addAll(WordFeedback.values
-                    .where((wf) => (wf != WordFeedback.none))
+                    .where((wf) => (wf != null))
                     .map((wf) => PopupMenuItem<WordFeedback>(
                           value: wf,
                           child: ListTile(
-                              leading: _GetWordFeedbackIcon(
+                              leading: _getWordFeedbackIcon(
                                   wf, false, wf == feedback),
-                              title: Text(_GetWordFeedbackText(wf))),
+                              title: Text(_getWordFeedbackText(wf))),
                         ))
                     .toList());
                 return result;
               },
               onSelected: (WordFeedback newFeedback) {
-                setFeedback(
-                    newFeedback == feedback ? WordFeedback.none : newFeedback);
+                setFeedback(newFeedback == feedback ? null : newFeedback);
               },
             )
           ],
@@ -209,14 +207,13 @@ class WordReviewItem extends StatelessWidget {
 }
 
 class PlayArea extends StatefulWidget {
-  final GameState gameState;
-  final GameConfig gameSettings;
-  final void Function(void Function()) onGameStateUpdate;
+  final GameController gameController;
+  final GameData gameData;
 
-  PlayArea(
-      {@required this.gameState,
-      @required this.gameSettings,
-      @required this.onGameStateUpdate});
+  PlayArea({
+    @required this.gameController,
+    @required this.gameData,
+  });
 
   @override
   State<StatefulWidget> createState() => PlayAreaState();
@@ -224,10 +221,10 @@ class PlayArea extends StatefulWidget {
 
 class PlayAreaState extends State<PlayArea>
     with SingleTickerProviderStateMixin {
-  GameState get gameState => widget.gameState;
-  GameConfig get gameSettings => widget.gameSettings;
-  void Function(void Function()) get onGameStateUpdate =>
-      widget.onGameStateUpdate;
+  GameController get gameController => widget.gameController;
+  GameConfig get gameConfig => gameData.config;
+  GameState get gameState => gameData.state;
+  GameData get gameData => widget.gameData;
 
   AnimationController _padlockAnimationController;
   bool _startButtonEnabled = false;
@@ -241,11 +238,11 @@ class PlayAreaState extends State<PlayArea>
   }
 
   void _startExplaning() {
-    onGameStateUpdate(() {
+    setState(() {
       _startButtonEnabled = false;
       _turnActive = true;
-      gameState.startExplaning();
     });
+    gameController.startExplaning();
   }
 
   void _setTurnActive(bool value) {
@@ -255,53 +252,37 @@ class PlayAreaState extends State<PlayArea>
   }
 
   void _wordGuessed() {
-    onGameStateUpdate(() {
-      gameState.wordGuessed();
-    });
+    gameController.wordGuessed();
   }
 
   void _endTurn(int turnRestriction) {
-    onGameStateUpdate(() {
-      if (gameState.currentTurn == turnRestriction &&
-          gameState.turnPhase == TurnPhase.explain) {
-        gameState.finishExplanation();
-        _bonusTimeActive = gameSettings.rules.bonusSeconds > 0;
-      }
-    });
+    if (gameState.turn == turnRestriction &&
+        gameState.turnPhase == TurnPhase.explain) {
+      gameController.finishExplanation();
+      setState(() {
+        _bonusTimeActive = gameConfig.rules.bonusSeconds > 0;
+      });
+    }
   }
 
   void _endBonusTime(int turnRestriction) {
-    setState(() {
-      if (gameState.currentTurn == turnRestriction) {
+    if (gameState.turn == turnRestriction) {
+      setState(() {
         _bonusTimeActive = false;
-      }
-    });
+      });
+    }
   }
 
-  void _setWordStatus(int wordId, WordInTurnStatus status) {
-    onGameStateUpdate(() {
-      gameState.setWordStatus(wordId, status);
-    });
+  void _setWordStatus(int wordId, WordStatus status) {
+    gameController.setWordStatus(wordId, status);
   }
 
   void _setWordFeedback(int wordId, WordFeedback feedback) {
-    onGameStateUpdate(() {
-      gameState.setWordFeedback(wordId, feedback);
-    });
+    gameController.setWordFeedback(wordId, feedback);
   }
 
   void _reviewDone() {
-    GameStatus gameStatus;
-    onGameStateUpdate(() {
-      gameStatus = gameState.newTurn();
-    });
-    if (gameStatus == GameStatus.finished) {
-      Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-              builder: (context) => ScoreView(gameState: gameState)),
-          ModalRoute.withName('/'));
-    }
+    gameController.nextTurn();
   }
 
   @override
@@ -321,7 +302,7 @@ class PlayAreaState extends State<PlayArea>
   Widget build(BuildContext context) {
     final wordsInHatWidget = Container(
       padding: EdgeInsets.symmetric(vertical: 12.0),
-      child: Text('Words in hat: ${gameState.numWordsInHat()}'),
+      child: Text('Words in hat: ${gameState.wordsInHat.length}'),
     );
     switch (gameState.turnPhase) {
       case TurnPhase.prepare:
@@ -366,7 +347,7 @@ class PlayAreaState extends State<PlayArea>
               child: WideButton(
                 onPressed: _turnActive ? _wordGuessed : null,
                 child: Text(
-                  gameState.currentWord(),
+                  gameData.currentWordText(),
                   style: TextStyle(fontSize: 24.0),
                 ),
               ),
@@ -377,9 +358,9 @@ class PlayAreaState extends State<PlayArea>
               child: TimerView(
                 style: TimerViewStyle.turnTime,
                 // TODO: Test how this behaves when the app is minimized.
-                onTimeEnded: () => _endTurn(gameState.currentTurn),
+                onTimeEnded: () => _endTurn(gameState.turn),
                 onRunningChanged: _setTurnActive,
-                duration: Duration(seconds: gameSettings.rules.turnSeconds),
+                duration: Duration(seconds: gameConfig.rules.turnSeconds),
               ),
             ),
           ),
@@ -392,13 +373,13 @@ class PlayAreaState extends State<PlayArea>
             child: ListView(
               children: ListTile.divideTiles(
                 context: context,
-                tiles: gameState
-                    .wordsInThisTurnViewData()
+                tiles: gameData
+                    .wordsInThisTurnData()
                     .map((w) => WordReviewItem(
                           text: w.text,
                           status: w.status,
                           feedback: w.feedback,
-                          setStatus: (WordInTurnStatus status) =>
+                          setStatus: (WordStatus status) =>
                               _setWordStatus(w.id, status),
                           setFeedback: (WordFeedback feedback) =>
                               _setWordFeedback(w.id, feedback),
@@ -410,8 +391,8 @@ class PlayAreaState extends State<PlayArea>
           if (_bonusTimeActive)
             TimerView(
               style: TimerViewStyle.bonusTime,
-              onTimeEnded: () => _endBonusTime(gameState.currentTurn),
-              duration: Duration(seconds: gameSettings.rules.bonusSeconds),
+              onTimeEnded: () => _endBonusTime(gameState.turn),
+              duration: Duration(seconds: gameConfig.rules.bonusSeconds),
             ),
           SizedBox(height: 40),
           Container(
@@ -433,23 +414,12 @@ class PlayAreaState extends State<PlayArea>
   }
 }
 
-class GameView extends StatefulWidget {
-  final GameConfig gameSettings;
+class GameView extends StatelessWidget {
+  final GameController gameController;
+  final GameConfig gameConfig;
 
-  GameView(this.gameSettings);
-
-  @override
-  createState() => GameViewState(gameSettings);
-}
-
-class GameViewState extends State<GameView> {
-  final GameState gameState;
-
-  GameViewState(GameConfig gameSettings) : gameState = GameState(gameSettings);
-
-  void update(Function updater) {
-    setState(updater);
-  }
+  GameView(this.gameConfig)
+      : gameController = GameController.newState(gameConfig);
 
   @override
   Widget build(BuildContext context) {
@@ -457,19 +427,52 @@ class GameViewState extends State<GameView> {
       appBar: AppBar(
         title: Text('Hat Game'),
       ),
-      body: Container(
-        child: Column(
-          children: [
-            TeamView(gameState.currentTeamViewData(), gameState.turnPhase),
-            Expanded(
-              child: PlayArea(
-                gameSettings: widget.gameSettings,
-                gameState: gameState,
-                onGameStateUpdate: (updater) => setState(() => updater()),
-              ),
+      body: StreamBuilder<GameState>(
+        stream: gameController.stateUpdatesStream,
+        builder: (BuildContext context, AsyncSnapshot<GameState> snapshot) {
+          if (snapshot.hasError) {
+            // TODO: Deal with errors.
+            return Center(
+                child: Text(
+              'Error getting game data:\n' + snapshot.error.toString(),
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
+            ));
+          }
+          if (!snapshot.hasData) {
+            // TODO: Deal with loading (use snapshot.connectionState?)
+            return Center(child: CircularProgressIndicator());
+          }
+          final GameState gameState = snapshot.data;
+          if (gameState == null) {
+            // TODO: When does this happen?
+            return Center(child: CircularProgressIndicator());
+          }
+          final gameData = GameData(gameConfig, gameState);
+          if (gameState.gameFinished) {
+            Future.delayed(
+              Duration.zero,
+              () => Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ScoreView(gameData: gameData)),
+                  ModalRoute.withName('/')),
+            );
+            return Container();
+          }
+          return Container(
+            child: Column(
+              children: [
+                PartyView(gameData.currentPartyViewData(), gameState.turnPhase),
+                Expanded(
+                  child: PlayArea(
+                    gameController: gameController,
+                    gameData: gameData,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

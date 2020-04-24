@@ -5,7 +5,7 @@ import 'package:hatgame/game_view.dart';
 import 'package:hatgame/player_config_view.dart';
 import 'package:hatgame/rules_config_view.dart';
 import 'package:hatgame/teaming_config_view.dart';
-import 'package:hatgame/teaming_strategy.dart';
+import 'package:hatgame/partying_strategy.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/wide_button.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
@@ -73,30 +73,11 @@ class _ConfigViewState extends State<ConfigView>
     Assert.ne(intermediateConfig.teamPlayers == null,
         intermediateConfig.players == null);
     if (teamingConfig.teamPlay && !teamingConfig.randomizeTeams) {
-      final List<List<String>> teamPlayers =
+      result.namesByTeam =
           intermediateConfig.teamPlayers ?? [intermediateConfig.players];
-      for (final team in teamPlayers) {
-        team.shuffle();
-      }
-      result.names = teamPlayers.expand((t) => t).toList();
-      result.teamingStrategy = FixedTeamsStrategy.manualTeams(
-          teamPlayers.map((t) => t.length).toList(),
-          teamingConfig.guessingInLargeTeam);
     } else {
-      final List<String> players = List.from(intermediateConfig.players) ??
+      result.names = List.from(intermediateConfig.players) ??
           intermediateConfig.teamPlayers.expand((t) => t).toList();
-      players.shuffle();
-      result.names = players;
-      if (teamingConfig.teamPlay) {
-        result.teamingStrategy = FixedTeamsStrategy.generateTeams(
-            players.length,
-            teamingConfig.desiredTeamSize,
-            teamingConfig.unequalTeamSize,
-            teamingConfig.guessingInLargeTeam);
-      } else {
-        result.teamingStrategy = IndividualStrategy(
-            players.length, teamingConfig.individualPlayStyle);
-      }
     }
     return result;
   }
@@ -107,7 +88,7 @@ class _ConfigViewState extends State<ConfigView>
     settings.teaming = _teamingConfig;
     try {
       settings.players = _makePlayersConfig(_teamingConfig, _playersConfig);
-    } on CannotMakeTeaming catch (e) {
+    } on CannotMakePartyingStrategy catch (e) {
       showDialog(
         context: context,
         // TODO: Add context or replace with a SnackBar.
