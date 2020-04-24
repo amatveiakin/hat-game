@@ -101,9 +101,8 @@ class ScoreView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Sort by score.
     final teamBodies = gameState.teamingStrategy.getAllTeamBodies();
-    final listTiles = List<Widget>();
+    final listTiles = List<_TeamScoreView>();
     if (teamBodies != null) {
       for (final team in teamBodies) {
         final players = List<_PlayerData>();
@@ -138,6 +137,8 @@ class ScoreView extends StatelessWidget {
         );
       }
     }
+    listTiles.sort((a, b) => b.totalScore.compareTo(a.totalScore));
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Game Over'),
