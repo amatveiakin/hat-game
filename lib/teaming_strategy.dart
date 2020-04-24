@@ -135,6 +135,7 @@ class FixedTeamsStrategy extends TeamingStrategy {
     } else if (players.length == 1) {
       throw CannotMakeTeaming('There is only one team');
     }
+    players.shuffle();
     return players;
   }
 

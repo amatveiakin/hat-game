@@ -23,10 +23,6 @@ bool _manualTeams(TeamingConfig teamingConfig) {
   return teamingConfig.teamPlay && !teamingConfig.randomizeTeams;
 }
 
-bool _manualOrder(TeamingConfig teamingConfig) {
-  return !teamingConfig.randomizeTeams;
-}
-
 void _updateIntermediatePlayersConfig(
     IntermediatePlayersConfig playersConfig, bool manualTeams) {
   if (playersConfig.players != null) {
@@ -47,7 +43,6 @@ void _updateIntermediatePlayersConfig(
 
 class PlayersConfigView extends StatefulWidget {
   final bool manualTeams;
-  final bool manualOrder;
   final IntermediatePlayersConfig initialPlayersConfig;
   final void Function(IntermediatePlayersConfig) onPlayersUpdated;
 
@@ -55,8 +50,7 @@ class PlayersConfigView extends StatefulWidget {
       {@required teamingConfig,
       @required this.initialPlayersConfig,
       @required this.onPlayersUpdated})
-      : this.manualTeams = _manualTeams(teamingConfig),
-        this.manualOrder = _manualOrder(teamingConfig);
+      : this.manualTeams = _manualTeams(teamingConfig);
 
   @override
   createState() => _PlayersConfigViewState();
@@ -96,7 +90,6 @@ class _PlayersConfigViewState extends State<PlayersConfigView> {
   bool _freezeUpdates = true;
 
   get manualTeams => widget.manualTeams;
-  get manualOrder => widget.manualOrder;
 
   void _generateInitialPlayerItems() {
     final IntermediatePlayersConfig config = widget.initialPlayersConfig;
@@ -234,10 +227,10 @@ class _PlayersConfigViewState extends State<PlayersConfigView> {
                     controller: player.controller,
                   ),
                 ),
-                if (manualOrder)
+                if (manualTeams)
                   SizedBox(width: 12),
                 // TODO: Make sure we don't have two drag handles on iOS.
-                if (manualOrder)
+                if (manualTeams)
                   Icon(Icons.drag_handle),
                 SizedBox(width: 4),
                 IconButton(
@@ -349,7 +342,7 @@ class _PlayersConfigViewState extends State<PlayersConfigView> {
       onHorizontalDragDown: (_) => _cancelAutoScroll(),
       child: Padding(
         padding: EdgeInsets.only(top: 6),
-        child: manualOrder
+        child: manualTeams
             ? ReorderableListView(
                 onReorder: onReorder,
                 scrollController: _scrollController,

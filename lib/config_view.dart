@@ -73,11 +73,11 @@ class _ConfigViewState extends State<ConfigView>
     Assert.ne(intermediateConfig.teamPlayers == null,
         intermediateConfig.players == null);
     if (teamingConfig.teamPlay && !teamingConfig.randomizeTeams) {
-      // TODO: Even when teams are fixed, you probable want the order to be
-      // random. This is currently unachievable. Does it even make sense to
-      // have an option for a non-random turn order?
       final List<List<String>> teamPlayers =
           intermediateConfig.teamPlayers ?? [intermediateConfig.players];
+      for (final team in teamPlayers) {
+        team.shuffle();
+      }
       result.names = teamPlayers.expand((t) => t).toList();
       result.teamingStrategy = FixedTeamsStrategy.manualTeams(
           teamPlayers.map((t) => t.length).toList(),
@@ -85,9 +85,7 @@ class _ConfigViewState extends State<ConfigView>
     } else {
       final List<String> players = List.from(intermediateConfig.players) ??
           intermediateConfig.teamPlayers.expand((t) => t).toList();
-      if (teamingConfig.randomizeTeams) {
-        players.shuffle();
-      }
+      players.shuffle();
       result.names = players;
       if (teamingConfig.teamPlay) {
         result.teamingStrategy = FixedTeamsStrategy.generateTeams(

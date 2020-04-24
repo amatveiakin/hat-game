@@ -202,26 +202,6 @@ class TeamingConfigView extends StatelessWidget {
         }),
       ),
     );
-    items.add(
-      MultiLineSwitchListTile(
-        title: Text(config.teamPlay
-            ? (config.randomizeTeams ? 'Random teams: on' : 'Random teams: off')
-            : (config.randomizeTeams
-                ? 'Random turn order: on'
-                : 'Random turn order: off')),
-        subtitle: Text(config.randomizeTeams
-            ? (config.teamPlay
-                ? 'Generate random teams and turn order.'
-                : 'Generate random turn order.')
-            : (config.teamPlay
-                ? 'Manually specify teams and turn order.'
-                : 'Manually specify turn order.')),
-        value: config.randomizeTeams,
-        onChanged: (bool checked) => onUpdate(() {
-          config.randomizeTeams = checked;
-        }),
-      ),
-    );
     if (!config.teamPlay) {
       final onTap = () {
         Navigator.of(context).push(MaterialPageRoute(
@@ -253,6 +233,21 @@ class TeamingConfigView extends StatelessWidget {
           Assert.fail('IndividualPlayStyle.broadcast is not supported '
               'in individual mode');
       }
+    }
+    if (config.teamPlay) {
+      items.add(
+        MultiLineSwitchListTile(
+          title: Text(
+              config.randomizeTeams ? 'Random teams: on' : 'Random teams: off'),
+          subtitle: Text(config.randomizeTeams
+              ? 'Players are divided into teams randomly.'
+              : 'Players are divided into teams manually.'),
+          value: config.randomizeTeams,
+          onChanged: (bool checked) => onUpdate(() {
+            config.randomizeTeams = checked;
+          }),
+        ),
+      );
     }
     if (config.teamPlay && config.randomizeTeams) {
       final onTap = () {
