@@ -106,19 +106,25 @@ class ScoreView extends StatelessWidget {
     if (teamBodies != null) {
       for (final team in teamBodies) {
         final players = List<_PlayerData>();
-        int totalScore = 0;
-        int totalScoreControl = 0;
+        final totalWordsExplained = List<int>();
+        final totalWordsGuessed = List<int>();
         for (final playerIdx in team) {
           final p = gameState.players[playerIdx];
-          totalScore += p.wordsExplained.length;
-          totalScoreControl += p.wordsGuessed.length;
+          totalWordsExplained.addAll(p.wordsExplained);
+          totalWordsGuessed.addAll(p.wordsGuessed);
           players.add(_PlayerData(
             name: p.name,
             wordsExplained: p.wordsExplained.length,
             wordsGuessed: p.wordsGuessed.length,
           ));
         }
-        Assert.eq(totalScore, totalScoreControl);
+        // There is always only one explaining player, so no need to de-dup.
+        // Frankly, the score could've been computed directly as:
+        //   totalScore += p.wordsExplained.length;
+        // The sets are just for sanity-checking.
+        final totalScore = totalWordsExplained.length;
+        Assert.eq(totalScore, totalWordsExplained.toSet().length);
+        Assert.eq(totalScore, totalWordsGuessed.toSet().length);
         listTiles.add(_TeamScoreView(totalScore: totalScore, players: players));
       }
     } else {
