@@ -9,8 +9,9 @@ class Team {
 }
 
 abstract class TeamingStrategy {
-  bool teamsAreFixed();
   Team getTeam(int turn);
+  // Returns null in individual mode.
+  List<List<int>> getAllTeamBodies();
 }
 
 class CannotMakeTeaming implements Exception {
@@ -39,7 +40,7 @@ abstract class IndividualStrategy extends TeamingStrategy {
   }
 
   @override
-  bool teamsAreFixed() => false;
+  List<List<int>> getAllTeamBodies() => null;
 }
 
 class ChainIndividualStrategy extends IndividualStrategy {
@@ -97,7 +98,7 @@ class FixedTeamsStrategy extends TeamingStrategy {
             _generateTeamSizes(numPlayers, desiredTeamSize, unequalTeamSize));
 
   @override
-  bool teamsAreFixed() => true;
+  List<List<int>> getAllTeamBodies() => teamPlayers;
 
   @override
   Team getTeam(int turn) {

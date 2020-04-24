@@ -3,6 +3,7 @@ import 'package:hatgame/assertion.dart';
 import 'package:hatgame/game_config.dart';
 import 'package:hatgame/game_state.dart';
 import 'package:hatgame/padlock.dart';
+import 'package:hatgame/score_view.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/timer.dart';
 import 'package:hatgame/wide_button.dart';
@@ -273,6 +274,20 @@ class PlayAreaState extends State<PlayArea>
     });
   }
 
+  void _reviewDone() {
+    GameStatus gameStatus;
+    _gameViewState.update(() {
+      gameStatus = gameState.newTurn();
+    });
+    if (gameStatus == GameStatus.finished) {
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+              builder: (context) => ScoreView(gameState: gameState)),
+          ModalRoute.withName('/'));
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -392,12 +407,10 @@ class PlayAreaState extends State<PlayArea>
           Container(
             padding: EdgeInsets.symmetric(vertical: 12.0),
             child: WideButton(
-              onPressed: () => _gameViewState.update(() {
-                gameState.newTurn();
-              }),
+              onPressed: _reviewDone,
               color: MyTheme.accent,
               child: Text(
-                'Next round',
+                'Done',
                 style: TextStyle(fontSize: 20.0),
               ),
             ),
@@ -405,6 +418,8 @@ class PlayAreaState extends State<PlayArea>
           SizedBox(height: 12),
         ]);
     }
+    Assert.holds(gameState.gameFinished);
+    return Container();
   }
 }
 

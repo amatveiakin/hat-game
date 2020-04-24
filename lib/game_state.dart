@@ -26,6 +26,11 @@ enum TurnPhase {
   review,
 }
 
+enum GameStatus {
+  active,
+  finished,
+}
+
 class Word {
   final int id;
   final String text;
@@ -78,6 +83,7 @@ class GameState {
 
   int _turn = 0;
   TurnPhase _turnPhase;
+  bool _gameFinished = false;
 
   GameState(GameConfig settings)
       : _players = settings.players.names.map((p) => PlayerState(p)).toList(),
@@ -90,8 +96,11 @@ class GameState {
     _initTurn();
   }
 
-  get currentTurn => _turn;
-  get turnPhase => _turnPhase;
+  List<PlayerState> get players => _players;
+  TeamingStrategy get teamingStrategy => _teamingStrategy;
+  int get currentTurn => _turn;
+  TurnPhase get turnPhase => _turnPhase;
+  bool get gameFinished => _gameFinished;
 
   int numWordsInHat() => _wordsInHat.length;
 
@@ -107,11 +116,17 @@ class GameState {
         .toList();
   }
 
-  void newTurn() {
+  GameStatus newTurn() {
     Assert.eq(_turnPhase, TurnPhase.review);
     _finishTurn();
+    if (_wordsInHat.length == 0) {
+      Assert.holds(!_gameFinished);
+      _gameFinished = true;
+      return GameStatus.finished;
+    }
     _turn++;
     _initTurn();
+    return GameStatus.active;
   }
 
   void startExplaning() {
