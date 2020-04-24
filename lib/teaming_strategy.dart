@@ -161,12 +161,15 @@ class FixedTeamsStrategy extends TeamingStrategy {
     switch (unequalTeamSize) {
       case UnequalTeamSize.expandTeams:
         break;
+      case UnequalTeamSize.forbid:
       case UnequalTeamSize.dropPlayers:
         if (numPlayers % teamSize != 0) {
           // TODO: Discard some player instead when we have a UI for it.
           throw CannotMakeTeaming(
-              'Players cannot be split into teams of desired size, '
-              'and unequally sized teams are diabled.');
+              'Players cannot be split into teams of desired size, ' +
+                  (unequalTeamSize == UnequalTeamSize.forbid
+                      ? 'and unequally sized teams are disabled.'
+                      : 'and support for dropping players isn\'t ready yet.'));
         }
         break;
     }

@@ -27,7 +27,7 @@ enum DesiredTeamSize {
 }
 
 enum UnequalTeamSize {
-  // TODO: Add 'forbid' option and make it default.
+  forbid,
   expandTeams,
   dropPlayers,
 }
@@ -37,7 +37,7 @@ class TeamingConfig {
   bool randomizeTeams = true;
   IndividualPlayStyle individualPlayStyle = IndividualPlayStyle.fluidPairs;
   DesiredTeamSize desiredTeamSize = DesiredTeamSize.teamsOf2;
-  UnequalTeamSize unequalTeamSize = UnequalTeamSize.expandTeams;
+  UnequalTeamSize unequalTeamSize = UnequalTeamSize.forbid;
   IndividualPlayStyle guessingInLargeTeam = IndividualPlayStyle.fluidPairs;
 }
 

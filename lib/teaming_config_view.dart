@@ -102,14 +102,20 @@ class DesiredTeamSizeSelectorState
 getUnequalTeamSizeOptions() {
   return [
     OptionDescription(
+      value: UnequalTeamSize.forbid,
+      title: 'Forbid unequal team sizes',
+      subtitle: 'Game wouldn\'t start unless the players can be divided '
+          'into teams of specified size.',
+    ),
+    OptionDescription(
       value: UnequalTeamSize.expandTeams,
-      title: 'Allow unequal teams',
+      title: 'Allow unequal team sizes',
       subtitle: 'If players cannot be divided into teams of equal sizes, '
           'some teams are going to be bigger.',
     ),
     OptionDescription(
       value: UnequalTeamSize.dropPlayers,
-      title: 'Teams must be equal',
+      title: 'Drop players to equalize teams',
       // TODO: Make the lot fair (don't ban the same person twice in a row)
       // and comment on this.
       subtitle: 'Each team must have the same number of players. '
@@ -299,25 +305,48 @@ class TeamingConfigView extends StatelessWidget {
                     }))));
       };
       switch (config.unequalTeamSize) {
+        case UnequalTeamSize.forbid:
+          String subtitle;
+          switch (config.desiredTeamSize) {
+            case DesiredTeamSize.teamsOf2:
+            case DesiredTeamSize.twoTeams:
+              subtitle = 'Game wouldn\'t start unless '
+                  'the number of players is even.';
+              break;
+            case DesiredTeamSize.teamsOf3:
+              subtitle = 'Game wouldn\'t start unless '
+                  'the number of players is divisible by 3.';
+              break;
+            case DesiredTeamSize.teamsOf4:
+              subtitle = 'Game wouldn\'t start unless '
+                  'the number of players is divisible by 4.';
+              break;
+          }
+          items.add(MultiLineListTile(
+            title: Text('Forbid unequal team sizes'),
+            subtitle: Text(subtitle),
+            onTap: onTap,
+          ));
+          break;
         case UnequalTeamSize.expandTeams:
           String subtitle;
           switch (config.desiredTeamSize) {
             case DesiredTeamSize.teamsOf2:
             case DesiredTeamSize.twoTeams:
-              subtitle = 'Teams will be unequal '
+              subtitle = 'Teams will has different size '
                   'if the total number of players is odd.';
               break;
             case DesiredTeamSize.teamsOf3:
-              subtitle = 'Teams will be unequal '
+              subtitle = 'Teams will has different size '
                   'if the total number of players is not divisible by 3.';
               break;
             case DesiredTeamSize.teamsOf4:
-              subtitle = 'Teams will be unequal '
+              subtitle = 'Teams will has different size '
                   'if the total number of players is not divisible by 4.';
               break;
           }
           items.add(MultiLineListTile(
-            title: Text('Allow unequal teams'),
+            title: Text('Allow unequal team sizes'),
             subtitle: Text(subtitle),
             onTap: onTap,
           ));
@@ -340,7 +369,7 @@ class TeamingConfigView extends StatelessWidget {
               break;
           }
           items.add(MultiLineListTile(
-            title: Text('Teams must be equal'),
+            title: Text('Drop players to equalize teams'),
             subtitle: Text(subtitle),
             onTap: onTap,
           ));
