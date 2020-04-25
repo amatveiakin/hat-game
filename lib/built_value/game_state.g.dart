@@ -82,6 +82,413 @@ final BuiltSet<WordFeedback> _$valuesWordFeedback =
   _$tooHard,
 ]);
 
+Serializers _$serializers = (new Serializers().toBuilder()
+      ..add(GameState.serializer)
+      ..add(Party.serializer)
+      ..add(PlayerState.serializer)
+      ..add(TurnPhase.serializer)
+      ..add(Word.serializer)
+      ..add(WordFeedback.serializer)
+      ..add(WordStatus.serializer)
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(PlayerState)]),
+          () => new ListBuilder<PlayerState>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [
+            const FullType(BuiltList, const [const FullType(int)])
+          ]),
+          () => new ListBuilder<BuiltList<int>>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(Word)]),
+          () => new ListBuilder<Word>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(int)]),
+          () => new ListBuilder<int>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(int)]),
+          () => new ListBuilder<int>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(int)]),
+          () => new ListBuilder<int>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(int)]),
+          () => new ListBuilder<int>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(int)]),
+          () => new ListBuilder<int>()))
+    .build();
+Serializer<PlayerState> _$playerStateSerializer = new _$PlayerStateSerializer();
+Serializer<Party> _$partySerializer = new _$PartySerializer();
+Serializer<TurnPhase> _$turnPhaseSerializer = new _$TurnPhaseSerializer();
+Serializer<WordStatus> _$wordStatusSerializer = new _$WordStatusSerializer();
+Serializer<WordFeedback> _$wordFeedbackSerializer =
+    new _$WordFeedbackSerializer();
+Serializer<Word> _$wordSerializer = new _$WordSerializer();
+Serializer<GameState> _$gameStateSerializer = new _$GameStateSerializer();
+
+class _$PlayerStateSerializer implements StructuredSerializer<PlayerState> {
+  @override
+  final Iterable<Type> types = const [PlayerState, _$PlayerState];
+  @override
+  final String wireName = 'PlayerState';
+
+  @override
+  Iterable<Object> serialize(Serializers serializers, PlayerState object,
+      {FullType specifiedType = FullType.unspecified}) {
+    final result = <Object>[
+      'id',
+      serializers.serialize(object.id, specifiedType: const FullType(int)),
+      'name',
+      serializers.serialize(object.name, specifiedType: const FullType(String)),
+      'wordsExplained',
+      serializers.serialize(object.wordsExplained,
+          specifiedType:
+              const FullType(BuiltList, const [const FullType(int)])),
+      'wordsGuessed',
+      serializers.serialize(object.wordsGuessed,
+          specifiedType:
+              const FullType(BuiltList, const [const FullType(int)])),
+    ];
+
+    return result;
+  }
+
+  @override
+  PlayerState deserialize(Serializers serializers, Iterable<Object> serialized,
+      {FullType specifiedType = FullType.unspecified}) {
+    final result = new PlayerStateBuilder();
+
+    final iterator = serialized.iterator;
+    while (iterator.moveNext()) {
+      final key = iterator.current as String;
+      iterator.moveNext();
+      final dynamic value = iterator.current;
+      switch (key) {
+        case 'id':
+          result.id = serializers.deserialize(value,
+              specifiedType: const FullType(int)) as int;
+          break;
+        case 'name':
+          result.name = serializers.deserialize(value,
+              specifiedType: const FullType(String)) as String;
+          break;
+        case 'wordsExplained':
+          result.wordsExplained.replace(serializers.deserialize(value,
+                  specifiedType:
+                      const FullType(BuiltList, const [const FullType(int)]))
+              as BuiltList<Object>);
+          break;
+        case 'wordsGuessed':
+          result.wordsGuessed.replace(serializers.deserialize(value,
+                  specifiedType:
+                      const FullType(BuiltList, const [const FullType(int)]))
+              as BuiltList<Object>);
+          break;
+      }
+    }
+
+    return result.build();
+  }
+}
+
+class _$PartySerializer implements StructuredSerializer<Party> {
+  @override
+  final Iterable<Type> types = const [Party, _$Party];
+  @override
+  final String wireName = 'Party';
+
+  @override
+  Iterable<Object> serialize(Serializers serializers, Party object,
+      {FullType specifiedType = FullType.unspecified}) {
+    final result = <Object>[
+      'performer',
+      serializers.serialize(object.performer,
+          specifiedType: const FullType(int)),
+      'recipients',
+      serializers.serialize(object.recipients,
+          specifiedType:
+              const FullType(BuiltList, const [const FullType(int)])),
+    ];
+
+    return result;
+  }
+
+  @override
+  Party deserialize(Serializers serializers, Iterable<Object> serialized,
+      {FullType specifiedType = FullType.unspecified}) {
+    final result = new PartyBuilder();
+
+    final iterator = serialized.iterator;
+    while (iterator.moveNext()) {
+      final key = iterator.current as String;
+      iterator.moveNext();
+      final dynamic value = iterator.current;
+      switch (key) {
+        case 'performer':
+          result.performer = serializers.deserialize(value,
+              specifiedType: const FullType(int)) as int;
+          break;
+        case 'recipients':
+          result.recipients.replace(serializers.deserialize(value,
+                  specifiedType:
+                      const FullType(BuiltList, const [const FullType(int)]))
+              as BuiltList<Object>);
+          break;
+      }
+    }
+
+    return result.build();
+  }
+}
+
+class _$TurnPhaseSerializer implements PrimitiveSerializer<TurnPhase> {
+  @override
+  final Iterable<Type> types = const <Type>[TurnPhase];
+  @override
+  final String wireName = 'TurnPhase';
+
+  @override
+  Object serialize(Serializers serializers, TurnPhase object,
+          {FullType specifiedType = FullType.unspecified}) =>
+      object.name;
+
+  @override
+  TurnPhase deserialize(Serializers serializers, Object serialized,
+          {FullType specifiedType = FullType.unspecified}) =>
+      TurnPhase.valueOf(serialized as String);
+}
+
+class _$WordStatusSerializer implements PrimitiveSerializer<WordStatus> {
+  @override
+  final Iterable<Type> types = const <Type>[WordStatus];
+  @override
+  final String wireName = 'WordStatus';
+
+  @override
+  Object serialize(Serializers serializers, WordStatus object,
+          {FullType specifiedType = FullType.unspecified}) =>
+      object.name;
+
+  @override
+  WordStatus deserialize(Serializers serializers, Object serialized,
+          {FullType specifiedType = FullType.unspecified}) =>
+      WordStatus.valueOf(serialized as String);
+}
+
+class _$WordFeedbackSerializer implements PrimitiveSerializer<WordFeedback> {
+  @override
+  final Iterable<Type> types = const <Type>[WordFeedback];
+  @override
+  final String wireName = 'WordFeedback';
+
+  @override
+  Object serialize(Serializers serializers, WordFeedback object,
+          {FullType specifiedType = FullType.unspecified}) =>
+      object.name;
+
+  @override
+  WordFeedback deserialize(Serializers serializers, Object serialized,
+          {FullType specifiedType = FullType.unspecified}) =>
+      WordFeedback.valueOf(serialized as String);
+}
+
+class _$WordSerializer implements StructuredSerializer<Word> {
+  @override
+  final Iterable<Type> types = const [Word, _$Word];
+  @override
+  final String wireName = 'Word';
+
+  @override
+  Iterable<Object> serialize(Serializers serializers, Word object,
+      {FullType specifiedType = FullType.unspecified}) {
+    final result = <Object>[
+      'id',
+      serializers.serialize(object.id, specifiedType: const FullType(int)),
+      'text',
+      serializers.serialize(object.text, specifiedType: const FullType(String)),
+      'status',
+      serializers.serialize(object.status,
+          specifiedType: const FullType(WordStatus)),
+    ];
+    if (object.feedback != null) {
+      result
+        ..add('feedback')
+        ..add(serializers.serialize(object.feedback,
+            specifiedType: const FullType(WordFeedback)));
+    }
+    return result;
+  }
+
+  @override
+  Word deserialize(Serializers serializers, Iterable<Object> serialized,
+      {FullType specifiedType = FullType.unspecified}) {
+    final result = new WordBuilder();
+
+    final iterator = serialized.iterator;
+    while (iterator.moveNext()) {
+      final key = iterator.current as String;
+      iterator.moveNext();
+      final dynamic value = iterator.current;
+      switch (key) {
+        case 'id':
+          result.id = serializers.deserialize(value,
+              specifiedType: const FullType(int)) as int;
+          break;
+        case 'text':
+          result.text = serializers.deserialize(value,
+              specifiedType: const FullType(String)) as String;
+          break;
+        case 'status':
+          result.status = serializers.deserialize(value,
+              specifiedType: const FullType(WordStatus)) as WordStatus;
+          break;
+        case 'feedback':
+          result.feedback = serializers.deserialize(value,
+              specifiedType: const FullType(WordFeedback)) as WordFeedback;
+          break;
+      }
+    }
+
+    return result.build();
+  }
+}
+
+class _$GameStateSerializer implements StructuredSerializer<GameState> {
+  @override
+  final Iterable<Type> types = const [GameState, _$GameState];
+  @override
+  final String wireName = 'GameState';
+
+  @override
+  Iterable<Object> serialize(Serializers serializers, GameState object,
+      {FullType specifiedType = FullType.unspecified}) {
+    final result = <Object>[
+      'players',
+      serializers.serialize(object.players,
+          specifiedType:
+              const FullType(BuiltList, const [const FullType(PlayerState)])),
+      'words',
+      serializers.serialize(object.words,
+          specifiedType:
+              const FullType(BuiltList, const [const FullType(Word)])),
+      'wordsInHat',
+      serializers.serialize(object.wordsInHat,
+          specifiedType:
+              const FullType(BuiltList, const [const FullType(int)])),
+      'gameFinished',
+      serializers.serialize(object.gameFinished,
+          specifiedType: const FullType(bool)),
+    ];
+    if (object.teams != null) {
+      result
+        ..add('teams')
+        ..add(serializers.serialize(object.teams,
+            specifiedType: const FullType(BuiltList, const [
+              const FullType(BuiltList, const [const FullType(int)])
+            ])));
+    }
+    if (object.currentParty != null) {
+      result
+        ..add('currentParty')
+        ..add(serializers.serialize(object.currentParty,
+            specifiedType: const FullType(Party)));
+    }
+    if (object.wordsInThisTurn != null) {
+      result
+        ..add('wordsInThisTurn')
+        ..add(serializers.serialize(object.wordsInThisTurn,
+            specifiedType:
+                const FullType(BuiltList, const [const FullType(int)])));
+    }
+    if (object.currentWord != null) {
+      result
+        ..add('currentWord')
+        ..add(serializers.serialize(object.currentWord,
+            specifiedType: const FullType(int)));
+    }
+    if (object.turn != null) {
+      result
+        ..add('turn')
+        ..add(serializers.serialize(object.turn,
+            specifiedType: const FullType(int)));
+    }
+    if (object.turnPhase != null) {
+      result
+        ..add('turnPhase')
+        ..add(serializers.serialize(object.turnPhase,
+            specifiedType: const FullType(TurnPhase)));
+    }
+    return result;
+  }
+
+  @override
+  GameState deserialize(Serializers serializers, Iterable<Object> serialized,
+      {FullType specifiedType = FullType.unspecified}) {
+    final result = new GameStateBuilder();
+
+    final iterator = serialized.iterator;
+    while (iterator.moveNext()) {
+      final key = iterator.current as String;
+      iterator.moveNext();
+      final dynamic value = iterator.current;
+      switch (key) {
+        case 'players':
+          result.players.replace(serializers.deserialize(value,
+                  specifiedType: const FullType(
+                      BuiltList, const [const FullType(PlayerState)]))
+              as BuiltList<Object>);
+          break;
+        case 'teams':
+          result.teams.replace(serializers.deserialize(value,
+              specifiedType: const FullType(BuiltList, const [
+                const FullType(BuiltList, const [const FullType(int)])
+              ])) as BuiltList<Object>);
+          break;
+        case 'currentParty':
+          result.currentParty.replace(serializers.deserialize(value,
+              specifiedType: const FullType(Party)) as Party);
+          break;
+        case 'words':
+          result.words.replace(serializers.deserialize(value,
+                  specifiedType:
+                      const FullType(BuiltList, const [const FullType(Word)]))
+              as BuiltList<Object>);
+          break;
+        case 'wordsInHat':
+          result.wordsInHat.replace(serializers.deserialize(value,
+                  specifiedType:
+                      const FullType(BuiltList, const [const FullType(int)]))
+              as BuiltList<Object>);
+          break;
+        case 'wordsInThisTurn':
+          result.wordsInThisTurn.replace(serializers.deserialize(value,
+                  specifiedType:
+                      const FullType(BuiltList, const [const FullType(int)]))
+              as BuiltList<Object>);
+          break;
+        case 'currentWord':
+          result.currentWord = serializers.deserialize(value,
+              specifiedType: const FullType(int)) as int;
+          break;
+        case 'turn':
+          result.turn = serializers.deserialize(value,
+              specifiedType: const FullType(int)) as int;
+          break;
+        case 'turnPhase':
+          result.turnPhase = serializers.deserialize(value,
+              specifiedType: const FullType(TurnPhase)) as TurnPhase;
+          break;
+        case 'gameFinished':
+          result.gameFinished = serializers.deserialize(value,
+              specifiedType: const FullType(bool)) as bool;
+          break;
+      }
+    }
+
+    return result.build();
+  }
+}
+
 class _$PlayerState extends PlayerState {
   @override
   final int id;

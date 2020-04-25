@@ -2,6 +2,7 @@ library game_state;
 
 import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
+import 'package:built_value/serializer.dart';
 
 part 'game_state.g.dart';
 
@@ -15,6 +16,7 @@ abstract class PlayerState implements Built<PlayerState, PlayerStateBuilder> {
 
   PlayerState._();
   factory PlayerState([updates(PlayerStateBuilder b)]) = _$PlayerState;
+  static Serializer<PlayerState> get serializer => _$playerStateSerializer;
 }
 
 // A set of player that participate in a given turn.
@@ -26,6 +28,7 @@ abstract class Party implements Built<Party, PartyBuilder> {
 
   Party._();
   factory Party([void Function(PartyBuilder) updates]) = _$Party;
+  static Serializer<Party> get serializer => _$partySerializer;
 }
 
 class TurnPhase extends EnumClass {
@@ -37,6 +40,7 @@ class TurnPhase extends EnumClass {
 
   static BuiltSet<TurnPhase> get values => _$valuesTurnPhase;
   static TurnPhase valueOf(String name) => _$valueOfTurnPhase(name);
+  static Serializer<TurnPhase> get serializer => _$turnPhaseSerializer;
 }
 
 class WordStatus extends EnumClass {
@@ -48,6 +52,7 @@ class WordStatus extends EnumClass {
 
   static BuiltSet<WordStatus> get values => _$valuesWordStatus;
   static WordStatus valueOf(String name) => _$valueOfWordStatus(name);
+  static Serializer<WordStatus> get serializer => _$wordStatusSerializer;
 }
 
 class WordFeedback extends EnumClass {
@@ -60,6 +65,7 @@ class WordFeedback extends EnumClass {
 
   static BuiltSet<WordFeedback> get values => _$valuesWordFeedback;
   static WordFeedback valueOf(String name) => _$valueOfWordFeedback(name);
+  static Serializer<WordFeedback> get serializer => _$wordFeedbackSerializer;
 }
 
 // TODO: -> WordState? (OR PlayerState -> Player)
@@ -83,6 +89,7 @@ abstract class Word implements Built<Word, WordBuilder> {
 
   Word._();
   factory Word([void Function(WordBuilder) updates]) = _$Word;
+  static Serializer<Word> get serializer => _$wordSerializer;
 }
 
 abstract class GameState implements Built<GameState, GameStateBuilder> {
@@ -110,4 +117,10 @@ abstract class GameState implements Built<GameState, GameStateBuilder> {
   GameState._();
 
   factory GameState([void Function(GameStateBuilder) updates]) = _$GameState;
+  static Serializer<GameState> get serializer => _$gameStateSerializer;
 }
+
+@SerializersFor([
+  GameState,
+])
+final Serializers serializers = _$serializers;

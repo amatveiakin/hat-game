@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:hatgame/assertion.dart';
 import 'package:hatgame/built_value/game_state.dart';
