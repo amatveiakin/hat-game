@@ -1,25 +1,34 @@
-import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:built_collection/built_collection.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hatgame/assertion.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
+import 'package:hatgame/built_value/serializers.dart';
 import 'package:hatgame/built_value_ext.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/list_ext.dart';
 import 'package:hatgame/partying_strategy.dart';
 import 'package:russian_words/russian_words.dart' as russian_words;
 
+// All functions that don't end with `NoUpdate`, both public and private,
+// update the state.
+// TODO: Find a cleaner to avoid sequential calls. Note that avoiding
+// sequential calls is important: it's not only a performance, but also a
+// correctness problems, because users could see intermediate state.
+
 class GameController {
   final GameConfig config;
-  // Don't get the state from here - get it from the stream!
-  GameState _state;
-  final _streamController = StreamController<GameState>(sync: true);
+  // TODO: Should UI be able to get state from here or only from the stream?
+  GameState state;
+  DocumentReference reference;
 
-  Stream<GameState> get stateUpdatesStream => _streamController.stream;
+  GameData get gameData => GameData(config, state);
 
-  GameController.newState(this.config) {
+  // TODO: Don't create a throwaway class instance.
+  GameController.newGame(this.config) {
     final words = List<Word>();
     while (words.length < 5) {
       final String text =
@@ -66,7 +75,7 @@ class GameController {
       ));
     }
 
-    _state = GameState(
+    state = GameState(
       (b) => b
         ..players.replace(players)
         ..words.replace(words)
@@ -76,64 +85,96 @@ class GameController {
     );
     if (teams != null) {
       // TODO: Is there a way to do this concisely in one builder?
-      _state = _state
+      state = state
           .rebuild((b) => b.teams.replace(teams.map((t) => BuiltList<int>(t))));
     }
-    _setState(_state);
+    _updateConfig();
     _initTurn();
   }
 
+  GameController.fromSnapshot(final DocumentSnapshot documentSnapshot)
+      : config = serializers
+            .deserialize(json.decode(documentSnapshot.data['config'])),
+        state = serializers
+            .deserialize(json.decode(documentSnapshot.data['state'])),
+        reference = documentSnapshot.reference;
+
+  // TODO: Find a cleaner to avoid sequential calls. Note that avoiding
+  // sequential calls is important: it's not only a performance, but also a
+  // correctness problems, because users could see intermediate state.
+  void _updateConfig() {
+    final serialized = json.encode(serializers.serialize(config));
+    Firestore.instance
+        .collection('games')
+        .document('test')
+        .updateData({'config': serialized});
+  }
+
+  void _setState(GameState newState) {
+    state = newState;
+    _updateState();
+  }
+
+  void _updateState() {
+    final serialized = json.encode(serializers.serialize(state));
+
+    if (reference != null) {
+      // TODO: Make this a transaction!
+      reference.updateData({'state': serialized});
+    } else {
+      Firestore.instance
+          .collection('games')
+          .document('test')
+          .updateData({'state': serialized});
+    }
+  }
+
   void nextTurn() {
-    Assert.eq(_state.turnPhase, TurnPhase.review);
-    _finishTurn();
-    if (_state.wordsInHat.length == 0) {
-      Assert.holds(!_state.gameFinished);
-      _setState(_state.rebuild(
+    Assert.eq(state.turnPhase, TurnPhase.review);
+    _finishTurnNoUpdate();
+    if (state.wordsInHat.length == 0) {
+      Assert.holds(!state.gameFinished);
+      _setState(state.rebuild(
         (b) => b..gameFinished = true,
       ));
     } else {
-      _setState(_state.rebuild(
-        (b) => b..turn = _state.turn + 1,
-      ));
+      state = state.rebuild(
+        (b) => b..turn = state.turn + 1,
+      );
       _initTurn();
     }
   }
 
   void startExplaning() {
-    Assert.eq(_state.turnPhase, TurnPhase.prepare);
-    _setState(_state.rebuild(
+    Assert.eq(state.turnPhase, TurnPhase.prepare);
+    state = state.rebuild(
       (b) => b..turnPhase = TurnPhase.explain,
-    ));
+    );
     _drawNextWord();
   }
 
   void wordGuessed() {
-    Assert.eq(_state.turnPhase, TurnPhase.explain);
-    Assert.holds(_state.wordsInThisTurn.isNotEmpty);
-    Assert.eq(_state.wordsInThisTurn.last, _state.currentWord);
-    setWordStatus(_state.currentWord, WordStatus.explained);
+    Assert.eq(state.turnPhase, TurnPhase.explain);
+    Assert.holds(state.wordsInThisTurn.isNotEmpty);
+    Assert.eq(state.wordsInThisTurn.last, state.currentWord);
+    _setWordStatusNoUpdate(state.currentWord, WordStatus.explained);
     _drawNextWord();
   }
 
   void finishExplanation() {
-    Assert.eq(_state.turnPhase, TurnPhase.explain);
-    _setState(_state.rebuild(
+    Assert.eq(state.turnPhase, TurnPhase.explain);
+    _setState(state.rebuild(
       (b) => b..turnPhase = TurnPhase.review,
     ));
   }
 
   void setWordStatus(int wordId, WordStatus newStatus) {
-    _setState(_state.rebuild(
-      (b) => b
-        ..words.rebuildAt(
-          wordId,
-          (b) => b..status = newStatus,
-        ),
-    ));
+    _setWordStatusNoUpdate(wordId, newStatus);
+    _updateState();
   }
 
   void setWordFeedback(int wordId, WordFeedback newFeedback) {
-    _setState(_state.rebuild(
+    _setState(state.rebuild(
       (b) => b
         ..words.rebuildAt(
           wordId,
@@ -143,57 +184,60 @@ class GameController {
   }
 
   void _initTurn() {
-    _setState(_state.rebuild(
+    _setState(state.rebuild(
       (b) => b
         ..turnPhase = TurnPhase.prepare
-        ..currentParty.replace(
-            PartyingStrategy.fromGame(GameData(config, _state))
-                .getParty(_state.turn)),
+        ..currentParty
+            .replace(PartyingStrategy.fromGame(gameData).getParty(state.turn)),
     ));
   }
 
-  void _finishTurn() {
-    final List<int> wordsScored = _state.wordsInThisTurn
-        .where((w) => _state.words[w].status == WordStatus.explained)
+  void _finishTurnNoUpdate() {
+    final List<int> wordsScored = state.wordsInThisTurn
+        .where((w) => state.words[w].status == WordStatus.explained)
         .toList();
-    _setState(_state.rebuild(
+    state = state.rebuild(
       (b) => b
         ..turnPhase = null
         ..players.map((p) {
-          if (_state.currentParty.performer == p.id) {
+          if (state.currentParty.performer == p.id) {
             return p.rebuild((b) => b..wordsExplained.addAll(wordsScored));
-          } else if (_state.currentParty.recipients.contains(p.id)) {
+          } else if (state.currentParty.recipients.contains(p.id)) {
             return p.rebuild((b) => b..wordsGuessed.addAll(wordsScored));
           }
           return p;
         })
-        ..wordsInHat.addAll(_state.wordsInThisTurn
+        ..wordsInHat.addAll(state.wordsInThisTurn
             .where((w) => b.words[w].status == WordStatus.notExplained))
         ..wordsInThisTurn.clear(),
-    ));
+    );
+  }
+
+  void _setWordStatusNoUpdate(int wordId, WordStatus newStatus) {
+    state = state.rebuild(
+      (b) => b
+        ..words.rebuildAt(
+          wordId,
+          (b) => b..status = newStatus,
+        ),
+    );
   }
 
   void _drawNextWord() {
-    Assert.eq(_state.turnPhase, TurnPhase.explain);
-    if (_state.wordsInHat.isEmpty) {
+    Assert.eq(state.turnPhase, TurnPhase.explain);
+    if (state.wordsInHat.isEmpty) {
       finishExplanation();
       return;
     }
     final int nextWord =
-        _state.wordsInHat[Random().nextInt(_state.wordsInHat.length)];
-    Assert.holds(_state.wordsInHat.contains(nextWord),
-        lazyMessage: () => _state.wordsInHat.toString());
-    _setState(_state.rebuild(
+        state.wordsInHat[Random().nextInt(state.wordsInHat.length)];
+    Assert.holds(state.wordsInHat.contains(nextWord),
+        lazyMessage: () => state.wordsInHat.toString());
+    _setState(state.rebuild(
       (b) => b
         ..currentWord = nextWord
         ..wordsInThisTurn.add(nextWord)
         ..wordsInHat.remove(nextWord),
     ));
-  }
-
-  // TODO: Optimize: avoid sequential calls.
-  void _setState(GameState newState) {
-    _state = newState;
-    _streamController.sink.add(newState);
   }
 }

@@ -119,8 +119,3 @@ abstract class GameState implements Built<GameState, GameStateBuilder> {
   factory GameState([void Function(GameStateBuilder) updates]) = _$GameState;
   static Serializer<GameState> get serializer => _$gameStateSerializer;
 }
-
-@SerializersFor([
-  GameState,
-])
-final Serializers serializers = _$serializers;

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/assertion.dart';
 import 'package:hatgame/built_value/game_config.dart';
@@ -409,26 +410,22 @@ class PlayAreaState extends State<PlayArea>
           SizedBox(height: 12),
         ]);
     }
-    Assert.holds(gameState.gameFinished);
+    Assert.holds(gameState.gameFinished,
+        lazyMessage: () => gameState.toString());
     return Container();
   }
 }
 
 class GameView extends StatelessWidget {
-  final GameConfig gameConfig;
-  final GameController gameController;
-
-  GameView({@required this.gameConfig, @required this.gameController});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Hat Game'),
       ),
-      body: StreamBuilder<GameState>(
-        stream: gameController.stateUpdatesStream,
-        builder: (BuildContext context, AsyncSnapshot<GameState> snapshot) {
+      body: StreamBuilder<QuerySnapshot>(
+        stream: Firestore.instance.collection('games').snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) {
             // TODO: Deal with errors.
             return Center(
@@ -441,20 +438,20 @@ class GameView extends StatelessWidget {
             // TODO: Deal with loading (use snapshot.connectionState?)
             return Center(child: CircularProgressIndicator());
           }
-          final GameState gameState = snapshot.data;
-          if (gameState == null) {
+          final gameController =
+              GameController.fromSnapshot(snapshot.data.documents.first);
+          if (gameController.state == null) {
             // TODO: When does this happen?
             return Center(child: CircularProgressIndicator());
           }
-
-          final gameData = GameData(gameConfig, gameState);
-          if (gameState.gameFinished) {
+          if (gameController.state.gameFinished) {
             Future.delayed(
               Duration.zero,
               () => Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => ScoreView(gameData: gameData)),
+                      builder: (context) =>
+                          ScoreView(gameData: gameController.gameData)),
                   ModalRoute.withName('/')),
             );
             return Container();
@@ -463,11 +460,12 @@ class GameView extends StatelessWidget {
           return Container(
             child: Column(
               children: [
-                PartyView(gameData.currentPartyViewData(), gameState.turnPhase),
+                PartyView(gameController.gameData.currentPartyViewData(),
+                    gameController.state.turnPhase),
                 Expanded(
                   child: PlayArea(
                     gameController: gameController,
-                    gameData: gameData,
+                    gameData: gameController.gameData,
                   ),
                 ),
               ],

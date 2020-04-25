@@ -65,9 +65,8 @@ class _GameConfigViewState extends State<GameConfigView>
   }
 
   void _startGame(GameConfig gameConfig) {
-    GameController gameController;
     try {
-      gameController = GameController.newState(gameConfig);
+      GameController.newGame(gameConfig);
     } on CannotMakePartyingStrategy catch (e) {
       showDialog(
         context: context,
@@ -94,12 +93,7 @@ class _GameConfigViewState extends State<GameConfigView>
     FocusScope.of(context).unfocus();
     // TODO: Remove "back" button.
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => GameView(
-                  gameConfig: gameConfig,
-                  gameController: gameController,
-                )));
+        context, MaterialPageRoute(builder: (context) => GameView()));
   }
 
   @override

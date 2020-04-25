@@ -82,41 +82,6 @@ final BuiltSet<WordFeedback> _$valuesWordFeedback =
   _$tooHard,
 ]);
 
-Serializers _$serializers = (new Serializers().toBuilder()
-      ..add(GameState.serializer)
-      ..add(Party.serializer)
-      ..add(PlayerState.serializer)
-      ..add(TurnPhase.serializer)
-      ..add(Word.serializer)
-      ..add(WordFeedback.serializer)
-      ..add(WordStatus.serializer)
-      ..addBuilderFactory(
-          const FullType(BuiltList, const [const FullType(PlayerState)]),
-          () => new ListBuilder<PlayerState>())
-      ..addBuilderFactory(
-          const FullType(BuiltList, const [
-            const FullType(BuiltList, const [const FullType(int)])
-          ]),
-          () => new ListBuilder<BuiltList<int>>())
-      ..addBuilderFactory(
-          const FullType(BuiltList, const [const FullType(Word)]),
-          () => new ListBuilder<Word>())
-      ..addBuilderFactory(
-          const FullType(BuiltList, const [const FullType(int)]),
-          () => new ListBuilder<int>())
-      ..addBuilderFactory(
-          const FullType(BuiltList, const [const FullType(int)]),
-          () => new ListBuilder<int>())
-      ..addBuilderFactory(
-          const FullType(BuiltList, const [const FullType(int)]),
-          () => new ListBuilder<int>())
-      ..addBuilderFactory(
-          const FullType(BuiltList, const [const FullType(int)]),
-          () => new ListBuilder<int>())
-      ..addBuilderFactory(
-          const FullType(BuiltList, const [const FullType(int)]),
-          () => new ListBuilder<int>()))
-    .build();
 Serializer<PlayerState> _$playerStateSerializer = new _$PlayerStateSerializer();
 Serializer<Party> _$partySerializer = new _$PartySerializer();
 Serializer<TurnPhase> _$turnPhaseSerializer = new _$TurnPhaseSerializer();
