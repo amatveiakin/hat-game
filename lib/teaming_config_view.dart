@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hatgame/assertion.dart';
+import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/enum_option_selector.dart';
-import 'package:hatgame/game_config.dart';
+import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/multi_line_list_tile.dart';
 
 // TODO: Add explanation images (ideally: animated) for the selection option
@@ -184,9 +185,9 @@ class GuessingInLargeTeamSelectorState extends EnumOptionSelectorState<
 
 class TeamingConfigView extends StatelessWidget {
   final TeamingConfig config;
-  final void Function(void Function()) onUpdate;
+  final GameConfigController configController;
 
-  TeamingConfigView({@required this.config, @required this.onUpdate});
+  TeamingConfigView({@required this.config, @required this.configController});
 
   // TODO: Irrelevant settings: hide or disable?
   @override
@@ -203,19 +204,19 @@ class TeamingConfigView extends StatelessWidget {
             ? 'Fixed teams. Score is per team.'
             : 'Fluid pairing. Score is per player.'),
         value: config.teamPlay,
-        onChanged: (bool checked) => onUpdate(() {
-          config.teamPlay = checked;
-        }),
+        onChanged: (bool checked) => configController
+            .updateTeaming(config.rebuild((b) => b..teamPlay = checked)),
       ),
     );
     if (!config.teamPlay) {
       final onTap = () {
         Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => IndividualPlayStyleSelector(
-                config.individualPlayStyle,
-                (IndividualPlayStyle newValue) => onUpdate(() {
-                      config.individualPlayStyle = newValue;
-                    }))));
+                  config.individualPlayStyle,
+                  (IndividualPlayStyle newValue) =>
+                      configController.updateTeaming(config
+                          .rebuild((b) => b..individualPlayStyle = newValue)),
+                )));
       };
       switch (config.individualPlayStyle) {
         case IndividualPlayStyle.chain:
@@ -249,9 +250,8 @@ class TeamingConfigView extends StatelessWidget {
               ? 'Players are divided into teams randomly.'
               : 'Players are divided into teams manually.'),
           value: config.randomizeTeams,
-          onChanged: (bool checked) => onUpdate(() {
-            config.randomizeTeams = checked;
-          }),
+          onChanged: (bool checked) => configController.updateTeaming(
+              config.rebuild((b) => b..randomizeTeams = checked)),
         ),
       );
     }
@@ -259,10 +259,10 @@ class TeamingConfigView extends StatelessWidget {
       final onTap = () {
         Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => DesiredTeamSizeSelector(
-                config.desiredTeamSize,
-                (DesiredTeamSize newValue) => onUpdate(() {
-                      config.desiredTeamSize = newValue;
-                    }))));
+                  config.desiredTeamSize,
+                  (DesiredTeamSize newValue) => configController.updateTeaming(
+                      config.rebuild((b) => b..desiredTeamSize = newValue)),
+                )));
       };
       switch (config.desiredTeamSize) {
         case DesiredTeamSize.teamsOf2:
@@ -299,10 +299,10 @@ class TeamingConfigView extends StatelessWidget {
       final onTap = () {
         Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => UnequalTeamSizeSelector(
-                config.unequalTeamSize,
-                (UnequalTeamSize newValue) => onUpdate(() {
-                      config.unequalTeamSize = newValue;
-                    }))));
+                  config.unequalTeamSize,
+                  (UnequalTeamSize newValue) => configController.updateTeaming(
+                      config.rebuild((b) => b..unequalTeamSize = newValue)),
+                )));
       };
       switch (config.unequalTeamSize) {
         case UnequalTeamSize.forbid:
@@ -381,10 +381,11 @@ class TeamingConfigView extends StatelessWidget {
       final onTap = () {
         Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => GuessingInLargeTeamSelector(
-                config.guessingInLargeTeam,
-                (IndividualPlayStyle newValue) => onUpdate(() {
-                      config.guessingInLargeTeam = newValue;
-                    }))));
+                  config.guessingInLargeTeam,
+                  (IndividualPlayStyle newValue) =>
+                      configController.updateTeaming(config
+                          .rebuild((b) => b..guessingInLargeTeam = newValue)),
+                )));
       };
       switch (config.guessingInLargeTeam) {
         case IndividualPlayStyle.fluidPairs:

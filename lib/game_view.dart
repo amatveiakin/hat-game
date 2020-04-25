@@ -1,9 +1,7 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:hatgame/assertion.dart';
+import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
-import 'package:hatgame/game_config.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/padlock.dart';
@@ -417,11 +415,10 @@ class PlayAreaState extends State<PlayArea>
 }
 
 class GameView extends StatelessWidget {
-  final GameController gameController;
   final GameConfig gameConfig;
+  final GameController gameController;
 
-  GameView(this.gameConfig)
-      : gameController = GameController.newState(gameConfig);
+  GameView({@required this.gameConfig, @required this.gameController});
 
   @override
   Widget build(BuildContext context) {
@@ -449,6 +446,7 @@ class GameView extends StatelessWidget {
             // TODO: When does this happen?
             return Center(child: CircularProgressIndicator());
           }
+
           final gameData = GameData(gameConfig, gameState);
           if (gameState.gameFinished) {
             Future.delayed(
@@ -461,6 +459,7 @@ class GameView extends StatelessWidget {
             );
             return Container();
           }
+
           return Container(
             child: Column(
               children: [

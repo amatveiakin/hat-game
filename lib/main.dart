@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hatgame/config_view.dart';
+import 'package:hatgame/game_config_view.dart';
 import 'package:hatgame/theme.dart';
 
 void main() => runApp(MyApp());
@@ -14,8 +14,8 @@ class StartScreen extends StatelessWidget {
       body: Center(
         child: RaisedButton(
           onPressed: () {
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => ConfigView()));
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => GameConfigView()));
           },
           child: Text('New Game'),
         ),

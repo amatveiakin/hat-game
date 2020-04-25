@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:hatgame/game_config.dart';
+import 'package:hatgame/built_value/game_config.dart';
+import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/numeric_field.dart';
 
 class RulesConfigView extends StatefulWidget {
   final RulesConfig config;
-  final void Function(void Function()) onUpdate;
+  final GameConfigController configController;
 
-  RulesConfigView({@required this.config, @required this.onUpdate});
+  RulesConfigView({@required this.config, @required this.configController});
 
   @override
   State<StatefulWidget> createState() => RulesConfigViewState();
@@ -49,22 +50,24 @@ class RulesConfigViewState extends State<RulesConfigView> {
   final _turnTimeController = TextEditingController();
   final _bonusTimeController = TextEditingController();
 
-  get config => widget.config;
-  get onUpdate => widget.onUpdate;
+  RulesConfig get config => widget.config;
+  GameConfigController get configController => widget.configController;
 
   @override
   void initState() {
     super.initState();
 
     _turnTimeController.text = config.turnSeconds.toString();
-    _turnTimeController.addListener(() => onUpdate(() {
-          config.turnSeconds = int.tryParse(_turnTimeController.text);
-        }));
+    _turnTimeController.addListener(() => configController.updateRules(
+          config.rebuild(
+              (b) => b..turnSeconds = int.tryParse(_turnTimeController.text)),
+        ));
 
     _bonusTimeController.text = config.bonusSeconds.toString();
-    _bonusTimeController.addListener(() => onUpdate(() {
-          config.bonusSeconds = int.tryParse(_bonusTimeController.text);
-        }));
+    _bonusTimeController.addListener(() => configController.updateRules(
+          config.rebuild(
+              (b) => b..bonusSeconds = int.tryParse(_bonusTimeController.text)),
+        ));
   }
 
   @override

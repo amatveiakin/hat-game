@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:hatgame/assertion.dart';
-import 'package:hatgame/game_config.dart';
+import 'package:hatgame/built_value/game_config.dart';
+import 'package:hatgame/game_config_controller.dart';
+import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_view.dart';
 import 'package:hatgame/player_config_view.dart';
 import 'package:hatgame/rules_config_view.dart';
@@ -10,12 +11,12 @@ import 'package:hatgame/theme.dart';
 import 'package:hatgame/wide_button.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
 
-class ConfigView extends StatefulWidget {
+class GameConfigView extends StatefulWidget {
   @override
-  createState() => _ConfigViewState();
+  createState() => _GameConfigViewState();
 }
 
-class _ConfigViewState extends State<ConfigView>
+class _GameConfigViewState extends State<GameConfigView>
     with SingleTickerProviderStateMixin {
   // TODO: Consider: change 'Start Game' button to:
   //   - advance to the next screen unless on the last screen alreay; OR
@@ -43,9 +44,7 @@ class _ConfigViewState extends State<ConfigView>
   static const int teamingTabIndex = 1;
   static const int playersTabIndex = 2;
 
-  final _rulesConfig = RulesConfig.dev();
-  final _teamingConfig = TeamingConfig();
-  var _playersConfig = IntermediatePlayersConfig.dev();
+  var _configController = GameConfigController.devConfig();
 
   TabController _tabController;
 
@@ -65,29 +64,10 @@ class _ConfigViewState extends State<ConfigView>
     super.dispose();
   }
 
-  static PlayersConfig _makePlayersConfig(TeamingConfig teamingConfig,
-      IntermediatePlayersConfig intermediateConfig) {
-    final result = PlayersConfig();
-    // Coversion between `players` and `teamPlayers` might be required if
-    // teaming config changed and players haven't been modified since then.
-    Assert.ne(intermediateConfig.teamPlayers == null,
-        intermediateConfig.players == null);
-    if (teamingConfig.teamPlay && !teamingConfig.randomizeTeams) {
-      result.namesByTeam =
-          intermediateConfig.teamPlayers ?? [intermediateConfig.players];
-    } else {
-      result.names = List.from(intermediateConfig.players) ??
-          intermediateConfig.teamPlayers.expand((t) => t).toList();
-    }
-    return result;
-  }
-
-  void _startGame() {
-    final settings = GameConfig();
-    settings.rules = _rulesConfig;
-    settings.teaming = _teamingConfig;
+  void _startGame(GameConfig gameConfig) {
+    GameController gameController;
     try {
-      settings.players = _makePlayersConfig(_teamingConfig, _playersConfig);
+      gameController = GameController.newState(gameConfig);
     } on CannotMakePartyingStrategy catch (e) {
       showDialog(
         context: context,
@@ -114,7 +94,12 @@ class _ConfigViewState extends State<ConfigView>
     FocusScope.of(context).unfocus();
     // TODO: Remove "back" button.
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => GameView(settings)));
+        context,
+        MaterialPageRoute(
+            builder: (context) => GameView(
+                  gameConfig: gameConfig,
+                  gameController: gameController,
+                )));
   }
 
   @override
@@ -129,43 +114,61 @@ class _ConfigViewState extends State<ConfigView>
           ),
         ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                RulesConfigView(
-                  config: _rulesConfig,
-                  onUpdate: (updater) => setState(() => updater()),
+      body: StreamBuilder<GameConfig>(
+        stream: _configController.stateUpdatesStream,
+        builder: (BuildContext context, AsyncSnapshot<GameConfig> snapshot) {
+          // TODO: Deal with errors and loading.
+          if (snapshot.hasError) {
+            return Center(
+                child: Text(
+              'Error getting game config:\n' + snapshot.error.toString(),
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
+            ));
+          }
+          if (!snapshot.hasData) {
+            return Center(child: CircularProgressIndicator());
+          }
+          final GameConfig gameConfig = snapshot.data;
+          if (gameConfig == null) {
+            return Center(child: CircularProgressIndicator());
+          }
+
+          return Column(
+            children: [
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    RulesConfigView(
+                      config: gameConfig.rules,
+                      configController: _configController,
+                    ),
+                    TeamingConfigView(
+                      config: gameConfig.teaming,
+                      configController: _configController,
+                    ),
+                    PlayersConfigView(
+                      teamingConfig: gameConfig.teaming,
+                      initialPlayersConfig: gameConfig.players,
+                      configController: _configController,
+                    ),
+                  ],
                 ),
-                TeamingConfigView(
-                  config: _teamingConfig,
-                  onUpdate: (updater) => setState(() => updater()),
-                ),
-                PlayersConfigView(
-                  teamingConfig: _teamingConfig,
-                  initialPlayersConfig: _playersConfig,
-                  onPlayersUpdated: (IntermediatePlayersConfig newConfig) =>
-                      setState(() {
-                    _playersConfig = newConfig;
-                  }),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 12.0),
-            child: WideButton(
-              onPressed: _startGame,
-              color: MyTheme.accent,
-              child: Text(
-                'Start Game',
-                style: TextStyle(fontSize: 20.0),
               ),
-            ),
-          ),
-        ],
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 12.0),
+                child: WideButton(
+                  onPressed: () => _startGame(gameConfig),
+                  color: MyTheme.accent,
+                  child: Text(
+                    'Start Game',
+                    style: TextStyle(fontSize: 20.0),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

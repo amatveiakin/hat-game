@@ -3,9 +3,9 @@ import 'dart:math';
 
 import 'package:built_collection/built_collection.dart';
 import 'package:hatgame/assertion.dart';
+import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value_ext.dart';
-import 'package:hatgame/game_config.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/list_ext.dart';
 import 'package:hatgame/partying_strategy.dart';
@@ -13,7 +13,8 @@ import 'package:russian_words/russian_words.dart' as russian_words;
 
 class GameController {
   final GameConfig config;
-  GameState state;
+  // Don't get the state from here - get it from the stream!
+  GameState _state;
   final _streamController = StreamController<GameState>(sync: true);
 
   Stream<GameState> get stateUpdatesStream => _streamController.stream;
@@ -39,19 +40,21 @@ class GameController {
       List<int> teamSizes;
       if (config.players.namesByTeam != null) {
         // Shuffle names within teams. Teams themselves are shuffled later.
-        final namesByTeamShuffled =
-            config.players.namesByTeam.map((t) => t.shuffled()).toList();
+        final List<List<String>> namesByTeamShuffled = config
+            .players.namesByTeam
+            .map((t) => t.toList().shuffled())
+            .toList();
         playerNames = namesByTeamShuffled.expand((t) => t).toList();
         teamSizes = namesByTeamShuffled.map((t) => t.length).toList();
       } else {
-        playerNames = config.players.names.shuffled();
+        playerNames = config.players.names.toList().shuffled();
         teamSizes = generateTeamSizes(playerNames.length,
             config.teaming.desiredTeamSize, config.teaming.unequalTeamSize);
       }
       teams = generateTeamPlayers(teamSizes).shuffled();
     } else {
       Assert.holds(config.players.names != null);
-      playerNames = config.players.names.shuffled();
+      playerNames = config.players.names.toList().shuffled();
     }
 
     final players = List<PlayerState>();
@@ -63,7 +66,7 @@ class GameController {
       ));
     }
 
-    state = GameState(
+    _state = GameState(
       (b) => b
         ..players.replace(players)
         ..words.replace(words)
@@ -73,54 +76,54 @@ class GameController {
     );
     if (teams != null) {
       // TODO: Is there a way to do this concisely in one builder?
-      state = state
+      _state = _state
           .rebuild((b) => b.teams.replace(teams.map((t) => BuiltList<int>(t))));
     }
-    _setState(state);
+    _setState(_state);
     _initTurn();
   }
 
   void nextTurn() {
-    Assert.eq(state.turnPhase, TurnPhase.review);
+    Assert.eq(_state.turnPhase, TurnPhase.review);
     _finishTurn();
-    if (state.wordsInHat.length == 0) {
-      Assert.holds(!state.gameFinished);
-      _setState(state.rebuild(
+    if (_state.wordsInHat.length == 0) {
+      Assert.holds(!_state.gameFinished);
+      _setState(_state.rebuild(
         (b) => b..gameFinished = true,
       ));
     } else {
-      _setState(state.rebuild(
-        (b) => b..turn = state.turn + 1,
+      _setState(_state.rebuild(
+        (b) => b..turn = _state.turn + 1,
       ));
       _initTurn();
     }
   }
 
   void startExplaning() {
-    Assert.eq(state.turnPhase, TurnPhase.prepare);
-    _setState(state.rebuild(
+    Assert.eq(_state.turnPhase, TurnPhase.prepare);
+    _setState(_state.rebuild(
       (b) => b..turnPhase = TurnPhase.explain,
     ));
     _drawNextWord();
   }
 
   void wordGuessed() {
-    Assert.eq(state.turnPhase, TurnPhase.explain);
-    Assert.holds(state.wordsInThisTurn.isNotEmpty);
-    Assert.eq(state.wordsInThisTurn.last, state.currentWord);
-    setWordStatus(state.currentWord, WordStatus.explained);
+    Assert.eq(_state.turnPhase, TurnPhase.explain);
+    Assert.holds(_state.wordsInThisTurn.isNotEmpty);
+    Assert.eq(_state.wordsInThisTurn.last, _state.currentWord);
+    setWordStatus(_state.currentWord, WordStatus.explained);
     _drawNextWord();
   }
 
   void finishExplanation() {
-    Assert.eq(state.turnPhase, TurnPhase.explain);
-    _setState(state.rebuild(
+    Assert.eq(_state.turnPhase, TurnPhase.explain);
+    _setState(_state.rebuild(
       (b) => b..turnPhase = TurnPhase.review,
     ));
   }
 
   void setWordStatus(int wordId, WordStatus newStatus) {
-    _setState(state.rebuild(
+    _setState(_state.rebuild(
       (b) => b
         ..words.rebuildAt(
           wordId,
@@ -130,7 +133,7 @@ class GameController {
   }
 
   void setWordFeedback(int wordId, WordFeedback newFeedback) {
-    _setState(state.rebuild(
+    _setState(_state.rebuild(
       (b) => b
         ..words.rebuildAt(
           wordId,
@@ -140,47 +143,47 @@ class GameController {
   }
 
   void _initTurn() {
-    _setState(state.rebuild(
+    _setState(_state.rebuild(
       (b) => b
         ..turnPhase = TurnPhase.prepare
         ..currentParty.replace(
-            PartyingStrategy.fromGame(GameData(config, state))
-                .getParty(state.turn)),
+            PartyingStrategy.fromGame(GameData(config, _state))
+                .getParty(_state.turn)),
     ));
   }
 
   void _finishTurn() {
-    final List<int> wordsScored = state.wordsInThisTurn
-        .where((w) => state.words[w].status == WordStatus.explained)
+    final List<int> wordsScored = _state.wordsInThisTurn
+        .where((w) => _state.words[w].status == WordStatus.explained)
         .toList();
-    _setState(state.rebuild(
+    _setState(_state.rebuild(
       (b) => b
         ..turnPhase = null
         ..players.map((p) {
-          if (state.currentParty.performer == p.id) {
+          if (_state.currentParty.performer == p.id) {
             return p.rebuild((b) => b..wordsExplained.addAll(wordsScored));
-          } else if (state.currentParty.recipients.contains(p.id)) {
+          } else if (_state.currentParty.recipients.contains(p.id)) {
             return p.rebuild((b) => b..wordsGuessed.addAll(wordsScored));
           }
           return p;
         })
-        ..wordsInHat.addAll(state.wordsInThisTurn
+        ..wordsInHat.addAll(_state.wordsInThisTurn
             .where((w) => b.words[w].status == WordStatus.notExplained))
         ..wordsInThisTurn.clear(),
     ));
   }
 
   void _drawNextWord() {
-    Assert.eq(state.turnPhase, TurnPhase.explain);
-    if (state.wordsInHat.isEmpty) {
+    Assert.eq(_state.turnPhase, TurnPhase.explain);
+    if (_state.wordsInHat.isEmpty) {
       finishExplanation();
       return;
     }
     final int nextWord =
-        state.wordsInHat[Random().nextInt(state.wordsInHat.length)];
-    Assert.holds(state.wordsInHat.contains(nextWord),
-        lazyMessage: () => state.wordsInHat.toString());
-    _setState(state.rebuild(
+        _state.wordsInHat[Random().nextInt(_state.wordsInHat.length)];
+    Assert.holds(_state.wordsInHat.contains(nextWord),
+        lazyMessage: () => _state.wordsInHat.toString());
+    _setState(_state.rebuild(
       (b) => b
         ..currentWord = nextWord
         ..wordsInThisTurn.add(nextWord)
@@ -190,7 +193,7 @@ class GameController {
 
   // TODO: Optimize: avoid sequential calls.
   void _setState(GameState newState) {
-    state = newState;
+    _state = newState;
     _streamController.sink.add(newState);
   }
 }

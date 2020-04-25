@@ -1,7 +1,7 @@
 
 import 'package:hatgame/assertion.dart';
+import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
-import 'package:hatgame/game_config.dart';
 
 class PartyViewData {
   final PlayerState performer;

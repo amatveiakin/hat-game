@@ -1,55 +1,25 @@
-import 'dart:math';
-
+import 'package:built_collection/built_collection.dart';
 import 'package:hatgame/assertion.dart';
-import 'package:hatgame/game_config.dart';
+import 'package:hatgame/built_value/game_config.dart';
+import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/theme.dart';
 import 'package:flutter/material.dart';
 
 // TODO: Allow to delete teams.
 
-class IntermediatePlayersConfig {
-  // One of the two is set depending on teaming config.
-  List<List<String>> teamPlayers;
-  List<String> players;
-
-  IntermediatePlayersConfig.nulls();
-  IntermediatePlayersConfig.defaults() : players = [];
-  // TODO: Delete before prod release.
-  IntermediatePlayersConfig.dev()
-      : players = ['Vasya', 'Petya', 'Masha', 'Dasha'];
-}
-
 bool _manualTeams(TeamingConfig teamingConfig) {
   return teamingConfig.teamPlay && !teamingConfig.randomizeTeams;
 }
 
-void _updateIntermediatePlayersConfig(
-    IntermediatePlayersConfig playersConfig, bool manualTeams) {
-  if (playersConfig.players != null) {
-    if (manualTeams) {
-      playersConfig.teamPlayers = [playersConfig.players];
-      playersConfig.players = null;
-    }
-  } else if (playersConfig.teamPlayers != null) {
-    if (!manualTeams) {
-      playersConfig.players =
-          playersConfig.teamPlayers.expand((t) => t).toList();
-      playersConfig.teamPlayers = null;
-    }
-  } else {
-    Assert.fail('IntermediatePlayersConfig not initialized');
-  }
-}
-
 class PlayersConfigView extends StatefulWidget {
   final bool manualTeams;
-  final IntermediatePlayersConfig initialPlayersConfig;
-  final void Function(IntermediatePlayersConfig) onPlayersUpdated;
+  final PlayersConfig initialPlayersConfig;
+  final GameConfigController configController;
 
   PlayersConfigView(
       {@required teamingConfig,
       @required this.initialPlayersConfig,
-      @required this.onPlayersUpdated})
+      @required this.configController})
       : this.manualTeams = _manualTeams(teamingConfig);
 
   @override
@@ -89,15 +59,16 @@ class _PlayersConfigViewState extends State<PlayersConfigView> {
   final _scrollController = ScrollController();
   bool _freezeUpdates = true;
 
-  get manualTeams => widget.manualTeams;
+  bool get manualTeams => widget.manualTeams;
+  GameConfigController get configController => widget.configController;
 
   void _generateInitialPlayerItems() {
-    final IntermediatePlayersConfig config = widget.initialPlayersConfig;
-    Assert.ne(config.teamPlayers == null, config.players == null);
+    final PlayersConfig config = widget.initialPlayersConfig;
+    Assert.ne(config.namesByTeam == null, config.names == null);
     // Conversion might be required is teaming config changed.
     if (manualTeams) {
       final teamPlayers =
-          (config.teamPlayers != null) ? config.teamPlayers : [config.players];
+          (config.namesByTeam != null) ? config.namesByTeam : [config.names];
       if (teamPlayers.isNotEmpty) {
         for (final team in teamPlayers) {
           if (_playerItems.isNotEmpty) {
@@ -109,9 +80,9 @@ class _PlayersConfigViewState extends State<PlayersConfigView> {
         }
       }
     } else {
-      final players = (config.players != null)
-          ? config.players
-          : config.teamPlayers.expand((t) => t).toList();
+      final players = (config.names != null)
+          ? config.names
+          : config.namesByTeam.expand((t) => t).toList();
       for (final p in players) {
         _addPlayer(p, focus: false);
       }
@@ -122,23 +93,28 @@ class _PlayersConfigViewState extends State<PlayersConfigView> {
     if (_freezeUpdates) {
       return;
     }
-    final config = IntermediatePlayersConfig.nulls();
     if (manualTeams) {
-      config.teamPlayers = [[]];
+      List<List<String>> namesByTeam = [[]];
       for (final p in _playerItems) {
         if (p.isTeamDivider) {
-          config.teamPlayers.add([]);
+          namesByTeam.add([]);
         } else {
-          config.teamPlayers.last.add(p.name);
+          namesByTeam.last.add(p.name);
         }
       }
+      configController.updatePlayers(PlayersConfig(
+        (b) => b
+          ..namesByTeam.replace(namesByTeam.map((t) => BuiltList<String>(t))),
+      ));
     } else {
-      config.players = _playerItems.map((p) {
-        Assert.holds(!p.isTeamDivider);
-        return p.name;
-      }).toList();
+      configController.updatePlayers(PlayersConfig(
+        (b) => b
+          ..names.replace(_playerItems.map((p) {
+            Assert.holds(!p.isTeamDivider);
+            return p.name;
+          })),
+      ));
     }
-    widget.onPlayersUpdated(config);
   }
 
   void _addPlayer(String name, {@required bool focus}) {
