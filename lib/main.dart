@@ -30,18 +30,12 @@ class StartScreen extends StatelessWidget {
           children: [
             WideButton(
               onPressed: () => _newGame(context),
-              child: Text(
-                'New Game',
-                style: TextStyle(fontSize: 20.0),
-              ),
+              child: Text('New Game'),
             ),
             SizedBox(height: 24),
             WideButton(
               onPressed: () => _joinGame(context),
-              child: Text(
-                'Join Game',
-                style: TextStyle(fontSize: 20.0),
-              ),
+              child: Text('Join Game'),
             ),
           ],
         ),

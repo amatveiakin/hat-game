@@ -154,10 +154,7 @@ class _GameConfigViewState extends State<GameConfigView>
                 child: WideButton(
                   onPressed: () => _startGame(gameConfig),
                   color: MyTheme.accent,
-                  child: Text(
-                    'Start Game',
-                    style: TextStyle(fontSize: 20.0),
-                  ),
+                  child: Text('Start Game'),
                 ),
               ),
             ],

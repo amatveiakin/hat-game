@@ -401,10 +401,7 @@ class PlayAreaState extends State<PlayArea>
             child: WideButton(
               onPressed: _reviewDone,
               color: MyTheme.accent,
-              child: Text(
-                'Done',
-                style: TextStyle(fontSize: 20.0),
-              ),
+              child: Text('Done'),
             ),
           ),
           SizedBox(height: 12),

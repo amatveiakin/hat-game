@@ -19,7 +19,10 @@ class WideButton extends StatelessWidget {
         onPressed: onPressed,
         color: color,
         padding: EdgeInsets.symmetric(vertical: 12.0),
-        child: child,
+        child: DefaultTextStyle.merge(
+          style: TextStyle(fontSize: 20),
+          child: child,
+        ),
       ),
     );
   }
