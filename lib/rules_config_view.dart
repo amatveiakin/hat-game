@@ -91,6 +91,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
               NumericField(
                 controller: _turnTimeController,
                 goldenValues: turnTimeGoldenValues,
+                suffixText: 's',
               ),
             ],
           ),
@@ -104,6 +105,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
               NumericField(
                 controller: _bonusTimeController,
                 goldenValues: bonusTimeGoldenValues,
+                suffixText: 's',
               ),
             ],
           ),

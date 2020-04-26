@@ -6,10 +6,12 @@ import 'package:hatgame/theme.dart';
 class NumericField extends StatefulWidget {
   final TextEditingController controller;
   final List<int> goldenValues;
+  final String suffixText;
 
   NumericField({
     @required this.controller,
     @required this.goldenValues,
+    this.suffixText,
   }) {
     Assert.holds(goldenValues.isNotEmpty);
   }
@@ -88,8 +90,11 @@ class _NumericFieldState extends State<NumericField> {
               child: TextField(
                 controller: widget.controller,
                 focusNode: _focusNode,
-                decoration:
-                    InputDecoration(filled: true, border: InputBorder.none),
+                decoration: InputDecoration(
+                  filled: true,
+                  border: InputBorder.none,
+                  suffixText: widget.suffixText,
+                ),
                 textAlign: TextAlign.center,
                 keyboardType: TextInputType.number,
                 inputFormatters: [WhitelistingTextInputFormatter.digitsOnly],
