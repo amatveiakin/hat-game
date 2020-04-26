@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/game_config_controller.dart';
+import 'package:hatgame/game_data.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/widget/enum_option_selector.dart';
 import 'package:hatgame/widget/multi_line_list_tile.dart';
@@ -184,10 +185,14 @@ class GuessingInLargeTeamSelectorState extends EnumOptionSelectorState<
 // Main part
 
 class TeamingConfigView extends StatelessWidget {
+  final bool onlineMode;
   final TeamingConfig config;
   final GameConfigController configController;
 
-  TeamingConfigView({@required this.config, @required this.configController});
+  TeamingConfigView(
+      {@required this.onlineMode,
+      @required this.config,
+      @required this.configController});
 
   // TODO: Irrelevant settings: hide or disable?
   @override
@@ -204,8 +209,8 @@ class TeamingConfigView extends StatelessWidget {
             ? 'Fixed teams. Score is per team.'
             : 'Fluid pairing. Score is per player.'),
         value: config.teamPlay,
-        onChanged: (bool checked) => configController
-            .updateTeaming(config.rebuild((b) => b..teamPlay = checked)),
+        onChanged: (bool checked) => configController.updateTeaming(
+            (config) => config.rebuild((b) => b..teamPlay = checked)),
       ),
     );
     if (!config.teamPlay) {
@@ -214,7 +219,7 @@ class TeamingConfigView extends StatelessWidget {
             builder: (context) => IndividualPlayStyleSelector(
                   config.individualPlayStyle,
                   (IndividualPlayStyle newValue) =>
-                      configController.updateTeaming(config
+                      configController.updateTeaming((config) => config
                           .rebuild((b) => b..individualPlayStyle = newValue)),
                 )));
       };
@@ -241,7 +246,7 @@ class TeamingConfigView extends StatelessWidget {
               'in individual mode');
       }
     }
-    if (config.teamPlay) {
+    if (config.teamPlay && !onlineMode) {
       items.add(
         MultiLineSwitchListTile(
           title: Text(
@@ -251,7 +256,7 @@ class TeamingConfigView extends StatelessWidget {
               : 'Players are divided into teams manually.'),
           value: config.randomizeTeams,
           onChanged: (bool checked) => configController.updateTeaming(
-              config.rebuild((b) => b..randomizeTeams = checked)),
+              (config) => config.rebuild((b) => b..randomizeTeams = checked)),
         ),
       );
     }
@@ -261,7 +266,8 @@ class TeamingConfigView extends StatelessWidget {
             builder: (context) => DesiredTeamSizeSelector(
                   config.desiredTeamSize,
                   (DesiredTeamSize newValue) => configController.updateTeaming(
-                      config.rebuild((b) => b..desiredTeamSize = newValue)),
+                      (config) =>
+                          config.rebuild((b) => b..desiredTeamSize = newValue)),
                 )));
       };
       switch (config.desiredTeamSize) {
@@ -301,7 +307,8 @@ class TeamingConfigView extends StatelessWidget {
             builder: (context) => UnequalTeamSizeSelector(
                   config.unequalTeamSize,
                   (UnequalTeamSize newValue) => configController.updateTeaming(
-                      config.rebuild((b) => b..unequalTeamSize = newValue)),
+                      (config) =>
+                          config.rebuild((b) => b..unequalTeamSize = newValue)),
                 )));
       };
       switch (config.unequalTeamSize) {
@@ -383,7 +390,7 @@ class TeamingConfigView extends StatelessWidget {
             builder: (context) => GuessingInLargeTeamSelector(
                   config.guessingInLargeTeam,
                   (IndividualPlayStyle newValue) =>
-                      configController.updateTeaming(config
+                      configController.updateTeaming((config) => config
                           .rebuild((b) => b..guessingInLargeTeam = newValue)),
                 )));
       };

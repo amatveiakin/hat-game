@@ -1,4 +1,5 @@
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/util/assertion.dart';
@@ -8,6 +9,25 @@ class PartyViewData {
   final List<PlayerState> recipients;
 
   PartyViewData(this.performer, this.recipients);
+}
+
+class LocalGameData {
+  final bool onlineMode = true;
+  final String gameID;
+  final DocumentReference gameReference;
+  // TODO: Make sure this is still synced after all randomizations.
+  final int myPlayerID;
+
+  bool get isAdmin => myPlayerID == 0;
+
+  LocalGameData(
+      {@required this.gameID,
+      @required this.gameReference,
+      @required this.myPlayerID}) {
+    Assert.holds(gameID != null);
+    Assert.holds(gameReference != null);
+    Assert.holds(myPlayerID != null);
+  }
 }
 
 // All information about the game, read-only.

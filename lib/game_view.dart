@@ -208,10 +208,13 @@ class WordReviewItem extends StatelessWidget {
 }
 
 class PlayArea extends StatefulWidget {
+  // TODO: Which of these do we actually need?
+  final LocalGameData localGameData;
   final GameController gameController;
   final GameData gameData;
 
   PlayArea({
+    @required this.localGameData,
     @required this.gameController,
     @required this.gameData,
   });
@@ -222,6 +225,7 @@ class PlayArea extends StatefulWidget {
 
 class PlayAreaState extends State<PlayArea>
     with SingleTickerProviderStateMixin {
+  LocalGameData get localGameData => widget.localGameData;
   GameController get gameController => widget.gameController;
   GameConfig get gameConfig => gameData.config;
   GameState get gameState => gameData.state;
@@ -414,15 +418,20 @@ class PlayAreaState extends State<PlayArea>
 }
 
 class GameView extends StatelessWidget {
+  final LocalGameData localGameData;
+
+  GameView({@required this.localGameData});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Hat Game'),
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: Firestore.instance.collection('games').snapshots(),
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+      body: StreamBuilder<DocumentSnapshot>(
+        stream: localGameData.gameReference.snapshots(),
+        builder:
+            (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
           if (snapshot.hasError) {
             // TODO: Deal with errors.
             return Center(
@@ -435,13 +444,14 @@ class GameView extends StatelessWidget {
             // TODO: Deal with loading (use snapshot.connectionState?)
             return Center(child: CircularProgressIndicator());
           }
-          final gameController =
-              GameController.fromSnapshot(snapshot.data.documents.first);
-          if (gameController.state == null) {
-            // TODO: When does this happen?
+          final gameController = GameController.fromSnapshot(snapshot.data);
+          if (gameController == null) {
             return Center(child: CircularProgressIndicator());
           }
+
           if (gameController.state.gameFinished) {
+            // TODO: Avoid double navigation, similarly to ConfigView.
+            // Cannot navigate from within `build`.
             Future.delayed(
               Duration.zero,
               () => Navigator.pushAndRemoveUntil(
@@ -461,6 +471,7 @@ class GameView extends StatelessWidget {
                     gameController.state.turnPhase),
                 Expanded(
                   child: PlayArea(
+                    localGameData: localGameData,
                     gameController: gameController,
                     gameData: gameController.gameData,
                   ),

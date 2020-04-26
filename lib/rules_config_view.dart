@@ -82,8 +82,8 @@ class RulesConfigViewState extends State<RulesConfigView> {
     _turnTimeController.addListener(() {
       final int newValue = int.tryParse(_turnTimeController.text);
       if (newValue != null) {
-        configController
-            .updateRules(config.rebuild((b) => b..turnSeconds = newValue));
+        configController.updateRules(
+            (config) => config.rebuild((b) => b..turnSeconds = newValue));
       }
     });
 
@@ -91,8 +91,8 @@ class RulesConfigViewState extends State<RulesConfigView> {
     _bonusTimeController.addListener(() {
       final int newValue = int.tryParse(_bonusTimeController.text);
       if (newValue != null) {
-        configController
-            .updateRules(config.rebuild((b) => b..bonusSeconds = newValue));
+        configController.updateRules(
+            (config) => config.rebuild((b) => b..bonusSeconds = newValue));
       }
     });
 
@@ -100,8 +100,8 @@ class RulesConfigViewState extends State<RulesConfigView> {
     _wordsPerPlayerController.addListener(() {
       final int newValue = int.tryParse(_wordsPerPlayerController.text);
       if (newValue != null) {
-        configController
-            .updateRules(config.rebuild((b) => b..wordsPerPlayer = newValue));
+        configController.updateRules(
+            (config) => config.rebuild((b) => b..wordsPerPlayer = newValue));
       }
     });
   }

@@ -3,13 +3,17 @@ import 'dart:math';
 
 import 'package:built_collection/built_collection.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value/serializers.dart';
+import 'package:hatgame/db_constants.dart';
+import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/partying_strategy.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/built_value_ext.dart';
+import 'package:hatgame/util/firestore.dart';
 import 'package:hatgame/util/list_ext.dart';
 import 'package:russian_words/russian_words.dart' as russian_words;
 
@@ -130,15 +134,78 @@ class GameTransformer {
 }
 
 class GameController {
+  final DocumentReference gameReference;
   final GameConfig config;
   // TODO: Should UI be able to get state from here or only from the stream?
   GameState state;
-  DocumentReference reference;
 
   GameData get gameData => GameData(config, state);
   GameTransformer get _transformer => GameTransformer(config, state);
 
-  static void newGame(GameConfig config) {
+  static String generateNewGameID() {
+    return Random().nextInt(10000).toString().padLeft(4, '0');
+  }
+
+  static DocumentReference gameReferenceFromGameID(String gameId) {
+    return Firestore.instance.collection('games').document(gameId);
+  }
+
+  static Future<LocalGameData> newLobby(String myName) async {
+    const int maxAttempts = 1000;
+    // TODO: Use config from local storage OR from account.
+    final GameConfig config = GameConfigController.defaultConfig();
+    final String serialized = json.encode(serializers.serialize(config));
+    String gameID;
+    DocumentReference reference;
+    final int playerID = 0;
+    await Firestore.instance.runTransaction((Transaction tx) async {
+      for (int iter = 0; iter < maxAttempts; iter++) {
+        gameID = generateNewGameID();
+        reference = gameReferenceFromGameID(gameID);
+        DocumentSnapshot snapshot = await tx.get(reference);
+        if (!snapshot.exists) {
+          await tx.set(reference, <String, dynamic>{
+            DBColumns.config: serialized,
+            DBColumns.player(playerID): myName
+          });
+          return;
+        }
+      }
+      throw Exception('Cannot generate game ID');
+    });
+    return LocalGameData(
+      gameID: gameID,
+      gameReference: reference,
+      myPlayerID: playerID,
+    );
+  }
+
+  static Future<LocalGameData> joinLobby(String myName, String gameID) async {
+    final DocumentReference reference = gameReferenceFromGameID(gameID);
+    int playerID = 0;
+    await Firestore.instance.runTransaction((Transaction tx) async {
+      DocumentSnapshot snapshot = await tx.get(reference);
+      if (!snapshot.exists) {
+        // TODO: Catch this and show a proper error message.
+        throw Exception('Game doesn\'t exist');
+      }
+      // TODO: Check that player name is unique.
+      while (snapshot.data.containsKey('player-' + playerID.toString())) {
+        playerID++;
+      }
+      await tx.update(reference,
+          <String, dynamic>{'player-' + playerID.toString(): myName});
+    });
+    return LocalGameData(
+      gameID: gameID,
+      gameReference: reference,
+      myPlayerID: playerID,
+    );
+  }
+
+  // Writes state asynchronously.
+  static void startGame(
+      DocumentReference reference, GameConfig config) {
     Assert.ne(config.players.names == null, config.players.namesByTeam == null);
     List<String> playerNames;
     List<List<int>> teams;
@@ -159,6 +226,7 @@ class GameController {
       }
       teams = generateTeamPlayers(teamSizes).shuffled();
     } else {
+      // TODO: Forbid games with a single players.
       Assert.holds(config.players.names != null);
       playerNames = config.players.names.toList().shuffled();
     }
@@ -199,53 +267,48 @@ class GameController {
       initialState = initialState
           .rebuild((b) => b.teams.replace(teams.map((t) => BuiltList<int>(t))));
     }
-    _writeConfig(config);
-    _writeInitialState(
-        (GameTransformer(config, initialState)..initTurn()).state);
+    initialState = (GameTransformer(config, initialState)..initTurn()).state;
+    // In addition to initial state, write the config:
+    //   - just to be sure;
+    //   - to fill in players field.  // TODO: Better solution for this?
+    _writeInitialState(reference, config, initialState);
   }
 
-  GameController.fromSnapshot(final DocumentSnapshot documentSnapshot)
-      : config = serializers
-            .deserialize(json.decode(documentSnapshot.data['config'])),
-        state = serializers
-            .deserialize(json.decode(documentSnapshot.data['state'])),
-        reference = documentSnapshot.reference;
+  GameController._(this.gameReference, this.config, this.state);
 
-  static void _writeConfig(GameConfig config) {
-    // TODO: Use a transaction to make sure the config doesn't exist yet.
-    final serialized = json.encode(serializers.serialize(config));
-    Firestore.instance
-        .collection('games')
-        .document('test')
-        .updateData({'config': serialized});
+  factory GameController.fromSnapshot(final DocumentSnapshot documentSnapshot) {
+    final GameConfigReadResult configReadResult =
+        GameConfigController.configFromSnapshot(documentSnapshot);
+    if (!configReadResult.gameHasStarted ||
+        !documentSnapshot.data.containsKey(DBColumns.state)) {
+      return null;
+    }
+    final GameState state = serializers
+        .deserialize(json.decode(documentSnapshot.data[DBColumns.state]));
+    return GameController._(
+        documentSnapshot.reference, configReadResult.config, state);
   }
 
-  static void _writeInitialState(GameState initialState) {
-    // TODO: Use a transaction to make sure the state doesn't exist yet.
-    final serialized = json.encode(serializers.serialize(initialState));
-    Firestore.instance
-        .collection('games')
-        .document('test')
-        .updateData({'state': serialized});
+  static Future<void> _writeInitialState(DocumentReference reference,
+      GameConfig config, GameState initialState) async {
+    final serializedConfig = json.encode(serializers.serialize(config));
+    final serializedState = json.encode(serializers.serialize(initialState));
+    await Firestore.instance.runTransaction((Transaction tx) async {
+      DocumentSnapshot snapshot = await tx.get(reference);
+      Assert.holds(snapshot.exists,
+          lazyMessage: () => 'Game doesn\'t exist: ' + reference.path);
+      Assert.holds(!snapshot.data.containsKey(DBColumns.state),
+          lazyMessage: () => 'Game state already exists: ' + reference.path);
+      await tx.update(reference, {
+        DBColumns.config: serializedConfig,
+        DBColumns.state: serializedState,
+      });
+    });
   }
 
   void _updateState(GameState newState) {
-    final oldStateSerialized = json.encode(serializers.serialize(state));
-    final newStateSerialized = json.encode(serializers.serialize(newState));
-    Assert.holds(reference != null);
-    Firestore.instance.runTransaction((Transaction tx) async {
-      DocumentSnapshot postSnapshot = await tx.get(reference);
-      final dbState = postSnapshot.data['state'];
-      Assert.holds(dbState == oldStateSerialized,
-          lazyMessage: () =>
-              'Race condition detected!' +
-              ('\nState in DB :\n' + dbState) +
-              ('\nOld state in the App:\n' + oldStateSerialized) +
-              ('\nNew state in the App:\n' + newStateSerialized),
-          inRelease: AssertInRelease.log);
-      await tx
-          .update(reference, <String, dynamic>{'state': newStateSerialized});
-    });
+    FirestoreUtil.atomicUpdateColumn(
+        gameReference, DBColumns.state, state, newState);
     state = newState;
   }
 

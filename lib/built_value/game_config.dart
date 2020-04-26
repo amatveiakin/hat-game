@@ -108,7 +108,7 @@ abstract class PlayersConfig
 abstract class GameConfig implements Built<GameConfig, GameConfigBuilder> {
   RulesConfig get rules;
   TeamingConfig get teaming;
-  PlayersConfig get players;
+  @nullable PlayersConfig get players;
 
   GameConfig._();
 

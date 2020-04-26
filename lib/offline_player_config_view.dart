@@ -11,19 +11,19 @@ bool _manualTeams(TeamingConfig teamingConfig) {
   return teamingConfig.teamPlay && !teamingConfig.randomizeTeams;
 }
 
-class PlayersConfigView extends StatefulWidget {
+class OfflinePlayersConfigView extends StatefulWidget {
   final bool manualTeams;
   final PlayersConfig initialPlayersConfig;
   final GameConfigController configController;
 
-  PlayersConfigView(
+  OfflinePlayersConfigView(
       {@required teamingConfig,
       @required this.initialPlayersConfig,
       @required this.configController})
       : this.manualTeams = _manualTeams(teamingConfig);
 
   @override
-  createState() => _PlayersConfigViewState();
+  createState() => _OfflinePlayersConfigViewState();
 }
 
 class _PlayerData {
@@ -52,7 +52,7 @@ class _PlayerData {
 }
 
 // TODO: Consider making this widget stateless.
-class _PlayersConfigViewState extends State<PlayersConfigView> {
+class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
   final _playerItems = <_PlayerData>[];
   final _playersToDispose = <_PlayerData>[];
   final _autoscrollStopwatch = Stopwatch();
@@ -64,7 +64,8 @@ class _PlayersConfigViewState extends State<PlayersConfigView> {
 
   void _generateInitialPlayerItems() {
     final PlayersConfig config = widget.initialPlayersConfig;
-    Assert.ne(config.namesByTeam == null, config.names == null);
+    Assert.ne(config.namesByTeam == null, config.names == null,
+        lazyMessage: () => config.toString());
     // Conversion might be required is teaming config changed.
     if (manualTeams) {
       final teamPlayers =
@@ -102,12 +103,12 @@ class _PlayersConfigViewState extends State<PlayersConfigView> {
           namesByTeam.last.add(p.name);
         }
       }
-      configController.updatePlayers(PlayersConfig(
+      configController.updatePlayers((_) => PlayersConfig(
         (b) => b
           ..namesByTeam.replace(namesByTeam.map((t) => BuiltList<String>(t))),
       ));
     } else {
-      configController.updatePlayers(PlayersConfig(
+      configController.updatePlayers((_) => PlayersConfig(
         (b) => b
           ..names.replace(_playerItems.map((p) {
             Assert.holds(!p.isTeamDivider);
@@ -275,7 +276,7 @@ class _PlayersConfigViewState extends State<PlayersConfigView> {
   }
 
   @override
-  void didUpdateWidget(PlayersConfigView oldWidget) {
+  void didUpdateWidget(OfflinePlayersConfigView oldWidget) {
     for (final player in _playersToDispose) {
       player.dispose();
     }

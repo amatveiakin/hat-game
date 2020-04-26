@@ -360,11 +360,13 @@ class _$GameConfigSerializer implements StructuredSerializer<GameConfig> {
       'teaming',
       serializers.serialize(object.teaming,
           specifiedType: const FullType(TeamingConfig)),
-      'players',
-      serializers.serialize(object.players,
-          specifiedType: const FullType(PlayersConfig)),
     ];
-
+    if (object.players != null) {
+      result
+        ..add('players')
+        ..add(serializers.serialize(object.players,
+            specifiedType: const FullType(PlayersConfig)));
+    }
     return result;
   }
 
@@ -795,9 +797,6 @@ class _$GameConfig extends GameConfig {
     if (teaming == null) {
       throw new BuiltValueNullFieldError('GameConfig', 'teaming');
     }
-    if (players == null) {
-      throw new BuiltValueNullFieldError('GameConfig', 'players');
-    }
   }
 
   @override
@@ -882,7 +881,7 @@ class GameConfigBuilder implements Builder<GameConfig, GameConfigBuilder> {
           new _$GameConfig._(
               rules: rules.build(),
               teaming: teaming.build(),
-              players: players.build());
+              players: _players?.build());
     } catch (_) {
       String _$failedField;
       try {
@@ -891,7 +890,7 @@ class GameConfigBuilder implements Builder<GameConfig, GameConfigBuilder> {
         _$failedField = 'teaming';
         teaming.build();
         _$failedField = 'players';
-        players.build();
+        _players?.build();
       } catch (e) {
         throw new BuiltValueNestedFieldError(
             'GameConfig', _$failedField, e.toString());

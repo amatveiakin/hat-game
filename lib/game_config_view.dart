@@ -1,17 +1,25 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/game_controller.dart';
+import 'package:hatgame/game_data.dart';
 import 'package:hatgame/game_view.dart';
+import 'package:hatgame/offline_player_config_view.dart';
+import 'package:hatgame/online_player_config_view.dart';
 import 'package:hatgame/partying_strategy.dart';
-import 'package:hatgame/player_config_view.dart';
 import 'package:hatgame/rules_config_view.dart';
 import 'package:hatgame/teaming_config_view.dart';
 import 'package:hatgame/theme.dart';
+import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/widget/wide_button.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
 
 class GameConfigView extends StatefulWidget {
+  final LocalGameData localGameData;
+
+  GameConfigView({@required this.localGameData});
+
   @override
   createState() => _GameConfigViewState();
 }
@@ -44,7 +52,9 @@ class _GameConfigViewState extends State<GameConfigView>
   static const int teamingTabIndex = 1;
   static const int playersTabIndex = 2;
 
-  var _configController = GameConfigController.devConfig();
+  LocalGameData get localGameData => widget.localGameData;
+  bool get isAdmin => localGameData.isAdmin;
+  bool navigatedToGame = false;
 
   TabController _tabController;
 
@@ -66,7 +76,7 @@ class _GameConfigViewState extends State<GameConfigView>
 
   void _startGame(GameConfig gameConfig) {
     try {
-      GameController.newGame(gameConfig);
+      GameController.startGame(localGameData.gameReference, gameConfig);
     } on CannotMakePartyingStrategy catch (e) {
       showDialog(
         context: context,
@@ -88,29 +98,57 @@ class _GameConfigViewState extends State<GameConfigView>
       _tabController.animateTo(playersTabIndex);
       return;
     }
+  }
 
+  void _goToGame() {
     // Hide virtual keyboard
     FocusScope.of(context).unfocus();
     // TODO: Remove "back" button.
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => GameView()));
+        context,
+        MaterialPageRoute(
+            builder: (context) => GameView(
+                  localGameData: localGameData,
+                )));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        flexibleSpace: SafeArea(
-          child: TabBar(
-            controller: _tabController,
-            tabs: tabs,
-          ),
-        ),
-      ),
-      body: StreamBuilder<GameConfig>(
-        stream: _configController.stateUpdatesStream,
-        builder: (BuildContext context, AsyncSnapshot<GameConfig> snapshot) {
+      appBar: localGameData.onlineMode
+          ? AppBar(
+              automaticallyImplyLeading: false,
+              title: localGameData.onlineMode
+                  ? Text('Game ID: ${localGameData.gameID}')
+                  : null,
+              // For some reason PreferredSize affects not only the botton of
+              // the AppBar but also the title, making it misaligned with the
+              // normal title text position. Hopefully this is not too visible.
+              // Without PreferredSize the AppBar is just too fat.
+              bottom: PreferredSize(
+                preferredSize: Size.fromHeight(64.0),
+                child: TabBar(
+                  controller: _tabController,
+                  tabs: tabs,
+                ),
+              ),
+            )
+          : PreferredSize(
+              preferredSize: Size.fromHeight(64.0),
+              child: AppBar(
+                automaticallyImplyLeading: false,
+                flexibleSpace: SafeArea(
+                  child: TabBar(
+                    controller: _tabController,
+                    tabs: tabs,
+                  ),
+                ),
+              ),
+            ),
+      body: StreamBuilder<DocumentSnapshot>(
+        stream: localGameData.gameReference.snapshots(),
+        builder:
+            (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
           // TODO: Deal with errors and loading.
           if (snapshot.hasError) {
             return Center(
@@ -122,8 +160,18 @@ class _GameConfigViewState extends State<GameConfigView>
           if (!snapshot.hasData) {
             return Center(child: CircularProgressIndicator());
           }
-          final GameConfig gameConfig = snapshot.data;
-          if (gameConfig == null) {
+          final configController =
+              GameConfigController(localGameData.gameReference);
+          final GameConfigReadResult gameConfigReadResult =
+              GameConfigController.configFromSnapshot(snapshot.data);
+          final GameConfig gameConfig = gameConfigReadResult.config;
+          Assert.holds(gameConfig != null);
+          if (gameConfigReadResult.gameHasStarted) {
+            // Cannot navigate from within `build`.
+            if (!navigatedToGame) {
+              Future.delayed(Duration.zero, () => _goToGame());
+              navigatedToGame = true;
+            }
             return Center(child: CircularProgressIndicator());
           }
 
@@ -135,23 +183,29 @@ class _GameConfigViewState extends State<GameConfigView>
                   children: [
                     RulesConfigView(
                       config: gameConfig.rules,
-                      configController: _configController,
+                      configController: configController,
                     ),
                     TeamingConfigView(
+                      onlineMode: localGameData.onlineMode,
                       config: gameConfig.teaming,
-                      configController: _configController,
+                      configController: configController,
                     ),
-                    PlayersConfigView(
-                      teamingConfig: gameConfig.teaming,
-                      initialPlayersConfig: gameConfig.players,
-                      configController: _configController,
-                    ),
+                    localGameData.onlineMode
+                        ? OnlinePlayersConfigView(
+                            playersConfig: gameConfig.players,
+                          )
+                        : OfflinePlayersConfigView(
+                            teamingConfig: gameConfig.teaming,
+                            initialPlayersConfig: gameConfig.players,
+                            configController: configController,
+                          ),
                   ],
                 ),
               ),
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 12.0),
                 child: WideButton(
+                  // TODO: Allow only if isAdmin (but show a hint otherwise).
                   onPressed: () => _startGame(gameConfig),
                   color: MyTheme.accent,
                   child: Text('Start Game'),
