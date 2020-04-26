@@ -138,8 +138,7 @@ class GameController {
   GameData get gameData => GameData(config, state);
   GameTransformer get _transformer => GameTransformer(config, state);
 
-  // TODO: Don't create a throwaway class instance.
-  GameController.newGame(this.config) {
+  static void newGame(GameConfig config) {
     Assert.ne(config.players.names == null, config.players.namesByTeam == null);
     List<String> playerNames;
     List<List<int>> teams;
@@ -200,7 +199,7 @@ class GameController {
       initialState = initialState
           .rebuild((b) => b.teams.replace(teams.map((t) => BuiltList<int>(t))));
     }
-    _updateConfig();
+    _writeConfig(config);
     _writeInitialState(
         (GameTransformer(config, initialState)..initTurn()).state);
   }
@@ -212,7 +211,8 @@ class GameController {
             .deserialize(json.decode(documentSnapshot.data['state'])),
         reference = documentSnapshot.reference;
 
-  void _updateConfig() {
+  static void _writeConfig(GameConfig config) {
+    // TODO: Use a transaction to make sure the config doesn't exist yet.
     final serialized = json.encode(serializers.serialize(config));
     Firestore.instance
         .collection('games')
@@ -220,16 +220,13 @@ class GameController {
         .updateData({'config': serialized});
   }
 
-  // TODO: Move out of the class, together with GameController.newGame.
-  void _writeInitialState(GameState newState) {
-    final newStateSerialized = json.encode(serializers.serialize(newState));
-    Assert.holds(state == null);
-    Assert.holds(reference == null);
+  static void _writeInitialState(GameState initialState) {
+    // TODO: Use a transaction to make sure the state doesn't exist yet.
+    final serialized = json.encode(serializers.serialize(initialState));
     Firestore.instance
         .collection('games')
         .document('test')
-        .updateData({'state': newStateSerialized});
-    state = newState;
+        .updateData({'state': serialized});
   }
 
   void _updateState(GameState newState) {
@@ -242,9 +239,9 @@ class GameController {
       Assert.holds(dbState == oldStateSerialized,
           lazyMessage: () =>
               'Race condition detected!' +
-              ('\n\nState in DB :\n' + dbState) +
-              ('\n\nOld state in the App:\n' + oldStateSerialized) +
-              ('\n\nNew state in the App:\n' + newStateSerialized),
+              ('\nState in DB :\n' + dbState) +
+              ('\nOld state in the App:\n' + oldStateSerialized) +
+              ('\nNew state in the App:\n' + newStateSerialized),
           inRelease: AssertInRelease.log);
       await tx
           .update(reference, <String, dynamic>{'state': newStateSerialized});
