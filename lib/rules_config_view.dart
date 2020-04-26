@@ -58,16 +58,22 @@ class RulesConfigViewState extends State<RulesConfigView> {
     super.initState();
 
     _turnTimeController.text = config.turnSeconds.toString();
-    _turnTimeController.addListener(() => configController.updateRules(
-          config.rebuild(
-              (b) => b..turnSeconds = int.tryParse(_turnTimeController.text)),
-        ));
+    _turnTimeController.addListener(() {
+      final int newValue = int.tryParse(_turnTimeController.text);
+      if (newValue != null) {
+        configController
+            .updateRules(config.rebuild((b) => b..turnSeconds = newValue));
+      }
+    });
 
     _bonusTimeController.text = config.bonusSeconds.toString();
-    _bonusTimeController.addListener(() => configController.updateRules(
-          config.rebuild(
-              (b) => b..bonusSeconds = int.tryParse(_bonusTimeController.text)),
-        ));
+    _bonusTimeController.addListener(() {
+      final int newValue = int.tryParse(_bonusTimeController.text);
+      if (newValue != null) {
+        configController
+            .updateRules(config.rebuild((b) => b..bonusSeconds = newValue));
+      }
+    });
   }
 
   @override
