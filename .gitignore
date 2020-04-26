@@ -32,6 +32,7 @@
 
 # Web related
 lib/generated_plugin_registrant.dart
+/.firebase/hosting.*.cache
 
 # Symbolication related
 app.*.symbols
