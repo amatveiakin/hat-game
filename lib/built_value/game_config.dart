@@ -12,6 +12,7 @@ part 'game_config.g.dart';
 abstract class RulesConfig implements Built<RulesConfig, RulesConfigBuilder> {
   int get turnSeconds;
   int get bonusSeconds;
+  int get wordsPerPlayer;
 
   RulesConfig._();
 

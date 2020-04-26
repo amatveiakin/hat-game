@@ -29,19 +29,6 @@ class GameController {
 
   // TODO: Don't create a throwaway class instance.
   GameController.newGame(this.config) {
-    final words = List<Word>();
-    while (words.length < 5) {
-      final String text =
-          russian_words.nouns[Random().nextInt(russian_words.nouns.length)];
-      if (text.toLowerCase() != text) {
-        continue;
-      }
-      words.add(Word((b) => b
-        ..id = words.length
-        ..text = text
-        ..status = WordStatus.notExplained));
-    }
-
     Assert.ne(config.players.names == null, config.players.namesByTeam == null);
     List<String> playerNames;
     List<List<int>> teams;
@@ -73,6 +60,20 @@ class GameController {
           ..id = players.length
           ..name = name,
       ));
+    }
+
+    final int totalWords = config.rules.wordsPerPlayer * players.length;
+    final words = List<Word>();
+    while (words.length < totalWords) {
+      final String text =
+          russian_words.nouns[Random().nextInt(russian_words.nouns.length)];
+      if (text.toLowerCase() != text) {
+        continue;
+      }
+      words.add(Word((b) => b
+        ..id = words.length
+        ..text = text
+        ..status = WordStatus.notExplained));
     }
 
     state = GameState(

@@ -14,6 +14,7 @@ class GameConfigController {
       (b) => b
         ..rules.turnSeconds = 15
         ..rules.bonusSeconds = 5
+        ..rules.wordsPerPlayer = 5
         ..teaming.teamPlay = true
         ..teaming.randomizeTeams = true
         ..teaming.individualPlayStyle = IndividualPlayStyle.fluidPairs
@@ -31,6 +32,7 @@ class GameConfigController {
       (b) => b
         ..rules.turnSeconds = 5
         ..rules.bonusSeconds = 3
+        ..rules.wordsPerPlayer = 1
         ..players.names.replace(['Vasya', 'Petya', 'Masha', 'Dasha']),
     ));
   }

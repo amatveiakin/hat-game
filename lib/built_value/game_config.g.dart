@@ -113,6 +113,9 @@ class _$RulesConfigSerializer implements StructuredSerializer<RulesConfig> {
       'bonusSeconds',
       serializers.serialize(object.bonusSeconds,
           specifiedType: const FullType(int)),
+      'wordsPerPlayer',
+      serializers.serialize(object.wordsPerPlayer,
+          specifiedType: const FullType(int)),
     ];
 
     return result;
@@ -135,6 +138,10 @@ class _$RulesConfigSerializer implements StructuredSerializer<RulesConfig> {
           break;
         case 'bonusSeconds':
           result.bonusSeconds = serializers.deserialize(value,
+              specifiedType: const FullType(int)) as int;
+          break;
+        case 'wordsPerPlayer':
+          result.wordsPerPlayer = serializers.deserialize(value,
               specifiedType: const FullType(int)) as int;
           break;
       }
@@ -396,16 +403,22 @@ class _$RulesConfig extends RulesConfig {
   final int turnSeconds;
   @override
   final int bonusSeconds;
+  @override
+  final int wordsPerPlayer;
 
   factory _$RulesConfig([void Function(RulesConfigBuilder) updates]) =>
       (new RulesConfigBuilder()..update(updates)).build();
 
-  _$RulesConfig._({this.turnSeconds, this.bonusSeconds}) : super._() {
+  _$RulesConfig._({this.turnSeconds, this.bonusSeconds, this.wordsPerPlayer})
+      : super._() {
     if (turnSeconds == null) {
       throw new BuiltValueNullFieldError('RulesConfig', 'turnSeconds');
     }
     if (bonusSeconds == null) {
       throw new BuiltValueNullFieldError('RulesConfig', 'bonusSeconds');
+    }
+    if (wordsPerPlayer == null) {
+      throw new BuiltValueNullFieldError('RulesConfig', 'wordsPerPlayer');
     }
   }
 
@@ -421,19 +434,22 @@ class _$RulesConfig extends RulesConfig {
     if (identical(other, this)) return true;
     return other is RulesConfig &&
         turnSeconds == other.turnSeconds &&
-        bonusSeconds == other.bonusSeconds;
+        bonusSeconds == other.bonusSeconds &&
+        wordsPerPlayer == other.wordsPerPlayer;
   }
 
   @override
   int get hashCode {
-    return $jf($jc($jc(0, turnSeconds.hashCode), bonusSeconds.hashCode));
+    return $jf($jc($jc($jc(0, turnSeconds.hashCode), bonusSeconds.hashCode),
+        wordsPerPlayer.hashCode));
   }
 
   @override
   String toString() {
     return (newBuiltValueToStringHelper('RulesConfig')
           ..add('turnSeconds', turnSeconds)
-          ..add('bonusSeconds', bonusSeconds))
+          ..add('bonusSeconds', bonusSeconds)
+          ..add('wordsPerPlayer', wordsPerPlayer))
         .toString();
   }
 }
@@ -449,12 +465,18 @@ class RulesConfigBuilder implements Builder<RulesConfig, RulesConfigBuilder> {
   int get bonusSeconds => _$this._bonusSeconds;
   set bonusSeconds(int bonusSeconds) => _$this._bonusSeconds = bonusSeconds;
 
+  int _wordsPerPlayer;
+  int get wordsPerPlayer => _$this._wordsPerPlayer;
+  set wordsPerPlayer(int wordsPerPlayer) =>
+      _$this._wordsPerPlayer = wordsPerPlayer;
+
   RulesConfigBuilder();
 
   RulesConfigBuilder get _$this {
     if (_$v != null) {
       _turnSeconds = _$v.turnSeconds;
       _bonusSeconds = _$v.bonusSeconds;
+      _wordsPerPlayer = _$v.wordsPerPlayer;
       _$v = null;
     }
     return this;
@@ -477,7 +499,9 @@ class RulesConfigBuilder implements Builder<RulesConfig, RulesConfigBuilder> {
   _$RulesConfig build() {
     final _$result = _$v ??
         new _$RulesConfig._(
-            turnSeconds: turnSeconds, bonusSeconds: bonusSeconds);
+            turnSeconds: turnSeconds,
+            bonusSeconds: bonusSeconds,
+            wordsPerPlayer: wordsPerPlayer);
     replace(_$result);
     return _$result;
   }

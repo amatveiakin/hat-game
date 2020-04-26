@@ -14,6 +14,8 @@ class RulesConfigView extends StatefulWidget {
 }
 
 class RulesConfigViewState extends State<RulesConfigView> {
+  // TODO: Consider making a standard set of golden values instead.
+
   static const List<int> turnTimeGoldenValues = [
     10,
     15,
@@ -47,8 +49,27 @@ class RulesConfigViewState extends State<RulesConfigView> {
     90,
   ];
 
+  static const List<int> wordsPerPlayerGoldenValues = [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    10,
+    12,
+    15,
+    20,
+    25,
+    30,
+    40,
+    50,
+  ];
+
   final _turnTimeController = TextEditingController();
   final _bonusTimeController = TextEditingController();
+  final _wordsPerPlayerController = TextEditingController();
 
   RulesConfig get config => widget.config;
   GameConfigController get configController => widget.configController;
@@ -72,6 +93,15 @@ class RulesConfigViewState extends State<RulesConfigView> {
       if (newValue != null) {
         configController
             .updateRules(config.rebuild((b) => b..bonusSeconds = newValue));
+      }
+    });
+
+    _wordsPerPlayerController.text = config.wordsPerPlayer.toString();
+    _wordsPerPlayerController.addListener(() {
+      final int newValue = int.tryParse(_wordsPerPlayerController.text);
+      if (newValue != null) {
+        configController
+            .updateRules(config.rebuild((b) => b..wordsPerPlayer = newValue));
       }
     });
   }
@@ -112,6 +142,19 @@ class RulesConfigViewState extends State<RulesConfigView> {
                 controller: _bonusTimeController,
                 goldenValues: bonusTimeGoldenValues,
                 suffixText: 's',
+              ),
+            ],
+          ),
+        ),
+        ListTile(
+          title: Row(
+            children: [
+              Expanded(
+                child: Text('Words per player'),
+              ),
+              NumericField(
+                controller: _wordsPerPlayerController,
+                goldenValues: wordsPerPlayerGoldenValues,
               ),
             ],
           ),
