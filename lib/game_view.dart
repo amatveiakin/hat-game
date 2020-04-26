@@ -1,15 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:hatgame/assertion.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
-import 'package:hatgame/padlock.dart';
 import 'package:hatgame/score_view.dart';
 import 'package:hatgame/theme.dart';
-import 'package:hatgame/timer.dart';
-import 'package:hatgame/wide_button.dart';
+import 'package:hatgame/util/assertion.dart';
+import 'package:hatgame/widget/padlock.dart';
+import 'package:hatgame/widget/timer.dart';
+import 'package:hatgame/widget/wide_button.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
 
 class PartyView extends StatefulWidget {

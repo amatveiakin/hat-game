@@ -1,9 +1,9 @@
 import 'package:built_collection/built_collection.dart';
-import 'package:hatgame/assertion.dart';
+import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/theme.dart';
-import 'package:flutter/material.dart';
+import 'package:hatgame/util/assertion.dart';
 
 // TODO: Allow to delete teams.
 

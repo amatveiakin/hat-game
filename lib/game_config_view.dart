@@ -3,12 +3,12 @@ import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_view.dart';
+import 'package:hatgame/partying_strategy.dart';
 import 'package:hatgame/player_config_view.dart';
 import 'package:hatgame/rules_config_view.dart';
 import 'package:hatgame/teaming_config_view.dart';
-import 'package:hatgame/partying_strategy.dart';
 import 'package:hatgame/theme.dart';
-import 'package:hatgame/wide_button.dart';
+import 'package:hatgame/widget/wide_button.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
 
 class GameConfigView extends StatefulWidget {

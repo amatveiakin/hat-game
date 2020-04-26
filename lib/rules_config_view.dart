@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/game_config_controller.dart';
-import 'package:hatgame/numeric_field.dart';
+import 'package:hatgame/widget/numeric_field.dart';
 
 class RulesConfigView extends StatefulWidget {
   final RulesConfig config;

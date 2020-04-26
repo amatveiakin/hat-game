@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hatgame/game_config_view.dart';
 import 'package:hatgame/game_view.dart';
 import 'package:hatgame/theme.dart';
-import 'package:hatgame/wide_button.dart';
+import 'package:hatgame/widget/wide_button.dart';
 
 void main() => runApp(MyApp());
 

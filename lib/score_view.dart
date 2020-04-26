@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:hatgame/assertion.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/theme.dart';
+import 'package:hatgame/util/assertion.dart';
 
 // TODO: Allow final results editing on ScoreView.
 // TODO: Does it make sense to show words guessed in modes with many guessers?

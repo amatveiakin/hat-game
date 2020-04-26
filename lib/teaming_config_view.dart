@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:hatgame/assertion.dart';
 import 'package:hatgame/built_value/game_config.dart';
-import 'package:hatgame/enum_option_selector.dart';
 import 'package:hatgame/game_config_controller.dart';
-import 'package:hatgame/multi_line_list_tile.dart';
+import 'package:hatgame/util/assertion.dart';
+import 'package:hatgame/widget/enum_option_selector.dart';
+import 'package:hatgame/widget/multi_line_list_tile.dart';
 
 // TODO: Add explanation images (ideally: animated) for the selection option
 // on top of each subwindow, as in Android settings.

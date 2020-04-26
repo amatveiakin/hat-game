@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hatgame/assertion.dart';
 import 'package:hatgame/theme.dart';
+import 'package:hatgame/util/assertion.dart';
 
 class NumericField extends StatefulWidget {
   final TextEditingController controller;

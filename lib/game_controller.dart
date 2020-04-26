@@ -3,14 +3,14 @@ import 'dart:math';
 
 import 'package:built_collection/built_collection.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:hatgame/assertion.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value/serializers.dart';
-import 'package:hatgame/built_value_ext.dart';
 import 'package:hatgame/game_data.dart';
-import 'package:hatgame/list_ext.dart';
 import 'package:hatgame/partying_strategy.dart';
+import 'package:hatgame/util/assertion.dart';
+import 'package:hatgame/util/built_value_ext.dart';
+import 'package:hatgame/util/list_ext.dart';
 import 'package:russian_words/russian_words.dart' as russian_words;
 
 class GameTransformer {

@@ -2,9 +2,9 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:hatgame/assertion.dart';
-import 'package:hatgame/colors.dart';
 import 'package:hatgame/theme.dart';
+import 'package:hatgame/util/assertion.dart';
+import 'package:hatgame/util/colors.dart';
 
 List<BoxShadow> _elevationToShadow(int elevation, Color color) {
   return kElevationToShadow[elevation]

@@ -1,9 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:hatgame/assertion.dart';
-import 'package:hatgame/colors.dart';
 import 'package:hatgame/theme.dart';
+import 'package:hatgame/util/assertion.dart';
+import 'package:hatgame/util/colors.dart';
 
 enum TimerViewStyle {
   turnTime,
