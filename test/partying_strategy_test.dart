@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart' as flutter_test;
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/partying_strategy.dart';
+import 'package:hatgame/util/invalid_operation.dart';
 import 'package:test/test.dart';
 
 // TODO: Test all strategies.
@@ -60,7 +61,7 @@ void main() {
           generateTeamSizes(
               5, DesiredTeamSize.teamsOf2, UnequalTeamSize.forbid);
         },
-        flutter_test.throwsA(isA<CannotMakePartyingStrategy>()),
+        flutter_test.throwsA(isA<InvalidOperation>()),
       );
     });
   });

@@ -2,6 +2,7 @@ import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/util/assertion.dart';
+import 'package:hatgame/util/invalid_operation.dart';
 
 // =============================================================================
 // Team Generators
@@ -14,7 +15,7 @@ List<List<int>> generateTeamPlayers(List<int> teamSizes) {
       // TODO: Disallow when the UI allows to delete teams.
       continue;
     } else if (s == 1) {
-      throw CannotMakePartyingStrategy('A team has only one player');
+      throw InvalidOperation('A team has only one player');
     }
     Assert.holds(s > 1);
     players.add([]);
@@ -25,9 +26,9 @@ List<List<int>> generateTeamPlayers(List<int> teamSizes) {
     }
   }
   if (players.length == 0) {
-    throw CannotMakePartyingStrategy('There are zero teams');
+    throw InvalidOperation('There are zero teams');
   } else if (players.length == 1) {
-    throw CannotMakePartyingStrategy('There is only one team');
+    throw InvalidOperation('There is only one team');
   }
   return players;
 }
@@ -61,11 +62,13 @@ List<int> generateTeamSizes(
     case UnequalTeamSize.dropPlayers:
       if (numPlayers % teamSize != 0) {
         // TODO: Discard some players on dropPlayers when we have a UI for it.
-        throw CannotMakePartyingStrategy(
-            'Players cannot be split into teams of desired size, ' +
-                (unequalTeamSize == UnequalTeamSize.forbid
-                    ? 'and unequally sized teams are disabled.'
-                    : 'and support for dropping players isn\'t ready yet.'));
+        throw InvalidOperation(
+          'Cannot make teams',
+          comment: 'Players cannot be split into teams of desired size, ' +
+              (unequalTeamSize == UnequalTeamSize.forbid
+                  ? 'and unequally sized teams are disabled.'
+                  : 'and support for dropping players isn\'t ready yet.'),
+        );
       }
       break;
   }
@@ -92,11 +95,6 @@ abstract class PartyingStrategy {
           gameData.config.teaming.individualPlayStyle);
     }
   }
-}
-
-class CannotMakePartyingStrategy implements Exception {
-  String message;
-  CannotMakePartyingStrategy(this.message);
 }
 
 // =============================================================================

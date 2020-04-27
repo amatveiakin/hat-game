@@ -14,6 +14,7 @@ import 'package:hatgame/partying_strategy.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/built_value_ext.dart';
 import 'package:hatgame/util/firestore.dart';
+import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/util/list_ext.dart';
 import 'package:russian_words/russian_words.dart' as russian_words;
 
@@ -171,7 +172,7 @@ class GameController {
           return;
         }
       }
-      throw Exception('Cannot generate game ID');
+      throw InvalidOperation('Cannot generate game ID', isInternalError: true);
     });
     return LocalGameData(
       gameID: gameID,
@@ -186,11 +187,12 @@ class GameController {
     await Firestore.instance.runTransaction((Transaction tx) async {
       DocumentSnapshot snapshot = await tx.get(reference);
       if (!snapshot.exists) {
-        // TODO: Catch this and show a proper error message.
-        throw Exception('Game doesn\'t exist');
+        throw InvalidOperation("Game $gameID doesn't exist");
       }
-      // TODO: Check that player name is unique.
-      while (snapshot.data.containsKey('player-' + playerID.toString())) {
+      while (snapshot.data.containsKey(DBColumns.player(playerID))) {
+        if (myName == snapshot.data[DBColumns.player(playerID)]) {
+          throw InvalidOperation("Name $myName is already taken");
+        }
         playerID++;
       }
       await tx.update(reference,
@@ -204,8 +206,7 @@ class GameController {
   }
 
   // Writes state asynchronously.
-  static void startGame(
-      DocumentReference reference, GameConfig config) {
+  static void startGame(DocumentReference reference, GameConfig config) {
     Assert.ne(config.players.names == null, config.players.namesByTeam == null);
     List<String> playerNames;
     List<List<int>> teams;
@@ -226,8 +227,10 @@ class GameController {
       }
       teams = generateTeamPlayers(teamSizes).shuffled();
     } else {
-      // TODO: Forbid games with a single players.
       Assert.holds(config.players.names != null);
+      if (config.players.names.length < 2) {
+        throw InvalidOperation('At least two players are required');
+      }
       playerNames = config.players.names.toList().shuffled();
     }
 

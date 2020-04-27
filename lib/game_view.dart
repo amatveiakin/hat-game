@@ -102,7 +102,7 @@ Icon _getWordFeedbackIcon(WordFeedback feedback, bool menuButton, bool active) {
           ? Icon(Icons.sentiment_very_dissatisfied, color: MyTheme.accent)
           : Icon(OMIcons.sentimentVeryDissatisfied);
   }
-  throw AssertionError("Reached end of _getWordFeedbackIcon");
+  Assert.fail("Reached end of _getWordFeedbackIcon");
 }
 
 String _getWordFeedbackText(WordFeedback feedback) {
@@ -119,7 +119,7 @@ String _getWordFeedbackText(WordFeedback feedback) {
     case WordFeedback.tooHard:
       return 'Too hard';
   }
-  throw AssertionError("Reached end of _getWordFeedbackText");
+  Assert.fail("Reached end of _getWordFeedbackText");
 }
 
 class WordReviewItem extends StatelessWidget {

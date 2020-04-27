@@ -12,6 +12,8 @@ import 'package:hatgame/rules_config_view.dart';
 import 'package:hatgame/teaming_config_view.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/assertion.dart';
+import 'package:hatgame/util/invalid_operation.dart';
+import 'package:hatgame/widget/invalid_operation_dialog.dart';
 import 'package:hatgame/widget/wide_button.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
 
@@ -77,24 +79,8 @@ class _GameConfigViewState extends State<GameConfigView>
   void _startGame(GameConfig gameConfig) {
     try {
       GameController.startGame(localGameData.gameReference, gameConfig);
-    } on CannotMakePartyingStrategy catch (e) {
-      showDialog(
-        context: context,
-        // TODO: Add context or replace with a SnackBar.
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text(e.message),
-            actions: <Widget>[
-              FlatButton(
-                child: Text('OK'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
+    } on InvalidOperation catch (e) {
+      showInvalidOperationDialog(context: context, error: e);
       _tabController.animateTo(playersTabIndex);
       return;
     }

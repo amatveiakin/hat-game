@@ -4,6 +4,8 @@ import 'package:hatgame/game_config_view.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/theme.dart';
+import 'package:hatgame/util/invalid_operation.dart';
+import 'package:hatgame/widget/invalid_operation_dialog.dart';
 import 'package:hatgame/widget/wide_button.dart';
 
 void main() => runApp(MyApp());
@@ -92,8 +94,13 @@ Future<JoinGameParams> _joinGameDialog(BuildContext context) async {
 class StartScreen extends StatelessWidget {
   Future<void> _newGameOnline(BuildContext context) async {
     final String playerName = await _newGameOnlineDialog(context);
-    final LocalGameData localGameData =
-        await GameController.newLobby(playerName);
+    LocalGameData localGameData;
+    try {
+      localGameData = await GameController.newLobby(playerName);
+    } on InvalidOperation catch (e) {
+      showInvalidOperationDialog(context: context, error: e);
+      return;
+    }
     Navigator.push(
         context,
         MaterialPageRoute(
@@ -104,8 +111,14 @@ class StartScreen extends StatelessWidget {
 
   Future<void> _joinGame(BuildContext context) async {
     final JoinGameParams params = await _joinGameDialog(context);
-    final LocalGameData localGameData =
-        await GameController.joinLobby(params.playerName, params.gameID);
+    LocalGameData localGameData;
+    try {
+      localGameData =
+          await GameController.joinLobby(params.playerName, params.gameID);
+    } on InvalidOperation catch (e) {
+      showInvalidOperationDialog(context: context, error: e);
+      return;
+    }
     Navigator.push(
         context,
         MaterialPageRoute(
