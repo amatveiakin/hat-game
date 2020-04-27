@@ -5,6 +5,7 @@ import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/score_view.dart';
+import 'package:hatgame/sounds.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/widget/padlock.dart';
@@ -263,6 +264,7 @@ class PlayAreaState extends State<PlayArea>
   void _endTurn(int turnRestriction) {
     if (gameState.turn == turnRestriction &&
         gameState.turnPhase == TurnPhase.explain) {
+      Sounds.play(Sounds.timeOver);
       gameController.finishExplanation();
       setState(() {
         _bonusTimeActive = gameConfig.rules.bonusSeconds > 0;

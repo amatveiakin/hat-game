@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:hatgame/sounds.dart';
 import 'package:hatgame/start_screen.dart';
 import 'package:hatgame/theme.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  Sounds.init();
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
