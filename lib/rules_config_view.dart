@@ -14,9 +14,11 @@ class RulesConfigView extends StatefulWidget {
 }
 
 class RulesConfigViewState extends State<RulesConfigView> {
-  // TODO: Consider making a standard set of golden values instead.
-
-  static const List<int> turnTimeGoldenValues = [
+  static const List<int> timeGoldenValues = [
+    0,
+    3,
+    5,
+    7,
     10,
     15,
     20,
@@ -33,21 +35,8 @@ class RulesConfigViewState extends State<RulesConfigView> {
     300,
   ];
 
-  static const List<int> bonusTimeGoldenValues = [
-    0,
-    3,
-    5,
-    7,
-    10,
-    15,
-    20,
-    25,
-    30,
-    40,
-    50,
-    60,
-    90,
-  ];
+  static final List<int> turnTimeGoldenValues =
+      timeGoldenValues.where((t) => t > 0).toList();
 
   static const List<int> wordsPerPlayerGoldenValues = [
     2,
@@ -140,7 +129,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
               ),
               NumericField(
                 controller: _bonusTimeController,
-                goldenValues: bonusTimeGoldenValues,
+                goldenValues: timeGoldenValues,
                 suffixText: 's',
               ),
             ],
