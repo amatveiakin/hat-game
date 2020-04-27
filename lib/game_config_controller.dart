@@ -6,7 +6,6 @@ import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/serializers.dart';
 import 'package:hatgame/db_constants.dart';
 import 'package:hatgame/util/assertion.dart';
-import 'package:hatgame/util/firestore.dart';
 
 class GameConfigReadResult {
   final GameConfig config;

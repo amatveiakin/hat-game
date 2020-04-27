@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
@@ -13,7 +14,6 @@ import 'package:hatgame/game_data.dart';
 import 'package:hatgame/partying_strategy.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/built_value_ext.dart';
-import 'package:hatgame/util/firestore.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/util/list_ext.dart';
 import 'package:russian_words/russian_words.dart' as russian_words;
@@ -21,8 +21,6 @@ import 'package:russian_words/russian_words.dart' as russian_words;
 class GameTransformer {
   final GameConfig config;
   GameState state;
-
-  GameData get gameData => GameData(config, state);
 
   GameTransformer(this.config, this.state);
 
@@ -89,8 +87,8 @@ class GameTransformer {
     state = state.rebuild(
       (b) => b
         ..turnPhase = TurnPhase.prepare
-        ..currentParty
-            .replace(PartyingStrategy.fromGame(gameData).getParty(state.turn)),
+        ..currentParty.replace(
+            PartyingStrategy.fromGame(config, state).getParty(state.turn)),
     );
   }
 
@@ -135,13 +133,27 @@ class GameTransformer {
 }
 
 class GameController {
-  final DocumentReference gameReference;
-  final GameConfig config;
+  final LocalGameData localGameData;
+  GameConfig config;
   // TODO: Should UI be able to get state from here or only from the stream?
   GameState state;
+  final localState = LocalGameState();
+  final _streamController = StreamController<GameData>(sync: true);
 
-  GameData get gameData => GameData(config, state);
+  Stream<GameData> get stateUpdatesStream => _streamController.stream;
+
+  GameData get _gameData => GameData(config, state, localState);
   GameTransformer get _transformer => GameTransformer(config, state);
+
+  // Since isInitialzied becomes true:
+  //   - config and state are guaranteed to be non-null,
+  //   - config doesn't change,
+  //   - isInitialzied stays true,
+  //   - stateUpdatesStream starts sending updates.
+  bool get isInitialzied => config != null;
+
+  bool get isActivePlayer =>
+      state == null ? false : activePlayer(state) == localGameData.myPlayerID;
 
   static String generateNewGameID() {
     return Random().nextInt(10000).toString().padLeft(4, '0');
@@ -150,6 +162,8 @@ class GameController {
   static DocumentReference gameReferenceFromGameID(String gameId) {
     return Firestore.instance.collection('games').document(gameId);
   }
+
+  static int activePlayer(GameState state) => state.currentParty.performer;
 
   static Future<LocalGameData> newLobby(String myName) async {
     const int maxAttempts = 1000;
@@ -182,6 +196,7 @@ class GameController {
   }
 
   static Future<LocalGameData> joinLobby(String myName, String gameID) async {
+    // TODO: Check if the game has already started.
     final DocumentReference reference = gameReferenceFromGameID(gameID);
     int playerID = 0;
     await Firestore.instance.runTransaction((Transaction tx) async {
@@ -277,19 +292,49 @@ class GameController {
     _writeInitialState(reference, config, initialState);
   }
 
-  GameController._(this.gameReference, this.config, this.state);
-
-  factory GameController.fromSnapshot(final DocumentSnapshot documentSnapshot) {
-    final GameConfigReadResult configReadResult =
-        GameConfigController.configFromSnapshot(documentSnapshot);
-    if (!configReadResult.gameHasStarted ||
-        !documentSnapshot.data.containsKey(DBColumns.state)) {
-      return null;
+  void _onUpdateFromDB(final DocumentSnapshot snapshot) {
+    Assert.holds(snapshot.data != null);
+    final bool wasInitialzied = isInitialzied;
+    if (!isInitialzied) {
+      final GameConfigReadResult configReadResult =
+          GameConfigController.configFromSnapshot(snapshot);
+      if (!configReadResult.gameHasStarted ||
+          !snapshot.data.containsKey(DBColumns.state)) {
+        return;
+      }
+      // This is the one and only place where the config changes.
+      config = configReadResult.config;
     }
-    final GameState state = serializers
-        .deserialize(json.decode(documentSnapshot.data[DBColumns.state]));
-    return GameController._(
-        documentSnapshot.reference, configReadResult.config, state);
+
+    if (!snapshot.data.containsKey(DBColumns.state)) {
+      Assert.fail('Game state not found');
+    }
+    GameState newState =
+        serializers.deserialize(json.decode(snapshot.data[DBColumns.state]));
+    if (isActivePlayer) {
+      Assert.holds(wasInitialzied);
+      final int newActivePlayer = activePlayer(newState);
+      Assert.eq(localGameData.myPlayerID, newActivePlayer,
+          message: 'Active player unexpectedly changed from '
+              '${localGameData.myPlayerID} to $newActivePlayer');
+      // Ignore the update, because the state of truth is on the client while
+      // we are the active player.
+    } else {
+      state = newState;
+      _streamController.add(_gameData);
+    }
+  }
+
+  GameController.fromFirestore(this.localGameData) {
+    localGameData.gameReference.snapshots().listen(
+      _onUpdateFromDB,
+      onError: (error) {
+        Assert.fail('Got error from Firestore: ' + error.toString());
+      },
+      onDone: () {
+        Assert.fail('Firestore updates stream aborted');
+      },
+    );
   }
 
   static Future<void> _writeInitialState(DocumentReference reference,
@@ -310,9 +355,12 @@ class GameController {
   }
 
   void _updateState(GameState newState) {
-    FirestoreUtil.atomicUpdateColumn(
-        gameReference, DBColumns.state, state, newState);
+    Assert.holds(isActivePlayer,
+        message: 'Only active player should change game state');
+    final serialized = json.encode(serializers.serialize(newState));
+    localGameData.gameReference.updateData({DBColumns.state: serialized});
     state = newState;
+    _streamController.add(_gameData);
   }
 
   void nextTurn() {

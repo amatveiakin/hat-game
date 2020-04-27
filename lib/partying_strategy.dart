@@ -86,13 +86,14 @@ abstract class PartyingStrategy {
 
   PartyingStrategy();
 
-  factory PartyingStrategy.fromGame(GameData gameData) {
-    if (gameData.state.teams != null) {
-      return FixedTeamsStrategy(
-          gameData.teams(), gameData.config.teaming.guessingInLargeTeam);
+  factory PartyingStrategy.fromGame(GameConfig config, GameState state) {
+    if (state.teams != null) {
+      final List<List<int>> teams =
+          state.teams.map((t) => t.toList())?.toList();
+      return FixedTeamsStrategy(teams, config.teaming.guessingInLargeTeam);
     } else {
-      return IndividualStrategy(gameData.state.players.length,
-          gameData.config.teaming.individualPlayStyle);
+      return IndividualStrategy(
+          state.players.length, config.teaming.individualPlayStyle);
     }
   }
 }

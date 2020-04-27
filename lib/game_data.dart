@@ -11,6 +11,7 @@ class PartyViewData {
   PartyViewData(this.performer, this.recipients);
 }
 
+// TODO: Rename in order to make it explicit that these are immutable settings.
 class LocalGameData {
   final bool onlineMode = true;
   final String gameID;
@@ -30,13 +31,18 @@ class LocalGameData {
   }
 }
 
+class LocalGameState {
+  bool startButtonEnabled = false;
+}
+
 // All information about the game, read-only.
 // Use GameController to influence the game.
 class GameData {
   final GameConfig config;
   final GameState state;
+  final LocalGameState localState;
 
-  GameData(this.config, this.state);
+  GameData(this.config, this.state, this.localState);
 
   List<List<int>> teams() => state.teams?.map((t) => t.toList())?.toList();
 

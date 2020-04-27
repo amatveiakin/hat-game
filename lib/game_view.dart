@@ -228,23 +228,23 @@ class PlayAreaState extends State<PlayArea>
   LocalGameData get localGameData => widget.localGameData;
   GameController get gameController => widget.gameController;
   GameConfig get gameConfig => gameData.config;
-  GameState get gameState => gameData.state;
   GameData get gameData => widget.gameData;
+  GameState get gameState => gameData.state;
+  LocalGameState get localGameState => gameData.localState;
 
   AnimationController _padlockAnimationController;
-  bool _startButtonEnabled = false;
   bool _turnActive = false;
   bool _bonusTimeActive = false;
 
   void _unlockStartExplaning() {
     setState(() {
-      _startButtonEnabled = true;
+      localGameState.startButtonEnabled = true;
     });
   }
 
   void _startExplaning() {
     setState(() {
-      _startButtonEnabled = false;
+      localGameState.startButtonEnabled = false;
       _turnActive = true;
     });
     gameController.startExplaning();
@@ -305,6 +305,15 @@ class PlayAreaState extends State<PlayArea>
 
   @override
   Widget build(BuildContext context) {
+    if (!gameController.isActivePlayer) {
+      // TODO: Show a read-only review page instead.
+      return Center(
+        child: Text(
+          'You are player ${localGameData.myPlayerID}. '
+          "It's not your turn.",
+        ),
+      );
+    }
     final wordsInHatWidget = Container(
       padding: EdgeInsets.symmetric(vertical: 12.0),
       child: Text('Words in hat: ${gameState.wordsInHat.length}'),
@@ -317,7 +326,9 @@ class PlayAreaState extends State<PlayArea>
               child: Center(
                 child: Container(
                   child: WideButton(
-                    onPressed: _startButtonEnabled ? _startExplaning : null,
+                    onPressed: localGameState.startButtonEnabled
+                        ? _startExplaning
+                        : null,
                     onPressedDisabled: () =>
                         _padlockAnimationController.forward(from: 0.0),
                     color: MyTheme.accent,
@@ -413,9 +424,11 @@ class PlayAreaState extends State<PlayArea>
 }
 
 class GameView extends StatefulWidget {
+  final GameController gameController;
   final LocalGameData localGameData;
 
-  GameView({@required this.localGameData});
+  GameView({@required this.localGameData})
+      : gameController = GameController.fromFirestore(localGameData);
 
   @override
   State<StatefulWidget> createState() => GameViewState();
@@ -424,6 +437,7 @@ class GameView extends StatefulWidget {
 class GameViewState extends State<GameView> {
   bool _navigatedToScoreboard = false;
 
+  GameController get gameController => widget.gameController;
   LocalGameData get localGameData => widget.localGameData;
 
   Future<bool> _onBackPressed() {
@@ -466,10 +480,9 @@ class GameViewState extends State<GameView> {
           automaticallyImplyLeading: false,
           title: Text('Hat Game'),
         ),
-        body: StreamBuilder<DocumentSnapshot>(
-          stream: localGameData.gameReference.snapshots(),
-          builder:
-              (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+        body: StreamBuilder<GameData>(
+          stream: gameController.stateUpdatesStream,
+          builder: (BuildContext context, AsyncSnapshot<GameData> snapshot) {
             if (snapshot.hasError) {
               // TODO: Deal with errors.
               return Center(
@@ -483,16 +496,12 @@ class GameViewState extends State<GameView> {
               // TODO: Deal with loading (use snapshot.connectionState?)
               return Center(child: CircularProgressIndicator());
             }
-            final gameController = GameController.fromSnapshot(snapshot.data);
-            if (gameController == null) {
-              return Center(child: CircularProgressIndicator());
-            }
+            final gameData = snapshot.data;
 
-            if (gameController.state.gameFinished) {
+            if (gameData.state.gameFinished) {
               // Cannot navigate from within `build`.
               if (!_navigatedToScoreboard) {
-                Future.delayed(Duration.zero,
-                    () => _goToScoreboard(gameController.gameData));
+                Future.delayed(Duration.zero, () => _goToScoreboard(gameData));
                 _navigatedToScoreboard = true;
               }
               return Center(child: CircularProgressIndicator());
@@ -501,13 +510,15 @@ class GameViewState extends State<GameView> {
             return Container(
               child: Column(
                 children: [
-                  PartyView(gameController.gameData.currentPartyViewData(),
-                      gameController.state.turnPhase),
+                  PartyView(
+                    gameData.currentPartyViewData(),
+                    gameData.state.turnPhase,
+                  ),
                   Expanded(
                     child: PlayArea(
                       localGameData: localGameData,
                       gameController: gameController,
-                      gameData: gameController.gameData,
+                      gameData: gameData,
                     ),
                   ),
                 ],
