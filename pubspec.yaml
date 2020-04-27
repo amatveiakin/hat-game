@@ -41,6 +41,8 @@ dependencies:
 
   soundpool: ^1.0.1
 
+  vibration: ^1.2.4
+
   russian_words: ^0.1.0
 
 dev_dependencies:

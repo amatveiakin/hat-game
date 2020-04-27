@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/game_controller.dart';
@@ -12,6 +13,7 @@ import 'package:hatgame/widget/padlock.dart';
 import 'package:hatgame/widget/timer.dart';
 import 'package:hatgame/widget/wide_button.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
+import 'package:vibration/vibration.dart';
 
 class PartyView extends StatefulWidget {
   final PartyViewData teamData;
@@ -23,7 +25,6 @@ class PartyView extends StatefulWidget {
   createState() => PartyViewState();
 }
 
-// TODO: Add haptic feedback for main events.
 // TODO: Swicth to animation controllers or make the widget stateless.
 class PartyViewState extends State<PartyView> with TickerProviderStateMixin {
   @override
@@ -258,6 +259,7 @@ class PlayAreaState extends State<PlayArea>
   }
 
   void _wordGuessed() {
+    HapticFeedback.mediumImpact();
     gameController.wordGuessed();
   }
 
@@ -265,6 +267,7 @@ class PlayAreaState extends State<PlayArea>
     if (gameState.turn == turnRestriction &&
         gameState.turnPhase == TurnPhase.explain) {
       Sounds.play(Sounds.timeOver);
+      Vibration.vibrate(amplitude: 255);
       gameController.finishExplanation();
       setState(() {
         _bonusTimeActive = gameConfig.rules.bonusSeconds > 0;
@@ -274,6 +277,7 @@ class PlayAreaState extends State<PlayArea>
 
   void _endBonusTime(int turnRestriction) {
     if (gameState.turn == turnRestriction) {
+      Vibration.vibrate(amplitude: 128);
       setState(() {
         _bonusTimeActive = false;
       });
