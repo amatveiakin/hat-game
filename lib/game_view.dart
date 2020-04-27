@@ -49,28 +49,25 @@ class PartyViewState extends State<PartyView> with TickerProviderStateMixin {
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 12.0),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Expanded(
-                child: Text(
-                  widget.teamData.performer.name,
-                  textAlign: TextAlign.right,
-                ),
+              Text(
+                widget.teamData.performer.name,
+                textAlign: TextAlign.right,
               ),
               Text(
                 ' → ',
                 textAlign: TextAlign.center,
               ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: widget.teamData.recipients
-                      .map((player) => Text(
-                            player.name,
-                            textAlign: TextAlign.left,
-                          ))
-                      .toList(),
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: widget.teamData.recipients
+                    .map((player) => Text(
+                          player.name,
+                          textAlign: TextAlign.left,
+                        ))
+                    .toList(),
               ),
             ],
           ),
