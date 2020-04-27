@@ -417,64 +417,93 @@ class GameView extends StatelessWidget {
 
   GameView({@required this.localGameData});
 
+  Future<bool> _onBackPressed(BuildContext context) {
+    return showDialog(
+          context: context,
+          builder: (context) => new AlertDialog(
+            title: Text('Leave game?'),
+            // TODO: Replace with a description of how to re-join when it's
+            // possible to re-join.
+            content: Text("You wouldn't be able to join back "
+                "(this is not implemented yet)"),
+            actions: [
+              FlatButton(
+                child: Text('Leave'),
+                onPressed: () => Navigator.of(context).pop(true),
+              ),
+              FlatButton(
+                child: Text('Stay'),
+                onPressed: () => Navigator.of(context).pop(false),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Hat Game'),
-      ),
-      body: StreamBuilder<DocumentSnapshot>(
-        stream: localGameData.gameReference.snapshots(),
-        builder:
-            (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-          if (snapshot.hasError) {
-            // TODO: Deal with errors.
-            return Center(
-                child: Text(
-              'Error getting game data:\n' + snapshot.error.toString(),
-              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
-            ));
-          }
-          if (!snapshot.hasData) {
-            // TODO: Deal with loading (use snapshot.connectionState?)
-            return Center(child: CircularProgressIndicator());
-          }
-          final gameController = GameController.fromSnapshot(snapshot.data);
-          if (gameController == null) {
-            return Center(child: CircularProgressIndicator());
-          }
+    return WillPopScope(
+      onWillPop: () => _onBackPressed(context),
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          title: Text('Hat Game'),
+        ),
+        body: StreamBuilder<DocumentSnapshot>(
+          stream: localGameData.gameReference.snapshots(),
+          builder:
+              (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+            if (snapshot.hasError) {
+              // TODO: Deal with errors.
+              return Center(
+                  child: Text(
+                'Error getting game data:\n' + snapshot.error.toString(),
+                style:
+                    TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
+              ));
+            }
+            if (!snapshot.hasData) {
+              // TODO: Deal with loading (use snapshot.connectionState?)
+              return Center(child: CircularProgressIndicator());
+            }
+            final gameController = GameController.fromSnapshot(snapshot.data);
+            if (gameController == null) {
+              return Center(child: CircularProgressIndicator());
+            }
 
-          if (gameController.state.gameFinished) {
-            // TODO: Avoid double navigation, similarly to ConfigView.
-            // Cannot navigate from within `build`.
-            Future.delayed(
-              Duration.zero,
-              () => Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          ScoreView(gameData: gameController.gameData)),
-                  ModalRoute.withName('/')),
-            );
-            return Container();
-          }
+            if (gameController.state.gameFinished) {
+              // TODO: Avoid double navigation, similarly to ConfigView.
+              // Cannot navigate from within `build`.
+              Future.delayed(
+                Duration.zero,
+                () => Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            ScoreView(gameData: gameController.gameData)),
+                    ModalRoute.withName('/')),
+              );
+              return Container();
+            }
 
-          return Container(
-            child: Column(
-              children: [
-                PartyView(gameController.gameData.currentPartyViewData(),
-                    gameController.state.turnPhase),
-                Expanded(
-                  child: PlayArea(
-                    localGameData: localGameData,
-                    gameController: gameController,
-                    gameData: gameController.gameData,
+            return Container(
+              child: Column(
+                children: [
+                  PartyView(gameController.gameData.currentPartyViewData(),
+                      gameController.state.turnPhase),
+                  Expanded(
+                    child: PlayArea(
+                      localGameData: localGameData,
+                      gameController: gameController,
+                      gameData: gameController.gameData,
+                    ),
                   ),
-                ),
-              ],
-            ),
-          );
-        },
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

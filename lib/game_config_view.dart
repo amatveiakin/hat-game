@@ -89,13 +89,13 @@ class _GameConfigViewState extends State<GameConfigView>
   void _goToGame() {
     // Hide virtual keyboard
     FocusScope.of(context).unfocus();
-    // TODO: Remove "back" button.
-    Navigator.push(
+    Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
             builder: (context) => GameView(
                   localGameData: localGameData,
-                )));
+                )),
+        ModalRoute.withName('/'));
   }
 
   @override
