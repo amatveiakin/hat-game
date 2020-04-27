@@ -412,12 +412,21 @@ class PlayAreaState extends State<PlayArea>
   }
 }
 
-class GameView extends StatelessWidget {
+class GameView extends StatefulWidget {
   final LocalGameData localGameData;
 
   GameView({@required this.localGameData});
 
-  Future<bool> _onBackPressed(BuildContext context) {
+  @override
+  State<StatefulWidget> createState() => GameViewState();
+}
+
+class GameViewState extends State<GameView> {
+  bool _navigatedToScoreboard = false;
+
+  LocalGameData get localGameData => widget.localGameData;
+
+  Future<bool> _onBackPressed() {
     return showDialog(
           context: context,
           builder: (context) => new AlertDialog(
@@ -441,10 +450,17 @@ class GameView extends StatelessWidget {
         false;
   }
 
+  void _goToScoreboard(GameData gameData) {
+    Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => ScoreView(gameData: gameData)),
+        ModalRoute.withName('/'));
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () => _onBackPressed(context),
+      onWillPop: () => _onBackPressed(),
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
@@ -473,18 +489,13 @@ class GameView extends StatelessWidget {
             }
 
             if (gameController.state.gameFinished) {
-              // TODO: Avoid double navigation, similarly to ConfigView.
               // Cannot navigate from within `build`.
-              Future.delayed(
-                Duration.zero,
-                () => Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            ScoreView(gameData: gameController.gameData)),
-                    ModalRoute.withName('/')),
-              );
-              return Container();
+              if (!_navigatedToScoreboard) {
+                Future.delayed(Duration.zero,
+                    () => _goToScoreboard(gameController.gameData));
+                _navigatedToScoreboard = true;
+              }
+              return Center(child: CircularProgressIndicator());
             }
 
             return Container(

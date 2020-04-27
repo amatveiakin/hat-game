@@ -56,7 +56,7 @@ class _GameConfigViewState extends State<GameConfigView>
 
   LocalGameData get localGameData => widget.localGameData;
   bool get isAdmin => localGameData.isAdmin;
-  bool navigatedToGame = false;
+  bool _navigatedToGame = false;
 
   TabController _tabController;
 
@@ -154,9 +154,9 @@ class _GameConfigViewState extends State<GameConfigView>
           Assert.holds(gameConfig != null);
           if (gameConfigReadResult.gameHasStarted) {
             // Cannot navigate from within `build`.
-            if (!navigatedToGame) {
+            if (!_navigatedToGame) {
               Future.delayed(Duration.zero, () => _goToGame());
-              navigatedToGame = true;
+              _navigatedToGame = true;
             }
             return Center(child: CircularProgressIndicator());
           }
