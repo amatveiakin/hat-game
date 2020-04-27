@@ -1,8 +1,15 @@
 ## Compile
 
-It should be possible to compile the app with a simple Flutter build.
+It should be possible to compile Android and iOS versions of the app with
+a simple Flutter build.
 
-However, changes to certain aspects of the app require additional recompilation
+To compile web version, first run:
+
+    $ gen_index_html.sh
+
+and then proceed with building as usual.
+
+Also, changes to certain aspects of the app require additional recompilation
 steps:
 
 ### built_value
@@ -33,8 +40,6 @@ In order to change app icon:
 
 In order to deploy the web version, run:
 
-    $ flutter build web
-    $ firebase deploy
+    $ ./deploy_web.sh
 
 The new version should be immediately accessible at https://hatgame.web.app.
-Don't forget to reload the page with `Ctrl+Shift+R` to clear browser cache!
