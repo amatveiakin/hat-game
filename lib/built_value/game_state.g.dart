@@ -332,6 +332,10 @@ class _$GameStateSerializer implements StructuredSerializer<GameState> {
       serializers.serialize(object.players,
           specifiedType:
               const FullType(BuiltList, const [const FullType(PlayerState)])),
+      'playerOrder',
+      serializers.serialize(object.playerOrder,
+          specifiedType:
+              const FullType(BuiltList, const [const FullType(int)])),
       'words',
       serializers.serialize(object.words,
           specifiedType:
@@ -401,6 +405,12 @@ class _$GameStateSerializer implements StructuredSerializer<GameState> {
           result.players.replace(serializers.deserialize(value,
                   specifiedType: const FullType(
                       BuiltList, const [const FullType(PlayerState)]))
+              as BuiltList<Object>);
+          break;
+        case 'playerOrder':
+          result.playerOrder.replace(serializers.deserialize(value,
+                  specifiedType:
+                      const FullType(BuiltList, const [const FullType(int)]))
               as BuiltList<Object>);
           break;
         case 'teams':
@@ -819,6 +829,8 @@ class _$GameState extends GameState {
   @override
   final BuiltList<PlayerState> players;
   @override
+  final BuiltList<int> playerOrder;
+  @override
   final BuiltList<BuiltList<int>> teams;
   @override
   final Party currentParty;
@@ -842,6 +854,7 @@ class _$GameState extends GameState {
 
   _$GameState._(
       {this.players,
+      this.playerOrder,
       this.teams,
       this.currentParty,
       this.words,
@@ -854,6 +867,9 @@ class _$GameState extends GameState {
       : super._() {
     if (players == null) {
       throw new BuiltValueNullFieldError('GameState', 'players');
+    }
+    if (playerOrder == null) {
+      throw new BuiltValueNullFieldError('GameState', 'playerOrder');
     }
     if (words == null) {
       throw new BuiltValueNullFieldError('GameState', 'words');
@@ -878,6 +894,7 @@ class _$GameState extends GameState {
     if (identical(other, this)) return true;
     return other is GameState &&
         players == other.players &&
+        playerOrder == other.playerOrder &&
         teams == other.teams &&
         currentParty == other.currentParty &&
         words == other.words &&
@@ -899,7 +916,9 @@ class _$GameState extends GameState {
                         $jc(
                             $jc(
                                 $jc(
-                                    $jc($jc(0, players.hashCode),
+                                    $jc(
+                                        $jc($jc(0, players.hashCode),
+                                            playerOrder.hashCode),
                                         teams.hashCode),
                                     currentParty.hashCode),
                                 words.hashCode),
@@ -915,6 +934,7 @@ class _$GameState extends GameState {
   String toString() {
     return (newBuiltValueToStringHelper('GameState')
           ..add('players', players)
+          ..add('playerOrder', playerOrder)
           ..add('teams', teams)
           ..add('currentParty', currentParty)
           ..add('words', words)
@@ -935,6 +955,12 @@ class GameStateBuilder implements Builder<GameState, GameStateBuilder> {
   ListBuilder<PlayerState> get players =>
       _$this._players ??= new ListBuilder<PlayerState>();
   set players(ListBuilder<PlayerState> players) => _$this._players = players;
+
+  ListBuilder<int> _playerOrder;
+  ListBuilder<int> get playerOrder =>
+      _$this._playerOrder ??= new ListBuilder<int>();
+  set playerOrder(ListBuilder<int> playerOrder) =>
+      _$this._playerOrder = playerOrder;
 
   ListBuilder<BuiltList<int>> _teams;
   ListBuilder<BuiltList<int>> get teams =>
@@ -983,6 +1009,7 @@ class GameStateBuilder implements Builder<GameState, GameStateBuilder> {
   GameStateBuilder get _$this {
     if (_$v != null) {
       _players = _$v.players?.toBuilder();
+      _playerOrder = _$v.playerOrder?.toBuilder();
       _teams = _$v.teams?.toBuilder();
       _currentParty = _$v.currentParty?.toBuilder();
       _words = _$v.words?.toBuilder();
@@ -1017,6 +1044,7 @@ class GameStateBuilder implements Builder<GameState, GameStateBuilder> {
       _$result = _$v ??
           new _$GameState._(
               players: players.build(),
+              playerOrder: playerOrder.build(),
               teams: _teams?.build(),
               currentParty: _currentParty?.build(),
               words: words.build(),
@@ -1031,6 +1059,8 @@ class GameStateBuilder implements Builder<GameState, GameStateBuilder> {
       try {
         _$failedField = 'players';
         players.build();
+        _$failedField = 'playerOrder';
+        playerOrder.build();
         _$failedField = 'teams';
         _teams?.build();
         _$failedField = 'currentParty';

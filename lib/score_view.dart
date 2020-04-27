@@ -104,7 +104,7 @@ class ScoreView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final teams = gameData.teams();
+    final teams = gameData.state.teams;
     final listTiles = List<_TeamScoreView>();
     if (teams != null) {
       for (final team in teams) {

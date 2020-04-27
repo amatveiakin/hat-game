@@ -16,7 +16,6 @@ class LocalGameData {
   final bool onlineMode = true;
   final String gameID;
   final DocumentReference gameReference;
-  // TODO: Make sure this is still synced after all randomizations.
   final int myPlayerID;
 
   bool get isAdmin => myPlayerID == 0;
@@ -43,8 +42,6 @@ class GameData {
   final LocalGameState localState;
 
   GameData(this.config, this.state, this.localState);
-
-  List<List<int>> teams() => state.teams?.map((t) => t.toList())?.toList();
 
   int numWordsInHat() => state.wordsInHat.length;
 

@@ -90,9 +90,10 @@ abstract class TeamingConfig
 
 abstract class PlayersConfig
     implements Built<PlayersConfig, PlayersConfigBuilder> {
-  // Exactly one of `names` and `namesByTeam` must be set.
-  @nullable BuiltList<String> get names;
-  @nullable BuiltList<BuiltList<String>> get namesByTeam;
+  // Maps to player ID to player name.
+  BuiltMap<int, String> get names;
+  // Set only if manual teaming.
+  @nullable BuiltList<BuiltList<int>> get teams;
 
   PlayersConfig._();
 

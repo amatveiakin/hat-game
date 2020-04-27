@@ -180,11 +180,15 @@ class _GameConfigViewState extends State<GameConfigView>
                         ? OnlinePlayersConfigView(
                             playersConfig: gameConfig.players,
                           )
-                        : OfflinePlayersConfigView(
+                        : throw UnimplementedError(
+                            'Offline mode not supported yet'),
+                    /*
+                          OfflinePlayersConfigView(
                             teamingConfig: gameConfig.teaming,
                             initialPlayersConfig: gameConfig.players,
                             configController: configController,
                           ),
+                    */
                   ],
                 ),
               ),

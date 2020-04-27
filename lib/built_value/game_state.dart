@@ -10,7 +10,7 @@ part 'game_state.g.dart';
 
 abstract class PlayerState implements Built<PlayerState, PlayerStateBuilder> {
   int get id;
-  String get name;
+  String get name; // TODO: Fetch name from the config.
   BuiltList<int> get wordsExplained;
   BuiltList<int> get wordsGuessed;
 
@@ -68,7 +68,7 @@ class WordFeedback extends EnumClass {
   static Serializer<WordFeedback> get serializer => _$wordFeedbackSerializer;
 }
 
-// TODO: -> WordState? (OR PlayerState -> Player)
+// TODO: -> WordState?
 abstract class Word implements Built<Word, WordBuilder> {
   int get id;
   String get text;
@@ -94,6 +94,7 @@ abstract class Word implements Built<Word, WordBuilder> {
 
 abstract class GameState implements Built<GameState, GameStateBuilder> {
   BuiltList<PlayerState> get players;
+  BuiltList<int> get playerOrder;
   @nullable
   BuiltList<BuiltList<int>> get teams;
   @nullable

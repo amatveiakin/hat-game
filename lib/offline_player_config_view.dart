@@ -7,6 +7,7 @@ import 'package:hatgame/util/assertion.dart';
 
 // TODO: Allow to delete teams.
 
+/*
 bool _manualTeams(TeamingConfig teamingConfig) {
   return teamingConfig.teamPlay && !teamingConfig.randomizeTeams;
 }
@@ -335,3 +336,4 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
     );
   }
 }
+*/

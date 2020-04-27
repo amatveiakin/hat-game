@@ -222,43 +222,39 @@ class GameController {
 
   // Writes state asynchronously.
   static void startGame(DocumentReference reference, GameConfig config) {
-    Assert.ne(config.players.names == null, config.players.namesByTeam == null);
-    List<String> playerNames;
-    List<List<int>> teams;
+    final numPlayers = config.players.names.length;
+    final playerOrder = List<int>.generate(numPlayers, (i) => i);
+    BuiltList<BuiltList<int>> teams;
     if (config.teaming.teamPlay) {
       List<int> teamSizes;
-      if (config.players.namesByTeam != null) {
-        // Shuffle names within teams. Teams themselves are shuffled later.
-        final List<List<String>> namesByTeamShuffled = config
-            .players.namesByTeam
-            .map((t) => t.toList().shuffled())
-            .toList();
-        playerNames = namesByTeamShuffled.expand((t) => t).toList();
-        teamSizes = namesByTeamShuffled.map((t) => t.length).toList();
+      if (config.players.teams != null) {
+        teams = config.players.teams;
+        // TODO: Shuffle teams; shuffle players within teams.
       } else {
-        playerNames = config.players.names.toList().shuffled();
-        teamSizes = generateTeamSizes(playerNames.length,
+        teamSizes = generateTeamSizes(numPlayers,
             config.teaming.desiredTeamSize, config.teaming.unequalTeamSize);
+        final teamsMutable = generateTeamPlayers(teamSizes);
+        teams = BuiltList<BuiltList<int>>.from(
+            teamsMutable.map((t) => BuiltList<int>(t)));
+        playerOrder.shuffle();
       }
-      teams = generateTeamPlayers(teamSizes).shuffled();
     } else {
-      Assert.holds(config.players.names != null);
-      if (config.players.names.length < 2) {
+      Assert.holds(config.players.teams == null);
+      if (numPlayers < 2) {
         throw InvalidOperation('At least two players are required');
       }
-      playerNames = config.players.names.toList().shuffled();
+      playerOrder.shuffle();
     }
 
-    final players = List<PlayerState>();
-    for (final name in playerNames) {
-      players.add(PlayerState(
-        (b) => b
-          ..id = players.length
-          ..name = name,
-      ));
-    }
+    final players = BuiltList<PlayerState>.from(
+      config.players.names.entries.map((entry) => PlayerState(
+            (b) => b
+              ..id = entry.key
+              ..name = entry.value,
+          )),
+    );
 
-    final int totalWords = config.rules.wordsPerPlayer * players.length;
+    final int totalWords = config.rules.wordsPerPlayer * numPlayers;
     final words = List<Word>();
     while (words.length < totalWords) {
       final String text =
@@ -275,6 +271,7 @@ class GameController {
     GameState initialState = GameState(
       (b) => b
         ..players.replace(players)
+        ..playerOrder.replace(playerOrder)
         ..words.replace(words)
         ..wordsInHat.replace(words.map((w) => w.id))
         ..turn = 0
@@ -282,8 +279,7 @@ class GameController {
     );
     if (teams != null) {
       // TODO: Is there a way to do this concisely in one builder?
-      initialState = initialState
-          .rebuild((b) => b.teams.replace(teams.map((t) => BuiltList<int>(t))));
+      initialState = initialState.rebuild((b) => b.teams.replace(teams));
     }
     initialState = (GameTransformer(config, initialState)..initTurn()).state;
     // In addition to initial state, write the config:

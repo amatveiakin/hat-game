@@ -1,3 +1,5 @@
+import 'package:built_collection/built_collection.dart';
+import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/game_data.dart';
@@ -81,16 +83,37 @@ List<int> generateTeamSizes(
 // =============================================================================
 // PartyingStrategy interface
 
-abstract class PartyingStrategy {
-  Party getParty(int turn);
+class PartyingStrategy {
+  final BuiltList<int> playerOrder;
+  final PartyingStrategyImpl impl;
 
-  PartyingStrategy();
+  Party getParty(int turn) {
+    Party p = impl.getParty(turn);
+    return Party((b) => b
+      ..performer = playerOrder[p.performer]
+      ..recipients.addAll(p.recipients.map((idx) => playerOrder[idx])));
+  }
+
+  PartyingStrategy._(this.playerOrder, this.impl);
 
   factory PartyingStrategy.fromGame(GameConfig config, GameState state) {
+    final impl = PartyingStrategyImpl.fromGame(config, state);
+    if (impl == null) {
+      return null;
+    }
+    return PartyingStrategy._(state.playerOrder, impl);
+  }
+}
+
+abstract class PartyingStrategyImpl {
+  Party getParty(int turn);
+
+  PartyingStrategyImpl();
+
+  factory PartyingStrategyImpl.fromGame(GameConfig config, GameState state) {
     if (state.teams != null) {
-      final List<List<int>> teams =
-          state.teams.map((t) => t.toList())?.toList();
-      return FixedTeamsStrategy(teams, config.teaming.guessingInLargeTeam);
+      return FixedTeamsStrategy(
+          state.teams, config.teaming.guessingInLargeTeam);
     } else {
       return IndividualStrategy(
           state.players.length, config.teaming.individualPlayStyle);
@@ -101,7 +124,7 @@ abstract class PartyingStrategy {
 // =============================================================================
 // IndividualStrategy
 
-abstract class IndividualStrategy extends PartyingStrategy {
+abstract class IndividualStrategy extends PartyingStrategyImpl {
   final int numPlayers;
 
   IndividualStrategy._internal(this.numPlayers);
@@ -164,8 +187,8 @@ class BroadcastIndividualStrategy extends IndividualStrategy {
 // =============================================================================
 // FixedTeamsStrategy
 
-class FixedTeamsStrategy extends PartyingStrategy {
-  final List<List<int>> teamPlayers;
+class FixedTeamsStrategy extends PartyingStrategyImpl {
+  final BuiltList<BuiltList<int>> teamPlayers;
   final IndividualPlayStyle individualPlayStyle;
 
   FixedTeamsStrategy(this.teamPlayers, this.individualPlayStyle);

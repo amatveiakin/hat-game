@@ -294,20 +294,18 @@ class _$PlayersConfigSerializer implements StructuredSerializer<PlayersConfig> {
   @override
   Iterable<Object> serialize(Serializers serializers, PlayersConfig object,
       {FullType specifiedType = FullType.unspecified}) {
-    final result = <Object>[];
-    if (object.names != null) {
+    final result = <Object>[
+      'names',
+      serializers.serialize(object.names,
+          specifiedType: const FullType(
+              BuiltMap, const [const FullType(int), const FullType(String)])),
+    ];
+    if (object.teams != null) {
       result
-        ..add('names')
-        ..add(serializers.serialize(object.names,
-            specifiedType:
-                const FullType(BuiltList, const [const FullType(String)])));
-    }
-    if (object.namesByTeam != null) {
-      result
-        ..add('namesByTeam')
-        ..add(serializers.serialize(object.namesByTeam,
+        ..add('teams')
+        ..add(serializers.serialize(object.teams,
             specifiedType: const FullType(BuiltList, const [
-              const FullType(BuiltList, const [const FullType(String)])
+              const FullType(BuiltList, const [const FullType(int)])
             ])));
     }
     return result;
@@ -327,14 +325,13 @@ class _$PlayersConfigSerializer implements StructuredSerializer<PlayersConfig> {
       switch (key) {
         case 'names':
           result.names.replace(serializers.deserialize(value,
-                  specifiedType:
-                      const FullType(BuiltList, const [const FullType(String)]))
-              as BuiltList<Object>);
+              specifiedType: const FullType(BuiltMap,
+                  const [const FullType(int), const FullType(String)])));
           break;
-        case 'namesByTeam':
-          result.namesByTeam.replace(serializers.deserialize(value,
+        case 'teams':
+          result.teams.replace(serializers.deserialize(value,
               specifiedType: const FullType(BuiltList, const [
-                const FullType(BuiltList, const [const FullType(String)])
+                const FullType(BuiltList, const [const FullType(int)])
               ])) as BuiltList<Object>);
           break;
       }
@@ -678,14 +675,18 @@ class TeamingConfigBuilder
 
 class _$PlayersConfig extends PlayersConfig {
   @override
-  final BuiltList<String> names;
+  final BuiltMap<int, String> names;
   @override
-  final BuiltList<BuiltList<String>> namesByTeam;
+  final BuiltList<BuiltList<int>> teams;
 
   factory _$PlayersConfig([void Function(PlayersConfigBuilder) updates]) =>
       (new PlayersConfigBuilder()..update(updates)).build();
 
-  _$PlayersConfig._({this.names, this.namesByTeam}) : super._();
+  _$PlayersConfig._({this.names, this.teams}) : super._() {
+    if (names == null) {
+      throw new BuiltValueNullFieldError('PlayersConfig', 'names');
+    }
+  }
 
   @override
   PlayersConfig rebuild(void Function(PlayersConfigBuilder) updates) =>
@@ -699,19 +700,19 @@ class _$PlayersConfig extends PlayersConfig {
     if (identical(other, this)) return true;
     return other is PlayersConfig &&
         names == other.names &&
-        namesByTeam == other.namesByTeam;
+        teams == other.teams;
   }
 
   @override
   int get hashCode {
-    return $jf($jc($jc(0, names.hashCode), namesByTeam.hashCode));
+    return $jf($jc($jc(0, names.hashCode), teams.hashCode));
   }
 
   @override
   String toString() {
     return (newBuiltValueToStringHelper('PlayersConfig')
           ..add('names', names)
-          ..add('namesByTeam', namesByTeam))
+          ..add('teams', teams))
         .toString();
   }
 }
@@ -720,22 +721,22 @@ class PlayersConfigBuilder
     implements Builder<PlayersConfig, PlayersConfigBuilder> {
   _$PlayersConfig _$v;
 
-  ListBuilder<String> _names;
-  ListBuilder<String> get names => _$this._names ??= new ListBuilder<String>();
-  set names(ListBuilder<String> names) => _$this._names = names;
+  MapBuilder<int, String> _names;
+  MapBuilder<int, String> get names =>
+      _$this._names ??= new MapBuilder<int, String>();
+  set names(MapBuilder<int, String> names) => _$this._names = names;
 
-  ListBuilder<BuiltList<String>> _namesByTeam;
-  ListBuilder<BuiltList<String>> get namesByTeam =>
-      _$this._namesByTeam ??= new ListBuilder<BuiltList<String>>();
-  set namesByTeam(ListBuilder<BuiltList<String>> namesByTeam) =>
-      _$this._namesByTeam = namesByTeam;
+  ListBuilder<BuiltList<int>> _teams;
+  ListBuilder<BuiltList<int>> get teams =>
+      _$this._teams ??= new ListBuilder<BuiltList<int>>();
+  set teams(ListBuilder<BuiltList<int>> teams) => _$this._teams = teams;
 
   PlayersConfigBuilder();
 
   PlayersConfigBuilder get _$this {
     if (_$v != null) {
       _names = _$v.names?.toBuilder();
-      _namesByTeam = _$v.namesByTeam?.toBuilder();
+      _teams = _$v.teams?.toBuilder();
       _$v = null;
     }
     return this;
@@ -759,15 +760,14 @@ class PlayersConfigBuilder
     _$PlayersConfig _$result;
     try {
       _$result = _$v ??
-          new _$PlayersConfig._(
-              names: _names?.build(), namesByTeam: _namesByTeam?.build());
+          new _$PlayersConfig._(names: names.build(), teams: _teams?.build());
     } catch (_) {
       String _$failedField;
       try {
         _$failedField = 'names';
-        _names?.build();
-        _$failedField = 'namesByTeam';
-        _namesByTeam?.build();
+        names.build();
+        _$failedField = 'teams';
+        _teams?.build();
       } catch (e) {
         throw new BuiltValueNestedFieldError(
             'PlayersConfig', _$failedField, e.toString());

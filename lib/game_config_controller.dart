@@ -58,13 +58,14 @@ class GameConfigController {
     // This happens in online mode before the game has started.
     if (config.players == null) {
       gameHasStarted = false;
-      final playerNames = List<String>();
+      final playerNames = Map<int, String>();
+      // TODO: Support gaps or check that there are none.
       for (int playerID = 0;; playerID++) {
         final String key = DBColumns.player(playerID);
         if (!documentSnapshot.data.containsKey(key)) {
           break;
         }
-        playerNames.add(documentSnapshot.data[key]);
+        playerNames[playerID] = documentSnapshot.data[key];
       }
       config = config.rebuild(
         (b) => b

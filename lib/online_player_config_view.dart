@@ -10,10 +10,15 @@ class OnlinePlayersConfigView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Assert.holds(playersConfig.names != null);
+    final List<MapEntry<int, String>> entries =
+        playersConfig.names.entries.toList();
+    // BuiltMap does not sort by key.
+    entries.sort((a, b) => a.key.compareTo(b.key));
+
     return ListView(
-      children: playersConfig.names
-          .map((name) => ListTile(
-                title: Text(name),
+      children: entries
+          .map((e) => ListTile(
+                title: Text(e.value),
               ))
           .toList(),
     );

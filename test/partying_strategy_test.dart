@@ -1,3 +1,4 @@
+import 'package:built_collection/built_collection.dart';
 import 'package:flutter_test/flutter_test.dart' as flutter_test;
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
@@ -6,6 +7,10 @@ import 'package:hatgame/util/invalid_operation.dart';
 import 'package:test/test.dart';
 
 // TODO: Test all strategies.
+
+BuiltList<BuiltList<int>> toBuiltList(List<List<int>> list) {
+  return BuiltList<BuiltList<int>>.from(list.map((t) => BuiltList<int>(t)));
+}
 
 partyEquals(int performer, List<int> recipients) => TypeMatcher<Party>()
     .having((t) => t.performer, 'performer', equals(performer))
@@ -88,10 +93,12 @@ void main() {
 
   group('fixed teams strategy', () {
     test('2 + 2', () {
-      final strategy = FixedTeamsStrategy([
-        [0, 1],
-        [2, 3],
-      ], IndividualPlayStyle.fluidPairs);
+      final strategy = FixedTeamsStrategy(
+          toBuiltList([
+            [0, 1],
+            [2, 3],
+          ]),
+          IndividualPlayStyle.fluidPairs);
       expect(strategy.getParty(0), partyEquals(0, [1]));
       expect(strategy.getParty(1), partyEquals(2, [3]));
       expect(strategy.getParty(2), partyEquals(1, [0]));
@@ -100,10 +107,12 @@ void main() {
     });
 
     test('2 + 3', () {
-      final strategy = FixedTeamsStrategy([
-        [0, 1, 2],
-        [3, 4],
-      ], IndividualPlayStyle.fluidPairs);
+      final strategy = FixedTeamsStrategy(
+          toBuiltList([
+            [0, 1, 2],
+            [3, 4],
+          ]),
+          IndividualPlayStyle.fluidPairs);
       expect(strategy.getParty(0), partyEquals(0, [1]));
       expect(strategy.getParty(1), partyEquals(3, [4]));
       expect(strategy.getParty(2), partyEquals(1, [2]));
