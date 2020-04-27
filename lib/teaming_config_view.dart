@@ -27,6 +27,12 @@ getIndividualPlayStyleOptions() {
           '(until you\'ve been paired up with every other player, '
           'at which point the loop starts anew).',
     ),
+    OptionDescription(
+      value: IndividualPlayStyle.broadcast,
+      title: 'One to all',
+      subtitle: 'Non-competitive mode. '
+          'One player explains, everybody else guesses.',
+    ),
   ];
 }
 
@@ -229,7 +235,7 @@ class TeamingConfigView extends StatelessWidget {
             MultiLineListTile(
                 title: Text('Chain sequence'),
                 subtitle: Text('The “hat” goes in a circle. '
-                    'You always explain to the next person in sequence.'),
+                    'You always explain to the next person.'),
                 onTap: onTap),
           );
           break;
@@ -242,8 +248,13 @@ class TeamingConfigView extends StatelessWidget {
           );
           break;
         case IndividualPlayStyle.broadcast:
-          Assert.fail('IndividualPlayStyle.broadcast is not supported '
-              'in individual mode');
+          items.add(
+            MultiLineListTile(
+                title: Text('One to all'),
+                subtitle: Text('You explain to everybody else.'),
+                onTap: onTap),
+          );
+          break;
       }
     }
     if (config.teamPlay && !onlineMode) {

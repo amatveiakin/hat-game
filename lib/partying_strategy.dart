@@ -80,6 +80,26 @@ List<int> generateTeamSizes(
       (index) => teamSize + (index < extraPlayers ? 1 : 0));
 }
 
+void checkNumPlayersForIndividualPlay(
+    int numPlayers, IndividualPlayStyle playStyle) {
+  switch (playStyle) {
+    case IndividualPlayStyle.chain:
+    case IndividualPlayStyle.fluidPairs:
+      if (numPlayers < 2) {
+        throw InvalidOperation(
+            'At least two players are required for this mode');
+      }
+      return;
+    case IndividualPlayStyle.broadcast:
+      if (numPlayers < 1) {
+        throw InvalidOperation(
+            'At least one player is required');
+      }
+      return;
+  }
+  Assert.fail('Unknown IndividualPlayStyle: $playStyle');
+}
+
 // =============================================================================
 // PartyingStrategy interface
 

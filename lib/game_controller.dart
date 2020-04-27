@@ -240,9 +240,8 @@ class GameController {
       }
     } else {
       Assert.holds(config.players.teams == null);
-      if (numPlayers < 2) {
-        throw InvalidOperation('At least two players are required');
-      }
+      checkNumPlayersForIndividualPlay(
+          numPlayers, config.teaming.individualPlayStyle);
       playerOrder.shuffle();
     }
 

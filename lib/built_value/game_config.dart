@@ -28,7 +28,6 @@ abstract class RulesConfig implements Built<RulesConfig, RulesConfigBuilder> {
 class IndividualPlayStyle extends EnumClass {
   static const IndividualPlayStyle chain = _$chain;
   static const IndividualPlayStyle fluidPairs = _$fluidPairs;
-  // TODO: Expose "each to all" (non-competitive) mode publicly (?)
   static const IndividualPlayStyle broadcast = _$broadcast;
 
   const IndividualPlayStyle._(String name) : super(name);
