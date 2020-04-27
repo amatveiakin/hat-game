@@ -191,8 +191,12 @@ class _GameConfigViewState extends State<GameConfigView>
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 12.0),
                 child: WideButton(
-                  // TODO: Allow only if isAdmin (but show a hint otherwise).
-                  onPressed: () => _startGame(gameConfig),
+                  onPressed: isAdmin ? () => _startGame(gameConfig) : null,
+                  onPressedDisabled: () {
+                    final snackBar = SnackBar(
+                        content: Text('Only the host can start the game.'));
+                    Scaffold.of(context).showSnackBar(snackBar);
+                  },
                   color: MyTheme.accent,
                   child: Text('Start Game'),
                 ),

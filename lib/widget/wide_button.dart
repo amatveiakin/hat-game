@@ -4,8 +4,13 @@ class WideButton extends StatelessWidget {
   final Widget child;
   final Color color;
   final VoidCallback onPressed;
+  final VoidCallback onPressedDisabled; // executed if onPressed is null
 
-  WideButton({this.child, this.color, @required this.onPressed});
+  WideButton(
+      {this.child,
+      this.color,
+      @required this.onPressed,
+      this.onPressedDisabled});
 
   @override
   Widget build(BuildContext context) {
@@ -15,14 +20,17 @@ class WideButton extends StatelessWidget {
     final double width = MediaQuery.of(context).size.width * 0.8;
     return SizedBox(
       width: width,
-      child: RaisedButton(
-        onPressed: onPressed,
-        color: color,
-        padding: EdgeInsets.symmetric(vertical: 12.0),
-        child: DefaultTextStyle.merge(
-          style: TextStyle(fontSize: 20),
-          child: child,
+      child: GestureDetector(
+        child: RaisedButton(
+          onPressed: onPressed,
+          color: color,
+          padding: EdgeInsets.symmetric(vertical: 12.0),
+          child: DefaultTextStyle.merge(
+            style: TextStyle(fontSize: 20),
+            child: child,
+          ),
         ),
+        onTap: onPressed == null ? onPressedDisabled : null,
       ),
     );
   }

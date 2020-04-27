@@ -316,20 +316,15 @@ class PlayAreaState extends State<PlayArea>
             Expanded(
               child: Center(
                 child: Container(
-                  child: GestureDetector(
-                    child: WideButton(
-                      onPressed: _startButtonEnabled ? _startExplaning : null,
-                      color: MyTheme.accent,
-                      child: Text(
-                        'Start!',
-                        style: TextStyle(fontSize: 24.0),
-                      ),
+                  child: WideButton(
+                    onPressed: _startButtonEnabled ? _startExplaning : null,
+                    onPressedDisabled: () =>
+                        _padlockAnimationController.forward(from: 0.0),
+                    color: MyTheme.accent,
+                    child: Text(
+                      'Start!',
+                      style: TextStyle(fontSize: 24.0),
                     ),
-                    // Cannot put this into the button, because it will become
-                    // enabled if it has a callback.
-                    onTap: _startButtonEnabled
-                        ? null
-                        : () => _padlockAnimationController.forward(from: 0.0),
                   ),
                 ),
               ),
