@@ -25,3 +25,16 @@ In order to change app icon:
 2. Run `flutter packages pub run flutter_launcher_icons:main` to update Android
    and iOS icons.
 3. Update web icons. So far I've been doing this manually.
+
+
+## Deploy
+
+### Web
+
+In order to deploy the web version, run:
+
+    $ flutter build web
+    $ firebase deploy
+
+The new version should be immediately accessible at https://hatgame.web.app.
+Don't forget to reload the page with `Ctrl+Shift+R` to clear browser cache!
