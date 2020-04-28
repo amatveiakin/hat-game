@@ -55,37 +55,11 @@ class WordStatus extends EnumClass {
   static Serializer<WordStatus> get serializer => _$wordStatusSerializer;
 }
 
-class WordFeedback extends EnumClass {
-  static const WordFeedback good = _$good;
-  static const WordFeedback bad = _$bad;
-  static const WordFeedback tooEasy = _$tooEasy;
-  static const WordFeedback tooHard = _$tooHard;
-
-  const WordFeedback._(String name) : super(name);
-
-  static BuiltSet<WordFeedback> get values => _$valuesWordFeedback;
-  static WordFeedback valueOf(String name) => _$valueOfWordFeedback(name);
-  static Serializer<WordFeedback> get serializer => _$wordFeedbackSerializer;
-}
-
 // TODO: -> WordState?
 abstract class Word implements Built<Word, WordBuilder> {
   int get id;
   String get text;
   WordStatus get status;
-  // There is a difference between feedback and status. We allow several
-  // copies of the same word (in manual word writing mode) and store the
-  // status separately for each copy. This is entirely reasonable.
-  // For feedback it doesn't quite make sense ("This 'cat' is too easy, but
-  // this 'cat' is totally good"?) so I conisdered storing feedback as a map
-  // keys by word text rather than word ID. This is however likely to produce
-  // bad UX. Seeing the same word for the seconds time is already a mindfuck,
-  // and if it appears that you've already given feedback to it, that would
-  // make it look even more like a glitch in the app.
-  // TODO: Make feedback per-player in online mode.
-  // TODO: Allow to also change word tags (when we have word tags).
-  @nullable
-  WordFeedback get feedback;
 
   Word._();
   factory Word([void Function(WordBuilder) updates]) = _$Word;
@@ -104,7 +78,6 @@ abstract class GameState implements Built<GameState, GameStateBuilder> {
   // two words are equal.
   BuiltList<Word> get words;
   BuiltList<int> get wordsInHat;
-  @nullable
   BuiltList<int> get wordsInThisTurn;
   @nullable
   int get currentWord;

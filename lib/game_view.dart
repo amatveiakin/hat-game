@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
+import 'package:hatgame/built_value/personal_state.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/score_view.dart';
@@ -125,15 +126,19 @@ class WordReviewItem extends StatelessWidget {
   final String text;
   final WordStatus status;
   final WordFeedback feedback;
-  final Function setStatus;
-  final Function setFeedback;
+  final bool hasFlag;
+  final void Function(WordStatus) setStatus;
+  final void Function(WordFeedback) setFeedback;
+  final void Function(bool) setFlag;
 
   WordReviewItem(
       {@required this.text,
       @required this.status,
       @required this.feedback,
+      @required this.hasFlag,
       @required this.setStatus,
-      @required this.setFeedback});
+      @required this.setFeedback,
+      @required this.setFlag});
 
   @override
   Widget build(BuildContext context) {
@@ -180,6 +185,20 @@ class WordReviewItem extends StatelessWidget {
                               : TextDecoration.none),
                     ),
             ),
+            if (hasFlag || setFlag != null)
+              IconButton(
+                icon: hasFlag
+                    ? Icon(Icons.error,
+                        color:
+                            setFlag != null ? MyTheme.accent : MyTheme.primary)
+                    : Icon(Icons.error_outline),
+                tooltip: setFlag != null
+                    ? 'Raise a problem with the word '
+                        '(invalid explanation, word not actually guessed)'
+                    : 'Somebody thinks there was a problem with the word '
+                        '(invalid explanation, word not actually guessed)',
+                onPressed: setFlag != null ? () => setFlag(!hasFlag) : () {},
+              ),
             if (setStatus != null)
               IconButton(
                 icon: Icon(status == WordStatus.discarded
@@ -243,6 +262,8 @@ class PlayAreaState extends State<PlayArea>
   GameConfig get gameConfig => gameData.config;
   GameData get gameData => widget.gameData;
   GameState get gameState => gameData.state;
+  DerivedGameState get derivedGameState => gameData.derivedState;
+  PersonalState get personalState => gameData.personalState;
   LocalGameState get localGameState => gameData.localState;
 
   AnimationController _padlockAnimationController;
@@ -303,6 +324,10 @@ class PlayAreaState extends State<PlayArea>
     gameController.setWordFeedback(wordId, feedback);
   }
 
+  void _setWordFlag(int wordId, bool hasFlag) {
+    gameController.setWordFlag(wordId, hasFlag);
+  }
+
   void _reviewDone() {
     gameController.nextTurn();
   }
@@ -335,10 +360,12 @@ class PlayAreaState extends State<PlayArea>
         .map((w) => WordReviewItem(
               text: w.status == WordStatus.notExplained ? null : w.text,
               status: w.status,
-              feedback: w.feedback,
+              feedback: personalState.wordFeedback[w.id],
+              hasFlag: personalState.wordFlags.contains(w.id),
               setStatus: null,
-              // TODO: Record feedback separately for each player.
-              setFeedback: null,
+              setFeedback: (WordFeedback feedback) =>
+                  _setWordFeedback(w.id, feedback),
+              setFlag: (bool hasFlag) => _setWordFlag(w.id, hasFlag),
             ))
         .toList();
     switch (gameState.turnPhase) {
@@ -433,11 +460,13 @@ class PlayAreaState extends State<PlayArea>
               .map((w) => WordReviewItem(
                     text: w.text,
                     status: w.status,
-                    feedback: w.feedback,
+                    feedback: personalState.wordFeedback[w.id],
+                    hasFlag: derivedGameState.flaggedWords.contains(w.id),
                     setStatus: (WordStatus status) =>
                         _setWordStatus(w.id, status),
                     setFeedback: (WordFeedback feedback) =>
                         _setWordFeedback(w.id, feedback),
+                    setFlag: null,
                   ))
               .toList();
           return Column(children: [

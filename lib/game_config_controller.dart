@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/serializers.dart';
-import 'package:hatgame/db_constants.dart';
+import 'package:hatgame/db_columns.dart';
 import 'package:hatgame/util/assertion.dart';
 
 class GameConfigReadResult {
@@ -47,13 +47,7 @@ class GameConfigController {
 
   static GameConfigReadResult configFromSnapshot(
       DocumentSnapshot documentSnapshot) {
-    Assert.holds(documentSnapshot.data.containsKey(DBColumns.config),
-        lazyMessage: () =>
-            documentSnapshot.reference.path +
-            ' -> ' +
-            documentSnapshot.data.toString());
-    GameConfig config = serializers
-        .deserialize(json.decode(documentSnapshot.data[DBColumns.config]));
+    GameConfig config = dbGet(documentSnapshot, DBColConfig());
     bool gameHasStarted = true;
     // This happens in online mode before the game has started.
     if (config.players == null) {
@@ -61,11 +55,11 @@ class GameConfigController {
       final playerNames = Map<int, String>();
       // TODO: Support gaps or check that there are none.
       for (int playerID = 0;; playerID++) {
-        final String key = DBColumns.player(playerID);
-        if (!documentSnapshot.data.containsKey(key)) {
+        final playerColumn = DBColPlayer(playerID);
+        if (!documentSnapshot.data.containsKey(playerColumn.name)) {
           break;
         }
-        playerNames[playerID] = documentSnapshot.data[key];
+        playerNames[playerID] = dbGet(documentSnapshot, playerColumn).name;
       }
       config = config.rebuild(
         (b) => b
@@ -80,13 +74,9 @@ class GameConfigController {
   void update(GameConfig Function(GameConfig) updater) {
     Firestore.instance.runTransaction((Transaction tx) async {
       DocumentSnapshot snapshot = await tx.get(gameReference);
-      final String oldValueSerialized = snapshot.data[DBColumns.config];
-      final GameConfig oldValue =
-          serializers.deserialize(json.decode(oldValueSerialized));
+      final GameConfig oldValue = dbGet(snapshot, DBColConfig());
       final GameConfig newValue = updater(oldValue);
-      final newValueSerialized = json.encode(serializers.serialize(newValue));
-      await tx.update(gameReference,
-          <String, dynamic>{DBColumns.config: newValueSerialized});
+      await tx.update(gameReference, dbData([DBColConfig().setData(newValue)]));
     });
   }
 

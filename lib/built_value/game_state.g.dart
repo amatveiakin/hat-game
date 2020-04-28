@@ -54,40 +54,10 @@ final BuiltSet<WordStatus> _$valuesWordStatus =
   _$discarded,
 ]);
 
-const WordFeedback _$good = const WordFeedback._('good');
-const WordFeedback _$bad = const WordFeedback._('bad');
-const WordFeedback _$tooEasy = const WordFeedback._('tooEasy');
-const WordFeedback _$tooHard = const WordFeedback._('tooHard');
-
-WordFeedback _$valueOfWordFeedback(String name) {
-  switch (name) {
-    case 'good':
-      return _$good;
-    case 'bad':
-      return _$bad;
-    case 'tooEasy':
-      return _$tooEasy;
-    case 'tooHard':
-      return _$tooHard;
-    default:
-      throw new ArgumentError(name);
-  }
-}
-
-final BuiltSet<WordFeedback> _$valuesWordFeedback =
-    new BuiltSet<WordFeedback>(const <WordFeedback>[
-  _$good,
-  _$bad,
-  _$tooEasy,
-  _$tooHard,
-]);
-
 Serializer<PlayerState> _$playerStateSerializer = new _$PlayerStateSerializer();
 Serializer<Party> _$partySerializer = new _$PartySerializer();
 Serializer<TurnPhase> _$turnPhaseSerializer = new _$TurnPhaseSerializer();
 Serializer<WordStatus> _$wordStatusSerializer = new _$WordStatusSerializer();
-Serializer<WordFeedback> _$wordFeedbackSerializer =
-    new _$WordFeedbackSerializer();
 Serializer<Word> _$wordSerializer = new _$WordSerializer();
 Serializer<GameState> _$gameStateSerializer = new _$GameStateSerializer();
 
@@ -240,23 +210,6 @@ class _$WordStatusSerializer implements PrimitiveSerializer<WordStatus> {
       WordStatus.valueOf(serialized as String);
 }
 
-class _$WordFeedbackSerializer implements PrimitiveSerializer<WordFeedback> {
-  @override
-  final Iterable<Type> types = const <Type>[WordFeedback];
-  @override
-  final String wireName = 'WordFeedback';
-
-  @override
-  Object serialize(Serializers serializers, WordFeedback object,
-          {FullType specifiedType = FullType.unspecified}) =>
-      object.name;
-
-  @override
-  WordFeedback deserialize(Serializers serializers, Object serialized,
-          {FullType specifiedType = FullType.unspecified}) =>
-      WordFeedback.valueOf(serialized as String);
-}
-
 class _$WordSerializer implements StructuredSerializer<Word> {
   @override
   final Iterable<Type> types = const [Word, _$Word];
@@ -275,12 +228,7 @@ class _$WordSerializer implements StructuredSerializer<Word> {
       serializers.serialize(object.status,
           specifiedType: const FullType(WordStatus)),
     ];
-    if (object.feedback != null) {
-      result
-        ..add('feedback')
-        ..add(serializers.serialize(object.feedback,
-            specifiedType: const FullType(WordFeedback)));
-    }
+
     return result;
   }
 
@@ -306,10 +254,6 @@ class _$WordSerializer implements StructuredSerializer<Word> {
         case 'status':
           result.status = serializers.deserialize(value,
               specifiedType: const FullType(WordStatus)) as WordStatus;
-          break;
-        case 'feedback':
-          result.feedback = serializers.deserialize(value,
-              specifiedType: const FullType(WordFeedback)) as WordFeedback;
           break;
       }
     }
@@ -344,6 +288,10 @@ class _$GameStateSerializer implements StructuredSerializer<GameState> {
       serializers.serialize(object.wordsInHat,
           specifiedType:
               const FullType(BuiltList, const [const FullType(int)])),
+      'wordsInThisTurn',
+      serializers.serialize(object.wordsInThisTurn,
+          specifiedType:
+              const FullType(BuiltList, const [const FullType(int)])),
       'gameFinished',
       serializers.serialize(object.gameFinished,
           specifiedType: const FullType(bool)),
@@ -361,13 +309,6 @@ class _$GameStateSerializer implements StructuredSerializer<GameState> {
         ..add('currentParty')
         ..add(serializers.serialize(object.currentParty,
             specifiedType: const FullType(Party)));
-    }
-    if (object.wordsInThisTurn != null) {
-      result
-        ..add('wordsInThisTurn')
-        ..add(serializers.serialize(object.wordsInThisTurn,
-            specifiedType:
-                const FullType(BuiltList, const [const FullType(int)])));
     }
     if (object.currentWord != null) {
       result
@@ -718,13 +659,11 @@ class _$Word extends Word {
   final String text;
   @override
   final WordStatus status;
-  @override
-  final WordFeedback feedback;
 
   factory _$Word([void Function(WordBuilder) updates]) =>
       (new WordBuilder()..update(updates)).build();
 
-  _$Word._({this.id, this.text, this.status, this.feedback}) : super._() {
+  _$Word._({this.id, this.text, this.status}) : super._() {
     if (id == null) {
       throw new BuiltValueNullFieldError('Word', 'id');
     }
@@ -749,15 +688,12 @@ class _$Word extends Word {
     return other is Word &&
         id == other.id &&
         text == other.text &&
-        status == other.status &&
-        feedback == other.feedback;
+        status == other.status;
   }
 
   @override
   int get hashCode {
-    return $jf($jc(
-        $jc($jc($jc(0, id.hashCode), text.hashCode), status.hashCode),
-        feedback.hashCode));
+    return $jf($jc($jc($jc(0, id.hashCode), text.hashCode), status.hashCode));
   }
 
   @override
@@ -765,8 +701,7 @@ class _$Word extends Word {
     return (newBuiltValueToStringHelper('Word')
           ..add('id', id)
           ..add('text', text)
-          ..add('status', status)
-          ..add('feedback', feedback))
+          ..add('status', status))
         .toString();
   }
 }
@@ -786,10 +721,6 @@ class WordBuilder implements Builder<Word, WordBuilder> {
   WordStatus get status => _$this._status;
   set status(WordStatus status) => _$this._status = status;
 
-  WordFeedback _feedback;
-  WordFeedback get feedback => _$this._feedback;
-  set feedback(WordFeedback feedback) => _$this._feedback = feedback;
-
   WordBuilder();
 
   WordBuilder get _$this {
@@ -797,7 +728,6 @@ class WordBuilder implements Builder<Word, WordBuilder> {
       _id = _$v.id;
       _text = _$v.text;
       _status = _$v.status;
-      _feedback = _$v.feedback;
       _$v = null;
     }
     return this;
@@ -818,8 +748,7 @@ class WordBuilder implements Builder<Word, WordBuilder> {
 
   @override
   _$Word build() {
-    final _$result = _$v ??
-        new _$Word._(id: id, text: text, status: status, feedback: feedback);
+    final _$result = _$v ?? new _$Word._(id: id, text: text, status: status);
     replace(_$result);
     return _$result;
   }
@@ -876,6 +805,9 @@ class _$GameState extends GameState {
     }
     if (wordsInHat == null) {
       throw new BuiltValueNullFieldError('GameState', 'wordsInHat');
+    }
+    if (wordsInThisTurn == null) {
+      throw new BuiltValueNullFieldError('GameState', 'wordsInThisTurn');
     }
     if (gameFinished == null) {
       throw new BuiltValueNullFieldError('GameState', 'gameFinished');
@@ -1049,7 +981,7 @@ class GameStateBuilder implements Builder<GameState, GameStateBuilder> {
               currentParty: _currentParty?.build(),
               words: words.build(),
               wordsInHat: wordsInHat.build(),
-              wordsInThisTurn: _wordsInThisTurn?.build(),
+              wordsInThisTurn: wordsInThisTurn.build(),
               currentWord: currentWord,
               turn: turn,
               turnPhase: turnPhase,
@@ -1070,7 +1002,7 @@ class GameStateBuilder implements Builder<GameState, GameStateBuilder> {
         _$failedField = 'wordsInHat';
         wordsInHat.build();
         _$failedField = 'wordsInThisTurn';
-        _wordsInThisTurn?.build();
+        wordsInThisTurn.build();
       } catch (e) {
         throw new BuiltValueNestedFieldError(
             'GameState', _$failedField, e.toString());

@@ -6,12 +6,13 @@ import 'package:built_collection/built_collection.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hatgame/built_value/personal_state.dart';
 import 'package:hatgame/git_version.dart';
 import 'package:unicode/unicode.dart' as unicode;
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value/serializers.dart';
-import 'package:hatgame/db_constants.dart';
+import 'package:hatgame/db_columns.dart';
 import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/partying_strategy.dart';
@@ -21,11 +22,11 @@ import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/util/list_ext.dart';
 import 'package:russian_words/russian_words.dart' as russian_words;
 
-class GameTransformer {
+class GameStateTransformer {
   final GameConfig config;
   GameState state;
 
-  GameTransformer(this.config, this.state);
+  GameStateTransformer(this.config, this.state);
 
   void nextTurn() {
     Assert.eq(state.turnPhase, TurnPhase.review);
@@ -72,16 +73,6 @@ class GameTransformer {
         ..words.rebuildAt(
           wordId,
           (b) => b..status = newStatus,
-        ),
-    );
-  }
-
-  void setWordFeedback(int wordId, WordFeedback newFeedback) {
-    state = state.rebuild(
-      (b) => b
-        ..words.rebuildAt(
-          wordId,
-          (b) => b..feedback = newFeedback,
         ),
     );
   }
@@ -135,21 +126,54 @@ class GameTransformer {
   }
 }
 
+class PersonalStateTransformer {
+  PersonalState personalState;
+
+  PersonalStateTransformer(this.personalState);
+
+  void setWordFeedback(int wordId, WordFeedback newFeedback) {
+    final wordFeedback = personalState.wordFeedback.toMap();
+    if (newFeedback != null) {
+      wordFeedback[wordId] = newFeedback;
+    } else {
+      wordFeedback.remove(wordId);
+    }
+    personalState =
+        personalState.rebuild((b) => b..wordFeedback.replace(wordFeedback));
+  }
+
+  void setWordFlag(int wordId, bool hasFlag) {
+    final wordFlags = personalState.wordFlags.toSet();
+    if (hasFlag) {
+      wordFlags.add(wordId);
+    } else {
+      wordFlags.remove(wordId);
+    }
+    personalState =
+        personalState.rebuild((b) => b..wordFlags.replace(wordFlags));
+  }
+}
+
 class GameController {
   final LocalGameData localGameData;
   GameConfig config;
   // TODO: Should UI be able to get state from here or only from the stream?
   GameState state;
+  DerivedGameState derivedState;
+  PersonalState personalState;
   final localState = LocalGameState();
   final _streamController = StreamController<GameData>(sync: true);
 
   Stream<GameData> get stateUpdatesStream => _streamController.stream;
 
-  GameData get _gameData => GameData(config, state, localState);
-  GameTransformer get _transformer => GameTransformer(config, state);
+  GameData get _gameData =>
+      GameData(config, state, derivedState, personalState, localState);
+  GameStateTransformer get _transformer => GameStateTransformer(config, state);
+  PersonalStateTransformer get _personalTransformer =>
+      PersonalStateTransformer(personalState);
 
   // Since isInitialzied becomes true:
-  //   - config and state are guaranteed to be non-null,
+  //   - config, state, derivedState and personalState are always non-null,
   //   - config doesn't change,
   //   - isInitialzied stays true,
   //   - stateUpdatesStream starts sending updates.
@@ -188,7 +212,6 @@ class GameController {
     const int maxAttempts = 1000;
     // TODO: Use config from local storage OR from account.
     final GameConfig config = GameConfigController.defaultConfig();
-    final String serialized = json.encode(serializers.serialize(config));
     String gameID;
     DocumentReference reference;
     final int playerID = 0;
@@ -198,12 +221,17 @@ class GameController {
         reference = gameReferenceFromGameID(gameID);
         DocumentSnapshot snapshot = await tx.get(reference);
         if (!snapshot.exists) {
-          await tx.set(reference, <String, dynamic>{
-            DBColumns.creationTimeUtc: DateTime.now().toUtc().toString(),
-            DBColumns.hostAppVersion: gitVersion,
-            DBColumns.config: serialized,
-            DBColumns.player(playerID): myName,
-          });
+          await tx.set(
+              reference,
+              dbData([
+                DBColCreationTimeUtc()
+                    .setData(DateTime.now().toUtc().toString()),
+                DBColHostAppVersion().setData(gitVersion),
+                DBColConfig().setData(config),
+                DBColPlayer(playerID).setData(PersonalState((b) => b
+                  ..id = playerID
+                  ..name = myName)),
+              ]));
           return;
         }
       }
@@ -258,15 +286,20 @@ class GameController {
         // [2/2] Workaround flutter/firestore error. Do a dump write.
         await tx.set(reference, snapshot.data);
       }
-      while (snapshot.data.containsKey(DBColumns.player(playerID))) {
-        if (myName == snapshot.data[DBColumns.player(playerID)]) {
+      while (snapshot.data.containsKey(DBColPlayer(playerID).name)) {
+        if (myName == dbGet(snapshot, DBColPlayer(playerID)).name) {
           error = InvalidOperation("Name $myName is already taken");
           return;
         }
         playerID++;
       }
-      await tx.update(reference,
-          <String, dynamic>{'player-' + playerID.toString(): myName});
+      await tx.update(
+          reference,
+          dbData([
+            DBColPlayer(playerID).setData(PersonalState((b) => b
+              ..id = playerID
+              ..name = myName))
+          ]));
     });
 
     if (error != null) {
@@ -340,11 +373,32 @@ class GameController {
       // TODO: Is there a way to do this concisely in one builder?
       initialState = initialState.rebuild((b) => b.teams.replace(teams));
     }
-    initialState = (GameTransformer(config, initialState)..initTurn()).state;
+    initialState =
+        (GameStateTransformer(config, initialState)..initTurn()).state;
     // In addition to initial state, write the config:
     //   - just to be sure;
     //   - to fill in players field.  // TODO: Better solution for this?
     _writeInitialState(reference, config, initialState);
+  }
+
+  Map<int, PersonalState> _parsePersonalStates(
+      final DocumentSnapshot snapshot) {
+    final states = Map<int, PersonalState>();
+    int playerID = 0;
+    while (snapshot.data.containsKey(DBColPlayer(playerID).name)) {
+      states[playerID] = dbGet(snapshot, DBColPlayer(playerID));
+      playerID++;
+    }
+    return states;
+  }
+
+  DerivedGameState _makeDerivedGameState(
+      Map<int, PersonalState> personalStates) {
+    final flaggedWords = Set<int>();
+    for (final st in personalStates.values) {
+      flaggedWords.addAll(st.wordFlags);
+    }
+    return DerivedGameState(flaggedWords: BuiltSet.from(flaggedWords));
   }
 
   void _onUpdateFromDB(final DocumentSnapshot snapshot) {
@@ -354,18 +408,18 @@ class GameController {
       final GameConfigReadResult configReadResult =
           GameConfigController.configFromSnapshot(snapshot);
       if (!configReadResult.gameHasStarted ||
-          !snapshot.data.containsKey(DBColumns.state)) {
+          !snapshot.data.containsKey(DBColState().name)) {
         return;
       }
       // This is the one and only place where the config changes.
       config = configReadResult.config;
     }
 
-    if (!snapshot.data.containsKey(DBColumns.state)) {
+    if (!snapshot.data.containsKey(DBColState().name)) {
       Assert.fail('Game state not found');
     }
-    GameState newState =
-        serializers.deserialize(json.decode(snapshot.data[DBColumns.state]));
+
+    GameState newState = dbGet(snapshot, DBColState());
     if (isActivePlayer) {
       Assert.holds(wasInitialzied);
       final int newActivePlayer = activePlayer(newState);
@@ -376,8 +430,14 @@ class GameController {
       // we are the active player.
     } else {
       state = newState;
-      _streamController.add(_gameData);
     }
+
+    final personalStates = _parsePersonalStates(snapshot);
+    derivedState = _makeDerivedGameState(personalStates);
+    Assert.holds(personalStates.containsKey(localGameData.myPlayerID));
+    personalState = personalStates[localGameData.myPlayerID];
+
+    _streamController.add(_gameData);
   }
 
   GameController.fromFirestore(this.localGameData) {
@@ -394,27 +454,34 @@ class GameController {
 
   static Future<void> _writeInitialState(DocumentReference reference,
       GameConfig config, GameState initialState) async {
-    final serializedConfig = json.encode(serializers.serialize(config));
-    final serializedState = json.encode(serializers.serialize(initialState));
     await Firestore.instance.runTransaction((Transaction tx) async {
       DocumentSnapshot snapshot = await tx.get(reference);
       Assert.holds(snapshot.exists,
           lazyMessage: () => 'Game doesn\'t exist: ' + reference.path);
-      Assert.holds(!snapshot.data.containsKey(DBColumns.state),
+      Assert.holds(!snapshot.data.containsKey(DBColState().name),
           lazyMessage: () => 'Game state already exists: ' + reference.path);
-      await tx.update(reference, {
-        DBColumns.config: serializedConfig,
-        DBColumns.state: serializedState,
-      });
+      await tx.update(
+          reference,
+          dbData([
+            DBColConfig().setData(config),
+            DBColState().setData(initialState),
+          ]));
     });
   }
 
   void _updateState(GameState newState) {
     Assert.holds(isActivePlayer,
         message: 'Only active player should change game state');
-    final serialized = json.encode(serializers.serialize(newState));
-    localGameData.gameReference.updateData({DBColumns.state: serialized});
+    localGameData.gameReference
+        .updateData(dbData([DBColState().setData(newState)]));
     state = newState;
+    _streamController.add(_gameData);
+  }
+
+  void _updatePersonalState(PersonalState newState) {
+    localGameData.gameReference.updateData(
+        dbData([DBColPlayer(localGameData.myPlayerID).setData(newState)]));
+    personalState = newState;
     _streamController.add(_gameData);
   }
 
@@ -439,6 +506,13 @@ class GameController {
   }
 
   void setWordFeedback(int wordId, WordFeedback newFeedback) {
-    _updateState((_transformer..setWordFeedback(wordId, newFeedback)).state);
+    _updatePersonalState((_personalTransformer
+          ..setWordFeedback(wordId, newFeedback))
+        .personalState);
+  }
+
+  void setWordFlag(int wordId, bool hasFlag) {
+    _updatePersonalState(
+        (_personalTransformer..setWordFlag(wordId, hasFlag)).personalState);
   }
 }

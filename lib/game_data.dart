@@ -1,7 +1,9 @@
+import 'package:built_collection/built_collection.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
+import 'package:hatgame/built_value/personal_state.dart';
 import 'package:hatgame/util/assertion.dart';
 
 class PartyViewData {
@@ -34,14 +36,23 @@ class LocalGameState {
   bool startButtonEnabled = false;
 }
 
+class DerivedGameState {
+  final BuiltSet<int> flaggedWords;
+
+  DerivedGameState({@required this.flaggedWords});
+}
+
 // All information about the game, read-only.
 // Use GameController to influence the game.
 class GameData {
   final GameConfig config;
   final GameState state;
+  final DerivedGameState derivedState;
+  final PersonalState personalState;
   final LocalGameState localState;
 
-  GameData(this.config, this.state, this.localState);
+  GameData(this.config, this.state, this.derivedState, this.personalState,
+      this.localState);
 
   int numWordsInHat() => state.wordsInHat.length;
 
