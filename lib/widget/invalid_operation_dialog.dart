@@ -3,9 +3,9 @@ import 'package:hatgame/util/invalid_operation.dart';
 
 Future<void> showInvalidOperationDialog(
     {@required BuildContext context, @required InvalidOperation error}) async {
+  // TODO: Close on enter (try using RawKeyEvent).
   await showDialog(
     context: context,
-    // TODO: Add context or replace with a SnackBar.
     builder: (BuildContext context) {
       return AlertDialog(
         title: Text(

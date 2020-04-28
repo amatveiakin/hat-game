@@ -10,12 +10,14 @@ import 'package:hatgame/widget/wide_button.dart';
 
 Future<String> _newGameOnlineDialog(BuildContext context) async {
   String playerName = '';
+  final closeDialog = () => Navigator.of(context).pop(playerName);
   return showDialog<String>(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
         title: Text('New Game'),
         content: TextField(
+          textInputAction: TextInputAction.go,
           autofocus: true,
           decoration: new InputDecoration(
             labelText: 'Player name',
@@ -23,13 +25,12 @@ Future<String> _newGameOnlineDialog(BuildContext context) async {
           onChanged: (value) {
             playerName = value;
           },
+          onSubmitted: (_) => closeDialog(),
         ),
         actions: <Widget>[
           FlatButton(
             child: Text('Create'),
-            onPressed: () {
-              Navigator.of(context).pop(playerName);
-            },
+            onPressed: closeDialog,
           ),
         ],
       );
@@ -44,6 +45,7 @@ class JoinGameParams {
 
 Future<JoinGameParams> _joinGameDialog(BuildContext context) async {
   final params = JoinGameParams();
+  final closeDialog = () => Navigator.of(context).pop(params);
   return showDialog<JoinGameParams>(
     context: context,
     builder: (BuildContext context) {
@@ -53,6 +55,7 @@ Future<JoinGameParams> _joinGameDialog(BuildContext context) async {
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
+              textInputAction: TextInputAction.next,
               autofocus: true,
               decoration: new InputDecoration(
                 labelText: 'Game ID',
@@ -62,8 +65,10 @@ Future<JoinGameParams> _joinGameDialog(BuildContext context) async {
               onChanged: (value) {
                 params.gameID = value;
               },
+              onSubmitted: (_) => FocusScope.of(context).nextFocus(),
             ),
             TextField(
+              textInputAction: TextInputAction.go,
               autofocus: true,
               decoration: new InputDecoration(
                 labelText: 'Player name',
@@ -71,15 +76,14 @@ Future<JoinGameParams> _joinGameDialog(BuildContext context) async {
               onChanged: (value) {
                 params.playerName = value;
               },
+              onSubmitted: (_) => closeDialog(),
             ),
           ],
         ),
         actions: <Widget>[
           FlatButton(
             child: Text('Join'),
-            onPressed: () {
-              Navigator.of(context).pop(params);
-            },
+            onPressed: closeDialog,
           ),
         ],
       );
