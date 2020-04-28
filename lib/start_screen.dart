@@ -56,21 +56,21 @@ Future<JoinGameParams> _joinGameDialog(BuildContext context) async {
             TextField(
               autofocus: true,
               decoration: new InputDecoration(
-                labelText: 'Name',
-              ),
-              onChanged: (value) {
-                params.playerName = value;
-              },
-            ),
-            TextField(
-              autofocus: true,
-              decoration: new InputDecoration(
                 labelText: 'Game ID',
               ),
               keyboardType: TextInputType.number,
               inputFormatters: [WhitelistingTextInputFormatter.digitsOnly],
               onChanged: (value) {
                 params.gameID = value;
+              },
+            ),
+            TextField(
+              autofocus: true,
+              decoration: new InputDecoration(
+                labelText: 'Name',
+              ),
+              onChanged: (value) {
+                params.playerName = value;
               },
             ),
           ],
