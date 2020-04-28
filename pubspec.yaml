@@ -71,6 +71,7 @@ flutter:
   uses-material-design: true
 
   assets:
+    - images/word_censored.png
     # TODO: Choose either .ogg or .wav
     - sounds/time_over.ogg
     - sounds/time_over.wav

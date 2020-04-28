@@ -160,13 +160,25 @@ class WordReviewItem extends StatelessWidget {
                   : null,
             ),
             Expanded(
-              child: Text(
-                text,
-                style: TextStyle(
-                    decoration: status == WordStatus.discarded
-                        ? TextDecoration.lineThrough
-                        : TextDecoration.none),
-              ),
+              child: text == null
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Flexible(
+                          child: Image(
+                            image: AssetImage('images/word_censored.png'),
+                            height: 32.0,
+                          ),
+                        )
+                      ],
+                    )
+                  : Text(
+                      text,
+                      style: TextStyle(
+                          decoration: status == WordStatus.discarded
+                              ? TextDecoration.lineThrough
+                              : TextDecoration.none),
+                    ),
             ),
             if (setStatus != null)
               IconButton(
@@ -318,34 +330,27 @@ class PlayAreaState extends State<PlayArea>
   }
 
   Widget _buildInactivePlayer(BuildContext context) {
+    final wordReviewItems = gameData
+        .wordsInThisTurnData()
+        .map((w) => WordReviewItem(
+              text: w.status == WordStatus.notExplained ? null : w.text,
+              status: w.status,
+              feedback: w.feedback,
+              setStatus: null,
+              // TODO: Record feedback separately for each player.
+              setFeedback: null,
+            ))
+        .toList();
     switch (gameState.turnPhase) {
       case TurnPhase.prepare:
         return Container();
       case TurnPhase.explain:
       case TurnPhase.review:
         {
-          final wordsToShow = gameData
-              .wordsInThisTurnData()
-              .map((w) => w.status == WordStatus.notExplained
-                  // TODO: Replace with smeary image.
-                  ? w.rebuild((b) => b..text = '???')
-                  : w);
           return Column(children: [
             Expanded(
               child: ListView(
-                children: ListTile.divideTiles(
-                  context: context,
-                  tiles: wordsToShow
-                      .map((w) => WordReviewItem(
-                            text: w.text,
-                            status: w.status,
-                            feedback: w.feedback,
-                            setStatus: null,
-                            // TODO: Record feedback separately for each player.
-                            setFeedback: null,
-                          ))
-                      .toList(),
-                ).toList(),
+                children: wordReviewItems,
               ),
             ),
           ]);
@@ -422,43 +427,43 @@ class PlayAreaState extends State<PlayArea>
           wordsInHatWidget,
         ]);
       case TurnPhase.review:
-        return Column(children: [
-          Expanded(
-            child: ListView(
-              children: ListTile.divideTiles(
-                context: context,
-                tiles: gameData
-                    .wordsInThisTurnData()
-                    .map((w) => WordReviewItem(
-                          text: w.text,
-                          status: w.status,
-                          feedback: w.feedback,
-                          setStatus: (WordStatus status) =>
-                              _setWordStatus(w.id, status),
-                          setFeedback: (WordFeedback feedback) =>
-                              _setWordFeedback(w.id, feedback),
-                        ))
-                    .toList(),
-              ).toList(),
+        {
+          final wordReviewItems = gameData
+              .wordsInThisTurnData()
+              .map((w) => WordReviewItem(
+                    text: w.text,
+                    status: w.status,
+                    feedback: w.feedback,
+                    setStatus: (WordStatus status) =>
+                        _setWordStatus(w.id, status),
+                    setFeedback: (WordFeedback feedback) =>
+                        _setWordFeedback(w.id, feedback),
+                  ))
+              .toList();
+          return Column(children: [
+            Expanded(
+              child: ListView(
+                children: wordReviewItems,
+              ),
             ),
-          ),
-          if (_bonusTimeActive)
-            TimerView(
-              style: TimerViewStyle.bonusTime,
-              onTimeEnded: () => _endBonusTime(gameState.turn),
-              duration: Duration(seconds: gameConfig.rules.bonusSeconds),
+            if (_bonusTimeActive)
+              TimerView(
+                style: TimerViewStyle.bonusTime,
+                onTimeEnded: () => _endBonusTime(gameState.turn),
+                duration: Duration(seconds: gameConfig.rules.bonusSeconds),
+              ),
+            SizedBox(height: 40),
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 12.0),
+              child: WideButton(
+                onPressed: _reviewDone,
+                color: MyTheme.accent,
+                child: Text('Done'),
+              ),
             ),
-          SizedBox(height: 40),
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 12.0),
-            child: WideButton(
-              onPressed: _reviewDone,
-              color: MyTheme.accent,
-              child: Text('Done'),
-            ),
-          ),
-          SizedBox(height: 12),
-        ]);
+            SizedBox(height: 12),
+          ]);
+        }
     }
     Assert.holds(gameState.gameFinished,
         lazyMessage: () => gameState.toString());
