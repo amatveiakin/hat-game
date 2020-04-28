@@ -220,21 +220,59 @@ class GameController {
     checkPlayerNameIsValid(myName);
     // TODO: Check if the game has already started.
     final DocumentReference reference = gameReferenceFromGameID(gameID);
+
+    if (!(await reference.get()).exists) {
+      // [1/2] Workaround flutter/firestore error:
+      //     E/flutter ( 6075): [ERROR:flutter/lib/ui/ui_dart_state.cc(157)]
+      //         Unhandled Exception: PlatformException(Error performing
+      //         transaction, Every document read in a transaction must also
+      //         be written., null)
+      // Check if the document exists beforehand. This is not 100% safe if
+      // the documents can be deleted (which may be the case), but I don't
+      // see what else we can do.
+      // TODO: Remove the workaround whe the bug is fixed.
+      throw InvalidOperation("Game $gameID doesn't exist");
+    }
+
+    // TODO: Adhere to best practices: get `playerID` as a return value from
+    // runTransaction. I tried doing this, but unfortunately ran into
+    // https://github.com/flutter/flutter/issues/17663. Note: the issue was
+    // already marked as closed, but for me it still crashed with:
+    //     Unhandled Exception: PlatformException(Error performing transaction,
+    //         java.lang.Exception: DoTransaction failed: Invalid argument:
+    //         Instance of '_CompactLinkedHashSet<Object>', null)
     int playerID = 0;
+    // For some reason, throwing from `runTransaction` doesn't work. Got:
+    //     Unhandled Exception: PlatformException(Error performing transaction,
+    //         java.lang.Exception: DoTransaction failed: Instance of
+    //         'InvalidOperation', null)
+    InvalidOperation error;
+
     await Firestore.instance.runTransaction((Transaction tx) async {
       DocumentSnapshot snapshot = await tx.get(reference);
       if (!snapshot.exists) {
-        throw InvalidOperation("Game $gameID doesn't exist");
+        error = InvalidOperation("Game $gameID doesn't exist");
+        return;
+      }
+      {
+        // [2/2] Workaround flutter/firestore error. Do a dump write.
+        await tx.set(reference, snapshot.data);
       }
       while (snapshot.data.containsKey(DBColumns.player(playerID))) {
         if (myName == snapshot.data[DBColumns.player(playerID)]) {
-          throw InvalidOperation("Name $myName is already taken");
+          error = InvalidOperation("Name $myName is already taken");
+          return;
         }
         playerID++;
       }
       await tx.update(reference,
           <String, dynamic>{'player-' + playerID.toString(): myName});
     });
+
+    if (error != null) {
+      throw error;
+    }
+
     return LocalGameData(
       gameID: gameID,
       gameReference: reference,
