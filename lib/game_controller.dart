@@ -6,6 +6,7 @@ import 'package:built_collection/built_collection.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hatgame/git_version.dart';
 import 'package:unicode/unicode.dart' as unicode;
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
@@ -198,8 +199,10 @@ class GameController {
         DocumentSnapshot snapshot = await tx.get(reference);
         if (!snapshot.exists) {
           await tx.set(reference, <String, dynamic>{
+            DBColumns.creationTimeUtc: DateTime.now().toUtc().toString(),
+            DBColumns.hostAppVersion: gitVersion,
             DBColumns.config: serialized,
-            DBColumns.player(playerID): myName
+            DBColumns.player(playerID): myName,
           });
           return;
         }
