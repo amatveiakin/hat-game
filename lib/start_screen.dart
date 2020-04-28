@@ -7,8 +7,6 @@ import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/widget/invalid_operation_dialog.dart';
 import 'package:hatgame/widget/wide_button.dart';
 
-// TODO: Validate player names.
-
 Future<String> _newGameOnlineDialog(BuildContext context) async {
   String playerName = '';
   return showDialog<String>(

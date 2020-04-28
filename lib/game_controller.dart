@@ -4,7 +4,9 @@ import 'dart:math';
 
 import 'package:built_collection/built_collection.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:unicode/unicode.dart' as unicode;
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value/serializers.dart';
@@ -165,7 +167,23 @@ class GameController {
 
   static int activePlayer(GameState state) => state.currentParty.performer;
 
+  static void checkPlayerNameIsValid(String name) {
+    if (name.isEmpty) {
+      throw InvalidOperation('Player name is empty');
+    }
+    if (name.length > 50) {
+      throw InvalidOperation('Player name too long');
+    }
+    for (final c in name.codeUnits) {
+      if (unicode.isControl(c) || unicode.isFormat(c)) {
+        throw InvalidOperation('Player name contans invalid character: '
+            '${String.fromCharCode(c)} (code $c)');
+      }
+    }
+  }
+
   static Future<LocalGameData> newLobby(String myName) async {
+    checkPlayerNameIsValid(myName);
     const int maxAttempts = 1000;
     // TODO: Use config from local storage OR from account.
     final GameConfig config = GameConfigController.defaultConfig();
@@ -196,6 +214,7 @@ class GameController {
   }
 
   static Future<LocalGameData> joinLobby(String myName, String gameID) async {
+    checkPlayerNameIsValid(myName);
     // TODO: Check if the game has already started.
     final DocumentReference reference = gameReferenceFromGameID(gameID);
     int playerID = 0;
