@@ -17,7 +17,7 @@ Future<String> _newGameOnlineDialog(BuildContext context) async {
         content: TextField(
           autofocus: true,
           decoration: new InputDecoration(
-            labelText: 'Name',
+            labelText: 'Player name',
           ),
           onChanged: (value) {
             playerName = value;
@@ -65,7 +65,7 @@ Future<JoinGameParams> _joinGameDialog(BuildContext context) async {
             TextField(
               autofocus: true,
               decoration: new InputDecoration(
-                labelText: 'Name',
+                labelText: 'Player name',
               ),
               onChanged: (value) {
                 params.playerName = value;
@@ -89,6 +89,9 @@ Future<JoinGameParams> _joinGameDialog(BuildContext context) async {
 class StartScreen extends StatelessWidget {
   Future<void> _newGameOnline(BuildContext context) async {
     final String playerName = await _newGameOnlineDialog(context);
+    if (playerName == null) {
+      return;
+    }
     LocalGameData localGameData;
     try {
       localGameData = await GameController.newLobby(playerName);
@@ -106,6 +109,9 @@ class StartScreen extends StatelessWidget {
 
   Future<void> _joinGame(BuildContext context) async {
     final JoinGameParams params = await _joinGameDialog(context);
+    if (params == null) {
+      return;
+    }
     LocalGameData localGameData;
     try {
       localGameData =
