@@ -1,6 +1,6 @@
 set -e
 set -o xtrace
 
-./gen_index_html.sh
+./update_git_version.sh
 flutter build web
 firebase deploy

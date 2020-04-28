@@ -34,8 +34,6 @@
 # Web related
 lib/generated_plugin_registrant.dart
 /.firebase/hosting.*.cache
-# Workaround for gen_index_html.sh, would be nice to revert.
-/web/index.html
 
 # Symbolication related
 app.*.symbols
@@ -45,3 +43,7 @@ app.*.map.json
 
 # Exceptions to above rules.
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
+
+# Workaround for update_git_version.sh, would be nice to revert.
+/web/index.html
+/lib/git_version.dart

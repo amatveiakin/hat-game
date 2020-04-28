@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:hatgame/game_config_view.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
+import 'package:hatgame/git_version.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/widget/invalid_operation_dialog.dart';
 import 'package:hatgame/widget/wide_button.dart';
@@ -136,8 +137,14 @@ class StartScreen extends StatelessWidget {
       ),
       body: Center(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
+            SizedBox(height: 6),
+            Text(
+              'This app is in Beta. Version: $gitVersion',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 10.0, color: Colors.black45),
+            ),
+            Expanded(child: Container()),
             WideButton(
               onPressed: () => _newGameOnline(context),
               child: Text('New Game Online'),
@@ -147,6 +154,7 @@ class StartScreen extends StatelessWidget {
               onPressed: () => _joinGame(context),
               child: Text('Join Game'),
             ),
+            Expanded(child: Container()),
           ],
         ),
       ),

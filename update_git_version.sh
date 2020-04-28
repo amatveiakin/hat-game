@@ -8,4 +8,7 @@
 set -e
 # TODO: Generate index.html inside some temp folder, e.g.:
 #     .dart_tool/build/generated/hatgame/web/index.html
-sed "s/%version%/`git describe --tags`/" web/index.tmpl.html > web/index.html
+VERSION=`git describe --tags`
+sed "s/%version%/$VERSION/" web/index.tmpl.html > web/index.html
+sed "s/%version%/$VERSION/" lib/git_version.tmpl > lib/git_version.dart
+echo "Git version update. New version: $VERSION"
