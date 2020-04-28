@@ -16,14 +16,14 @@ getIndividualPlayStyleOptions() {
   return [
     OptionDescription(
       value: IndividualPlayStyle.chain,
-      title: 'Chain sequence',
+      title: 'Chain',
       subtitle: 'The “hat” goes in a circle. '
-          'You always explain to the next person in sequence.',
+          'Always explain to the next person in sequence.',
     ),
     OptionDescription(
       value: IndividualPlayStyle.fluidPairs,
       title: 'Fluid pairs',
-      subtitle: 'You explain to a new person every time '
+      subtitle: 'Explain to a new person every time '
           '(until you\'ve been paired up with every other player, '
           'at which point the loop starts anew).',
     ),
@@ -41,7 +41,7 @@ class IndividualPlayStyleSelector
   IndividualPlayStyleSelector(
       IndividualPlayStyle initialValue, Function changeCallback)
       : super(
-          windowTitle: 'Individual Play Style',
+          windowTitle: 'Turn Order',
           allValues: getIndividualPlayStyleOptions(),
           initialValue: initialValue,
           changeCallback: changeCallback,
@@ -233,25 +233,25 @@ class TeamingConfigView extends StatelessWidget {
         case IndividualPlayStyle.chain:
           items.add(
             MultiLineListTile(
-                title: Text('Chain sequence'),
+                title: Text('Turn order: chain'),
                 subtitle: Text('The “hat” goes in a circle. '
-                    'You always explain to the next person.'),
+                    'Always explain to the next person.'),
                 onTap: onTap),
           );
           break;
         case IndividualPlayStyle.fluidPairs:
           items.add(
             MultiLineListTile(
-                title: Text('Fluid pairs'),
-                subtitle: Text('You explain to a new person every time.'),
+                title: Text('Turn order: fluid pairs'),
+                subtitle: Text('Explain to a new person every time.'),
                 onTap: onTap),
           );
           break;
         case IndividualPlayStyle.broadcast:
           items.add(
             MultiLineListTile(
-                title: Text('One to all'),
-                subtitle: Text('You explain to everybody else.'),
+                title: Text('Turn order: one to all'),
+                subtitle: Text('Explains to everybody else.'),
                 onTap: onTap),
           );
           break;
@@ -409,7 +409,7 @@ class TeamingConfigView extends StatelessWidget {
         case IndividualPlayStyle.fluidPairs:
           items.add(
             MultiLineListTile(
-                title: Text('Always one guesser'),
+                title: Text('Large teams: always one guesser'),
                 subtitle: Text('Exactly one person guesses every turn. '
                     'Teams with more than two players rotate roles.'),
                 onTap: onTap),
@@ -418,7 +418,7 @@ class TeamingConfigView extends StatelessWidget {
         case IndividualPlayStyle.broadcast:
           items.add(
             MultiLineListTile(
-                title: Text('The whole team guesses'),
+                title: Text('Large teams: whole team guesses'),
                 subtitle: Text(
                     'Everybody can guess in teams with more than two players.'),
                 onTap: onTap),
