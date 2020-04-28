@@ -155,9 +155,9 @@ class WordReviewItem extends StatelessWidget {
           children: [
             Checkbox(
               value: _statusToChecked(status),
-              onChanged: (bool newValue) {
-                setStatus(_checkedToStatus(newValue));
-              },
+              onChanged: setStatus != null
+                  ? (bool newValue) => setStatus(_checkedToStatus(newValue))
+                  : null,
             ),
             Expanded(
               child: Text(
@@ -168,37 +168,39 @@ class WordReviewItem extends StatelessWidget {
                         : TextDecoration.none),
               ),
             ),
-            IconButton(
-              icon: Icon(status == WordStatus.discarded
-                  ? Icons.restore_from_trash
-                  : Icons.delete_outline),
-              tooltip: status == WordStatus.discarded ? 'Restore' : 'Discard',
-              onPressed: () {
-                setStatus(status == WordStatus.discarded
-                    ? WordStatus.notExplained
-                    : WordStatus.discarded);
-              },
-            ),
-            PopupMenuButton(
-              icon: _getWordFeedbackIcon(feedback, true, true),
-              itemBuilder: (BuildContext context) {
-                var result = <PopupMenuItem<WordFeedback>>[];
-                result.addAll(WordFeedback.values
-                    .where((wf) => (wf != null))
-                    .map((wf) => PopupMenuItem<WordFeedback>(
-                          value: wf,
-                          child: ListTile(
-                              leading: _getWordFeedbackIcon(
-                                  wf, false, wf == feedback),
-                              title: Text(_getWordFeedbackText(wf))),
-                        ))
-                    .toList());
-                return result;
-              },
-              onSelected: (WordFeedback newFeedback) {
-                setFeedback(newFeedback == feedback ? null : newFeedback);
-              },
-            )
+            if (setStatus != null)
+              IconButton(
+                icon: Icon(status == WordStatus.discarded
+                    ? Icons.restore_from_trash
+                    : Icons.delete_outline),
+                tooltip: status == WordStatus.discarded ? 'Restore' : 'Discard',
+                onPressed: () {
+                  setStatus(status == WordStatus.discarded
+                      ? WordStatus.notExplained
+                      : WordStatus.discarded);
+                },
+              ),
+            if (setFeedback != null)
+              PopupMenuButton(
+                icon: _getWordFeedbackIcon(feedback, true, true),
+                itemBuilder: (BuildContext context) {
+                  var result = <PopupMenuItem<WordFeedback>>[];
+                  result.addAll(WordFeedback.values
+                      .where((wf) => (wf != null))
+                      .map((wf) => PopupMenuItem<WordFeedback>(
+                            value: wf,
+                            child: ListTile(
+                                leading: _getWordFeedbackIcon(
+                                    wf, false, wf == feedback),
+                                title: Text(_getWordFeedbackText(wf))),
+                          ))
+                      .toList());
+                  return result;
+                },
+                onSelected: (WordFeedback newFeedback) {
+                  setFeedback(newFeedback == feedback ? null : newFeedback);
+                },
+              )
           ],
         ),
       ),
@@ -308,15 +310,53 @@ class PlayAreaState extends State<PlayArea>
 
   @override
   Widget build(BuildContext context) {
-    if (!gameController.isActivePlayer) {
-      // TODO: Show a read-only review page instead.
-      return Center(
-        child: Text(
-          'You are player ${localGameData.myPlayerID}. '
-          "It's not your turn.",
-        ),
-      );
+    if (gameController.isActivePlayer) {
+      return _buildActivePlayer(context);
+    } else {
+      return _buildInactivePlayer(context);
     }
+  }
+
+  Widget _buildInactivePlayer(BuildContext context) {
+    switch (gameState.turnPhase) {
+      case TurnPhase.prepare:
+        return Container();
+      case TurnPhase.explain:
+      case TurnPhase.review:
+        {
+          final wordsToShow = gameData
+              .wordsInThisTurnData()
+              .map((w) => w.status == WordStatus.notExplained
+                  // TODO: Replace with smeary image.
+                  ? w.rebuild((b) => b..text = '???')
+                  : w);
+          return Column(children: [
+            Expanded(
+              child: ListView(
+                children: ListTile.divideTiles(
+                  context: context,
+                  tiles: wordsToShow
+                      .map((w) => WordReviewItem(
+                            text: w.text,
+                            status: w.status,
+                            feedback: w.feedback,
+                            setStatus: null,
+                            // TODO: Record feedback separately for each player.
+                            setFeedback: null,
+                          ))
+                      .toList(),
+                ).toList(),
+              ),
+            ),
+          ]);
+        }
+    }
+    Assert.holds(gameState.gameFinished,
+        lazyMessage: () => gameState.toString());
+    return Container();
+  }
+
+  Widget _buildActivePlayer(BuildContext context) {
     final wordsInHatWidget = Container(
       padding: EdgeInsets.symmetric(vertical: 12.0),
       child: Text('Words in hat: ${gameState.wordsInHat.length}'),
