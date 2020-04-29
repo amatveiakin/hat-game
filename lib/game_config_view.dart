@@ -105,13 +105,11 @@ class _GameConfigViewState extends State<GameConfigView>
       appBar: localGameData.onlineMode
           ? AppBar(
               automaticallyImplyLeading: false,
-              title: localGameData.onlineMode
-                  ? Text('Game ID: ${localGameData.gameID}')
-                  : null,
-              // For some reason PreferredSize affects not only the botton of
+              title: Text('Game ID: ${localGameData.gameID}'),
+              // For some reason PreferredSize affects not only the bottom of
               // the AppBar but also the title, making it misaligned with the
-              // normal title text position. Hopefully this is not too visible.
-              // Without PreferredSize the AppBar is just too fat.
+              // normal title text position. Hopefully this is not too
+              // noticeable. Without PreferredSize the AppBar is just too fat.
               bottom: PreferredSize(
                 preferredSize: Size.fromHeight(64.0),
                 child: TabBar(
