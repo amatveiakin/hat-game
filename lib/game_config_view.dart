@@ -34,25 +34,29 @@ class _GameConfigViewState extends State<GameConfigView>
   //     - this can be half-official, e.g. the button would be disabled and
   //       display a warning, but still change the tab.
   // (Are there best practices?)
-  final tabs = <Tab>[
-    Tab(
-      text: 'Rules',
-      icon: Icon(Icons.settings),
-    ),
-    Tab(
-      text: 'Teaming',
-      // TODO: Add arrows / several groups of people / gearwheel.
-      icon: Icon(Icons.people),
-    ),
-    Tab(
-      text: 'Players',
-      // TODO: Replace squares with person icons.
-      icon: Icon(OMIcons.ballot),
-    ),
-  ];
+  List<Tab> _buildTabs(int numPlayers) {
+    return [
+      Tab(
+        text: 'Rules',
+        icon: Icon(Icons.settings),
+      ),
+      Tab(
+        text: 'Teaming',
+        // TODO: Add arrows / several groups of people / gearwheel.
+        icon: Icon(Icons.people),
+      ),
+      Tab(
+        text: 'Players ($numPlayers)',
+        // TODO: Replace squares with person icons.
+        icon: Icon(OMIcons.ballot),
+      ),
+    ];
+  }
+
   static const int rulesTabIndex = 0;
   static const int teamingTabIndex = 1;
   static const int playersTabIndex = 2;
+  static const int numTabs = 3;
 
   LocalGameData get localGameData => widget.localGameData;
   bool get isAdmin => localGameData.isAdmin;
@@ -62,7 +66,7 @@ class _GameConfigViewState extends State<GameConfigView>
 
   @override
   void initState() {
-    _tabController = TabController(vsync: this, length: tabs.length);
+    _tabController = TabController(vsync: this, length: numTabs);
     _tabController.addListener(() {
       // Hide virtual keyboard
       FocusScope.of(context).unfocus();
@@ -100,67 +104,68 @@ class _GameConfigViewState extends State<GameConfigView>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: localGameData.onlineMode
-          ? AppBar(
-              automaticallyImplyLeading: false,
-              title: Text('Game ID: ${localGameData.gameID}'),
-              // For some reason PreferredSize affects not only the bottom of
-              // the AppBar but also the title, making it misaligned with the
-              // normal title text position. Hopefully this is not too
-              // noticeable. Without PreferredSize the AppBar is just too fat.
-              bottom: PreferredSize(
-                preferredSize: Size.fromHeight(64.0),
-                child: TabBar(
-                  controller: _tabController,
-                  tabs: tabs,
-                ),
-              ),
-            )
-          : PreferredSize(
-              preferredSize: Size.fromHeight(64.0),
-              child: AppBar(
-                automaticallyImplyLeading: false,
-                flexibleSpace: SafeArea(
-                  child: TabBar(
-                    controller: _tabController,
-                    tabs: tabs,
+    return StreamBuilder<DocumentSnapshot>(
+      stream: localGameData.gameReference.snapshots(),
+      builder:
+          (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+        // TODO: Deal with errors and loading.
+        if (snapshot.hasError) {
+          return Center(
+              child: Text(
+            'Error getting game config:\n' + snapshot.error.toString(),
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
+          ));
+        }
+        if (!snapshot.hasData) {
+          return Center(child: CircularProgressIndicator());
+        }
+        final configController =
+            GameConfigController(localGameData.gameReference);
+        final GameConfigReadResult gameConfigReadResult =
+            GameConfigController.configFromSnapshot(snapshot.data);
+        final GameConfig gameConfig = gameConfigReadResult.config;
+        Assert.holds(gameConfig != null);
+        if (gameConfigReadResult.gameHasStarted) {
+          // Cannot navigate from within `build`.
+          if (!_navigatedToGame) {
+            Future.delayed(Duration.zero, () => _goToGame());
+            _navigatedToGame = true;
+          }
+          return Center(child: CircularProgressIndicator());
+        }
+
+        final tabs = _buildTabs(gameConfig.players.names.length);
+        return Scaffold(
+          resizeToAvoidBottomInset: false,
+          appBar: localGameData.onlineMode
+              ? AppBar(
+                  automaticallyImplyLeading: false,
+                  title: Text('Game ID: ${localGameData.gameID}'),
+                  // For some reason PreferredSize affects not only the bottom of
+                  // the AppBar but also the title, making it misaligned with the
+                  // normal title text position. Hopefully this is not too
+                  // noticeable. Without PreferredSize the AppBar is just too fat.
+                  bottom: PreferredSize(
+                    preferredSize: Size.fromHeight(64.0),
+                    child: TabBar(
+                      controller: _tabController,
+                      tabs: tabs,
+                    ),
+                  ),
+                )
+              : PreferredSize(
+                  preferredSize: Size.fromHeight(64.0),
+                  child: AppBar(
+                    automaticallyImplyLeading: false,
+                    flexibleSpace: SafeArea(
+                      child: TabBar(
+                        controller: _tabController,
+                        tabs: tabs,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-      body: StreamBuilder<DocumentSnapshot>(
-        stream: localGameData.gameReference.snapshots(),
-        builder:
-            (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-          // TODO: Deal with errors and loading.
-          if (snapshot.hasError) {
-            return Center(
-                child: Text(
-              'Error getting game config:\n' + snapshot.error.toString(),
-              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
-            ));
-          }
-          if (!snapshot.hasData) {
-            return Center(child: CircularProgressIndicator());
-          }
-          final configController =
-              GameConfigController(localGameData.gameReference);
-          final GameConfigReadResult gameConfigReadResult =
-              GameConfigController.configFromSnapshot(snapshot.data);
-          final GameConfig gameConfig = gameConfigReadResult.config;
-          Assert.holds(gameConfig != null);
-          if (gameConfigReadResult.gameHasStarted) {
-            // Cannot navigate from within `build`.
-            if (!_navigatedToGame) {
-              Future.delayed(Duration.zero, () => _goToGame());
-              _navigatedToGame = true;
-            }
-            return Center(child: CircularProgressIndicator());
-          }
-
-          return Column(
+          body: Column(
             children: [
               Expanded(
                 child: TabBarView(
@@ -205,9 +210,9 @@ class _GameConfigViewState extends State<GameConfigView>
                 ),
               ),
             ],
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }
