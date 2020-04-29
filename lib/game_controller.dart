@@ -6,8 +6,8 @@ import 'package:built_collection/built_collection.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hatgame/app_version.dart';
 import 'package:hatgame/built_value/personal_state.dart';
-import 'package:hatgame/git_version.dart';
 import 'package:unicode/unicode.dart' as unicode;
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
@@ -226,7 +226,7 @@ class GameController {
               dbData([
                 DBColCreationTimeUtc()
                     .setData(DateTime.now().toUtc().toString()),
-                DBColHostAppVersion().setData(gitVersion),
+                DBColHostAppVersion().setData(appVersion),
                 DBColConfig().setData(config),
                 DBColPlayer(playerID).setData(PersonalState((b) => b
                   ..id = playerID

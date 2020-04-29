@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hatgame/app_version.dart';
 import 'package:hatgame/game_config_view.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
-import 'package:hatgame/git_version.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/widget/invalid_operation_dialog.dart';
 import 'package:hatgame/widget/wide_button.dart';
@@ -144,7 +144,7 @@ class StartScreen extends StatelessWidget {
           children: [
             SizedBox(height: 6),
             Text(
-              'This app is in Beta. Version: $gitVersion',
+              'This app is in Beta. Version: $appVersion',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 10.0, color: Colors.black45),
             ),
