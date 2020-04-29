@@ -135,6 +135,9 @@ class StartScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (MediaQuery.of(context).size.longestSide < 960) {
+      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text('Hat Game'),
