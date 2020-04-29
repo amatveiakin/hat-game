@@ -101,6 +101,7 @@ class _GameConfigViewState extends State<GameConfigView>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: localGameData.onlineMode
           ? AppBar(
               automaticallyImplyLeading: false,
