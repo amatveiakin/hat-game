@@ -113,6 +113,8 @@ class PadlockState extends State<Padlock> with SingleTickerProviderStateMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // TODO: Check available space rather then screen size: replace MediaQuery
+    // with LayoutBuilder or FractionallySizedBox.
     final double side =
         min(200, MediaQuery.of(context).size.shortestSide * 0.6);
     _size = Size.square(side);

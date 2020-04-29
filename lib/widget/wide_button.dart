@@ -14,12 +14,8 @@ class WideButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get screen size using MediaQuery
-    // TODO: Consider using LayoutBuilder with viewportConstraints.maxWidth
-    // instead of MediaQuery.
-    final double width = MediaQuery.of(context).size.width * 0.8;
-    return SizedBox(
-      width: width,
+    return FractionallySizedBox(
+      widthFactor: 0.8,
       child: GestureDetector(
         child: RaisedButton(
           onPressed: onPressed,
