@@ -137,10 +137,11 @@ class WordReviewItem extends StatelessWidget {
       {@required this.text,
       @required this.status,
       @required this.feedback,
-      @required this.hasFlag,
+      bool hasFlag,
       @required this.setStatus,
       @required this.setFeedback,
-      @required this.setFlag});
+      @required this.setFlag})
+      : hasFlag = hasFlag ?? false;
 
   @override
   Widget build(BuildContext context) {
@@ -187,19 +188,24 @@ class WordReviewItem extends StatelessWidget {
                               : TextDecoration.none),
                     ),
             ),
-            if (hasFlag || setFlag != null)
+            if (hasFlag && setFlag == null)
+              // Padding and icon size constants are mimicing an icon button.
+              Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Tooltip(
+                  child: Icon(Icons.error, color: MyTheme.primary),
+                  message: 'Somebody thinks there was a problem with the word '
+                      '(invalid explanation, word not actually guessed)',
+                ),
+              ),
+            if (setFlag != null)
               IconButton(
                 icon: hasFlag
-                    ? Icon(Icons.error,
-                        color:
-                            setFlag != null ? MyTheme.accent : MyTheme.primary)
+                    ? Icon(Icons.error, color: MyTheme.accent)
                     : Icon(Icons.error_outline),
-                tooltip: setFlag != null
-                    ? 'Raise a problem with the word '
-                        '(invalid explanation, word not actually guessed)'
-                    : 'Somebody thinks there was a problem with the word '
-                        '(invalid explanation, word not actually guessed)',
-                onPressed: setFlag != null ? () => setFlag(!hasFlag) : () {},
+                tooltip: 'Raise a problem with the word '
+                    '(invalid explanation, word not actually guessed)',
+                onPressed: () => setFlag(!hasFlag),
               ),
             if (setStatus != null)
               IconButton(
@@ -359,16 +365,26 @@ class PlayAreaState extends State<PlayArea>
   Widget _buildInactivePlayer(BuildContext context) {
     final wordReviewItems = gameData
         .wordsInThisTurnData()
-        .map((w) => WordReviewItem(
-              text: w.status == WordStatus.notExplained ? null : w.text,
-              status: w.status,
-              feedback: personalState.wordFeedback[w.id],
-              hasFlag: personalState.wordFlags.contains(w.id),
-              setStatus: null,
-              setFeedback: (WordFeedback feedback) =>
-                  _setWordFeedback(w.id, feedback),
-              setFlag: (bool hasFlag) => _setWordFlag(w.id, hasFlag),
-            ))
+        .map((w) => w.status != WordStatus.notExplained
+            ? WordReviewItem(
+                text: w.text,
+                status: w.status,
+                feedback: personalState.wordFeedback[w.id],
+                hasFlag: personalState.wordFlags.contains(w.id),
+                setStatus: null,
+                setFeedback: (WordFeedback feedback) =>
+                    _setWordFeedback(w.id, feedback),
+                setFlag: (bool hasFlag) => _setWordFlag(w.id, hasFlag),
+              )
+            : WordReviewItem(
+                text: null,
+                status: w.status,
+                feedback: null,
+                hasFlag: null,
+                setStatus: null,
+                setFeedback: null,
+                setFlag: null,
+              ))
         .toList();
     switch (gameState.turnPhase) {
       case TurnPhase.prepare:
