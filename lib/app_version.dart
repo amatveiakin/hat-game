@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:hatgame/git_version.dart';
 
-String get appVersion => '$gitVersion:${buildMode()}';
+String get appVersion => gitVersion + _buildModeSuffix();
 
 String buildMode() {
   if (kReleaseMode) {
@@ -13,4 +13,8 @@ String buildMode() {
   } else {
     return 'unknown_built_type';
   }
+}
+
+String _buildModeSuffix() {
+  return kReleaseMode ? '' : ':' + buildMode();
 }
