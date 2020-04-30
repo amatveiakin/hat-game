@@ -56,7 +56,7 @@ class GameConfigController {
       // TODO: Support gaps or check that there are none.
       for (int playerID = 0;; playerID++) {
         final playerColumn = DBColPlayer(playerID);
-        if (!documentSnapshot.data.containsKey(playerColumn.name)) {
+        if (!dbContains(documentSnapshot, playerColumn)) {
           break;
         }
         playerNames[playerID] = dbGet(documentSnapshot, playerColumn).name;

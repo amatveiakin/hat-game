@@ -27,17 +27,19 @@ abstract class DBColumn<T> {
   }
 }
 
+bool dbContains<T>(DocumentSnapshot snapshot, DBColumn<T> column) {
+  return snapshot.data.containsKey(column.name);
+}
+
 T dbGet<T>(DocumentSnapshot snapshot, DBColumn<T> column) {
-  Assert.holds(snapshot.data.containsKey(column.name),
+  Assert.holds(dbContains(snapshot, column),
       lazyMessage: () => 'Column ${column.name} not found in '
           '${snapshot.reference.path}. Content: ${snapshot.data.toString()}');
   return column.deserialize(snapshot.data[column.name]);
 }
 
 T dbTryGet<T>(DocumentSnapshot snapshot, DBColumn<T> column) {
-  return snapshot.data.containsKey(column.name)
-      ? dbGet(snapshot, column)
-      : null;
+  return dbContains(snapshot, column) ? dbGet(snapshot, column) : null;
 }
 
 Map<String, dynamic> dbData(List<DBColumn> columns) {

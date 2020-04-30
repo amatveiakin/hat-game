@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hatgame/util/strings.dart';
 import 'package:meta/meta.dart';
 
 enum AssertInRelease {
@@ -64,6 +65,6 @@ class Assert {
   }
 
   static _combine(List<String> messages) {
-    return messages.where((s) => s != null && s.isNotEmpty).join(': ');
+    return messages.where((s) => !isNullOrEmpty(s)).join(': ');
   }
 }

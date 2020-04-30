@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/app_version.dart';
 import 'package:hatgame/built_value/personal_state.dart';
+import 'package:hatgame/util/strings.dart';
 import 'package:unicode/unicode.dart' as unicode;
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
@@ -182,8 +183,9 @@ class GameController {
   bool get isActivePlayer =>
       state == null ? false : activePlayer(state) == localGameData.myPlayerID;
 
-  static String generateNewGameID() {
-    return Random().nextInt(10000).toString().padLeft(4, '0');
+  static String generateNewGameID(int length, String prefix) {
+    return prefix +
+        Random().nextInt(pow(10, length)).toString().padLeft(length, '0');
   }
 
   static DocumentReference gameReferenceFromGameID(String gameId) {
@@ -204,6 +206,20 @@ class GameController {
         throw InvalidOperation('Player name contans invalid character: '
             '${String.fromCharCode(c)} (code $c)');
       }
+    }
+  }
+
+  static void checkVersionCompatibility(
+      String hostVersion, String clientVersion) {
+    if (isNullOrEmpty(hostVersion)) {
+      throw InvalidOperation('Unknown host version', isInternalError: true);
+    }
+    if (isNullOrEmpty(clientVersion)) {
+      throw InvalidOperation('Unknown client version', isInternalError: true);
+    }
+    if (!versionsCompatibile(hostVersion, clientVersion)) {
+      throw InvalidOperation('Incompatible game version. '
+          'Host version: $hostVersion, local version: $clientVersion');
     }
   }
 
@@ -293,10 +309,17 @@ class GameController {
         return;
       }
       {
-        // [2/2] Workaround flutter/firestore error. Do a dump write.
+        // [2/2] Workaround flutter/firestore error. Do a dumb write.
         await tx.set(reference, snapshot.data);
       }
-      while (snapshot.data.containsKey(DBColPlayer(playerID).name)) {
+      try {
+        checkVersionCompatibility(
+            dbTryGet(snapshot, DBColHostAppVersion()), appVersion);
+      } on InvalidOperation catch (e) {
+        error = e;
+        return;
+      }
+      while (dbContains(snapshot, DBColPlayer(playerID))) {
         if (myName == dbGet(snapshot, DBColPlayer(playerID)).name) {
           error = InvalidOperation("Name $myName is already taken");
           return;
@@ -395,7 +418,7 @@ class GameController {
       final DocumentSnapshot snapshot) {
     final states = Map<int, PersonalState>();
     int playerID = 0;
-    while (snapshot.data.containsKey(DBColPlayer(playerID).name)) {
+    while (dbContains(snapshot, DBColPlayer(playerID))) {
       states[playerID] = dbGet(snapshot, DBColPlayer(playerID));
       playerID++;
     }
@@ -418,14 +441,14 @@ class GameController {
       final GameConfigReadResult configReadResult =
           GameConfigController.configFromSnapshot(snapshot);
       if (!configReadResult.gameHasStarted ||
-          !snapshot.data.containsKey(DBColState().name)) {
+          !dbContains(snapshot, DBColState())) {
         return;
       }
       // This is the one and only place where the config changes.
       config = configReadResult.config;
     }
 
-    if (!snapshot.data.containsKey(DBColState().name)) {
+    if (!dbContains(snapshot, DBColState())) {
       Assert.fail('Game state not found');
     }
 
@@ -468,7 +491,7 @@ class GameController {
       DocumentSnapshot snapshot = await tx.get(reference);
       Assert.holds(snapshot.exists,
           lazyMessage: () => 'Game doesn\'t exist: ' + reference.path);
-      Assert.holds(!snapshot.data.containsKey(DBColState().name),
+      Assert.holds(!dbContains(snapshot, DBColState()),
           lazyMessage: () => 'Game state already exists: ' + reference.path);
       await tx.update(
           reference,
