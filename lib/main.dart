@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:hatgame/sounds.dart';
 import 'package:hatgame/start_screen.dart';
 import 'package:hatgame/theme.dart';
+import 'package:hatgame/util/sounds.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
