@@ -26,6 +26,8 @@ dependencies:
 
   meta: ^1.1.8
 
+  tuple: ^1.0.3
+
   built_collection: ^4.3.2
   built_value: ^7.1.0
 

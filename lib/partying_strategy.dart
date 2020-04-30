@@ -92,8 +92,7 @@ void checkNumPlayersForIndividualPlay(
       return;
     case IndividualPlayStyle.broadcast:
       if (numPlayers < 1) {
-        throw InvalidOperation(
-            'At least one player is required');
+        throw InvalidOperation('At least one player is required');
       }
       return;
   }
@@ -147,7 +146,7 @@ abstract class PartyingStrategyImpl {
 abstract class IndividualStrategy extends PartyingStrategyImpl {
   final int numPlayers;
 
-  IndividualStrategy._internal(this.numPlayers);
+  IndividualStrategy.internal(this.numPlayers);
 
   factory IndividualStrategy(int numPlayers, IndividualPlayStyle playStyle) {
     switch (playStyle) {
@@ -163,7 +162,7 @@ abstract class IndividualStrategy extends PartyingStrategyImpl {
 }
 
 class ChainIndividualStrategy extends IndividualStrategy {
-  ChainIndividualStrategy(int numPlayers) : super._internal(numPlayers);
+  ChainIndividualStrategy(int numPlayers) : super.internal(numPlayers);
 
   @override
   Party getParty(int turn) {
@@ -176,12 +175,18 @@ class ChainIndividualStrategy extends IndividualStrategy {
 }
 
 class FluidPairsIndividualStrategy extends IndividualStrategy {
-  FluidPairsIndividualStrategy(int numPlayers) : super._internal(numPlayers);
+  FluidPairsIndividualStrategy(int numPlayers) : super.internal(numPlayers);
 
   @override
   Party getParty(int turn) {
-    final int performer = turn % numPlayers;
+    final int localIdx = turn % numPlayers;
     final int shift = turn ~/ numPlayers % (numPlayers - 1) + 1;
+    // Any function of `shift` and `numPlayers` is a valid seed, although
+    // only seed non-trivially depending on `shift` is meaningful.
+    // To estimate which seed gives best results, check out the metrics
+    // in partying_strategy_test.dart.
+    final int seed = numPlayers == 3 ? (shift - 1) : 0;
+    final int performer = (localIdx + seed) % numPlayers;
     final int recipient = (performer + shift) % numPlayers;
     return Party((b) => b
       ..performer = performer
@@ -190,7 +195,7 @@ class FluidPairsIndividualStrategy extends IndividualStrategy {
 }
 
 class BroadcastIndividualStrategy extends IndividualStrategy {
-  BroadcastIndividualStrategy(int numPlayers) : super._internal(numPlayers);
+  BroadcastIndividualStrategy(int numPlayers) : super.internal(numPlayers);
 
   @override
   Party getParty(int turn) {
