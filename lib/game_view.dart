@@ -16,59 +16,65 @@ import 'package:hatgame/widget/wide_button.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
 import 'package:vibration/vibration.dart';
 
-class PartyView extends StatefulWidget {
+class PartyView extends StatelessWidget {
   final PartyViewData teamData;
   final TurnPhase turnPhase;
+  final int myPlayerID;
 
-  PartyView(this.teamData, this.turnPhase);
+  PartyView(this.teamData, this.turnPhase, this.myPlayerID);
 
-  @override
-  createState() => PartyViewState();
-}
-
-// TODO: Swicth to animation controllers or make the widget stateless.
-class PartyViewState extends State<PartyView> with TickerProviderStateMixin {
-  @override
-  Widget build(BuildContext context) {
-    final animationDuration = widget.turnPhase == TurnPhase.prepare
+  Widget _playerView(PlayerState playerState) {
+    Widget textWidget = Text(playerState.name);
+    final animationDuration = turnPhase == TurnPhase.prepare
         ? Duration.zero
         : Duration(milliseconds: 300);
-    return AnimatedDefaultTextStyle(
-      duration: animationDuration,
-      style: TextStyle(
-        fontSize: 20.0,
-        fontWeight: widget.turnPhase == TurnPhase.prepare
-            ? FontWeight.bold
-            : FontWeight.normal,
-        // TODO: Why do we need to specify color?
-        // TODO: Take color from the theme.
-        color: Colors.black,
-      ),
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 12.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              widget.teamData.performer.name,
-              textAlign: TextAlign.right,
-            ),
-            Text(
-              ' → ',
-              textAlign: TextAlign.center,
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: widget.teamData.recipients
-                  .map((player) => Text(
-                        player.name,
-                        textAlign: TextAlign.left,
-                      ))
-                  .toList(),
-            ),
-          ],
-        ),
+    // TODO: Why do we need to specify color?
+    // TODO: Take color from the theme.
+    if (playerState.id != myPlayerID) {
+      return AnimatedDefaultTextStyle(
+          duration: animationDuration,
+          style: TextStyle(
+            fontSize: 20.0,
+            fontWeight: turnPhase == TurnPhase.prepare
+                ? FontWeight.w900
+                : FontWeight.normal,
+            decoration: TextDecoration.underline,
+            decorationColor: MyTheme.accent,
+            decorationThickness: turnPhase == TurnPhase.prepare ? 2.0 : 1.0,
+            color: Colors.black,
+          ),
+          child: textWidget);
+    } else {
+      return AnimatedDefaultTextStyle(
+          duration: animationDuration,
+          style: TextStyle(
+            fontSize: 20.0,
+            fontWeight: turnPhase == TurnPhase.prepare
+                ? FontWeight.w600
+                : FontWeight.normal,
+            color: Colors.black,
+          ),
+          child: textWidget);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 12.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          _playerView(teamData.performer),
+          Text(' → '),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: teamData.recipients
+                .map((player) => _playerView(player))
+                .toList(),
+          ),
+        ],
       ),
     );
   }
@@ -586,6 +592,7 @@ class GameViewState extends State<GameView> {
                   PartyView(
                     gameData.currentPartyViewData(),
                     gameData.state.turnPhase,
+                    localGameData.myPlayerID,
                   ),
                   Expanded(
                     child: PlayArea(
