@@ -44,34 +44,30 @@ class PartyViewState extends State<PartyView> with TickerProviderStateMixin {
         // TODO: Take color from the theme.
         color: Colors.black,
       ),
-      child: AnimatedOpacity(
-        duration: animationDuration,
-        opacity: widget.turnPhase == TurnPhase.prepare ? 1.0 : 0.5,
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 12.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                widget.teamData.performer.name,
-                textAlign: TextAlign.right,
-              ),
-              Text(
-                ' → ',
-                textAlign: TextAlign.center,
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: widget.teamData.recipients
-                    .map((player) => Text(
-                          player.name,
-                          textAlign: TextAlign.left,
-                        ))
-                    .toList(),
-              ),
-            ],
-          ),
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 12.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              widget.teamData.performer.name,
+              textAlign: TextAlign.right,
+            ),
+            Text(
+              ' → ',
+              textAlign: TextAlign.center,
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: widget.teamData.recipients
+                  .map((player) => Text(
+                        player.name,
+                        textAlign: TextAlign.left,
+                      ))
+                  .toList(),
+            ),
+          ],
         ),
       ),
     );
