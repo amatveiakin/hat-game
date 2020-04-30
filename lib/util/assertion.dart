@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/util/strings.dart';
 import 'package:meta/meta.dart';
@@ -22,14 +23,23 @@ class Assert {
     assert(condition, combinedMessage);
     if (!condition) {
       final decoratedMessage = _combine(['Assertion failed', combinedMessage]);
+      final String stackTrace = StackTrace.current.toString();
+      final firebaseLog = () => FirebaseAnalytics().logEvent(
+            name: 'assertion_failure',
+            parameters: {
+              'message': decoratedMessage,
+              'stack_trace': stackTrace,
+            },
+          );
       switch (inRelease) {
         case AssertInRelease.ignore:
           break;
         case AssertInRelease.log:
-          // TODO: Log to Firebase.
-          debugPrint(decoratedMessage + '\n\n' + StackTrace.current.toString());
+          debugPrint(decoratedMessage + '\n' + stackTrace);
+          firebaseLog();
           break;
         case AssertInRelease.fail:
+          firebaseLog();
           throw AssertionError(decoratedMessage);
       }
     }
