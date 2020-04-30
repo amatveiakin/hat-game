@@ -38,10 +38,8 @@ class Assert {
   // TODO: Replace `@alwaysThrows` with `Never` return type when it's ready.
   @alwaysThrows
   static void fail(String message,
-      {MessageProducer lazyMessage,
-      AssertInRelease inRelease = defaultReleaseBehavior}) {
-    holds(false,
-        message: message, lazyMessage: lazyMessage, inRelease: inRelease);
+      {AssertInRelease inRelease = defaultReleaseBehavior}) {
+    holds(false, message: message, inRelease: inRelease);
   }
 
   static void eq<T>(T a, T b,
