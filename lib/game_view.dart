@@ -10,11 +10,11 @@ import 'package:hatgame/score_view.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/sounds.dart';
+import 'package:hatgame/util/vibration.dart';
 import 'package:hatgame/widget/padlock.dart';
 import 'package:hatgame/widget/timer.dart';
 import 'package:hatgame/widget/wide_button.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
-import 'package:vibration/vibration.dart';
 
 class PartyView extends StatelessWidget {
   final PartyViewData teamData;
@@ -301,7 +301,7 @@ class PlayAreaState extends State<PlayArea>
     if (gameState.turn == turnRestriction &&
         gameState.turnPhase == TurnPhase.explain) {
       Sounds.play(Sounds.timeOver);
-      Vibration.vibrate(amplitude: 255);
+      MyVibration.heavyVibration();
       gameController.finishExplanation();
       setState(() {
         _bonusTimeActive = gameConfig.rules.bonusSeconds > 0;
@@ -311,7 +311,7 @@ class PlayAreaState extends State<PlayArea>
 
   void _endBonusTime(int turnRestriction) {
     if (gameState.turn == turnRestriction) {
-      Vibration.vibrate(amplitude: 128);
+      MyVibration.mediumVibration();
       setState(() {
         _bonusTimeActive = false;
       });
