@@ -228,7 +228,7 @@ class GameController {
     const int minIDLength = 4;
     const int maxIDLength = 8;
     const int attemptsPerTransaction = 100;
-    final String idPrefix = kReleaseMode ? '' : '*';
+    final String idPrefix = kReleaseMode ? '' : '.';
     // TODO: Use config from local storage OR from account.
     final GameConfig config = GameConfigController.defaultConfig();
     String gameID;

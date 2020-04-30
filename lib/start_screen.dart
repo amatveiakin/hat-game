@@ -61,7 +61,9 @@ Future<JoinGameParams> _joinGameDialog(BuildContext context) async {
                 labelText: 'Game ID',
               ),
               keyboardType: TextInputType.number,
-              inputFormatters: [WhitelistingTextInputFormatter.digitsOnly],
+              inputFormatters: [
+                WhitelistingTextInputFormatter(RegExp(r'[.0-9]+'))
+              ],
               onChanged: (value) {
                 params.gameID = value;
               },
