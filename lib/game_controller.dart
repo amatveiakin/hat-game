@@ -209,34 +209,44 @@ class GameController {
 
   static Future<LocalGameData> newLobby(String myName) async {
     checkPlayerNameIsValid(myName);
-    const int maxAttempts = 1000;
+    const int minIDLength = 4;
+    const int maxIDLength = 8;
+    const int attemptsPerTransaction = 100;
+    final String idPrefix = kReleaseMode ? '' : '*';
     // TODO: Use config from local storage OR from account.
     final GameConfig config = GameConfigController.defaultConfig();
     String gameID;
     DocumentReference reference;
     final int playerID = 0;
-    await Firestore.instance.runTransaction((Transaction tx) async {
-      for (int iter = 0; iter < maxAttempts; iter++) {
-        gameID = generateNewGameID();
-        reference = gameReferenceFromGameID(gameID);
-        DocumentSnapshot snapshot = await tx.get(reference);
-        if (!snapshot.exists) {
-          await tx.set(
-              reference,
-              dbData([
-                DBColCreationTimeUtc()
-                    .setData(DateTime.now().toUtc().toString()),
-                DBColHostAppVersion().setData(appVersion),
-                DBColConfig().setData(config),
-                DBColPlayer(playerID).setData(PersonalState((b) => b
-                  ..id = playerID
-                  ..name = myName)),
-              ]));
-          return;
+    for (int idLength = minIDLength;
+        idLength <= maxIDLength && gameID == null;
+        idLength++) {
+      await Firestore.instance.runTransaction((Transaction tx) async {
+        for (int iter = 0; iter < attemptsPerTransaction; iter++) {
+          gameID = generateNewGameID(idLength, idPrefix);
+          reference = gameReferenceFromGameID(gameID);
+          DocumentSnapshot snapshot = await tx.get(reference);
+          if (!snapshot.exists) {
+            await tx.set(
+                reference,
+                dbData([
+                  DBColCreationTimeUtc()
+                      .setData(DateTime.now().toUtc().toString()),
+                  DBColHostAppVersion().setData(appVersion),
+                  DBColConfig().setData(config),
+                  DBColPlayer(playerID).setData(PersonalState((b) => b
+                    ..id = playerID
+                    ..name = myName)),
+                ]));
+            return;
+          }
         }
-      }
+        gameID = null;
+      });
+    }
+    if (gameID == null) {
       throw InvalidOperation('Cannot generate game ID', isInternalError: true);
-    });
+    }
     return LocalGameData(
       gameID: gameID,
       gameReference: reference,
