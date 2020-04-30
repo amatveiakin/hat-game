@@ -30,7 +30,7 @@ class PartyView extends StatelessWidget {
         : Duration(milliseconds: 300);
     // TODO: Why do we need to specify color?
     // TODO: Take color from the theme.
-    if (playerState.id != myPlayerID) {
+    if (playerState.id == myPlayerID) {
       return AnimatedDefaultTextStyle(
           duration: animationDuration,
           style: TextStyle(
