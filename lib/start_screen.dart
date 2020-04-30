@@ -92,6 +92,8 @@ Future<JoinGameParams> _joinGameDialog(BuildContext context) async {
 }
 
 class StartScreen extends StatelessWidget {
+  static const String gameConfigRoute = 'GameConfig';
+
   Future<void> _newGameOnline(BuildContext context) async {
     final String playerName = await _newGameOnlineDialog(context);
     if (playerName == null) {
@@ -104,12 +106,12 @@ class StartScreen extends StatelessWidget {
       showInvalidOperationDialog(context: context, error: e);
       return;
     }
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => GameConfigView(
-                  localGameData: localGameData,
-                )));
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => GameConfigView(
+        localGameData: localGameData,
+      ),
+      settings: RouteSettings(name: gameConfigRoute),
+    ));
   }
 
   Future<void> _joinGame(BuildContext context) async {
@@ -125,12 +127,12 @@ class StartScreen extends StatelessWidget {
       showInvalidOperationDialog(context: context, error: e);
       return;
     }
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => GameConfigView(
-                  localGameData: localGameData,
-                )));
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => GameConfigView(
+        localGameData: localGameData,
+      ),
+      settings: RouteSettings(name: gameConfigRoute),
+    ));
   }
 
   @override

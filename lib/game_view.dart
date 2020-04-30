@@ -544,9 +544,11 @@ class GameViewState extends State<GameView> {
   }
 
   void _goToScoreboard(GameData gameData) {
-    Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => ScoreView(gameData: gameData)),
+    Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (context) => ScoreView(gameData: gameData),
+          settings: RouteSettings(name: 'Scoreboard'),
+        ),
         ModalRoute.withName('/'));
   }
 

@@ -93,12 +93,13 @@ class _GameConfigViewState extends State<GameConfigView>
   void _goToGame() {
     // Hide virtual keyboard
     FocusScope.of(context).unfocus();
-    Navigator.pushAndRemoveUntil(
-        context,
+    Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
-            builder: (context) => GameView(
-                  localGameData: localGameData,
-                )),
+          builder: (context) => GameView(
+            localGameData: localGameData,
+          ),
+          settings: RouteSettings(name: 'Game'),
+        ),
         ModalRoute.withName('/'));
   }
 
