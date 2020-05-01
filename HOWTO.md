@@ -1,9 +1,8 @@
 ## Compile
 
-Before compiling the app for the first time, as well as before releasing
-it anywhere, run:
+After cloning the repository before compiling the app for the first time, run
 
-    $ update_git_version.sh
+    $ ./init_repo.sh
 
 Afterwards use the normal Flutter build proccess in order to compile the app.
 
@@ -32,6 +31,10 @@ In order to change app icon:
 
 
 ## Deploy
+
+Before releasing the anywhere, update the version:
+
+    $ ./update_git_version.sh
 
 ### Web
 
