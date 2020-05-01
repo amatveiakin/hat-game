@@ -5,6 +5,7 @@ import 'package:hatgame/game_config_view.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/util/invalid_operation.dart';
+import 'package:hatgame/util/ntp_time.dart';
 import 'package:hatgame/widget/invalid_operation_dialog.dart';
 import 'package:hatgame/widget/wide_button.dart';
 
@@ -93,8 +94,14 @@ Future<JoinGameParams> _joinGameDialog(BuildContext context) async {
   );
 }
 
-class StartScreen extends StatelessWidget {
+class StartScreen extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => StartScreenState();
+}
+
+class StartScreenState extends State<StartScreen> {
   static const String gameConfigRoute = 'GameConfig';
+  bool _initialized = false;
 
   Future<void> _newGameOnline(BuildContext context) async {
     final String playerName = await _newGameOnlineDialog(context);
@@ -137,6 +144,19 @@ class StartScreen extends StatelessWidget {
     ));
   }
 
+  _initPlatformState() async {
+    await NtpTime.init();
+    setState(() {
+      _initialized = true;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initPlatformState();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (MediaQuery.of(context).size.longestSide < 960) {
@@ -147,27 +167,29 @@ class StartScreen extends StatelessWidget {
         title: Text('Hat Game'),
       ),
       body: Center(
-        child: Column(
-          children: [
-            SizedBox(height: 6),
-            Text(
-              'This app is in Beta. Version: $appVersion',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 10.0, color: Colors.black45),
-            ),
-            Expanded(child: Container()),
-            WideButton(
-              onPressed: () => _newGameOnline(context),
-              child: Text('New Game Online'),
-            ),
-            SizedBox(height: 24),
-            WideButton(
-              onPressed: () => _joinGame(context),
-              child: Text('Join Game'),
-            ),
-            Expanded(child: Container()),
-          ],
-        ),
+        child: _initialized
+            ? Column(
+                children: [
+                  SizedBox(height: 6),
+                  Text(
+                    'This app is in Beta. Version: $appVersion',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 10.0, color: Colors.black45),
+                  ),
+                  Expanded(child: Container()),
+                  WideButton(
+                    onPressed: () => _newGameOnline(context),
+                    child: Text('New Game Online'),
+                  ),
+                  SizedBox(height: 24),
+                  WideButton(
+                    onPressed: () => _joinGame(context),
+                    child: Text('Join Game'),
+                  ),
+                  Expanded(child: Container()),
+                ],
+              )
+            : CircularProgressIndicator(),
       ),
     );
   }

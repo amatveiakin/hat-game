@@ -34,6 +34,8 @@ dependencies:
   cloud_firestore: ^0.13.5
   firebase_analytics: ^5.0.11
 
+  ntp: ^1.0.6
+
   # This package provides the 'outline' theme of Material icons.
   # By default Flutter has only a very limited number of those.
   outline_material_icons: ^0.1.1

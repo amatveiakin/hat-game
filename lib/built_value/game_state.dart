@@ -86,6 +86,16 @@ abstract class GameState implements Built<GameState, GameStateBuilder> {
   int get turn;
   @nullable
   TurnPhase get turnPhase;
+
+  @nullable
+  bool get turnPaused;
+  @nullable
+  Duration get turnTimeBeforePause;
+  @nullable
+  DateTime get turnTimeStart;
+  @nullable
+  DateTime get bonusTimeStart;
+
   bool get gameFinished;
 
   GameState._();

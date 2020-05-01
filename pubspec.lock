@@ -394,6 +394,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.4.8"
+  ntp:
+    dependency: "direct main"
+    description:
+      name: ntp
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.6"
   outline_material_icons:
     dependency: "direct main"
     description:

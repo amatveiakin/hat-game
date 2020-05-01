@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,6 +11,8 @@ import 'package:hatgame/game_data.dart';
 import 'package:hatgame/score_view.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/assertion.dart';
+import 'package:hatgame/util/functions.dart';
+import 'package:hatgame/util/ntp_time.dart';
 import 'package:hatgame/util/sounds.dart';
 import 'package:hatgame/util/vibration.dart';
 import 'package:hatgame/widget/padlock.dart';
@@ -276,7 +280,6 @@ class PlayAreaState extends State<PlayArea>
 
   AnimationController _padlockAnimationController;
   bool _turnActive = false;
-  bool _bonusTimeActive = false;
 
   void _unlockStartExplaning() {
     setState(() {
@@ -296,6 +299,11 @@ class PlayAreaState extends State<PlayArea>
     setState(() {
       _turnActive = value;
     });
+    if (value) {
+      gameController.resumeExplaning();
+    } else {
+      gameController.pauseExplaning();
+    }
   }
 
   void _wordGuessed() {
@@ -309,18 +317,12 @@ class PlayAreaState extends State<PlayArea>
       Sounds.play(Sounds.timeOver);
       MyVibration.heavyVibration();
       gameController.finishExplanation();
-      setState(() {
-        _bonusTimeActive = gameConfig.rules.bonusSeconds > 0;
-      });
     }
   }
 
   void _endBonusTime(int turnRestriction) {
     if (gameState.turn == turnRestriction) {
       MyVibration.mediumVibration();
-      setState(() {
-        _bonusTimeActive = false;
-      });
     }
   }
 
@@ -386,20 +388,56 @@ class PlayAreaState extends State<PlayArea>
                 setFlag: null,
               ))
         .toList();
+    final wordReviewView = ListView(
+      children: wordReviewItems,
+    );
+
     switch (gameState.turnPhase) {
       case TurnPhase.prepare:
         return Container();
       case TurnPhase.explain:
+        return Column(children: [
+          Expanded(
+            child: wordReviewView,
+          ),
+          // Use unique key to make sure Flutter doesn't cache timer state,
+          // therefore updates from gameState are effective.
+          // Flutter usually uses parent-owned controllers for this.
+          // OPTIMIZATION POTENTIAL: The cost of recreating anumation
+          // controller (inside the timer) may turn out to be non-zero, in
+          // which case Flutter approach would be faster.
+          gameState.turnPaused
+              ? TimerView(
+                  key: UniqueKey(),
+                  style: TimerViewStyle.turnTime,
+                  duration: Duration(seconds: gameConfig.rules.turnSeconds),
+                  startTime: gameState.turnTimeBeforePause,
+                  startPaused: true,
+                )
+              : TimerView(
+                  key: UniqueKey(),
+                  style: TimerViewStyle.turnTime,
+                  duration: Duration(seconds: gameConfig.rules.turnSeconds),
+                  startTime: gameState.turnTimeBeforePause +
+                      anyMax(Duration.zero,
+                          NtpTime.nowUtc().difference(gameState.turnTimeStart)),
+                ),
+          SizedBox(height: 12.0),
+        ]);
       case TurnPhase.review:
-        {
-          return Column(children: [
-            Expanded(
-              child: ListView(
-                children: wordReviewItems,
-              ),
-            ),
-          ]);
-        }
+        return Column(children: [
+          Expanded(
+            child: wordReviewView,
+          ),
+          TimerView(
+            key: UniqueKey(),
+            style: TimerViewStyle.bonusTime,
+            duration: Duration(seconds: gameConfig.rules.bonusSeconds),
+            startTime: (NtpTime.nowUtc().difference(gameState.bonusTimeStart)),
+            hideOnTimeEnded: true,
+          ),
+          SizedBox(height: 12.0),
+        ]);
     }
     Assert.holds(gameState.gameFinished,
         lazyMessage: () => gameState.toString());
@@ -459,9 +497,14 @@ class PlayAreaState extends State<PlayArea>
           ),
           Expanded(
             child: Center(
+              // Don't set start time and paused state from gameState for
+              // smoother experience for explaining players and more precise
+              // time tracking.
+              // Set key to make sure Flutter keeps the timer, because its
+              // internal state is the source of truth for turn time.
               child: TimerView(
+                key: ValueKey('turn_timer'),
                 style: TimerViewStyle.turnTime,
-                // TODO: Test how this behaves when the app is minimized.
                 onTimeEnded: () => _endTurn(gameState.turn),
                 onRunningChanged: _setTurnActive,
                 duration: Duration(seconds: gameConfig.rules.turnSeconds),
@@ -493,12 +536,13 @@ class PlayAreaState extends State<PlayArea>
                 children: wordReviewItems,
               ),
             ),
-            if (_bonusTimeActive)
-              TimerView(
-                style: TimerViewStyle.bonusTime,
-                onTimeEnded: () => _endBonusTime(gameState.turn),
-                duration: Duration(seconds: gameConfig.rules.bonusSeconds),
-              ),
+            TimerView(
+              key: ValueKey('bonus_timer'),
+              style: TimerViewStyle.bonusTime,
+              onTimeEnded: () => _endBonusTime(gameState.turn),
+              duration: Duration(seconds: gameConfig.rules.bonusSeconds),
+              hideOnTimeEnded: true,
+            ),
             SizedBox(height: 40),
             Container(
               padding: EdgeInsets.symmetric(vertical: 12.0),

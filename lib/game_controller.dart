@@ -1,18 +1,13 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:built_collection/built_collection.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:hatgame/app_version.dart';
-import 'package:hatgame/built_value/personal_state.dart';
-import 'package:hatgame/util/strings.dart';
-import 'package:unicode/unicode.dart' as unicode;
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
-import 'package:hatgame/built_value/serializers.dart';
+import 'package:hatgame/built_value/personal_state.dart';
 import 'package:hatgame/db_columns.dart';
 import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/game_data.dart';
@@ -20,8 +15,10 @@ import 'package:hatgame/partying_strategy.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/built_value_ext.dart';
 import 'package:hatgame/util/invalid_operation.dart';
-import 'package:hatgame/util/list_ext.dart';
+import 'package:hatgame/util/ntp_time.dart';
+import 'package:hatgame/util/strings.dart';
 import 'package:russian_words/russian_words.dart' as russian_words;
+import 'package:unicode/unicode.dart' as unicode;
 
 class GameStateTransformer {
   final GameConfig config;
@@ -48,9 +45,32 @@ class GameStateTransformer {
   void startExplaning() {
     Assert.eq(state.turnPhase, TurnPhase.prepare);
     state = state.rebuild(
-      (b) => b..turnPhase = TurnPhase.explain,
+      (b) => b
+        ..turnPhase = TurnPhase.explain
+        ..turnPaused = false
+        ..turnTimeBeforePause = Duration.zero
+        ..turnTimeStart = NtpTime.nowUtc(),
     );
     drawNextWord();
+  }
+
+  void pauseExplaning() {
+    Assert.eq(state.turnPhase, TurnPhase.explain);
+    Assert.holds(!state.turnPaused);
+    state = state.rebuild((b) => b
+      ..turnPaused = true
+      ..turnTimeBeforePause = state.turnTimeBeforePause +
+          (NtpTime.nowUtc().difference(state.turnTimeStart)));
+  }
+
+  void resumeExplaning() {
+    Assert.eq(state.turnPhase, TurnPhase.explain);
+    Assert.holds(state.turnPaused);
+    state = state.rebuild(
+      (b) => b
+        ..turnPaused = false
+        ..turnTimeStart = NtpTime.nowUtc(),
+    );
   }
 
   void wordGuessed() {
@@ -64,7 +84,12 @@ class GameStateTransformer {
   void finishExplanation() {
     Assert.eq(state.turnPhase, TurnPhase.explain);
     state = state.rebuild(
-      (b) => b..turnPhase = TurnPhase.review,
+      (b) => b
+        ..turnPhase = TurnPhase.review
+        ..turnPaused = null
+        ..turnTimeBeforePause = null
+        ..turnTimeStart = null
+        ..bonusTimeStart = NtpTime.nowUtc(),
     );
   }
 
@@ -246,8 +271,7 @@ class GameController {
             await tx.set(
                 reference,
                 dbData([
-                  DBColCreationTimeUtc()
-                      .setData(DateTime.now().toUtc().toString()),
+                  DBColCreationTimeUtc().setData(NtpTime.nowUtc().toString()),
                   DBColHostAppVersion().setData(appVersion),
                   DBColConfig().setData(config),
                   DBColPlayer(playerID).setData(PersonalState((b) => b
@@ -524,6 +548,14 @@ class GameController {
 
   void startExplaning() {
     _updateState((_transformer..startExplaning()).state);
+  }
+
+  void pauseExplaning() {
+    _updateState((_transformer..pauseExplaning()).state);
+  }
+
+  void resumeExplaning() {
+    _updateState((_transformer..resumeExplaning()).state);
   }
 
   void wordGuessed() {
