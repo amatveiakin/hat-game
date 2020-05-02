@@ -408,7 +408,13 @@ class GameController {
     while (words.length < totalWords) {
       final String text =
           russian_words.nouns[Random().nextInt(russian_words.nouns.length)];
-      if (text.toLowerCase() != text) {
+      // This dictionary contains a lot of words with diminutive sufficies -
+      // try to filter them out. This will also throw away some legit words,
+      // but that's ok. Eventually we'll find a better dictionary.
+      if (text.toLowerCase() != text ||
+          text.endsWith('ик') ||
+          text.endsWith('ек') ||
+          text.endsWith('ок')) {
         continue;
       }
       words.add(Word((b) => b
