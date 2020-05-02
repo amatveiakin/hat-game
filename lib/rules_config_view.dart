@@ -99,6 +99,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
   void dispose() {
     _turnTimeController.dispose();
     _bonusTimeController.dispose();
+    _wordsPerPlayerController.dispose();
     super.dispose();
   }
 
