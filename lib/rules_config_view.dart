@@ -3,11 +3,34 @@ import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/widget/numeric_field.dart';
 
+class RulesConfigViewController {
+  final turnTimeController = TextEditingController();
+  final bonusTimeController = TextEditingController();
+  final wordsPerPlayerController = TextEditingController();
+  bool _updatingFromConfig = false;
+  bool get updatingFromConfig => _updatingFromConfig;
+
+  void updateFromConfig(RulesConfig config) {
+    _updatingFromConfig = true;
+    turnTimeController.text = config.turnSeconds.toString();
+    bonusTimeController.text = config.bonusSeconds.toString();
+    wordsPerPlayerController.text = config.wordsPerPlayer.toString();
+    _updatingFromConfig = false;
+  }
+
+  void dispose() {
+    turnTimeController.dispose();
+    bonusTimeController.dispose();
+    wordsPerPlayerController.dispose();
+  }
+}
+
 class RulesConfigView extends StatefulWidget {
-  final RulesConfig config;
+  final RulesConfigViewController viewController;
   final GameConfigController configController;
 
-  RulesConfigView({@required this.config, @required this.configController});
+  RulesConfigView(
+      {@required this.viewController, @required this.configController});
 
   @override
   State<StatefulWidget> createState() => RulesConfigViewState();
@@ -56,51 +79,38 @@ class RulesConfigViewState extends State<RulesConfigView> {
     50,
   ];
 
-  final _turnTimeController = TextEditingController();
-  final _bonusTimeController = TextEditingController();
-  final _wordsPerPlayerController = TextEditingController();
-
-  RulesConfig get config => widget.config;
+  RulesConfigViewController get viewController => widget.viewController;
   GameConfigController get configController => widget.configController;
 
   @override
   void initState() {
     super.initState();
 
-    _turnTimeController.text = config.turnSeconds.toString();
-    _turnTimeController.addListener(() {
-      final int newValue = int.tryParse(_turnTimeController.text);
-      if (newValue != null) {
+    viewController.turnTimeController.addListener(() {
+      final int newValue = int.tryParse(viewController.turnTimeController.text);
+      if (newValue != null && !viewController.updatingFromConfig) {
         configController.updateRules(
             (config) => config.rebuild((b) => b..turnSeconds = newValue));
       }
     });
 
-    _bonusTimeController.text = config.bonusSeconds.toString();
-    _bonusTimeController.addListener(() {
-      final int newValue = int.tryParse(_bonusTimeController.text);
-      if (newValue != null) {
+    viewController.bonusTimeController.addListener(() {
+      final int newValue =
+          int.tryParse(viewController.bonusTimeController.text);
+      if (newValue != null && !viewController.updatingFromConfig) {
         configController.updateRules(
             (config) => config.rebuild((b) => b..bonusSeconds = newValue));
       }
     });
 
-    _wordsPerPlayerController.text = config.wordsPerPlayer.toString();
-    _wordsPerPlayerController.addListener(() {
-      final int newValue = int.tryParse(_wordsPerPlayerController.text);
-      if (newValue != null) {
+    viewController.wordsPerPlayerController.addListener(() {
+      final int newValue =
+          int.tryParse(viewController.wordsPerPlayerController.text);
+      if (newValue != null && !viewController.updatingFromConfig) {
         configController.updateRules(
             (config) => config.rebuild((b) => b..wordsPerPlayer = newValue));
       }
     });
-  }
-
-  @override
-  void dispose() {
-    _turnTimeController.dispose();
-    _bonusTimeController.dispose();
-    _wordsPerPlayerController.dispose();
-    super.dispose();
   }
 
   @override
@@ -115,7 +125,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
                 child: Text('Turn time'),
               ),
               NumericField(
-                controller: _turnTimeController,
+                controller: viewController.turnTimeController,
                 goldenValues: turnTimeGoldenValues,
                 suffixText: 's',
               ),
@@ -129,7 +139,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
                 child: Text('Bonus time'),
               ),
               NumericField(
-                controller: _bonusTimeController,
+                controller: viewController.bonusTimeController,
                 goldenValues: timeGoldenValues,
                 suffixText: 's',
               ),
@@ -143,7 +153,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
                 child: Text('Words per player'),
               ),
               NumericField(
-                controller: _wordsPerPlayerController,
+                controller: viewController.wordsPerPlayerController,
                 goldenValues: wordsPerPlayerGoldenValues,
               ),
             ],

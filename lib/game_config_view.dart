@@ -63,6 +63,7 @@ class _GameConfigViewState extends State<GameConfigView>
   bool _navigatedToGame = false;
 
   TabController _tabController;
+  final _rulesConfigViewController = RulesConfigViewController();
 
   @override
   void initState() {
@@ -77,6 +78,7 @@ class _GameConfigViewState extends State<GameConfigView>
   @override
   void dispose() {
     _tabController.dispose();
+    _rulesConfigViewController.dispose();
     super.dispose();
   }
 
@@ -135,10 +137,12 @@ class _GameConfigViewState extends State<GameConfigView>
           return Center(child: CircularProgressIndicator());
         }
 
+        // TODO: Fix lag on quick sequential local updates !!!
+        _rulesConfigViewController.updateFromConfig(gameConfig.rules);
         final tabs = _buildTabs(gameConfig.players.names.length);
         final configViews = [
           RulesConfigView(
-            config: gameConfig.rules,
+            viewController: _rulesConfigViewController,
             configController: configController,
           ),
           TeamingConfigView(
