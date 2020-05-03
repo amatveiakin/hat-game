@@ -6,6 +6,7 @@ import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/util/ntp_time.dart';
+import 'package:hatgame/util/sounds.dart';
 import 'package:hatgame/widget/invalid_operation_dialog.dart';
 import 'package:hatgame/widget/wide_button.dart';
 
@@ -145,6 +146,7 @@ class StartScreenState extends State<StartScreen> {
   }
 
   _initPlatformState() async {
+    await Sounds.init();
     await NtpTime.init();
     setState(() {
       _initialized = true;
