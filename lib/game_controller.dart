@@ -475,7 +475,7 @@ class GameController {
         return;
       }
       // This is the one and only place where the config changes.
-      config = configReadResult.config;
+      config = configReadResult.configWithOverrides;
     }
 
     if (!dbContains(snapshot, DBColState())) {
@@ -507,10 +507,10 @@ class GameController {
     localGameData.gameReference.snapshots().listen(
       _onUpdateFromDB,
       onError: (error) {
-        Assert.fail('Got error from Firestore: ' + error.toString());
+        Assert.fail('GameController: Firestore error: $error');
       },
       onDone: () {
-        Assert.fail('Firestore updates stream aborted');
+        Assert.fail('GameController: Firestore updates stream aborted');
       },
     );
   }

@@ -18,9 +18,11 @@ import 'package:hatgame/widget/wide_button.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
 
 class GameConfigView extends StatefulWidget {
+  final GameConfigController configController;
   final LocalGameData localGameData;
 
-  GameConfigView({@required this.localGameData});
+  GameConfigView({@required this.localGameData})
+      : configController = GameConfigController.fromFirestore(localGameData);
 
   @override
   createState() => _GameConfigViewState();
@@ -59,6 +61,7 @@ class _GameConfigViewState extends State<GameConfigView>
   static const int numTabs = 3;
 
   LocalGameData get localGameData => widget.localGameData;
+  GameConfigController get configController => widget.configController;
   bool get isAdmin => localGameData.isAdmin;
   bool _navigatedToGame = false;
 
@@ -107,10 +110,9 @@ class _GameConfigViewState extends State<GameConfigView>
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<DocumentSnapshot>(
-      stream: localGameData.gameReference.snapshots(),
-      builder:
-          (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+    return StreamBuilder<GameConfigPlus>(
+      stream: configController.stateUpdatesStream,
+      builder: (BuildContext context, AsyncSnapshot<GameConfigPlus> snapshot) {
         // TODO: Deal with errors and loading.
         if (snapshot.hasError) {
           return Center(
@@ -122,13 +124,10 @@ class _GameConfigViewState extends State<GameConfigView>
         if (!snapshot.hasData) {
           return Center(child: CircularProgressIndicator());
         }
-        final configController =
-            GameConfigController(localGameData.gameReference);
-        final GameConfigReadResult gameConfigReadResult =
-            GameConfigController.configFromSnapshot(snapshot.data);
-        final GameConfig gameConfig = gameConfigReadResult.config;
+        final GameConfigPlus gameConfigPlus = snapshot.data;
+        final GameConfig gameConfig = gameConfigPlus.config;
         Assert.holds(gameConfig != null);
-        if (gameConfigReadResult.gameHasStarted) {
+        if (gameConfigPlus.gameHasStarted) {
           // Cannot navigate from within `build`.
           if (!_navigatedToGame) {
             Future.delayed(Duration.zero, () => _goToGame());
@@ -137,7 +136,6 @@ class _GameConfigViewState extends State<GameConfigView>
           return Center(child: CircularProgressIndicator());
         }
 
-        // TODO: Fix lag on quick sequential local updates !!!
         _rulesConfigViewController.updateFromConfig(gameConfig.rules);
         final tabs = _buildTabs(gameConfig.players.names.length);
         final configViews = [

@@ -5,19 +5,40 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/serializers.dart';
 import 'package:hatgame/db_columns.dart';
+import 'package:hatgame/game_data.dart';
 import 'package:hatgame/util/assertion.dart';
 
-class GameConfigReadResult {
+class GameConfigPlus {
   final GameConfig config;
   final bool gameHasStarted;
 
-  GameConfigReadResult(this.config, this.gameHasStarted);
+  GameConfigPlus(this.config, this.gameHasStarted);
+}
+
+class GameConfigReadResult {
+  final GameConfig rawConfig;
+  final Map<int, String> playerNamesOverrides;
+  bool get gameHasStarted => rawConfig.players != null;
+  GameConfig get configWithOverrides =>
+      rawConfig.players != null || playerNamesOverrides == null
+          ? rawConfig
+          : rawConfig.rebuild((b) => b
+            ..players.replace(PlayersConfig(
+              (b) => b..names.replace(playerNamesOverrides),
+            )));
+
+  GameConfigReadResult(this.rawConfig, this.playerNamesOverrides);
 }
 
 class GameConfigController {
-  final DocumentReference gameReference;
+  final LocalGameData localGameData;
+  GameConfig _rawConfig;
+  Map<int, String> _playerNamesOverrides;
+  // bool _gameHasStarted = false;
+  final _streamController = StreamController<GameConfigPlus>(sync: true);
 
-  GameConfigController(this.gameReference);
+  Stream<GameConfigPlus> get stateUpdatesStream => _streamController.stream;
+  bool get isReadOnly => !localGameData.isAdmin;
 
   static GameConfig defaultConfig() {
     return GameConfig(
@@ -45,39 +66,67 @@ class GameConfigController {
     );
   }
 
-  static GameConfigReadResult configFromSnapshot(
-      DocumentSnapshot documentSnapshot) {
-    GameConfig config = dbGet(documentSnapshot, DBColConfig());
-    bool gameHasStarted = true;
-    // This happens in online mode before the game has started.
-    if (config.players == null) {
-      gameHasStarted = false;
-      final playerNames = Map<int, String>();
+  GameConfigController.fromFirestore(this.localGameData) {
+    localGameData.gameReference.snapshots().listen(
+      _onUpdateFromDB,
+      onError: (error) {
+        Assert.fail('GameConfigController: Firestore error: $error');
+      },
+      onDone: () {
+        Assert.fail('GameConfigController: Firestore updates stream aborted');
+      },
+    );
+  }
+
+  static GameConfigReadResult configFromSnapshot(DocumentSnapshot snapshot) {
+    Assert.holds(snapshot.data != null);
+    GameConfig rawConfig = dbGet(snapshot, DBColConfig());
+    Map<int, String> playerNamesOverrides;
+    if (rawConfig.players == null) {
+      // This happens in online mode before the game has started.
+      playerNamesOverrides = Map<int, String>();
       // TODO: Support gaps or check that there are none.
       for (int playerID = 0;; playerID++) {
         final playerColumn = DBColPlayer(playerID);
-        if (!dbContains(documentSnapshot, playerColumn)) {
+        if (!dbContains(snapshot, playerColumn)) {
           break;
         }
-        playerNames[playerID] = dbGet(documentSnapshot, playerColumn).name;
+        playerNamesOverrides[playerID] = dbGet(snapshot, playerColumn).name;
       }
-      config = config.rebuild(
-        (b) => b
-          ..players.replace(PlayersConfig(
-            (b) => b..names.replace(playerNames),
-          )),
-      );
     }
-    return GameConfigReadResult(config, gameHasStarted);
+    return GameConfigReadResult(rawConfig, playerNamesOverrides);
+  }
+
+  GameConfig _configWithOverrides() {
+    return GameConfigReadResult(_rawConfig, _playerNamesOverrides)
+        .configWithOverrides;
+  }
+
+  GameConfigPlus _configPlus() =>
+      GameConfigPlus(_configWithOverrides(), _rawConfig.players != null);
+
+  void _onUpdateFromDB(final DocumentSnapshot snapshot) {
+    GameConfigReadResult readResult = configFromSnapshot(snapshot);
+    // If config view starts lagging, a potential fix would be to skip
+    // updating _rawConfig when `!isReadOnly`. Just be sure not to forget
+    // about playerNamesOverrides and gameHasStarted!
+    _rawConfig = readResult.rawConfig;
+    _playerNamesOverrides = readResult.playerNamesOverrides;
+    _streamController.add(_configPlus());
+  }
+
+  void _checkWritesAllowed() {
+    Assert.holds(!isReadOnly,
+        message: 'Trying to update config while in read-only mode',
+        inRelease: AssertInRelease.log);
   }
 
   void update(GameConfig Function(GameConfig) updater) {
-    Firestore.instance.runTransaction((Transaction tx) async {
-      DocumentSnapshot snapshot = await tx.get(gameReference);
-      final GameConfig oldValue = dbGet(snapshot, DBColConfig());
-      final GameConfig newValue = updater(oldValue);
-      await tx.update(gameReference, dbData([DBColConfig().setData(newValue)]));
-    });
+    _checkWritesAllowed();
+    _rawConfig = updater(_rawConfig);
+    localGameData.gameReference
+        .updateData(dbData([DBColConfig().setData(_rawConfig)]));
+    _streamController.add(_configPlus());
   }
 
   void updateRules(RulesConfig Function(RulesConfig) updater) {
