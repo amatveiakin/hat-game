@@ -224,10 +224,10 @@ class _GameConfigViewState extends State<GameConfigView>
           final configBoxes = List<Widget>();
           for (int i = 0; i < numTabs; i++) {
             configBoxes.add(
-              SizedBox(
-                width: configBoxWidth,
-                child: Padding(
-                  padding: EdgeInsets.all(configBoxMargin),
+              Padding(
+                padding: EdgeInsets.all(configBoxMargin),
+                child: SizedBox(
+                  width: configBoxWidth,
                   child: Card(
                     clipBehavior: Clip.antiAlias,
                     child: Column(
