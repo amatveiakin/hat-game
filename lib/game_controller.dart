@@ -199,12 +199,12 @@ class GameController {
   PersonalStateTransformer get _personalTransformer =>
       PersonalStateTransformer(personalState);
 
-  // Since isInitialzied becomes true:
+  // Since isInitialized becomes true:
   //   - config, state, derivedState and personalState are always non-null,
   //   - config doesn't change,
-  //   - isInitialzied stays true,
+  //   - isInitialized stays true,
   //   - stateUpdatesStream starts sending updates.
-  bool get isInitialzied => config != null;
+  bool get isInitialized => config != null;
 
   bool get isActivePlayer =>
       state == null ? false : activePlayer(state) == localGameData.myPlayerID;
@@ -468,8 +468,8 @@ class GameController {
 
   void _onUpdateFromDB(final DocumentSnapshot snapshot) {
     Assert.holds(snapshot.data != null);
-    final bool wasInitialzied = isInitialzied;
-    if (!isInitialzied) {
+    final bool wasInitialized = isInitialized;
+    if (!isInitialized) {
       final GameConfigReadResult configReadResult =
           GameConfigController.configFromSnapshot(snapshot);
       if (!configReadResult.gameHasStarted ||
@@ -486,7 +486,7 @@ class GameController {
 
     GameState newState = dbGet(snapshot, DBColState());
     if (isActivePlayer) {
-      Assert.holds(wasInitialzied);
+      Assert.holds(wasInitialized);
       final int newActivePlayer = activePlayer(newState);
       Assert.eq(localGameData.myPlayerID, newActivePlayer,
           message: 'Active player unexpectedly changed from '
