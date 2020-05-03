@@ -125,6 +125,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
                 child: Text('Turn time'),
               ),
               NumericField(
+                readOnly: configController.isReadOnly,
                 controller: viewController.turnTimeController,
                 goldenValues: turnTimeGoldenValues,
                 suffixText: 's',
@@ -139,6 +140,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
                 child: Text('Bonus time'),
               ),
               NumericField(
+                readOnly: configController.isReadOnly,
                 controller: viewController.bonusTimeController,
                 goldenValues: timeGoldenValues,
                 suffixText: 's',
@@ -153,6 +155,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
                 child: Text('Words per player'),
               ),
               NumericField(
+                readOnly: configController.isReadOnly,
                 controller: viewController.wordsPerPlayerController,
                 goldenValues: wordsPerPlayerGoldenValues,
               ),

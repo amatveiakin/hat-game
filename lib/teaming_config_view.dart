@@ -210,25 +210,36 @@ class TeamingConfigView extends StatelessWidget {
     var items = <Widget>[];
     items.add(
       MultiLineSwitchListTile(
-        title: Text(config.teamPlay ? 'Team play: on' : 'Team play: off'),
-        subtitle: Text(config.teamPlay
-            ? 'Fixed teams. Score is per team.'
-            : 'Fluid pairing. Score is per player.'),
+        // Don't gray out disabled text for inactive players.
+        title: Text(
+          config.teamPlay ? 'Team play: on' : 'Team play: off',
+          style: TextStyle(color: Theme.of(context).textTheme.subtitle1.color),
+        ),
+        subtitle: Text(
+          config.teamPlay
+              ? 'Fixed teams. Score is per team.'
+              : 'Fluid pairing. Score is per player.',
+          style: TextStyle(color: Theme.of(context).textTheme.caption.color),
+        ),
         value: config.teamPlay,
-        onChanged: (bool checked) => configController.updateTeaming(
-            (config) => config.rebuild((b) => b..teamPlay = checked)),
+        onChanged: configController.isReadOnly
+            ? null
+            : (bool checked) => configController.updateTeaming(
+                (config) => config.rebuild((b) => b..teamPlay = checked)),
       ),
     );
     if (!config.teamPlay) {
-      final onTap = () {
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => IndividualPlayStyleSelector(
-                  config.individualPlayStyle,
-                  (IndividualPlayStyle newValue) =>
-                      configController.updateTeaming((config) => config
-                          .rebuild((b) => b..individualPlayStyle = newValue)),
-                )));
-      };
+      final onTap = configController.isReadOnly
+          ? null
+          : () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => IndividualPlayStyleSelector(
+                        config.individualPlayStyle,
+                        (IndividualPlayStyle newValue) => configController
+                            .updateTeaming((config) => config.rebuild(
+                                (b) => b..individualPlayStyle = newValue)),
+                      )));
+            };
       switch (config.individualPlayStyle) {
         case IndividualPlayStyle.chain:
           items.add(
@@ -272,15 +283,17 @@ class TeamingConfigView extends StatelessWidget {
       );
     }
     if (config.teamPlay && config.randomizeTeams) {
-      final onTap = () {
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => DesiredTeamSizeSelector(
-                  config.desiredTeamSize,
-                  (DesiredTeamSize newValue) => configController.updateTeaming(
-                      (config) =>
-                          config.rebuild((b) => b..desiredTeamSize = newValue)),
-                )));
-      };
+      final onTap = configController.isReadOnly
+          ? null
+          : () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => DesiredTeamSizeSelector(
+                        config.desiredTeamSize,
+                        (DesiredTeamSize newValue) =>
+                            configController.updateTeaming((config) => config
+                                .rebuild((b) => b..desiredTeamSize = newValue)),
+                      )));
+            };
       switch (config.desiredTeamSize) {
         case DesiredTeamSize.teamsOf2:
           items.add(MultiLineListTile(
@@ -313,15 +326,17 @@ class TeamingConfigView extends StatelessWidget {
       }
     }
     if (config.teamPlay && config.randomizeTeams) {
-      final onTap = () {
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => UnequalTeamSizeSelector(
-                  config.unequalTeamSize,
-                  (UnequalTeamSize newValue) => configController.updateTeaming(
-                      (config) =>
-                          config.rebuild((b) => b..unequalTeamSize = newValue)),
-                )));
-      };
+      final onTap = configController.isReadOnly
+          ? null
+          : () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => UnequalTeamSizeSelector(
+                        config.unequalTeamSize,
+                        (UnequalTeamSize newValue) =>
+                            configController.updateTeaming((config) => config
+                                .rebuild((b) => b..unequalTeamSize = newValue)),
+                      )));
+            };
       switch (config.unequalTeamSize) {
         case UnequalTeamSize.forbid:
           String subtitle;
@@ -396,15 +411,17 @@ class TeamingConfigView extends StatelessWidget {
     }
     if (config.teamPlay && largeTeamsPossible) {
       // TODO: Consider uniting with IndividualPlayStyle.
-      final onTap = () {
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => GuessingInLargeTeamSelector(
-                  config.guessingInLargeTeam,
-                  (IndividualPlayStyle newValue) =>
-                      configController.updateTeaming((config) => config
-                          .rebuild((b) => b..guessingInLargeTeam = newValue)),
-                )));
-      };
+      final onTap = configController.isReadOnly
+          ? null
+          : () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => GuessingInLargeTeamSelector(
+                        config.guessingInLargeTeam,
+                        (IndividualPlayStyle newValue) => configController
+                            .updateTeaming((config) => config.rebuild(
+                                (b) => b..guessingInLargeTeam = newValue)),
+                      )));
+            };
       switch (config.guessingInLargeTeam) {
         case IndividualPlayStyle.fluidPairs:
           items.add(
