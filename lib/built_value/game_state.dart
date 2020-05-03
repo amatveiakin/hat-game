@@ -68,7 +68,9 @@ abstract class Word implements Built<Word, WordBuilder> {
 
 abstract class GameState implements Built<GameState, GameStateBuilder> {
   BuiltList<PlayerState> get players;
-  BuiltList<int> get playerOrder;
+  // Exactly one of `individualOrder` and `teams` must be set.
+  @nullable
+  BuiltList<int> get individualOrder;
   @nullable
   BuiltList<BuiltList<int>> get teams;
   @nullable

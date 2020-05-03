@@ -257,7 +257,7 @@ void main() {
   group('generate team players', () {
     test('2 + 2', () {
       expect(
-          generateTeamPlayers([2, 2]),
+          generateTeamPlayers(playerIDs: [0, 1, 2, 3], teamSizes: [2, 2]),
           equals([
             [0, 1],
             [2, 3],
@@ -266,10 +266,19 @@ void main() {
 
     test('2 + 3', () {
       expect(
-          generateTeamPlayers([3, 2]),
+          generateTeamPlayers(playerIDs: [0, 1, 2, 3, 4], teamSizes: [3, 2]),
           equals([
             [0, 1, 2],
             [3, 4],
+          ]));
+    });
+
+    test('custom IDs', () {
+      expect(
+          generateTeamPlayers(playerIDs: [17, 0, 42, 100], teamSizes: [2, 2]),
+          equals([
+            [17, 0],
+            [42, 100],
           ]));
     });
   });

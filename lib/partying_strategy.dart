@@ -2,14 +2,14 @@ import 'package:built_collection/built_collection.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
-import 'package:hatgame/game_data.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 
 // =============================================================================
 // Team Generators
 
-List<List<int>> generateTeamPlayers(List<int> teamSizes) {
+List<List<int>> generateTeamPlayers(
+    {@required List<int> playerIDs, @required List<int> teamSizes}) {
   final List<List<int>> players = [];
   int playerIdx = 0;
   for (final s in teamSizes) {
@@ -23,7 +23,7 @@ List<List<int>> generateTeamPlayers(List<int> teamSizes) {
     players.add([]);
     final List<int> playersInTeam = players.last;
     for (int i = 0; i < s; i++) {
-      playersInTeam.add(playerIdx);
+      playersInTeam.add(playerIDs[playerIdx]);
       playerIdx++;
     }
   }
@@ -102,34 +102,12 @@ void checkNumPlayersForIndividualPlay(
 // =============================================================================
 // PartyingStrategy interface
 
-class PartyingStrategy {
-  final BuiltList<int> playerOrder;
-  final PartyingStrategyImpl impl;
-
-  Party getParty(int turn) {
-    Party p = impl.getParty(turn);
-    return Party((b) => b
-      ..performer = playerOrder[p.performer]
-      ..recipients.addAll(p.recipients.map((idx) => playerOrder[idx])));
-  }
-
-  PartyingStrategy._(this.playerOrder, this.impl);
-
-  factory PartyingStrategy.fromGame(GameConfig config, GameState state) {
-    final impl = PartyingStrategyImpl.fromGame(config, state);
-    if (impl == null) {
-      return null;
-    }
-    return PartyingStrategy._(state.playerOrder, impl);
-  }
-}
-
-abstract class PartyingStrategyImpl {
+abstract class PartyingStrategy {
   Party getParty(int turn);
 
-  PartyingStrategyImpl();
+  PartyingStrategy();
 
-  factory PartyingStrategyImpl.fromGame(GameConfig config, GameState state) {
+  factory PartyingStrategy.fromGame(GameConfig config, GameState state) {
     if (state.teams != null) {
       return FixedTeamsStrategy(
           state.teams, config.teaming.guessingInLargeTeam);
@@ -143,7 +121,7 @@ abstract class PartyingStrategyImpl {
 // =============================================================================
 // IndividualStrategy
 
-abstract class IndividualStrategy extends PartyingStrategyImpl {
+abstract class IndividualStrategy extends PartyingStrategy {
   final int numPlayers;
 
   IndividualStrategy.internal(this.numPlayers);
@@ -212,7 +190,7 @@ class BroadcastIndividualStrategy extends IndividualStrategy {
 // =============================================================================
 // FixedTeamsStrategy
 
-class FixedTeamsStrategy extends PartyingStrategyImpl {
+class FixedTeamsStrategy extends PartyingStrategy {
   final BuiltList<BuiltList<int>> teamPlayers;
   final IndividualPlayStyle individualPlayStyle;
 

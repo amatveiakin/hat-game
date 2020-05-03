@@ -15,6 +15,7 @@ import 'package:hatgame/partying_strategy.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/built_value_ext.dart';
 import 'package:hatgame/util/invalid_operation.dart';
+import 'package:hatgame/util/list_ext.dart';
 import 'package:hatgame/util/ntp_time.dart';
 import 'package:hatgame/util/strings.dart';
 import 'package:russian_words/russian_words.dart' as russian_words;
@@ -373,26 +374,29 @@ class GameController {
   // Writes state asynchronously.
   static void startGame(DocumentReference reference, GameConfig config) {
     final numPlayers = config.players.names.length;
-    final playerOrder = List<int>.generate(numPlayers, (i) => i);
     BuiltList<BuiltList<int>> teams;
+    BuiltList<int> individualOrder;
     if (config.teaming.teamPlay) {
-      List<int> teamSizes;
       if (config.players.teams != null) {
-        teams = config.players.teams;
-        // TODO: Shuffle teams; shuffle players within teams.
+        teams = BuiltList<BuiltList<int>>.from(config.players.teams
+            .map((team) => team.toList().shuffled())
+            .toList()
+            .shuffled());
       } else {
-        teamSizes = generateTeamSizes(numPlayers,
+        final List<int> teamSizes = generateTeamSizes(numPlayers,
             config.teaming.desiredTeamSize, config.teaming.unequalTeamSize);
-        final teamsMutable = generateTeamPlayers(teamSizes);
+        final teamsMutable = generateTeamPlayers(
+            playerIDs: config.players.names.keys.toList().shuffled(),
+            teamSizes: teamSizes.shuffled());
         teams = BuiltList<BuiltList<int>>.from(
             teamsMutable.map((t) => BuiltList<int>(t)));
-        playerOrder.shuffle();
       }
     } else {
       Assert.holds(config.players.teams == null);
       checkNumPlayersForIndividualPlay(
           numPlayers, config.teaming.individualPlayStyle);
-      playerOrder.shuffle();
+      individualOrder = BuiltList<int>.from(
+          List<int>.generate(numPlayers, (i) => i).shuffled());
     }
 
     final players = BuiltList<PlayerState>.from(
@@ -426,16 +430,14 @@ class GameController {
     GameState initialState = GameState(
       (b) => b
         ..players.replace(players)
-        ..playerOrder.replace(playerOrder)
+        ..individualOrder =
+            (individualOrder != null ? ListBuilder(individualOrder) : null)
+        ..teams = (teams != null ? ListBuilder(teams) : null)
         ..words.replace(words)
         ..wordsInHat.replace(words.map((w) => w.id))
         ..turn = 0
         ..gameFinished = false,
     );
-    if (teams != null) {
-      // TODO: Is there a way to do this concisely in one builder?
-      initialState = initialState.rebuild((b) => b.teams.replace(teams));
-    }
     initialState =
         (GameStateTransformer(config, initialState)..initTurn()).state;
     // In addition to initial state, write the config:
