@@ -62,6 +62,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
       timeGoldenValues.where((t) => t > 0).toList();
 
   static const List<int> wordsPerPlayerGoldenValues = [
+    1,
     2,
     3,
     4,
