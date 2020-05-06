@@ -401,8 +401,8 @@ class GameController {
     );
   }
 
-  // Writes state asynchronously.
-  static void startGame(DBDocumentReference reference, GameConfig config) {
+  static Future<void> startGame(
+      DBDocumentReference reference, GameConfig config) {
     final numPlayers = config.players.names.length;
     BuiltList<BuiltList<int>> teams;
     BuiltList<int> individualOrder;
@@ -473,7 +473,7 @@ class GameController {
     // In addition to initial state, write the config:
     //   - just to be sure;
     //   - to fill in players field.  // TODO: Better solution for this?
-    _writeInitialState(reference, config, initialState);
+    return _writeInitialState(reference, config, initialState);
   }
 
   Map<int, PersonalState> _parsePersonalStates(
@@ -512,10 +512,12 @@ class GameController {
     GameState newState = snapshot.get(DBColState());
     if (isActivePlayer) {
       Assert.holds(wasInitialized);
-      final int newActivePlayer = activePlayer(newState);
-      Assert.eq(localGameData.myPlayerID, newActivePlayer,
-          message: 'Active player unexpectedly changed from '
-              '${localGameData.myPlayerID} to $newActivePlayer');
+      if (localGameData.onlineMode) {
+        final int newActivePlayer = activePlayer(newState);
+        Assert.eq(localGameData.myPlayerID, newActivePlayer,
+            message: 'Active player unexpectedly changed from '
+                '${localGameData.myPlayerID} to $newActivePlayer');
+      }
       // Ignore the update, because the state of truth is on the client while
       // we are the active player.
     } else {
@@ -547,6 +549,10 @@ class GameController {
     );
   }
 
+  Future<void> testAwaitInitialized() {
+    return Future.doWhile(() async => !isInitialized);
+  }
+
   static Future<void> _writeInitialState(DBDocumentReference reference,
       GameConfig config, GameState initialState) async {
     reference.updateColumns([
@@ -555,57 +561,58 @@ class GameController {
     ]);
   }
 
-  void _updateState(GameState newState) {
+  Future<void> _updateState(GameState newState) {
     Assert.holds(isActivePlayer,
         message: 'Only active player should change game state');
-    localGameData.gameReference.updateColumns([DBColState().withData(newState)]);
     state = newState;
     _streamController.add(_gameData);
+    return localGameData.gameReference
+        .updateColumns([DBColState().withData(newState)]);
   }
 
-  void _updatePersonalState(PersonalState newState) {
-    localGameData.gameReference.updateColumns(
-        [DBColPlayer(localGameData.myPlayerID).withData(newState)]);
+  Future<void> _updatePersonalState(PersonalState newState) {
     personalState = newState;
     _streamController.add(_gameData);
+    return localGameData.gameReference.updateColumns(
+        [DBColPlayer(localGameData.myPlayerID).withData(newState)]);
   }
 
-  void nextTurn() {
-    _updateState((_transformer..nextTurn()).state);
+  Future<void> nextTurn() {
+    return _updateState((_transformer..nextTurn()).state);
   }
 
-  void startExplaning() {
-    _updateState((_transformer..startExplaning()).state);
+  Future<void> startExplaning() {
+    return _updateState((_transformer..startExplaning()).state);
   }
 
-  void pauseExplaning() {
-    _updateState((_transformer..pauseExplaning()).state);
+  Future<void> pauseExplaning() {
+    return _updateState((_transformer..pauseExplaning()).state);
   }
 
-  void resumeExplaning() {
-    _updateState((_transformer..resumeExplaning()).state);
+  Future<void> resumeExplaning() {
+    return _updateState((_transformer..resumeExplaning()).state);
   }
 
-  void wordGuessed() {
-    _updateState((_transformer..wordGuessed()).state);
+  Future<void> wordGuessed() {
+    return _updateState((_transformer..wordGuessed()).state);
   }
 
-  void finishExplanation() {
-    _updateState((_transformer..finishExplanation()).state);
+  Future<void> finishExplanation() {
+    return _updateState((_transformer..finishExplanation()).state);
   }
 
-  void setWordStatus(int wordId, WordStatus newStatus) {
-    _updateState((_transformer..setWordStatus(wordId, newStatus)).state);
+  Future<void> setWordStatus(int wordId, WordStatus newStatus) {
+    return _updateState((_transformer..setWordStatus(wordId, newStatus)).state);
   }
 
-  void setWordFeedback(int wordId, WordFeedback newFeedback) {
-    _updatePersonalState((_personalTransformer
+  Future<void> setWordFeedback(int wordId, WordFeedback newFeedback) {
+    return _updatePersonalState((_personalTransformer
           ..setWordFeedback(wordId, newFeedback))
         .personalState);
   }
 
-  void setWordFlag(int wordId, bool hasFlag) {
-    _updatePersonalState(
+  Future<void> setWordFlag(int wordId, bool hasFlag) {
+    return _updatePersonalState(
         (_personalTransformer..setWordFlag(wordId, hasFlag)).personalState);
   }
 }

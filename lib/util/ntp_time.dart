@@ -29,6 +29,11 @@ class NtpTime {
     }
   }
 
+  static initForUnitTests() {
+    _offset = Duration.zero;
+    debugPrint("NTP initialized in test mode.");
+  }
+
   static DateTime nowUtc() {
     return DateTime.now().toUtc().add(_offset);
   }
