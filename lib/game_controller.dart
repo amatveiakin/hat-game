@@ -254,7 +254,7 @@ class GameController {
   }
 
   static Future<LocalGameData> newOffineGame() async {
-    DBDocumentReference reference = localGameReference();
+    DBDocumentReference reference = newLocalGameReference();
     await reference.delete();
     final GameConfig config = GameConfigController.defaultConfig().rebuild(
       (b) => b.players.names.replace({}),

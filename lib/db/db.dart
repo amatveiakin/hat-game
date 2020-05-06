@@ -14,6 +14,6 @@ firestore.DocumentReference firestoreGameReference({@required String gameID}) {
   return firestore.Firestore.instance.collection('games').document(gameID);
 }
 
-LocalDocumentReference localGameReference() {
-  return LocalDocumentReference(path: 'local');
+LocalDocumentReference newLocalGameReference() {
+  return LocalDocumentReference(path: LocalDB.instance.newRowPath());
 }

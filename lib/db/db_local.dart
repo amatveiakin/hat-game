@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:hatgame/db/db_columns.dart';
@@ -79,15 +80,25 @@ class LocalDB {
 
   // TODO: Back up to some persistent local storage.
   final _rows = Map<String, Map<String, dynamic>>();
+  int _newRowId = 0;
   final _streamController =
       StreamController<LocalDocumentRawUpdate>.broadcast();
 
   static LocalDB get instance => _instance;
 
-  Stream<LocalDocumentRawUpdate> snapshots() => _streamController.stream;
-
   Map<String, dynamic> getRow(String path) {
     return _rows[path];
+  }
+
+  String newRowPath() {
+    while (true) {
+      final String path = _newRowId.toString();
+      if (!_rows.containsKey(path)) {
+        _rows[path] = null;
+        return path;
+      }
+      _newRowId++;
+    }
   }
 
   void setRow(String path, Map<String, dynamic> value) {
@@ -96,7 +107,10 @@ class LocalDB {
   }
 
   void removeRow(String path) {
-    _rows.remove(path);
+    // Keep the row to name sure IDs are unique.
+    _rows[path] = null;
     _streamController.add(LocalDocumentRawUpdate(path, null));
   }
+
+  Stream<LocalDocumentRawUpdate> snapshots() => _streamController.stream;
 }
