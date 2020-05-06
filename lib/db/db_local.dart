@@ -12,12 +12,12 @@ class LocalDocumentReference extends DBDocumentReference {
 
   String get path => _path;
 
-  Future<void> setColumns(List<DBColumn> columns) {
+  Future<void> setColumns(List<DBColumnData> columns) {
     _localDB.setRow(path, dbData(columns));
     return Future<void>.value();
   }
 
-  Future<void> updateColumnsImpl(List<DBColumn> columns) {
+  Future<void> updateColumnsImpl(List<DBColumnData> columns) {
     _localDB.setRow(
         path, Map.from(_localDB.getRow(path))..addAll(dbData(columns)));
     return Future<void>.value();

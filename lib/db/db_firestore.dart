@@ -9,10 +9,10 @@ class FirestoreDocumentReference extends DBDocumentReference {
 
   String get path => _ref.path;
 
-  Future<void> setColumns(List<DBColumn> columns) =>
+  Future<void> setColumns(List<DBColumnData> columns) =>
       _ref.setData(dbData(columns));
 
-  Future<void> updateColumnsImpl(List<DBColumn> columns) =>
+  Future<void> updateColumnsImpl(List<DBColumnData> columns) =>
       _ref.updateData(dbData(columns));
 
   Future<FirestoreDocumentSnapshot> get() async =>

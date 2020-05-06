@@ -6,11 +6,11 @@ import 'package:hatgame/util/assertion.dart';
 abstract class DBDocumentReference {
   String get path;
 
-  Future<void> setColumns(List<DBColumn> columns);
+  Future<void> setColumns(List<DBColumnData> columns);
 
   // Set new content for each column. Doesn't support nested updates
   // (in contrast to Firestore).
-  Future<void> updateColumns(List<DBColumn> columns) {
+  Future<void> updateColumns(List<DBColumnData> columns) {
     checkNoNestedOverrides(columns);
     return updateColumnsImpl(columns);
   }
@@ -22,10 +22,10 @@ abstract class DBDocumentReference {
   Stream<DBDocumentSnapshot> snapshots();
 
   @protected
-  Future<void> updateColumnsImpl(List<DBColumn> columns);
+  Future<void> updateColumnsImpl(List<DBColumnData> columns);
 
   @protected
-  void checkNoNestedOverrides(List<DBColumn> columns) {
+  void checkNoNestedOverrides(List<DBColumnData> columns) {
     for (final col in columns) {
       if (col.data is firestore.DocumentReference ||
           col.data is List ||

@@ -11,20 +11,22 @@ import 'package:hatgame/util/assertion.dart';
 // API
 
 abstract class DBColumn<T> {
-  T data;
-
   String get name;
 
   String serialize(T value);
   T deserialize(String serialized);
 
-  // TODO: Create a separate class for 'column with payload'.
-  setData(T newData) {
-    Assert.holds(data == null);
-    Assert.holds(newData != null);
-    data = newData;
-    return this;
+  DBColumnData<T> withData(T data) {
+    Assert.holds(data != null);
+    return DBColumnData<T>(this, data);
   }
+}
+
+class DBColumnData<T> {
+  final DBColumn<T> column;
+  final T data;
+
+  DBColumnData(this.column, this.data);
 }
 
 bool dbContains<T>(Map<String, dynamic> data, DBColumn<T> column) {
@@ -45,10 +47,10 @@ T dbTryGet<T>(Map<String, dynamic> data, DBColumn<T> column) {
   return dbContains(data, column) ? dbGet(data, column) : null;
 }
 
-Map<String, dynamic> dbData(List<DBColumn> columns) {
+Map<String, dynamic> dbData(List<DBColumnData> columns) {
   final result = Map<String, dynamic>();
   for (final c in columns) {
-    result[c.name] = c.serialize(c.data);
+    result[c.column.name] = c.column.serialize(c.data);
   }
   return result;
 }

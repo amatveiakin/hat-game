@@ -215,10 +215,10 @@ class GameController {
           ? activePlayer(state) == localGameData.myPlayerID
           : true);
 
-  static List<DBColumn> _newGameRecord() {
+  static List<DBColumnData> _newGameRecord() {
     return [
-      DBColCreationTimeUtc().setData(NtpTime.nowUtc().toString()),
-      DBColHostAppVersion().setData(appVersion),
+      DBColCreationTimeUtc().withData(NtpTime.nowUtc().toString()),
+      DBColHostAppVersion().withData(appVersion),
     ];
   }
 
@@ -262,8 +262,8 @@ class GameController {
     await reference.setColumns(
       _newGameRecord() +
           [
-            DBColConfig().setData(config),
-            DBColLocalPlayer().setData(PersonalState((b) => b
+            DBColConfig().withData(config),
+            DBColLocalPlayer().withData(PersonalState((b) => b
               ..id = 0
               ..name = 'fake')),
           ],
@@ -300,8 +300,8 @@ class GameController {
                 reference,
                 dbData(gameRecordStub +
                     [
-                      DBColConfig().setData(config),
-                      DBColPlayer(playerID).setData(PersonalState((b) => b
+                      DBColConfig().withData(config),
+                      DBColPlayer(playerID).withData(PersonalState((b) => b
                         ..id = playerID
                         ..name = myName)),
                     ]));
@@ -383,7 +383,7 @@ class GameController {
       await tx.update(
           reference,
           dbData([
-            DBColPlayer(playerID).setData(PersonalState((b) => b
+            DBColPlayer(playerID).withData(PersonalState((b) => b
               ..id = playerID
               ..name = myName))
           ]));
@@ -550,22 +550,22 @@ class GameController {
   static Future<void> _writeInitialState(DBDocumentReference reference,
       GameConfig config, GameState initialState) async {
     reference.updateColumns([
-      DBColConfig().setData(config),
-      DBColState().setData(initialState),
+      DBColConfig().withData(config),
+      DBColState().withData(initialState),
     ]);
   }
 
   void _updateState(GameState newState) {
     Assert.holds(isActivePlayer,
         message: 'Only active player should change game state');
-    localGameData.gameReference.updateColumns([DBColState().setData(newState)]);
+    localGameData.gameReference.updateColumns([DBColState().withData(newState)]);
     state = newState;
     _streamController.add(_gameData);
   }
 
   void _updatePersonalState(PersonalState newState) {
     localGameData.gameReference.updateColumns(
-        [DBColPlayer(localGameData.myPlayerID).setData(newState)]);
+        [DBColPlayer(localGameData.myPlayerID).withData(newState)]);
     personalState = newState;
     _streamController.add(_gameData);
   }

@@ -123,7 +123,7 @@ class GameConfigController {
     _checkWritesAllowed();
     _rawConfig = updater(_rawConfig);
     localGameData.gameReference
-        .updateColumns([DBColConfig().setData(_rawConfig)]);
+        .updateColumns([DBColConfig().withData(_rawConfig)]);
     _streamController.add(_configPlus());
   }
 
