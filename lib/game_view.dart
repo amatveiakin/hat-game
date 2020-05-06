@@ -567,7 +567,7 @@ class GameView extends StatefulWidget {
   final LocalGameData localGameData;
 
   GameView({@required this.localGameData})
-      : gameController = GameController.fromFirestore(localGameData);
+      : gameController = GameController.fromDB(localGameData);
 
   @override
   State<StatefulWidget> createState() => GameViewState();

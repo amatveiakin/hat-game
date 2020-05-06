@@ -55,14 +55,14 @@ class GameConfigController {
     );
   }
 
-  GameConfigController.fromFirestore(this.localGameData) {
+  GameConfigController.fromDB(this.localGameData) {
     localGameData.gameReference.snapshots().listen(
       _onUpdateFromDB,
       onError: (error) {
-        Assert.fail('GameConfigController: Firestore error: $error');
+        Assert.fail('GameConfigController: DB error: $error');
       },
       onDone: () {
-        Assert.fail('GameConfigController: Firestore updates stream aborted');
+        Assert.fail('GameConfigController: DB updates stream aborted');
       },
     );
   }

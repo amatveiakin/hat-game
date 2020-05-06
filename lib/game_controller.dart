@@ -535,14 +535,14 @@ class GameController {
     _streamController.add(_gameData);
   }
 
-  GameController.fromFirestore(this.localGameData) {
+  GameController.fromDB(this.localGameData) {
     localGameData.gameReference.snapshots().listen(
       _onUpdateFromDB,
       onError: (error) {
-        Assert.fail('GameController: Firestore error: $error');
+        Assert.fail('GameController: DB error: $error');
       },
       onDone: () {
-        Assert.fail('GameController: Firestore updates stream aborted');
+        Assert.fail('GameController: DB updates stream aborted');
       },
     );
   }

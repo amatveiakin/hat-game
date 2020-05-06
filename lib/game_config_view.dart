@@ -21,7 +21,7 @@ class GameConfigView extends StatefulWidget {
   final LocalGameData localGameData;
 
   GameConfigView({@required this.localGameData})
-      : configController = GameConfigController.fromFirestore(localGameData);
+      : configController = GameConfigController.fromDB(localGameData);
 
   @override
   createState() => _GameConfigViewState();
