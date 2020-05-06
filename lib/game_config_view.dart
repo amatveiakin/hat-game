@@ -152,14 +152,11 @@ class _GameConfigViewState extends State<GameConfigView>
               ? OnlinePlayersConfigView(
                   playersConfig: gameConfig.players,
                 )
-              : throw UnimplementedError('Offline mode not supported yet'),
-          /*
-                OfflinePlayersConfigView(
+              : OfflinePlayersConfigView(
                   teamingConfig: gameConfig.teaming,
                   initialPlayersConfig: gameConfig.players,
                   configController: configController,
                 ),
-          */
         ];
         final startButton = Padding(
           padding: EdgeInsets.symmetric(vertical: 12.0),

@@ -15,20 +15,20 @@ class PartyViewData {
 
 // TODO: Rename in order to make it explicit that these are immutable settings.
 class LocalGameData {
-  final bool onlineMode = true;
+  final bool onlineMode;
   final String gameID;
   final DocumentReference gameReference;
   final int myPlayerID;
 
-  bool get isAdmin => myPlayerID == 0;
+  bool get isAdmin => !onlineMode || myPlayerID == 0;
 
   LocalGameData(
-      {@required this.gameID,
+      {@required this.onlineMode,
+      this.gameID,
       @required this.gameReference,
-      @required this.myPlayerID}) {
-    Assert.holds(gameID != null);
+      this.myPlayerID}) {
+    Assert.holds(onlineMode != null);
     Assert.holds(gameReference != null);
-    Assert.holds(myPlayerID != null);
   }
 }
 

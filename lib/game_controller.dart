@@ -214,8 +214,19 @@ class GameController {
         Random().nextInt(pow(10, length)).toString().padLeft(length, '0');
   }
 
+  static CollectionReference gamesCollection() {
+    return Firestore.instance.collection('games');
+  }
+
   static DocumentReference gameReferenceFromGameID(String gameId) {
-    return Firestore.instance.collection('games').document(gameId);
+    return gamesCollection().document(gameId);
+  }
+
+  static Map<String, dynamic> _newGameRecord() {
+    return dbData([
+      DBColCreationTimeUtc().setData(NtpTime.nowUtc().toString()),
+      DBColHostAppVersion().setData(appVersion),
+    ]);
   }
 
   static int activePlayer(GameState state) => state.currentParty.performer;
@@ -249,17 +260,36 @@ class GameController {
     }
   }
 
+  static Future<LocalGameData> newOffineGame() async {
+    DocumentReference reference = gamesCollection().document('local');
+    await reference.delete();
+    final GameConfig config = GameConfigController.defaultConfig().rebuild(
+      (b) => b.players.names.replace({}),
+    );
+    await reference.setData({
+      ..._newGameRecord(),
+      ...dbData([
+        DBColConfig().setData(config),
+      ]),
+    });
+    return LocalGameData(
+      onlineMode: false,
+      gameReference: reference,
+    );
+  }
+
   static Future<LocalGameData> newLobby(String myName) async {
     checkPlayerNameIsValid(myName);
     const int minIDLength = 4;
     const int maxIDLength = 8;
     const int attemptsPerTransaction = 100;
     final String idPrefix = kReleaseMode ? '' : '.';
-    // TODO: Use config from local storage OR from account.
-    final GameConfig config = GameConfigController.defaultConfig();
     String gameID;
     DocumentReference reference;
     final int playerID = 0;
+    // TODO: Use config from local storage OR from account.
+    final GameConfig config = GameConfigController.defaultConfig();
+    final gameRecordStub = _newGameRecord();
     for (int idLength = minIDLength;
         idLength <= maxIDLength && gameID == null;
         idLength++) {
@@ -269,16 +299,15 @@ class GameController {
           reference = gameReferenceFromGameID(gameID);
           DocumentSnapshot snapshot = await tx.get(reference);
           if (!snapshot.exists) {
-            await tx.set(
-                reference,
-                dbData([
-                  DBColCreationTimeUtc().setData(NtpTime.nowUtc().toString()),
-                  DBColHostAppVersion().setData(appVersion),
-                  DBColConfig().setData(config),
-                  DBColPlayer(playerID).setData(PersonalState((b) => b
-                    ..id = playerID
-                    ..name = myName)),
-                ]));
+            await tx.set(reference, {
+              ...gameRecordStub,
+              ...dbData([
+                DBColConfig().setData(config),
+                DBColPlayer(playerID).setData(PersonalState((b) => b
+                  ..id = playerID
+                  ..name = myName)),
+              ])
+            });
             return;
           }
         }
@@ -289,6 +318,7 @@ class GameController {
       throw InvalidOperation('Cannot generate game ID', isInternalError: true);
     }
     return LocalGameData(
+      onlineMode: true,
       gameID: gameID,
       gameReference: reference,
       myPlayerID: playerID,
@@ -365,6 +395,7 @@ class GameController {
     }
 
     return LocalGameData(
+      onlineMode: true,
       gameID: gameID,
       gameReference: reference,
       myPlayerID: playerID,
@@ -471,17 +502,12 @@ class GameController {
     final bool wasInitialized = isInitialized;
     if (!isInitialized) {
       final GameConfigReadResult configReadResult =
-          GameConfigController.configFromSnapshot(snapshot);
-      if (!configReadResult.gameHasStarted ||
-          !dbContains(snapshot, DBColState())) {
+          GameConfigController.configFromSnapshot(localGameData, snapshot);
+      if (!dbContains(snapshot, DBColState())) {
         return;
       }
       // This is the one and only place where the config changes.
       config = configReadResult.configWithOverrides;
-    }
-
-    if (!dbContains(snapshot, DBColState())) {
-      Assert.fail('Game state not found');
     }
 
     GameState newState = dbGet(snapshot, DBColState());
@@ -500,7 +526,7 @@ class GameController {
     final personalStates = _parsePersonalStates(snapshot);
     derivedState = _makeDerivedGameState(personalStates);
     Assert.holds(personalStates.containsKey(localGameData.myPlayerID));
-    personalState = personalStates[localGameData.myPlayerID];
+    personalState = personalStates[localGameData.myPlayerID];  // TODO: !!!
 
     _streamController.add(_gameData);
   }

@@ -3,6 +3,7 @@ library game_config;
 import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
+import 'package:hatgame/util/assertion.dart';
 
 part 'game_config.g.dart';
 
@@ -92,7 +93,8 @@ abstract class PlayersConfig
   // Maps to player ID to player name.
   BuiltMap<int, String> get names;
   // Set only if manual teaming.
-  @nullable BuiltList<BuiltList<int>> get teams;
+  @nullable
+  BuiltList<BuiltList<int>> get teams;
 
   PlayersConfig._();
 
@@ -100,6 +102,16 @@ abstract class PlayersConfig
       _$PlayersConfig;
 
   static Serializer<PlayersConfig> get serializer => _$playersConfigSerializer;
+
+  void checkInvariant() {
+    if (teams != null) {
+      for (final t in teams) {
+        for (final p in t) {
+          Assert.holds(names.containsKey(p), lazyMessage: () => toString());
+        }
+      }
+    }
+  }
 }
 
 // =============================================================================
@@ -108,7 +120,8 @@ abstract class PlayersConfig
 abstract class GameConfig implements Built<GameConfig, GameConfigBuilder> {
   RulesConfig get rules;
   TeamingConfig get teaming;
-  @nullable PlayersConfig get players;
+  @nullable
+  PlayersConfig get players;
 
   GameConfig._();
 

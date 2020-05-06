@@ -71,6 +71,7 @@ abstract class GameState implements Built<GameState, GameStateBuilder> {
   // Exactly one of `individualOrder` and `teams` must be set.
   @nullable
   BuiltList<int> get individualOrder;
+  // == PlayersConfig.teams, but teams and players within a team are shuffled.
   @nullable
   BuiltList<BuiltList<int>> get teams;
   @nullable

@@ -7,7 +7,6 @@ import 'package:hatgame/util/assertion.dart';
 
 // TODO: Allow to delete teams.
 
-/*
 bool _manualTeams(TeamingConfig teamingConfig) {
   return teamingConfig.teamPlay && !teamingConfig.randomizeTeams;
 }
@@ -65,27 +64,21 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
 
   void _generateInitialPlayerItems() {
     final PlayersConfig config = widget.initialPlayersConfig;
-    Assert.ne(config.namesByTeam == null, config.names == null,
-        lazyMessage: () => config.toString());
+    config.checkInvariant();
     // Conversion might be required is teaming config changed.
     if (manualTeams) {
-      final teamPlayers =
-          (config.namesByTeam != null) ? config.namesByTeam : [config.names];
-      if (teamPlayers.isNotEmpty) {
-        for (final team in teamPlayers) {
-          if (_playerItems.isNotEmpty) {
-            _addDivider();
-          }
-          for (final p in team) {
-            _addPlayer(p, focus: false);
-          }
+      final teams =
+          config.teams ?? BuiltList<BuiltList<int>>([config.names.values]);
+      for (final team in teams) {
+        if (_playerItems.isNotEmpty) {
+          _addDivider();
+        }
+        for (final p in team) {
+          _addPlayer(config.names[p], focus: false);
         }
       }
     } else {
-      final players = (config.names != null)
-          ? config.names
-          : config.namesByTeam.expand((t) => t).toList();
-      for (final p in players) {
+      for (final p in config.names.values) {
         _addPlayer(p, focus: false);
       }
     }
@@ -95,27 +88,31 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
     if (_freezeUpdates) {
       return;
     }
-    if (manualTeams) {
-      List<List<String>> namesByTeam = [[]];
-      for (final p in _playerItems) {
-        if (p.isTeamDivider) {
-          namesByTeam.add([]);
-        } else {
-          namesByTeam.last.add(p.name);
-        }
+
+    final Map<int, String> names = {};
+    final List<List<int>> teams = [[]];
+    int playerID = 0;
+    for (final p in _playerItems) {
+      if (p.isTeamDivider) {
+        teams.add([]);
+      } else {
+        names[playerID] = p.name;
+        teams.last.add(playerID);
+        playerID++;
       }
+    }
+
+    if (manualTeams) {
       configController.updatePlayers((_) => PlayersConfig(
-        (b) => b
-          ..namesByTeam.replace(namesByTeam.map((t) => BuiltList<String>(t))),
-      ));
+            (b) => b
+              ..names.replace(names)
+              ..teams.replace(teams.map((t) => BuiltList(t))),
+          ));
     } else {
+      Assert.eq(teams.length, 1);
       configController.updatePlayers((_) => PlayersConfig(
-        (b) => b
-          ..names.replace(_playerItems.map((p) {
-            Assert.holds(!p.isTeamDivider);
-            return p.name;
-          })),
-      ));
+            (b) => b..names.replace(names),
+          ));
     }
   }
 
@@ -336,4 +333,3 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
     );
   }
 }
-*/

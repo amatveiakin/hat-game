@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/serializers.dart';
 import 'package:hatgame/db_columns.dart';
+import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/util/assertion.dart';
 
@@ -18,7 +19,6 @@ class GameConfigPlus {
 class GameConfigReadResult {
   final GameConfig rawConfig;
   final Map<int, String> playerNamesOverrides;
-  bool get gameHasStarted => rawConfig.players != null;
   GameConfig get configWithOverrides =>
       rawConfig.players != null || playerNamesOverrides == null
           ? rawConfig
@@ -34,7 +34,7 @@ class GameConfigController {
   final LocalGameData localGameData;
   GameConfig _rawConfig;
   Map<int, String> _playerNamesOverrides;
-  // bool _gameHasStarted = false;
+  bool _gameHasStarted = false;
   final _streamController = StreamController<GameConfigPlus>(sync: true);
 
   Stream<GameConfigPlus> get stateUpdatesStream => _streamController.stream;
@@ -55,17 +55,6 @@ class GameConfigController {
     );
   }
 
-  // TODO: Remove after prod release.
-  static GameConfig devConfig() {
-    return defaultConfig().rebuild(
-      (b) => b
-        ..rules.turnSeconds = 5
-        ..rules.bonusSeconds = 3
-        ..rules.wordsPerPlayer = 1
-        ..players.names.replace(['Vasya', 'Petya', 'Masha', 'Dasha']),
-    );
-  }
-
   GameConfigController.fromFirestore(this.localGameData) {
     localGameData.gameReference.snapshots().listen(
       _onUpdateFromDB,
@@ -78,11 +67,12 @@ class GameConfigController {
     );
   }
 
-  static GameConfigReadResult configFromSnapshot(DocumentSnapshot snapshot) {
+  static GameConfigReadResult configFromSnapshot(
+      LocalGameData localGameData, DocumentSnapshot snapshot) {
     Assert.holds(snapshot.data != null);
     GameConfig rawConfig = dbGet(snapshot, DBColConfig());
     Map<int, String> playerNamesOverrides;
-    if (rawConfig.players == null) {
+    if (rawConfig.players == null && localGameData.onlineMode) {
       // This happens in online mode before the game has started.
       playerNamesOverrides = Map<int, String>();
       // TODO: Support gaps or check that there are none.
@@ -103,15 +93,23 @@ class GameConfigController {
   }
 
   GameConfigPlus _configPlus() =>
-      GameConfigPlus(_configWithOverrides(), _rawConfig.players != null);
+      GameConfigPlus(_configWithOverrides(), _gameHasStarted);
 
   void _onUpdateFromDB(final DocumentSnapshot snapshot) {
-    GameConfigReadResult readResult = configFromSnapshot(snapshot);
+    GameConfigReadResult readResult =
+        configFromSnapshot(localGameData, snapshot);
     // If config view starts lagging, a potential fix would be to skip
     // updating _rawConfig when `!isReadOnly`. Just be sure not to forget
     // about playerNamesOverrides and gameHasStarted!
     _rawConfig = readResult.rawConfig;
     _playerNamesOverrides = readResult.playerNamesOverrides;
+    _gameHasStarted = dbContains(snapshot, DBColState());
+    if (localGameData.onlineMode) {
+      Assert.eq(_gameHasStarted, _rawConfig.players != null);
+      Assert.eq(_gameHasStarted, _playerNamesOverrides == null);
+    } else {
+      Assert.holds(_playerNamesOverrides == null);
+    }
     _streamController.add(_configPlus());
   }
 
