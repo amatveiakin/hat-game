@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:built_value/serializer.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value/personal_state.dart';
@@ -19,6 +18,7 @@ abstract class DBColumn<T> {
   String serialize(T value);
   T deserialize(String serialized);
 
+  // TODO: Create a separate class for 'column with payload'.
   setData(T newData) {
     Assert.holds(data == null);
     Assert.holds(newData != null);
@@ -27,19 +27,22 @@ abstract class DBColumn<T> {
   }
 }
 
-bool dbContains<T>(DocumentSnapshot snapshot, DBColumn<T> column) {
-  return snapshot.data.containsKey(column.name);
+bool dbContains<T>(Map<String, dynamic> data, DBColumn<T> column) {
+  return data.containsKey(column.name);
 }
 
-T dbGet<T>(DocumentSnapshot snapshot, DBColumn<T> column) {
-  Assert.holds(dbContains(snapshot, column),
-      lazyMessage: () => 'Column ${column.name} not found in '
-          '${snapshot.reference.path}. Content: ${snapshot.data.toString()}');
-  return column.deserialize(snapshot.data[column.name]);
+T dbGet<T>(Map<String, dynamic> data, DBColumn<T> column,
+    {String documentPath}) {
+  Assert.holds(dbContains(data, column),
+      lazyMessage: () => documentPath != null
+          ? 'Column "${column.name}" not found in "$documentPath". '
+              'Content: "$data"'
+          : 'Column "${column.name}" not found. Content: "$data"');
+  return column.deserialize(data[column.name]);
 }
 
-T dbTryGet<T>(DocumentSnapshot snapshot, DBColumn<T> column) {
-  return dbContains(snapshot, column) ? dbGet(snapshot, column) : null;
+T dbTryGet<T>(Map<String, dynamic> data, DBColumn<T> column) {
+  return dbContains(data, column) ? dbGet(data, column) : null;
 }
 
 Map<String, dynamic> dbData(List<DBColumn> columns) {
@@ -69,10 +72,19 @@ class DBColState extends DBColumnBuiltValue<GameState> {
   String get name => 'state';
 }
 
+// Per-player state in online mode.
 class DBColPlayer extends DBColumnBuiltValue<PersonalState> {
   final int playerID;
   DBColPlayer(this.playerID);
   String get name => 'player-$playerID';
+}
+
+// Analog of DBColPlayer for offline mode. In offline mode there is no
+// per-player state, so this column is separate from DBColState for the purely
+// technical reason of trying to keep offline and online implementations close.
+class DBColLocalPlayer extends DBColumnBuiltValue<PersonalState> {
+  DBColLocalPlayer();
+  String get name => 'additional_state';
 }
 
 // =============================================================================

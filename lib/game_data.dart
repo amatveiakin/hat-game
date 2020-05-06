@@ -1,9 +1,9 @@
 import 'package:built_collection/built_collection.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value/personal_state.dart';
+import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/util/assertion.dart';
 
 class PartyViewData {
@@ -17,7 +17,7 @@ class PartyViewData {
 class LocalGameData {
   final bool onlineMode;
   final String gameID;
-  final DocumentReference gameReference;
+  final DBDocumentReference gameReference;
   final int myPlayerID;
 
   bool get isAdmin => !onlineMode || myPlayerID == 0;

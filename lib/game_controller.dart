@@ -2,13 +2,16 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:built_collection/built_collection.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 import 'package:flutter/foundation.dart';
 import 'package:hatgame/app_version.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value/personal_state.dart';
+import 'package:hatgame/db/db.dart';
 import 'package:hatgame/db/db_columns.dart';
+import 'package:hatgame/db/db_document.dart';
+import 'package:hatgame/db/db_firestore.dart';
 import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/partying_strategy.dart';
@@ -206,27 +209,17 @@ class GameController {
   //   - stateUpdatesStream starts sending updates.
   bool get isInitialized => config != null;
 
-  bool get isActivePlayer =>
-      state == null ? false : activePlayer(state) == localGameData.myPlayerID;
+  bool get isActivePlayer => state == null
+      ? false
+      : (localGameData.onlineMode
+          ? activePlayer(state) == localGameData.myPlayerID
+          : true);
 
-  static String generateNewGameID(int length, String prefix) {
-    return prefix +
-        Random().nextInt(pow(10, length)).toString().padLeft(length, '0');
-  }
-
-  static CollectionReference gamesCollection() {
-    return Firestore.instance.collection('games');
-  }
-
-  static DocumentReference gameReferenceFromGameID(String gameId) {
-    return gamesCollection().document(gameId);
-  }
-
-  static Map<String, dynamic> _newGameRecord() {
-    return dbData([
+  static List<DBColumn> _newGameRecord() {
+    return [
       DBColCreationTimeUtc().setData(NtpTime.nowUtc().toString()),
       DBColHostAppVersion().setData(appVersion),
-    ]);
+    ];
   }
 
   static int activePlayer(GameState state) => state.currentParty.performer;
@@ -261,17 +254,20 @@ class GameController {
   }
 
   static Future<LocalGameData> newOffineGame() async {
-    DocumentReference reference = gamesCollection().document('local');
+    DBDocumentReference reference = localGameReference();
     await reference.delete();
     final GameConfig config = GameConfigController.defaultConfig().rebuild(
       (b) => b.players.names.replace({}),
     );
-    await reference.setData({
-      ..._newGameRecord(),
-      ...dbData([
-        DBColConfig().setData(config),
-      ]),
-    });
+    await reference.setColumns(
+      _newGameRecord() +
+          [
+            DBColConfig().setData(config),
+            DBColLocalPlayer().setData(PersonalState((b) => b
+              ..id = 0
+              ..name = 'fake')),
+          ],
+    );
     return LocalGameData(
       onlineMode: false,
       gameReference: reference,
@@ -285,7 +281,7 @@ class GameController {
     const int attemptsPerTransaction = 100;
     final String idPrefix = kReleaseMode ? '' : '.';
     String gameID;
-    DocumentReference reference;
+    firestore.DocumentReference reference;
     final int playerID = 0;
     // TODO: Use config from local storage OR from account.
     final GameConfig config = GameConfigController.defaultConfig();
@@ -293,21 +289,22 @@ class GameController {
     for (int idLength = minIDLength;
         idLength <= maxIDLength && gameID == null;
         idLength++) {
-      await Firestore.instance.runTransaction((Transaction tx) async {
+      await firestore.Firestore.instance
+          .runTransaction((firestore.Transaction tx) async {
         for (int iter = 0; iter < attemptsPerTransaction; iter++) {
-          gameID = generateNewGameID(idLength, idPrefix);
-          reference = gameReferenceFromGameID(gameID);
-          DocumentSnapshot snapshot = await tx.get(reference);
+          gameID = newFirestoreGameID(idLength, idPrefix);
+          reference = firestoreGameReference(gameID: gameID);
+          firestore.DocumentSnapshot snapshot = await tx.get(reference);
           if (!snapshot.exists) {
-            await tx.set(reference, {
-              ...gameRecordStub,
-              ...dbData([
-                DBColConfig().setData(config),
-                DBColPlayer(playerID).setData(PersonalState((b) => b
-                  ..id = playerID
-                  ..name = myName)),
-              ])
-            });
+            await tx.set(
+                reference,
+                dbData(gameRecordStub +
+                    [
+                      DBColConfig().setData(config),
+                      DBColPlayer(playerID).setData(PersonalState((b) => b
+                        ..id = playerID
+                        ..name = myName)),
+                    ]));
             return;
           }
         }
@@ -320,7 +317,7 @@ class GameController {
     return LocalGameData(
       onlineMode: true,
       gameID: gameID,
-      gameReference: reference,
+      gameReference: FirestoreDocumentReference(reference),
       myPlayerID: playerID,
     );
   }
@@ -328,7 +325,8 @@ class GameController {
   static Future<LocalGameData> joinLobby(String myName, String gameID) async {
     checkPlayerNameIsValid(myName);
     // TODO: Check if the game has already started.
-    final DocumentReference reference = gameReferenceFromGameID(gameID);
+    final firestore.DocumentReference reference =
+        firestoreGameReference(gameID: gameID);
 
     if (!(await reference.get()).exists) {
       // [1/2] Workaround flutter/firestore error:
@@ -357,8 +355,9 @@ class GameController {
     //         'InvalidOperation', null)
     InvalidOperation error;
 
-    await Firestore.instance.runTransaction((Transaction tx) async {
-      DocumentSnapshot snapshot = await tx.get(reference);
+    await firestore.Firestore.instance
+        .runTransaction((firestore.Transaction tx) async {
+      firestore.DocumentSnapshot snapshot = await tx.get(reference);
       if (!snapshot.exists) {
         error = InvalidOperation("Game $gameID doesn't exist");
         return;
@@ -369,13 +368,13 @@ class GameController {
       }
       try {
         checkVersionCompatibility(
-            dbTryGet(snapshot, DBColHostAppVersion()), appVersion);
+            dbTryGet(snapshot.data, DBColHostAppVersion()), appVersion);
       } on InvalidOperation catch (e) {
         error = e;
         return;
       }
-      while (dbContains(snapshot, DBColPlayer(playerID))) {
-        if (myName == dbGet(snapshot, DBColPlayer(playerID)).name) {
+      while (dbContains(snapshot.data, DBColPlayer(playerID))) {
+        if (myName == dbGet(snapshot.data, DBColPlayer(playerID)).name) {
           error = InvalidOperation("Name $myName is already taken");
           return;
         }
@@ -397,13 +396,13 @@ class GameController {
     return LocalGameData(
       onlineMode: true,
       gameID: gameID,
-      gameReference: reference,
+      gameReference: FirestoreDocumentReference(reference),
       myPlayerID: playerID,
     );
   }
 
   // Writes state asynchronously.
-  static void startGame(DocumentReference reference, GameConfig config) {
+  static void startGame(DBDocumentReference reference, GameConfig config) {
     final numPlayers = config.players.names.length;
     BuiltList<BuiltList<int>> teams;
     BuiltList<int> individualOrder;
@@ -478,11 +477,11 @@ class GameController {
   }
 
   Map<int, PersonalState> _parsePersonalStates(
-      final DocumentSnapshot snapshot) {
+      final DBDocumentSnapshot snapshot) {
     final states = Map<int, PersonalState>();
     int playerID = 0;
-    while (dbContains(snapshot, DBColPlayer(playerID))) {
-      states[playerID] = dbGet(snapshot, DBColPlayer(playerID));
+    while (snapshot.contains(DBColPlayer(playerID))) {
+      states[playerID] = snapshot.get(DBColPlayer(playerID));
       playerID++;
     }
     return states;
@@ -497,20 +496,20 @@ class GameController {
     return DerivedGameState(flaggedWords: BuiltSet.from(flaggedWords));
   }
 
-  void _onUpdateFromDB(final DocumentSnapshot snapshot) {
-    Assert.holds(snapshot.data != null);
+  void _onUpdateFromDB(final DBDocumentSnapshot snapshot) {
+    Assert.holds(snapshot.exists);
     final bool wasInitialized = isInitialized;
     if (!isInitialized) {
       final GameConfigReadResult configReadResult =
           GameConfigController.configFromSnapshot(localGameData, snapshot);
-      if (!dbContains(snapshot, DBColState())) {
+      if (!snapshot.contains(DBColState())) {
         return;
       }
       // This is the one and only place where the config changes.
       config = configReadResult.configWithOverrides;
     }
 
-    GameState newState = dbGet(snapshot, DBColState());
+    GameState newState = snapshot.get(DBColState());
     if (isActivePlayer) {
       Assert.holds(wasInitialized);
       final int newActivePlayer = activePlayer(newState);
@@ -523,10 +522,15 @@ class GameController {
       state = newState;
     }
 
-    final personalStates = _parsePersonalStates(snapshot);
-    derivedState = _makeDerivedGameState(personalStates);
-    Assert.holds(personalStates.containsKey(localGameData.myPlayerID));
-    personalState = personalStates[localGameData.myPlayerID];  // TODO: !!!
+    if (localGameData.onlineMode) {
+      final personalStates = _parsePersonalStates(snapshot);
+      derivedState = _makeDerivedGameState(personalStates);
+      Assert.holds(personalStates.containsKey(localGameData.myPlayerID));
+      personalState = personalStates[localGameData.myPlayerID];
+    } else {
+      personalState = snapshot.get(DBColLocalPlayer());
+      derivedState = _makeDerivedGameState({personalState.id: personalState});
+    }
 
     _streamController.add(_gameData);
   }
@@ -543,35 +547,25 @@ class GameController {
     );
   }
 
-  static Future<void> _writeInitialState(DocumentReference reference,
+  static Future<void> _writeInitialState(DBDocumentReference reference,
       GameConfig config, GameState initialState) async {
-    await Firestore.instance.runTransaction((Transaction tx) async {
-      DocumentSnapshot snapshot = await tx.get(reference);
-      Assert.holds(snapshot.exists,
-          lazyMessage: () => 'Game doesn\'t exist: ' + reference.path);
-      Assert.holds(!dbContains(snapshot, DBColState()),
-          lazyMessage: () => 'Game state already exists: ' + reference.path);
-      await tx.update(
-          reference,
-          dbData([
-            DBColConfig().setData(config),
-            DBColState().setData(initialState),
-          ]));
-    });
+    reference.updateColumns([
+      DBColConfig().setData(config),
+      DBColState().setData(initialState),
+    ]);
   }
 
   void _updateState(GameState newState) {
     Assert.holds(isActivePlayer,
         message: 'Only active player should change game state');
-    localGameData.gameReference
-        .updateData(dbData([DBColState().setData(newState)]));
+    localGameData.gameReference.updateColumns([DBColState().setData(newState)]);
     state = newState;
     _streamController.add(_gameData);
   }
 
   void _updatePersonalState(PersonalState newState) {
-    localGameData.gameReference.updateData(
-        dbData([DBColPlayer(localGameData.myPlayerID).setData(newState)]));
+    localGameData.gameReference.updateColumns(
+        [DBColPlayer(localGameData.myPlayerID).setData(newState)]);
     personalState = newState;
     _streamController.add(_gameData);
   }

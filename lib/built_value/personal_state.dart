@@ -34,6 +34,8 @@ class WordFeedback extends EnumClass {
 // by the corresponding player.
 abstract class PersonalState
     implements Built<PersonalState, PersonalStateBuilder> {
+  // TODO: Mark things that don't make sense in offline mode as nullable OR
+  // move everything else to a separate class and reference it from here.
   int get id;
   String get name;
   BuiltMap<int, WordFeedback> get wordFeedback;

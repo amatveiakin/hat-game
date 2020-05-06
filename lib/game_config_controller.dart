@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/serializers.dart';
 import 'package:hatgame/db/db_columns.dart';
+import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/util/assertion.dart';
@@ -68,9 +68,9 @@ class GameConfigController {
   }
 
   static GameConfigReadResult configFromSnapshot(
-      LocalGameData localGameData, DocumentSnapshot snapshot) {
-    Assert.holds(snapshot.data != null);
-    GameConfig rawConfig = dbGet(snapshot, DBColConfig());
+      LocalGameData localGameData, DBDocumentSnapshot snapshot) {
+    Assert.holds(snapshot.exists);
+    GameConfig rawConfig = snapshot.get(DBColConfig());
     Map<int, String> playerNamesOverrides;
     if (rawConfig.players == null && localGameData.onlineMode) {
       // This happens in online mode before the game has started.
@@ -78,10 +78,10 @@ class GameConfigController {
       // TODO: Support gaps or check that there are none.
       for (int playerID = 0;; playerID++) {
         final playerColumn = DBColPlayer(playerID);
-        if (!dbContains(snapshot, playerColumn)) {
+        if (!snapshot.contains(playerColumn)) {
           break;
         }
-        playerNamesOverrides[playerID] = dbGet(snapshot, playerColumn).name;
+        playerNamesOverrides[playerID] = snapshot.get(playerColumn).name;
       }
     }
     return GameConfigReadResult(rawConfig, playerNamesOverrides);
@@ -95,7 +95,7 @@ class GameConfigController {
   GameConfigPlus _configPlus() =>
       GameConfigPlus(_configWithOverrides(), _gameHasStarted);
 
-  void _onUpdateFromDB(final DocumentSnapshot snapshot) {
+  void _onUpdateFromDB(final DBDocumentSnapshot snapshot) {
     GameConfigReadResult readResult =
         configFromSnapshot(localGameData, snapshot);
     // If config view starts lagging, a potential fix would be to skip
@@ -103,7 +103,7 @@ class GameConfigController {
     // about playerNamesOverrides and gameHasStarted!
     _rawConfig = readResult.rawConfig;
     _playerNamesOverrides = readResult.playerNamesOverrides;
-    _gameHasStarted = dbContains(snapshot, DBColState());
+    _gameHasStarted = snapshot.contains(DBColState());
     if (localGameData.onlineMode) {
       Assert.eq(_gameHasStarted, _rawConfig.players != null);
       Assert.eq(_gameHasStarted, _playerNamesOverrides == null);
@@ -123,7 +123,7 @@ class GameConfigController {
     _checkWritesAllowed();
     _rawConfig = updater(_rawConfig);
     localGameData.gameReference
-        .updateData(dbData([DBColConfig().setData(_rawConfig)]));
+        .updateColumns([DBColConfig().setData(_rawConfig)]);
     _streamController.add(_configPlus());
   }
 
