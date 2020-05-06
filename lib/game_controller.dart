@@ -8,7 +8,7 @@ import 'package:hatgame/app_version.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value/personal_state.dart';
-import 'package:hatgame/db_columns.dart';
+import 'package:hatgame/db/db_columns.dart';
 import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/partying_strategy.dart';

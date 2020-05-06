@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/serializers.dart';
-import 'package:hatgame/db_columns.dart';
+import 'package:hatgame/db/db_columns.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/util/assertion.dart';
