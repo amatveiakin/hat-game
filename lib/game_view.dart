@@ -20,11 +20,11 @@ import 'package:hatgame/widget/wide_button.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
 
 class PartyView extends StatelessWidget {
-  final PartyViewData teamData;
+  final PartyViewData party;
   final TurnPhase turnPhase;
   final int myPlayerID;
 
-  PartyView(this.teamData, this.turnPhase, this.myPlayerID);
+  PartyView(this.party, this.turnPhase, this.myPlayerID);
 
   Widget _playerView(PlayerState playerState) {
     Widget textWidget = Text(playerState.name);
@@ -69,14 +69,15 @@ class PartyView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _playerView(teamData.performer),
-          Text(' → '),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: teamData.recipients
-                .map((player) => _playerView(player))
-                .toList(),
-          ),
+          _playerView(party.performer),
+          if (party.recipients.isNotEmpty) Text(' → '),
+          if (party.recipients.isNotEmpty)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: party.recipients
+                  .map((player) => _playerView(player))
+                  .toList(),
+            ),
         ],
       ),
     );
