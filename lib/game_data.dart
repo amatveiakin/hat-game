@@ -95,6 +95,29 @@ class WordViewData {
   });
 }
 
+class _PlayerPerformance {
+  int wordsExplained = 0;
+  int wordsGuessed = 0;
+}
+
+class PlayerScoreViewData {
+  final String name;
+  final int wordsExplained;
+  final int wordsGuessed;
+
+  PlayerScoreViewData(
+      {@required this.name,
+      @required this.wordsExplained,
+      @required this.wordsGuessed});
+}
+
+class TeamScoreViewData {
+  final int totalScore;
+  final List<PlayerScoreViewData> players;
+
+  TeamScoreViewData({@required this.totalScore, @required this.players});
+}
+
 // All information about the game, read-only.
 // Use GameController to influence the game.
 class GameData {
@@ -149,5 +172,65 @@ class GameData {
       recipients:
           turnState.party.recipients.map((id) => _playerViewData(id)).toList(),
     );
+  }
+
+  List<TeamScoreViewData> scoreData() {
+    final Map<int, _PlayerPerformance> playerPerformance = config.players.names
+        .map((id, name) => MapEntry(id, _PlayerPerformance()))
+        .toMap();
+    for (final t in turnLog) {
+      final int numWordsScored = t.wordsInThisTurn
+          .where((w) => w.status == WordStatus.explained)
+          .length;
+      playerPerformance[t.party.performer].wordsExplained += numWordsScored;
+      for (final p in t.party.recipients) {
+        playerPerformance[p].wordsGuessed += numWordsScored;
+      }
+    }
+
+    final scoreItems = List<TeamScoreViewData>();
+    if (initialState.teams != null) {
+      for (final team in initialState.teams) {
+        final players = List<PlayerScoreViewData>();
+        int totalWordsExplained = 0;
+        int totalWordsGuessed = 0;
+        for (final playerID in team) {
+          final performance = playerPerformance[playerID];
+          totalWordsExplained += performance.wordsExplained;
+          totalWordsGuessed += performance.wordsGuessed;
+          players.add(PlayerScoreViewData(
+            name: config.players.names[playerID],
+            wordsExplained: performance.wordsExplained,
+            wordsGuessed: performance.wordsGuessed,
+          ));
+        }
+        if (config.teaming.guessingInLargeTeam !=
+            IndividualPlayStyle.broadcast) {
+          Assert.eq(totalWordsExplained, totalWordsGuessed);
+        }
+        scoreItems.add(TeamScoreViewData(
+          totalScore: totalWordsExplained,
+          players: players,
+        ));
+      }
+    } else {
+      config.players.names.forEach((playerID, name) {
+        final performance = playerPerformance[playerID];
+        scoreItems.add(
+          TeamScoreViewData(
+            totalScore: performance.wordsExplained + performance.wordsGuessed,
+            players: [
+              PlayerScoreViewData(
+                name: name,
+                wordsExplained: performance.wordsExplained,
+                wordsGuessed: performance.wordsGuessed,
+              ),
+            ],
+          ),
+        );
+      });
+    }
+    scoreItems.sort((a, b) => b.totalScore.compareTo(a.totalScore));
+    return scoreItems;
   }
 }

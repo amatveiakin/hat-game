@@ -75,6 +75,10 @@ void main() {
       expect(controller.turnState.turnPhase, equals(TurnPhase.review));
       await controller.nextTurn();
       expect(controller.gameData.gameFinished(), isTrue);
+      final scoreData = controller.gameData.scoreData();
+      expect(scoreData.length, equals(2));
+      expect(scoreData[0].totalScore, equals(2));
+      expect(scoreData[1].totalScore, equals(1));
     });
   });
 }
