@@ -98,12 +98,16 @@ class GameConfigController {
   void _onUpdateFromDB(final DBDocumentSnapshot snapshot) {
     GameConfigReadResult readResult =
         configFromSnapshot(localGameData, snapshot);
-    // If config view starts lagging, a potential fix would be to skip
-    // updating _rawConfig when `!isReadOnly`. Just be sure not to forget
-    // about playerNamesOverrides and gameHasStarted!
-    _rawConfig = readResult.rawConfig;
     _playerNamesOverrides = readResult.playerNamesOverrides;
     _gameHasStarted = snapshot.contains(DBColInitialState());
+    if (!isReadOnly && _rawConfig != null && !_gameHasStarted) {
+      // Skip updating the config. The host is the only user who is updating
+      // the config, so DB contains no information that we don't have. On
+      // the other hand, information from DB can lag behing and cause UI
+      // flickering if the config was updated many times in a row.
+    } else {
+      _rawConfig = readResult.rawConfig;
+    }
     if (localGameData.onlineMode) {
       Assert.eq(_gameHasStarted, _rawConfig.players != null);
       Assert.eq(_gameHasStarted, _playerNamesOverrides == null);
