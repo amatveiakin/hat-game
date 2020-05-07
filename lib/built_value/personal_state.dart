@@ -23,7 +23,6 @@ class WordFeedback extends EnumClass {
   static const WordFeedback tooHard = _$tooHard;
 
   const WordFeedback._(String name) : super(name);
-
   static BuiltSet<WordFeedback> get values => _$valuesWordFeedback;
   static WordFeedback valueOf(String name) => _$valueOfWordFeedback(name);
   static Serializer<WordFeedback> get serializer => _$wordFeedbackSerializer;

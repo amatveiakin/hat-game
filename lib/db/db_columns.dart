@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:built_value/serializer.dart';
+import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value/personal_state.dart';
@@ -13,11 +14,19 @@ import 'package:hatgame/util/assertion.dart';
 abstract class DBColumn<T> {
   String get name;
 
-  String serialize(T value);
-  T deserialize(String serialized);
+  String serialize(T value) => value == null ? null : serializeImpl(value);
+  T deserialize(String serialized) =>
+      serialized == null ? null : deserializeImpl(serialized);
 
+  @protected
+  String serializeImpl(T value);
+  @protected
+  T deserializeImpl(String serialized);
+
+  // Note: `data` can be null, in which case null is written to the DB.
+  // This is similar, but not equivalent to removing the column (`dbTryGet`
+  // doesn't distinguish between the two, but `dbContains` does).
   DBColumnData<T> withData(T data) {
-    Assert.holds(data != null);
     return DBColumnData<T>(this, data);
   }
 }
@@ -70,8 +79,18 @@ class DBColConfig extends DBColumnBuiltValue<GameConfig> {
   String get name => 'config';
 }
 
-class DBColState extends DBColumnBuiltValue<GameState> {
-  String get name => 'state';
+class DBColInitialState extends DBColumnBuiltValue<InitialGameState> {
+  String get name => 'initial_state';
+}
+
+class DBColTurnRecord extends DBColumnBuiltValue<TurnRecord> {
+  final int turnID;
+  DBColTurnRecord(this.turnID);
+  String get name => 'turn-$turnID';
+}
+
+class DBColCurrentTurn extends DBColumnBuiltValue<TurnState> {
+  String get name => 'turn_current';
 }
 
 // Per-player state in online mode.
@@ -94,13 +113,13 @@ class DBColLocalPlayer extends DBColumnBuiltValue<PersonalState> {
 
 abstract class DBColumnBuiltValue<T> extends DBColumn<T> {
   Serializer _serializer() => serializers.serializerForType(T);
-  String serialize(T value) =>
+  String serializeImpl(T value) =>
       json.encode(serializers.serializeWith(_serializer(), value));
-  T deserialize(String serialized) =>
+  T deserializeImpl(String serialized) =>
       serializers.deserializeWith(_serializer(), json.decode(serialized));
 }
 
 abstract class DBColumnString extends DBColumn<String> {
-  String serialize(String value) => value;
-  String deserialize(String serialized) => serialized;
+  String serializeImpl(String value) => value;
+  String deserializeImpl(String serialized) => serialized;
 }

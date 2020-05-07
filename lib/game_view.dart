@@ -26,14 +26,14 @@ class PartyView extends StatelessWidget {
 
   PartyView(this.party, this.turnPhase, this.myPlayerID);
 
-  Widget _playerView(PlayerState playerState) {
-    Widget textWidget = Text(playerState.name);
+  Widget _playerView(PlayerViewData playerData) {
+    Widget textWidget = Text(playerData.name);
     final animationDuration = turnPhase == TurnPhase.prepare
         ? Duration.zero
         : Duration(milliseconds: 300);
     // TODO: Why do we need to specify color?
     // TODO: Take color from the theme.
-    if (playerState.id == myPlayerID) {
+    if (playerData.id == myPlayerID) {
       return AnimatedDefaultTextStyle(
           duration: animationDuration,
           style: TextStyle(
@@ -273,9 +273,7 @@ class PlayAreaState extends State<PlayArea>
   GameController get gameController => widget.gameController;
   GameConfig get gameConfig => gameData.config;
   GameData get gameData => widget.gameData;
-  GameState get gameState => gameData.state;
-  DerivedGameState get derivedGameState => gameData.derivedState;
-  PersonalState get personalState => gameData.personalState;
+  TurnState get turnState => gameData.turnState;
   LocalGameState get localGameState => gameData.localState;
 
   AnimationController _padlockAnimationController;
@@ -312,8 +310,8 @@ class PlayAreaState extends State<PlayArea>
   }
 
   void _endTurn(int turnRestriction) {
-    if (gameState.turn == turnRestriction &&
-        gameState.turnPhase == TurnPhase.explain) {
+    if (gameData.turnIndex() == turnRestriction &&
+        turnState.turnPhase == TurnPhase.explain) {
       Sounds.play(Sounds.timeOver);
       MyVibration.heavyVibration();
       gameController.finishExplanation();
@@ -321,7 +319,7 @@ class PlayAreaState extends State<PlayArea>
   }
 
   void _endBonusTime(int turnRestriction) {
-    if (gameState.turn == turnRestriction) {
+    if (gameData.turnIndex() == turnRestriction) {
       MyVibration.mediumVibration();
     }
   }
@@ -371,8 +369,8 @@ class PlayAreaState extends State<PlayArea>
             ? WordReviewItem(
                 text: w.text,
                 status: w.status,
-                feedback: personalState.wordFeedback[w.id],
-                hasFlag: personalState.wordFlags.contains(w.id),
+                feedback: w.feedback,
+                hasFlag: w.flaggedByActivePlayer,
                 setStatus: null,
                 setFeedback: (WordFeedback feedback) =>
                     _setWordFeedback(w.id, feedback),
@@ -392,7 +390,7 @@ class PlayAreaState extends State<PlayArea>
       children: wordReviewItems,
     );
 
-    switch (gameState.turnPhase) {
+    switch (turnState.turnPhase) {
       case TurnPhase.prepare:
         return Container();
       case TurnPhase.explain:
@@ -406,21 +404,21 @@ class PlayAreaState extends State<PlayArea>
           // OPTIMIZATION POTENTIAL: The cost of recreating anumation
           // controller (inside the timer) may turn out to be non-zero, in
           // which case Flutter approach would be faster.
-          gameState.turnPaused
+          turnState.turnPaused
               ? TimerView(
                   key: UniqueKey(),
                   style: TimerViewStyle.turnTime,
                   duration: Duration(seconds: gameConfig.rules.turnSeconds),
-                  startTime: gameState.turnTimeBeforePause,
+                  startTime: turnState.turnTimeBeforePause,
                   startPaused: true,
                 )
               : TimerView(
                   key: UniqueKey(),
                   style: TimerViewStyle.turnTime,
                   duration: Duration(seconds: gameConfig.rules.turnSeconds),
-                  startTime: gameState.turnTimeBeforePause +
+                  startTime: turnState.turnTimeBeforePause +
                       anyMax(Duration.zero,
-                          NtpTime.nowUtc().difference(gameState.turnTimeStart)),
+                          NtpTime.nowUtc().difference(turnState.turnTimeStart)),
                 ),
           SizedBox(height: 12.0),
         ]);
@@ -433,23 +431,22 @@ class PlayAreaState extends State<PlayArea>
             key: UniqueKey(),
             style: TimerViewStyle.bonusTime,
             duration: Duration(seconds: gameConfig.rules.bonusSeconds),
-            startTime: (NtpTime.nowUtc().difference(gameState.bonusTimeStart)),
+            startTime: (NtpTime.nowUtc().difference(turnState.bonusTimeStart)),
             hideOnTimeEnded: true,
           ),
           SizedBox(height: 12.0),
         ]);
     }
-    Assert.holds(gameState.gameFinished,
-        lazyMessage: () => gameState.toString());
+    Assert.holds(gameData.gameFinished());
     return Container();
   }
 
   Widget _buildActivePlayer(BuildContext context) {
     final wordsInHatWidget = Container(
       padding: EdgeInsets.symmetric(vertical: 12.0),
-      child: Text('Words in hat: ${gameState.wordsInHat.length}'),
+      child: Text('Words in hat: ${gameData.numWordsInHat()}'),
     );
-    switch (gameState.turnPhase) {
+    switch (turnState.turnPhase) {
       case TurnPhase.prepare:
         return Column(
           children: [
@@ -505,7 +502,7 @@ class PlayAreaState extends State<PlayArea>
               child: TimerView(
                 key: ValueKey('turn_timer'),
                 style: TimerViewStyle.turnTime,
-                onTimeEnded: () => _endTurn(gameState.turn),
+                onTimeEnded: () => _endTurn(gameData.turnIndex()),
                 onRunningChanged: _setTurnActive,
                 duration: Duration(seconds: gameConfig.rules.turnSeconds),
               ),
@@ -521,8 +518,8 @@ class PlayAreaState extends State<PlayArea>
               .map((w) => WordReviewItem(
                     text: w.text,
                     status: w.status,
-                    feedback: personalState.wordFeedback[w.id],
-                    hasFlag: derivedGameState.flaggedWords.contains(w.id),
+                    feedback: w.feedback,
+                    hasFlag: w.flaggedByOthers,
                     setStatus: (WordStatus status) =>
                         _setWordStatus(w.id, status),
                     setFeedback: (WordFeedback feedback) =>
@@ -539,7 +536,7 @@ class PlayAreaState extends State<PlayArea>
             TimerView(
               key: ValueKey('bonus_timer'),
               style: TimerViewStyle.bonusTime,
-              onTimeEnded: () => _endBonusTime(gameState.turn),
+              onTimeEnded: () => _endBonusTime(gameData.turnIndex()),
               duration: Duration(seconds: gameConfig.rules.bonusSeconds),
               hideOnTimeEnded: true,
             ),
@@ -556,8 +553,7 @@ class PlayAreaState extends State<PlayArea>
           ]);
         }
     }
-    Assert.holds(gameState.gameFinished,
-        lazyMessage: () => gameState.toString());
+    Assert.holds(gameData.gameFinished());
     return Container();
   }
 }
@@ -639,7 +635,7 @@ class GameViewState extends State<GameView> {
             }
             final gameData = snapshot.data;
 
-            if (gameData.state.gameFinished) {
+            if (gameData.gameFinished()) {
               // Cannot navigate from within `build`.
               if (!_navigatedToScoreboard) {
                 Future.delayed(Duration.zero, () => _goToScoreboard(gameData));
@@ -653,7 +649,7 @@ class GameViewState extends State<GameView> {
                 children: [
                   PartyView(
                     gameData.currentPartyViewData(),
-                    gameData.state.turnPhase,
+                    gameData.turnState.turnPhase,
                     localGameData.myPlayerID,
                   ),
                   Expanded(

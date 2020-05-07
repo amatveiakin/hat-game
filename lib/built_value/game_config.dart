@@ -16,10 +16,8 @@ abstract class RulesConfig implements Built<RulesConfig, RulesConfigBuilder> {
   int get wordsPerPlayer;
 
   RulesConfig._();
-
   factory RulesConfig([void Function(RulesConfigBuilder) updates]) =
       _$RulesConfig;
-
   static Serializer<RulesConfig> get serializer => _$rulesConfigSerializer;
 }
 
@@ -32,7 +30,6 @@ class IndividualPlayStyle extends EnumClass {
   static const IndividualPlayStyle broadcast = _$broadcast;
 
   const IndividualPlayStyle._(String name) : super(name);
-
   static BuiltSet<IndividualPlayStyle> get values =>
       _$valuesIndividualPlayStyle;
   static IndividualPlayStyle valueOf(String name) =>
@@ -48,7 +45,6 @@ class DesiredTeamSize extends EnumClass {
   static const DesiredTeamSize twoTeams = _$twoTeams;
 
   const DesiredTeamSize._(String name) : super(name);
-
   static BuiltSet<DesiredTeamSize> get values => _$valuesDesiredTeamSize;
   static DesiredTeamSize valueOf(String name) => _$valueOfDesiredTeamSize(name);
   static Serializer<DesiredTeamSize> get serializer =>
@@ -61,7 +57,6 @@ class UnequalTeamSize extends EnumClass {
   static const UnequalTeamSize dropPlayers = _$dropPlayers;
 
   const UnequalTeamSize._(String name) : super(name);
-
   static BuiltSet<UnequalTeamSize> get values => _$valuesUnequalTeamSize;
   static UnequalTeamSize valueOf(String name) => _$valueOfUnequalTeamSize(name);
   static Serializer<UnequalTeamSize> get serializer =>
@@ -78,10 +73,8 @@ abstract class TeamingConfig
   IndividualPlayStyle get guessingInLargeTeam;
 
   TeamingConfig._();
-
   factory TeamingConfig([void Function(TeamingConfigBuilder) updates]) =
       _$TeamingConfig;
-
   static Serializer<TeamingConfig> get serializer => _$teamingConfigSerializer;
 }
 
@@ -97,10 +90,8 @@ abstract class PlayersConfig
   BuiltList<BuiltList<int>> get teams;
 
   PlayersConfig._();
-
   factory PlayersConfig([void Function(PlayersConfigBuilder) updates]) =
       _$PlayersConfig;
-
   static Serializer<PlayersConfig> get serializer => _$playersConfigSerializer;
 
   void checkInvariant() {
@@ -124,8 +115,6 @@ abstract class GameConfig implements Built<GameConfig, GameConfigBuilder> {
   PlayersConfig get players;
 
   GameConfig._();
-
   factory GameConfig([void Function(GameConfigBuilder) updates]) = _$GameConfig;
-
   static Serializer<GameConfig> get serializer => _$gameConfigSerializer;
 }

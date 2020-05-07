@@ -49,6 +49,8 @@ abstract class DBDocumentSnapshot {
   T get<T>(DBColumn<T> col) =>
       dbGet(rawData, col, documentPath: reference.path);
 
+  T tryGet<T>(DBColumn<T> col) => dbTryGet(rawData, col);
+
   @protected
   Map<String, dynamic> get rawData;
 }

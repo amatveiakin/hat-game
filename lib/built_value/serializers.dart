@@ -10,7 +10,9 @@ part 'serializers.g.dart';
 
 @SerializersFor([
   GameConfig,
-  GameState,
+  InitialGameState,
+  TurnRecord,
+  TurnState,
   PersonalState,
 ])
 final Serializers serializers = _$serializers;

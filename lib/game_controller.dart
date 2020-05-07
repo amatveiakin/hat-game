@@ -24,31 +24,40 @@ import 'package:hatgame/util/strings.dart';
 import 'package:russian_words/russian_words.dart' as russian_words;
 import 'package:unicode/unicode.dart' as unicode;
 
-class GameStateTransformer {
+class TurnStateTransformer {
   final GameConfig config;
-  GameState state;
+  final InitialGameState initialState;
+  final List<TurnRecord> turnLog;
+  TurnState turnState;
 
-  GameStateTransformer(this.config, this.state);
+  TurnStateTransformer(
+      this.config, this.initialState, this.turnLog, this.turnState);
 
-  void nextTurn() {
-    Assert.eq(state.turnPhase, TurnPhase.review);
-    finishTurn();
-    if (state.wordsInHat.length == 0) {
-      Assert.holds(!state.gameFinished);
-      state = state.rebuild(
-        (b) => b..gameFinished = true,
-      );
-    } else {
-      state = state.rebuild(
-        (b) => b..turn = state.turn + 1,
-      );
-      initTurn();
-    }
+  static TurnRecord turnRecord(TurnState turnState) {
+    return TurnRecord(
+      (b) => b
+        ..party.replace(turnState.party)
+        ..wordsInThisTurn.replace(turnState.wordsInThisTurn),
+    );
+  }
+
+  static TurnState newTurn(
+    GameConfig config,
+    InitialGameState initialState, {
+    @required bool timeToEndGame,
+    @required int turnIndex,
+  }) {
+    return timeToEndGame
+        ? null
+        : TurnState((b) => b
+          ..party.replace(PartyingStrategy.fromGame(config, initialState)
+              .getParty(turnIndex))
+          ..turnPhase = TurnPhase.prepare);
   }
 
   void startExplaning() {
-    Assert.eq(state.turnPhase, TurnPhase.prepare);
-    state = state.rebuild(
+    Assert.eq(turnState.turnPhase, TurnPhase.prepare);
+    turnState = turnState.rebuild(
       (b) => b
         ..turnPhase = TurnPhase.explain
         ..turnPaused = false
@@ -59,18 +68,18 @@ class GameStateTransformer {
   }
 
   void pauseExplaning() {
-    Assert.eq(state.turnPhase, TurnPhase.explain);
-    Assert.holds(!state.turnPaused);
-    state = state.rebuild((b) => b
+    Assert.eq(turnState.turnPhase, TurnPhase.explain);
+    Assert.holds(!turnState.turnPaused);
+    turnState = turnState.rebuild((b) => b
       ..turnPaused = true
-      ..turnTimeBeforePause = state.turnTimeBeforePause +
-          (NtpTime.nowUtc().difference(state.turnTimeStart)));
+      ..turnTimeBeforePause = turnState.turnTimeBeforePause +
+          (NtpTime.nowUtc().difference(turnState.turnTimeStart)));
   }
 
   void resumeExplaning() {
-    Assert.eq(state.turnPhase, TurnPhase.explain);
-    Assert.holds(state.turnPaused);
-    state = state.rebuild(
+    Assert.eq(turnState.turnPhase, TurnPhase.explain);
+    Assert.holds(turnState.turnPaused);
+    turnState = turnState.rebuild(
       (b) => b
         ..turnPaused = false
         ..turnTimeStart = NtpTime.nowUtc(),
@@ -78,16 +87,15 @@ class GameStateTransformer {
   }
 
   void wordGuessed() {
-    Assert.eq(state.turnPhase, TurnPhase.explain);
-    Assert.holds(state.wordsInThisTurn.isNotEmpty);
-    Assert.eq(state.wordsInThisTurn.last, state.currentWord);
-    setWordStatus(state.currentWord, WordStatus.explained);
+    Assert.eq(turnState.turnPhase, TurnPhase.explain);
+    Assert.holds(turnState.wordsInThisTurn.isNotEmpty);
+    setWordStatus(turnState.wordsInThisTurn.last.id, WordStatus.explained);
     drawNextWord();
   }
 
   void finishExplanation() {
-    Assert.eq(state.turnPhase, TurnPhase.explain);
-    state = state.rebuild(
+    Assert.eq(turnState.turnPhase, TurnPhase.explain);
+    turnState = turnState.rebuild(
       (b) => b
         ..turnPhase = TurnPhase.review
         ..turnPaused = null
@@ -98,60 +106,35 @@ class GameStateTransformer {
   }
 
   void setWordStatus(int wordId, WordStatus newStatus) {
-    state = state.rebuild(
+    final int wordIndex =
+        turnState.wordsInThisTurn.indexWhere((w) => w.id == wordId);
+    Assert.holds(wordIndex >= 0);
+    turnState = turnState.rebuild(
       (b) => b
-        ..words.rebuildAt(
-          wordId,
+        ..wordsInThisTurn.rebuildAt(
+          wordIndex,
           (b) => b..status = newStatus,
         ),
     );
   }
 
-  void initTurn() {
-    state = state.rebuild(
-      (b) => b
-        ..turnPhase = TurnPhase.prepare
-        ..currentParty.replace(
-            PartyingStrategy.fromGame(config, state).getParty(state.turn)),
-    );
-  }
-
-  void finishTurn() {
-    final List<int> wordsScored = state.wordsInThisTurn
-        .where((w) => state.words[w].status == WordStatus.explained)
-        .toList();
-    state = state.rebuild(
-      (b) => b
-        ..turnPhase = null
-        ..players.map((p) {
-          if (state.currentParty.performer == p.id) {
-            return p.rebuild((b) => b..wordsExplained.addAll(wordsScored));
-          } else if (state.currentParty.recipients.contains(p.id)) {
-            return p.rebuild((b) => b..wordsGuessed.addAll(wordsScored));
-          }
-          return p;
-        })
-        ..wordsInHat.addAll(state.wordsInThisTurn
-            .where((w) => b.words[w].status == WordStatus.notExplained))
-        ..wordsInThisTurn.clear(),
-    );
-  }
-
   void drawNextWord() {
-    Assert.eq(state.turnPhase, TurnPhase.explain);
-    if (state.wordsInHat.isEmpty) {
+    Assert.eq(turnState.turnPhase, TurnPhase.explain);
+    final wordsInHat =
+        DerivedGameState.wordsInHat(initialState, turnLog, turnState);
+    if (wordsInHat.isEmpty) {
       finishExplanation();
       return;
     }
     final int nextWord =
-        state.wordsInHat[Random().nextInt(state.wordsInHat.length)];
-    Assert.holds(state.wordsInHat.contains(nextWord),
-        lazyMessage: () => state.wordsInHat.toString());
-    state = state.rebuild(
+        wordsInHat.elementAt(Random().nextInt(wordsInHat.length));
+    turnState = turnState.rebuild(
       (b) => b
-        ..currentWord = nextWord
-        ..wordsInThisTurn.add(nextWord)
-        ..wordsInHat.remove(nextWord),
+        ..wordsInThisTurn.add(WordInTurn(
+          (b) => b
+            ..id = nextWord
+            ..status = WordStatus.notExplained,
+        )),
     );
   }
 }
@@ -188,31 +171,36 @@ class GameController {
   final LocalGameData localGameData;
   GameConfig config;
   // TODO: Should UI be able to get state from here or only from the stream?
-  GameState state;
-  DerivedGameState derivedState;
+  InitialGameState initialState;
+  List<TurnRecord> turnLog;
+  TurnState turnState;
   PersonalState personalState;
+  List<PersonalState> otherPersonalStates; // online-only
   final localState = LocalGameState();
   final _streamController = StreamController<GameData>(sync: true);
 
   Stream<GameData> get stateUpdatesStream => _streamController.stream;
 
-  GameData get _gameData =>
-      GameData(config, state, derivedState, personalState, localState);
-  GameStateTransformer get _transformer => GameStateTransformer(config, state);
+  GameData get gameData => GameData(config, initialState, turnLog, turnState,
+      personalState, otherPersonalStates, localState);
+  TurnStateTransformer get _transformer =>
+      TurnStateTransformer(config, initialState, turnLog, turnState);
   PersonalStateTransformer get _personalTransformer =>
       PersonalStateTransformer(personalState);
 
-  // Since isInitialized becomes true:
-  //   - config, state, derivedState and personalState are always non-null,
-  //   - config doesn't change,
+  // INVARIANTS. Since isInitialized becomes true:
+  //   - config, initialState, turnLog, personalState and otherPersonalStates
+  //     are always non-null,
+  //   - turnState is not null until the game is over,
+  //   - config and initialState don't change,
   //   - isInitialized stays true,
   //   - stateUpdatesStream starts sending updates.
   bool get isInitialized => config != null;
 
-  bool get isActivePlayer => state == null
+  bool get isActivePlayer => turnState == null
       ? false
       : (localGameData.onlineMode
-          ? activePlayer(state) == localGameData.myPlayerID
+          ? activePlayer(turnState) == localGameData.myPlayerID
           : true);
 
   static List<DBColumnData> _newGameRecord() {
@@ -222,7 +210,7 @@ class GameController {
     ];
   }
 
-  static int activePlayer(GameState state) => state.currentParty.performer;
+  static int activePlayer(TurnState currentTurn) => currentTurn.party.performer;
 
   static void checkPlayerNameIsValid(String name) {
     if (name.isEmpty) {
@@ -429,14 +417,6 @@ class GameController {
           List<int>.generate(numPlayers, (i) => i).shuffled());
     }
 
-    final players = BuiltList<PlayerState>.from(
-      config.players.names.entries.map((entry) => PlayerState(
-            (b) => b
-              ..id = entry.key
-              ..name = entry.value,
-          )),
-    );
-
     final int totalWords = config.rules.wordsPerPlayer * numPlayers;
     final words = List<Word>();
     while (words.length < totalWords) {
@@ -453,31 +433,29 @@ class GameController {
       }
       words.add(Word((b) => b
         ..id = words.length
-        ..text = text
-        ..status = WordStatus.notExplained));
+        ..text = text));
     }
 
-    GameState initialState = GameState(
-      (b) => b
-        ..players.replace(players)
-        ..individualOrder =
-            (individualOrder != null ? ListBuilder(individualOrder) : null)
-        ..teams = (teams != null ? ListBuilder(teams) : null)
-        ..words.replace(words)
-        ..wordsInHat.replace(words.map((w) => w.id))
-        ..turn = 0
-        ..gameFinished = false,
+    final InitialGameState initialState = InitialGameState((b) => b
+      ..individualOrder =
+          (individualOrder != null ? ListBuilder(individualOrder) : null)
+      ..teams = (teams != null ? ListBuilder(teams) : null)
+      ..words.replace(words));
+    final TurnState turnState = TurnStateTransformer.newTurn(
+      config,
+      initialState,
+      timeToEndGame: false,
+      turnIndex: 0,
     );
-    initialState =
-        (GameStateTransformer(config, initialState)..initTurn()).state;
     // In addition to initial state, write the config:
     //   - just to be sure;
     //   - to fill in players field.  // TODO: Better solution for this?
-    return _writeInitialState(reference, config, initialState);
+    return _writeInitialState(reference, config, initialState, turnState);
   }
 
   Map<int, PersonalState> _parsePersonalStates(
       final DBDocumentSnapshot snapshot) {
+    // TODO: Support gaps in player ID space.
     final states = Map<int, PersonalState>();
     int playerID = 0;
     while (snapshot.contains(DBColPlayer(playerID))) {
@@ -487,54 +465,66 @@ class GameController {
     return states;
   }
 
-  DerivedGameState _makeDerivedGameState(
-      Map<int, PersonalState> personalStates) {
-    final flaggedWords = Set<int>();
-    for (final st in personalStates.values) {
-      flaggedWords.addAll(st.wordFlags);
+  List<TurnRecord> _parseTurnLog(final DBDocumentSnapshot snapshot) {
+    // TODO: Check that there are no gaps.
+    final turns = List<TurnRecord>();
+    int turnIndex = 0;
+    while (snapshot.contains(DBColTurnRecord(turnIndex))) {
+      turns.add(snapshot.get(DBColTurnRecord(turnIndex)));
+      turnIndex++;
     }
-    return DerivedGameState(flaggedWords: BuiltSet.from(flaggedWords));
+    return turns;
   }
 
   void _onUpdateFromDB(final DBDocumentSnapshot snapshot) {
     Assert.holds(snapshot.exists);
-    final bool wasInitialized = isInitialized;
     if (!isInitialized) {
       final GameConfigReadResult configReadResult =
           GameConfigController.configFromSnapshot(localGameData, snapshot);
-      if (!snapshot.contains(DBColState())) {
+      if (!snapshot.contains(DBColInitialState())) {
         return;
       }
       // This is the one and only place where the config changes.
       config = configReadResult.configWithOverrides;
+      initialState = snapshot.get(DBColInitialState());
     }
 
-    GameState newState = snapshot.get(DBColState());
+    TurnState newTurnState = snapshot.tryGet(DBColCurrentTurn());
+    List<TurnRecord> newTurnLog = _parseTurnLog(snapshot);
     if (isActivePlayer) {
-      Assert.holds(wasInitialized);
       if (localGameData.onlineMode) {
-        final int newActivePlayer = activePlayer(newState);
+        final int newActivePlayer = activePlayer(newTurnState);
         Assert.eq(localGameData.myPlayerID, newActivePlayer,
             message: 'Active player unexpectedly changed from '
                 '${localGameData.myPlayerID} to $newActivePlayer');
       }
       // Ignore the update, because the state of truth is on the client while
       // we are the active player.
+    } else if (turnLog != null &&
+        DerivedGameState.turnIndex(newTurnLog) <
+            DerivedGameState.turnIndex(turnLog)) {
+      // Similar to above. There is only one case when update in the DB can
+      // be older than the local version: we used to be the active player,
+      // wrote an update indicating that a new turn started and then received
+      // a stale update from the previous turn.
     } else {
-      state = newState;
+      turnState = newTurnState;
+      turnLog = _parseTurnLog(snapshot);
     }
 
     if (localGameData.onlineMode) {
-      final personalStates = _parsePersonalStates(snapshot);
-      derivedState = _makeDerivedGameState(personalStates);
-      Assert.holds(personalStates.containsKey(localGameData.myPlayerID));
-      personalState = personalStates[localGameData.myPlayerID];
+      final allPersonalStates = _parsePersonalStates(snapshot);
+      Assert.holds(allPersonalStates.containsKey(localGameData.myPlayerID));
+      personalState = allPersonalStates[localGameData.myPlayerID];
+      allPersonalStates
+          .removeWhere((playerID, _) => playerID == localGameData.myPlayerID);
+      otherPersonalStates = allPersonalStates.values.toList();
     } else {
       personalState = snapshot.get(DBColLocalPlayer());
-      derivedState = _makeDerivedGameState({personalState.id: personalState});
+      otherPersonalStates = [];
     }
 
-    _streamController.add(_gameData);
+    _streamController.add(gameData);
   }
 
   GameController.fromDB(this.localGameData) {
@@ -553,56 +543,80 @@ class GameController {
     return Future.doWhile(() async => !isInitialized);
   }
 
-  static Future<void> _writeInitialState(DBDocumentReference reference,
-      GameConfig config, GameState initialState) async {
+  static Future<void> _writeInitialState(
+      DBDocumentReference reference,
+      GameConfig config,
+      InitialGameState initialState,
+      TurnState turnState) async {
     reference.updateColumns([
       DBColConfig().withData(config),
-      DBColState().withData(initialState),
+      DBColInitialState().withData(initialState),
+      DBColCurrentTurn().withData(turnState),
     ]);
   }
 
-  Future<void> _updateState(GameState newState) {
+  Future<void> _updateTurnState(TurnState newState) {
     Assert.holds(isActivePlayer,
-        message: 'Only active player should change game state');
-    state = newState;
-    _streamController.add(_gameData);
-    return localGameData.gameReference
-        .updateColumns([DBColState().withData(newState)]);
+        message: 'Only the active player can change game state');
+    turnState = newState;
+    _streamController.add(gameData);
+    return localGameData.gameReference.updateColumns([
+      DBColCurrentTurn().withData(newState),
+    ]);
   }
 
   Future<void> _updatePersonalState(PersonalState newState) {
     personalState = newState;
-    _streamController.add(_gameData);
-    return localGameData.gameReference.updateColumns(
-        [DBColPlayer(localGameData.myPlayerID).withData(newState)]);
+    _streamController.add(gameData);
+    return localGameData.gameReference.updateColumns([
+      DBColPlayer(localGameData.myPlayerID).withData(newState),
+    ]);
   }
 
   Future<void> nextTurn() {
-    return _updateState((_transformer..nextTurn()).state);
+    Assert.holds(isActivePlayer,
+        message: 'Only the active player can change game state');
+    final int turnIndex = DerivedGameState.turnIndex(turnLog);
+    turnLog.add(TurnStateTransformer.turnRecord(turnState));
+    turnState = TurnStateTransformer.newTurn(
+      config,
+      initialState,
+      // pass (turnState == null) to `wordsInHat`, because words from the
+      // currect turn have already been moved to turnLog
+      timeToEndGame:
+          DerivedGameState.wordsInHat(initialState, turnLog, null).isEmpty,
+      turnIndex: turnIndex + 1,
+    );
+    _streamController.add(gameData);
+    return localGameData.gameReference.updateColumns([
+      DBColCurrentTurn().withData(turnState),
+      DBColTurnRecord(turnIndex).withData(turnLog.last),
+    ]);
   }
 
   Future<void> startExplaning() {
-    return _updateState((_transformer..startExplaning()).state);
+    return _updateTurnState((_transformer..startExplaning()).turnState);
   }
 
   Future<void> pauseExplaning() {
-    return _updateState((_transformer..pauseExplaning()).state);
+    return _updateTurnState((_transformer..pauseExplaning()).turnState);
   }
 
   Future<void> resumeExplaning() {
-    return _updateState((_transformer..resumeExplaning()).state);
+    return _updateTurnState((_transformer..resumeExplaning()).turnState);
   }
 
   Future<void> wordGuessed() {
-    return _updateState((_transformer..wordGuessed()).state);
+    return _updateTurnState((_transformer..wordGuessed()).turnState);
   }
 
   Future<void> finishExplanation() {
-    return _updateState((_transformer..finishExplanation()).state);
+    return _updateTurnState((_transformer..finishExplanation()).turnState);
   }
 
   Future<void> setWordStatus(int wordId, WordStatus newStatus) {
-    return _updateState((_transformer..setWordStatus(wordId, newStatus)).state);
+    return _updateTurnState(
+        (_transformer..setWordStatus(wordId, newStatus)).turnState);
   }
 
   Future<void> setWordFeedback(int wordId, WordFeedback newFeedback) {

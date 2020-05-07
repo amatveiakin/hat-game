@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:hatgame/built_value/game_config.dart';
+import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/assertion.dart';
 
 // TODO: Allow final results editing on ScoreView.
 // TODO: Does it make sense to show words guessed in modes with many guessers?
+
+class _PlayerPerformance {
+  int wordsExplained = 0;
+  int wordsGuessed = 0;
+}
 
 class _PlayerData {
   final String name;
@@ -97,6 +104,23 @@ class _TeamScoreView extends StatelessWidget {
   }
 }
 
+// TODO: Include score computation in the scope of GameController unit test.
+Map<int, _PlayerPerformance> _parseTurnLog(
+    GameConfig config, List<TurnRecord> turnLog) {
+  final Map<int, _PlayerPerformance> playerPerformance = config.players.names
+      .map((id, name) => MapEntry(id, _PlayerPerformance()))
+      .toMap();
+  for (final t in turnLog) {
+    final int numWordsScored =
+        t.wordsInThisTurn.where((w) => w.status == WordStatus.explained).length;
+    playerPerformance[t.party.performer].wordsExplained += numWordsScored;
+    for (final p in t.party.recipients) {
+      playerPerformance[p].wordsGuessed += numWordsScored;
+    }
+  }
+  return playerPerformance;
+}
+
 class ScoreView extends StatelessWidget {
   final GameData gameData;
 
@@ -104,47 +128,48 @@ class ScoreView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final teams = gameData.state.teams;
+    final Map<int, _PlayerPerformance> playerPerformance =
+        _parseTurnLog(gameData.config, gameData.turnLog);
+    final teams = gameData.initialState.teams;
     final listTiles = List<_TeamScoreView>();
     if (teams != null) {
       for (final team in teams) {
         final players = List<_PlayerData>();
-        final totalWordsExplained = List<int>();
-        final totalWordsGuessed = List<int>();
-        for (final playerIdx in team) {
-          final p = gameData.state.players[playerIdx];
-          totalWordsExplained.addAll(p.wordsExplained);
-          totalWordsGuessed.addAll(p.wordsGuessed);
+        int totalWordsExplained = 0;
+        int totalWordsGuessed = 0;
+        for (final playerID in team) {
+          final performance = playerPerformance[playerID];
+          totalWordsExplained += performance.wordsExplained;
+          totalWordsGuessed += performance.wordsGuessed;
           players.add(_PlayerData(
-            name: p.name,
-            wordsExplained: p.wordsExplained.length,
-            wordsGuessed: p.wordsGuessed.length,
+            name: gameData.config.players.names[playerID],
+            wordsExplained: performance.wordsExplained,
+            wordsGuessed: performance.wordsGuessed,
           ));
         }
-        // There is always only one explaining player, so no need to de-dup.
-        // Frankly, the score could've been computed directly as:
-        //   totalScore += p.wordsExplained.length;
-        // The sets are just for sanity-checking.
-        final totalScore = totalWordsExplained.length;
-        Assert.eq(totalScore, totalWordsExplained.toSet().length);
-        Assert.eq(totalScore, totalWordsGuessed.toSet().length);
-        listTiles.add(_TeamScoreView(totalScore: totalScore, players: players));
+        if (gameData.config.teaming.guessingInLargeTeam !=
+            IndividualPlayStyle.broadcast) {
+          Assert.eq(totalWordsExplained, totalWordsGuessed);
+        }
+        listTiles.add(
+            _TeamScoreView(totalScore: totalWordsExplained, players: players));
       }
     } else {
-      for (final p in gameData.state.players) {
+      gameData.config.players.names.forEach((playerID, name) {
+        final performance = playerPerformance[playerID];
         listTiles.add(
           _TeamScoreView(
-            totalScore: p.wordsExplained.length + p.wordsGuessed.length,
+            totalScore: performance.wordsExplained + performance.wordsGuessed,
             players: [
               _PlayerData(
-                name: p.name,
-                wordsExplained: p.wordsExplained.length,
-                wordsGuessed: p.wordsGuessed.length,
+                name: name,
+                wordsExplained: performance.wordsExplained,
+                wordsGuessed: performance.wordsGuessed,
               ),
             ],
           ),
         );
-      }
+      });
     }
     listTiles.sort((a, b) => b.totalScore.compareTo(a.totalScore));
 

@@ -103,7 +103,7 @@ class GameConfigController {
     // about playerNamesOverrides and gameHasStarted!
     _rawConfig = readResult.rawConfig;
     _playerNamesOverrides = readResult.playerNamesOverrides;
-    _gameHasStarted = snapshot.contains(DBColState());
+    _gameHasStarted = snapshot.contains(DBColInitialState());
     if (localGameData.onlineMode) {
       Assert.eq(_gameHasStarted, _rawConfig.players != null);
       Assert.eq(_gameHasStarted, _playerNamesOverrides == null);

@@ -21,6 +21,8 @@ GameConfig twoVsTwoConfig() {
   );
 }
 
+// TODO: Unit test for online mode.
+
 void main() {
   initAppForTests();
 
@@ -39,7 +41,7 @@ void main() {
       await controller.wordGuessed();
       await controller.nextTurn();
 
-      expect(controller.state.gameFinished, isTrue);
+      expect(controller.gameData.gameFinished(), isTrue);
     });
 
     test('sample 2 vs 2 game', () async {
@@ -50,29 +52,29 @@ void main() {
       await controller.testAwaitInitialized();
 
       await controller.startExplaning();
-      final int w0 = controller.state.currentWord;
+      final int w0 = controller.turnState.wordsInThisTurn.last.id;
       await controller.wordGuessed();
-      final int w1 = controller.state.currentWord;
+      final int w1 = controller.turnState.wordsInThisTurn.last.id;
       await controller.wordGuessed();
       await controller.wordGuessed();
       // Last word is already pulled from the hat, although not guessed.
-      expect(controller.state.wordsInHat.length, equals(0));
+      expect(controller.gameData.numWordsInHat(), equals(0));
       await controller.finishExplanation();
       await controller.setWordStatus(w0, WordStatus.discarded);
       await controller.setWordStatus(w1, WordStatus.notExplained);
       await controller.nextTurn();
       // One word wasn't guessed to begin with and one was returned to the hat.
-      expect(controller.state.wordsInHat.length, equals(2));
+      expect(controller.gameData.numWordsInHat(), equals(2));
 
-      expect(controller.state.turnPhase, equals(TurnPhase.prepare));
+      expect(controller.turnState.turnPhase, equals(TurnPhase.prepare));
       await controller.startExplaning();
-      expect(controller.state.turnPhase, equals(TurnPhase.explain));
+      expect(controller.turnState.turnPhase, equals(TurnPhase.explain));
       await controller.wordGuessed();
-      expect(controller.state.turnPhase, equals(TurnPhase.explain));
+      expect(controller.turnState.turnPhase, equals(TurnPhase.explain));
       await controller.wordGuessed();
-      expect(controller.state.turnPhase, equals(TurnPhase.review));
+      expect(controller.turnState.turnPhase, equals(TurnPhase.review));
       await controller.nextTurn();
-      expect(controller.state.gameFinished, isTrue);
+      expect(controller.gameData.gameFinished(), isTrue);
     });
   });
 }

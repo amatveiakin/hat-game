@@ -107,13 +107,14 @@ abstract class PartyingStrategy {
 
   PartyingStrategy();
 
-  factory PartyingStrategy.fromGame(GameConfig config, GameState state) {
-    if (state.teams != null) {
+  factory PartyingStrategy.fromGame(
+      GameConfig config, InitialGameState initialState) {
+    if (initialState.teams != null) {
       return FixedTeamsStrategy(
-          state.teams, config.teaming.guessingInLargeTeam);
+          initialState.teams, config.teaming.guessingInLargeTeam);
     } else {
       return IndividualStrategy(
-          state.players.length, config.teaming.individualPlayStyle);
+          config.players.names.length, config.teaming.individualPlayStyle);
     }
   }
 }
