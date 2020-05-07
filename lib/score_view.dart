@@ -1,18 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/theme.dart';
+import 'package:hatgame/widget/spacing.dart';
 
 // TODO: Allow final results editing on ScoreView.
 // TODO: Does it make sense to show words guessed in modes with many guessers?
-
-List<Widget> addSpacing(
-    {@required List<Widget> tiles, double horizontal, double vertical}) {
-  if (tiles.isEmpty) return tiles;
-  return tiles.skip(1).fold(
-      [tiles.first],
-      (list, tile) =>
-          list + [SizedBox(width: horizontal, height: vertical), tile]);
-}
 
 class _TeamScoreView extends StatelessWidget {
   final TeamScoreViewData data;
