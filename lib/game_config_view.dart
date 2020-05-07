@@ -13,6 +13,7 @@ import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/widget/invalid_operation_dialog.dart';
+import 'package:hatgame/widget/sections_layout.dart';
 import 'package:hatgame/widget/wide_button.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
 
@@ -35,24 +36,21 @@ class _GameConfigViewState extends State<GameConfigView>
   //     - this can be half-official, e.g. the button would be disabled and
   //       display a warning, but still change the tab.
   // (Are there best practices?)
-  List<Tab> _buildTabs(int numPlayers) {
-    return [
-      Tab(
+
+  SectionTitleData rulesSectionTitle() => SectionTitleData(
         text: 'Rules',
         icon: Icon(Icons.settings),
-      ),
-      Tab(
+      );
+  SectionTitleData teamingSectionTitle() => SectionTitleData(
         text: 'Teaming',
         // TODO: Add arrows / several groups of people / gearwheel.
         icon: Icon(Icons.people),
-      ),
-      Tab(
+      );
+  SectionTitleData playersSectionTitle(int numPlayers) => SectionTitleData(
         text: 'Players: $numPlayers',
         // TODO: Replace squares with person icons.
         icon: Icon(OMIcons.ballot),
-      ),
-    ];
-  }
+      );
 
   static const int rulesTabIndex = 0;
   static const int teamingTabIndex = 1;
@@ -136,26 +134,34 @@ class _GameConfigViewState extends State<GameConfigView>
         }
 
         _rulesConfigViewController.updateFromConfig(gameConfig.rules);
-        final tabs = _buildTabs(gameConfig.players.names.length);
-        final configViews = [
-          RulesConfigView(
-            viewController: _rulesConfigViewController,
-            configController: configController,
+        final sections = [
+          SectionData(
+            title: rulesSectionTitle(),
+            body: RulesConfigView(
+              viewController: _rulesConfigViewController,
+              configController: configController,
+            ),
           ),
-          TeamingConfigView(
-            onlineMode: localGameData.onlineMode,
-            config: gameConfig.teaming,
-            configController: configController,
+          SectionData(
+            title: teamingSectionTitle(),
+            body: TeamingConfigView(
+              onlineMode: localGameData.onlineMode,
+              config: gameConfig.teaming,
+              configController: configController,
+            ),
           ),
-          localGameData.onlineMode
-              ? OnlinePlayersConfigView(
-                  playersConfig: gameConfig.players,
-                )
-              : OfflinePlayersConfigView(
-                  teamingConfig: gameConfig.teaming,
-                  initialPlayersConfig: gameConfig.players,
-                  configController: configController,
-                ),
+          SectionData(
+            title: playersSectionTitle(gameConfig.players.names.length),
+            body: localGameData.onlineMode
+                ? OnlinePlayersConfigView(
+                    playersConfig: gameConfig.players,
+                  )
+                : OfflinePlayersConfigView(
+                    teamingConfig: gameConfig.teaming,
+                    initialPlayersConfig: gameConfig.players,
+                    configController: configController,
+                  ),
+          ),
         ];
         final startButton = Padding(
           padding: EdgeInsets.symmetric(vertical: 12.0),
@@ -171,116 +177,16 @@ class _GameConfigViewState extends State<GameConfigView>
           ),
         );
 
-        const double configBoxWidth = 480;
-        const double configBoxMargin = 16;
-        final double wideLayoutWidth =
-            (configBoxWidth + 2 * configBoxMargin) * numTabs;
-        final bool wideLayout =
-            MediaQuery.of(context).size.width >= wideLayoutWidth;
-
-        if (!wideLayout) {
-          // One-column view for phones and tablets in portrait mode.
-          final tabBar = TabBar(
-            controller: _tabController,
-            tabs: tabs,
-          );
-          return Scaffold(
-            resizeToAvoidBottomInset: false,
-            appBar: localGameData.onlineMode
-                ? AppBar(
-                    automaticallyImplyLeading: false,
-                    title: Text('Hat Game ID: ${localGameData.gameID}'),
-                    // For some reason PreferredSize affects not only the bottom of
-                    // the AppBar but also the title, making it misaligned with the
-                    // normal title text position. Hopefully this is not too
-                    // noticeable. Without PreferredSize the AppBar is just too fat.
-                    bottom: PreferredSize(
-                        preferredSize: Size.fromHeight(64.0), child: tabBar),
-                  )
-                : PreferredSize(
-                    preferredSize: Size.fromHeight(64.0),
-                    child: AppBar(
-                      automaticallyImplyLeading: false,
-                      flexibleSpace: SafeArea(child: tabBar),
-                    ),
-                  ),
-            body: Column(
-              children: [
-                Expanded(
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: configViews,
-                  ),
-                ),
-                startButton,
-              ],
-            ),
-          );
-        } else {
-          final configBoxes = List<Widget>();
-          for (int i = 0; i < numTabs; i++) {
-            configBoxes.add(
-              Padding(
-                padding: EdgeInsets.all(configBoxMargin),
-                child: SizedBox(
-                  width: configBoxWidth,
-                  child: Card(
-                    clipBehavior: Clip.antiAlias,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Container(
-                          color: MyTheme.primary,
-                          padding: EdgeInsets.all(16.0),
-                          child: Text(
-                            tabs[i].text,
-                            // Use the same text style as AppBar.
-                            // TODO: Why is font bigger than in actual AppBar?
-                            style:
-                                Theme.of(context).textTheme.headline6.copyWith(
-                                      // TODO: Take color from the theme.
-                                      color: Colors.white,
-                                    ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.all(8),
-                            child: configViews[i],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            );
-          }
-          // Multi-column view for tablets in landscape mode and desktops.
-          return Scaffold(
-            resizeToAvoidBottomInset: false,
-            appBar: AppBar(
-              automaticallyImplyLeading: false,
-              title: Text(localGameData.onlineMode
-                  ? 'Hat Game ID: ${localGameData.gameID}'
-                  : 'Hat Game'),
-            ),
-            body: Column(
-              children: [
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: configBoxes,
-                  ),
-                ),
-                SizedBox(
-                  width: wideLayoutWidth,
-                  child: startButton,
-                )
-              ],
-            ),
-          );
-        }
+        return SectionsView(
+          appBarAutomaticallyImplyLeading: false,
+          appTitle: localGameData.onlineMode
+              ? 'Hat Game ID: ${localGameData.gameID}'
+              : 'Hat Game',
+          appTitlePresentInNarrowMode: localGameData.onlineMode,
+          sections: sections,
+          tabController: _tabController,
+          bottonWidget: startButton,
+        );
       },
     );
   }
