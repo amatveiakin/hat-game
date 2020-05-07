@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:hatgame/built_value/game_config.dart';
+import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/theme.dart';
+import 'package:hatgame/widget/sections_layout.dart';
 import 'package:hatgame/widget/spacing.dart';
 
 // TODO: Allow final results editing on ScoreView.
@@ -76,6 +79,95 @@ class _TeamScoreView extends StatelessWidget {
   }
 }
 
+class _WordView extends StatelessWidget {
+  final WordInTurnLogViewData data;
+
+  _WordView({@required this.data});
+
+  Icon _icon(WordStatus status) {
+    switch (status) {
+      case WordStatus.notExplained:
+        return Icon(Icons.redo, color: _style(status).color);
+      case WordStatus.explained:
+        // TODO: Find a clearer solution.
+        return Icon(Icons.check, color: Colors.transparent);
+      case WordStatus.discarded:
+        return Icon(Icons.delete);
+    }
+  }
+
+  TextStyle _style(WordStatus status) {
+    switch (status) {
+      case WordStatus.notExplained:
+        // TODO: Take the color from the theme.
+        return TextStyle(color: Colors.black45);
+      case WordStatus.explained:
+        return TextStyle();
+      case WordStatus.discarded:
+        return TextStyle(decoration: TextDecoration.lineThrough);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        _icon(data.status),
+        SizedBox(
+          width: 4.0,
+        ),
+        Expanded(
+          child: Text(
+            data.text,
+            style: _style(data.status),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TurnView extends StatelessWidget {
+  final TurnLogViewData data;
+
+  _TurnView({@required this.data});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            // TODO: Take the color from the theme.
+            color: Colors.black12,
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+              child: Text(data.party),
+            ),
+          ),
+          Divider(
+            height: 0.0,
+            thickness: 0.5,
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children:
+                    // TODO: Filter unexplained by default.
+                    data.wordsInThisTurn
+                        .map((w) => _WordView(data: w))
+                        .toList()),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class ScoreView extends StatelessWidget {
   final GameData gameData;
 
@@ -83,23 +175,39 @@ class ScoreView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Game Over'),
+    final sections = [
+      SectionData(
+        title: SectionTitleData(
+            // TODO: Proper icon.
+            icon: Icon(Icons.score),
+            text: 'Scoreboard'),
+        body: ListView(
+          children:
+              gameData.scoreData().map((s) => _TeamScoreView(data: s)).toList(),
+        ),
       ),
-      body: Column(
-        children: [
-          SizedBox(height: 4),
-          Expanded(
-            child: ListView(
-              children: gameData
-                  .scoreData()
-                  .map((s) => _TeamScoreView(data: s))
-                  .toList(),
-            ),
-          ),
-        ],
+      SectionData(
+        title: SectionTitleData(
+            // TODO: Proper icon.
+            icon: Icon(Icons.list),
+            text: 'Game Log'),
+        body: ListView(
+          children:
+              gameData.turnLogData().map((t) => _TurnView(data: t)).toList(),
+        ),
       ),
+    ];
+
+    return SectionsView(
+      appBarAutomaticallyImplyLeading: true,
+      appTitle: 'Game Over',
+      appTitlePresentInNarrowMode: true,
+      sections: sections,
+      // Don't allow wide mode:
+      //   - Nested cards look bad (although this might be fixed with bigger
+      //     padding and making inner cards flat or some other redesign).
+      //   - It focuses on the most relevant info: score.
+      allowWideMode: false,
     );
   }
 }

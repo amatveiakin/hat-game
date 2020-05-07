@@ -118,6 +118,20 @@ class TeamScoreViewData {
   TeamScoreViewData({@required this.totalScore, @required this.players});
 }
 
+class WordInTurnLogViewData {
+  final String text;
+  final WordStatus status;
+
+  WordInTurnLogViewData({@required this.text, @required this.status});
+}
+
+class TurnLogViewData {
+  final String party;
+  final List<WordInTurnLogViewData> wordsInThisTurn;
+
+  TurnLogViewData({@required this.party, @required this.wordsInThisTurn});
+}
+
 // All information about the game, read-only.
 // Use GameController to influence the game.
 class GameData {
@@ -141,7 +155,7 @@ class GameData {
 
   String currentWordText() {
     Assert.eq(turnState.turnPhase, TurnPhase.explain);
-    return initialState.words[turnState.wordsInThisTurn.last.id].text;
+    return _wordText(turnState.wordsInThisTurn.last.id);
   }
 
   List<WordViewData> wordsInThisTurnData() {
@@ -150,7 +164,7 @@ class GameData {
     return turnState.wordsInThisTurn
         .map((w) => WordViewData(
               id: w.id,
-              text: initialState.words[w.id].text,
+              text: _wordText(w.id),
               status: w.status,
               feedback: personalState.wordFeedback[w.id],
               flaggedByActivePlayer: personalState.wordFlags.contains(w.id),
@@ -232,5 +246,29 @@ class GameData {
     }
     scoreItems.sort((a, b) => b.totalScore.compareTo(a.totalScore));
     return scoreItems;
+  }
+
+  List<TurnLogViewData> turnLogData() {
+    return turnLog.map((t) => TurnLogViewData(
+          party: _partyToString(t.party),
+          wordsInThisTurn: t.wordsInThisTurn
+              .map((w) => WordInTurnLogViewData(
+                    text: _wordText(w.id),
+                    status: w.status,
+                  ))
+              .toList(),
+        )).toList();
+  }
+
+  String _partyToString(Party p) {
+    return config.players.names[p.performer] +
+        ' → ' +
+        p.recipients.map((r) => config.players.names[r]).join(', ');
+  }
+
+  String _wordText(int wordID) {
+    final word = initialState.words[wordID];
+    Assert.eq(word.id, wordID);
+    return word.text;
   }
 }

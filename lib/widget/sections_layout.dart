@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hatgame/theme.dart';
+import 'package:hatgame/util/assertion.dart';
 
 class SectionTitleData {
   final String text;
@@ -20,6 +21,7 @@ class SectionsView extends StatelessWidget {
   final String appTitle;
   final bool appTitlePresentInNarrowMode;
   final List<SectionData> sections;
+  final bool allowWideMode;
   final TabController tabController;
   final Widget bottonWidget;
 
@@ -28,9 +30,14 @@ class SectionsView extends StatelessWidget {
     @required this.appTitle,
     @required this.appTitlePresentInNarrowMode,
     @required this.sections,
-    @required this.tabController,
+    this.allowWideMode = true,
+    this.tabController,
     this.bottonWidget,
-  });
+  }) {
+    if (appBarAutomaticallyImplyLeading) {
+      Assert.holds(appTitlePresentInNarrowMode);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +45,7 @@ class SectionsView extends StatelessWidget {
     const double boxMargin = 16;
     final double wideLayoutWidth = (boxWidth + 2 * boxMargin) * sections.length;
     final bool wideLayout =
-        MediaQuery.of(context).size.width >= wideLayoutWidth;
+        allowWideMode && MediaQuery.of(context).size.width >= wideLayoutWidth;
 
     if (!wideLayout) {
       // One-column view for phones and tablets in portrait mode.
@@ -53,7 +60,7 @@ class SectionsView extends StatelessWidget {
                 ))
             .toList(),
       );
-      return Scaffold(
+      final scaffold = Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: appTitlePresentInNarrowMode
             ? AppBar(
@@ -85,6 +92,12 @@ class SectionsView extends StatelessWidget {
           ],
         ),
       );
+      return tabController != null
+          ? scaffold
+          : DefaultTabController(
+              child: scaffold,
+              length: sections.length,
+            );
     } else {
       final boxes = List<Widget>();
       for (int i = 0; i < sections.length; i++) {
