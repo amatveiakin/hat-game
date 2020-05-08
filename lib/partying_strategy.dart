@@ -10,29 +10,32 @@ import 'package:hatgame/util/invalid_operation.dart';
 
 List<List<int>> generateTeamPlayers(
     {@required List<int> playerIDs, @required List<int> teamSizes}) {
-  final List<List<int>> players = [];
+  final List<List<int>> teams = [];
   int playerIdx = 0;
   for (final s in teamSizes) {
-    if (s == 0) {
-      // TODO: Disallow when the UI allows to delete teams.
-      continue;
-    } else if (s == 1) {
-      throw InvalidOperation('A team has only one player');
-    }
-    Assert.holds(s > 1);
-    players.add([]);
-    final List<int> playersInTeam = players.last;
+    teams.add([]);
+    final List<int> playersInTeam = teams.last;
     for (int i = 0; i < s; i++) {
       playersInTeam.add(playerIDs[playerIdx]);
       playerIdx++;
     }
   }
-  if (players.length == 0) {
+  return teams;
+}
+
+void checkTeamSizes(BuiltList<BuiltList<int>> teams) {
+  for (final t in teams) {
+    if (t.length == 0) {
+      // TODO: Disallow when the UI allows to delete teams.
+    } else if (t.length == 1) {
+      throw InvalidOperation('A team has only one player');
+    }
+  }
+  if (teams.length == 0) {
     throw InvalidOperation('There are zero teams');
-  } else if (players.length == 1) {
+  } else if (teams.length == 1) {
     throw InvalidOperation('There is only one team');
   }
-  return players;
 }
 
 List<int> generateTeamSizes(

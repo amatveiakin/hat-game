@@ -397,7 +397,7 @@ class GameController {
     if (config.teaming.teamPlay) {
       if (config.players.teams != null) {
         teams = BuiltList<BuiltList<int>>.from(config.players.teams
-            .map((team) => team.toList().shuffled())
+            .map((team) => BuiltList<int>(team.toList().shuffled()))
             .toList()
             .shuffled());
       } else {
@@ -409,6 +409,7 @@ class GameController {
         teams = BuiltList<BuiltList<int>>.from(
             teamsMutable.map((t) => BuiltList<int>(t)));
       }
+      checkTeamSizes(teams);
     } else {
       Assert.holds(config.players.teams == null);
       checkNumPlayersForIndividualPlay(

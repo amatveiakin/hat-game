@@ -67,8 +67,8 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
     config.checkInvariant();
     // Conversion might be required is teaming config changed.
     if (manualTeams) {
-      final teams =
-          config.teams ?? BuiltList<BuiltList<int>>([config.names.values]);
+      final teams = config.teams ??
+          BuiltList<BuiltList<int>>([BuiltList<int>(config.names.values)]);
       for (final team in teams) {
         if (_playerItems.isNotEmpty) {
           _addDivider();
@@ -106,7 +106,7 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
       configController.updatePlayers((_) => PlayersConfig(
             (b) => b
               ..names.replace(names)
-              ..teams.replace(teams.map((t) => BuiltList(t))),
+              ..teams.replace(teams.map((t) => BuiltList<int>(t))),
           ));
     } else {
       Assert.eq(teams.length, 1);
