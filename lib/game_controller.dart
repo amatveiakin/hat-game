@@ -62,7 +62,7 @@ class TurnStateTransformer {
         ..turnPhase = TurnPhase.explain
         ..turnPaused = false
         ..turnTimeBeforePause = Duration.zero
-        ..turnTimeStart = NtpTime.nowUtc(),
+        ..turnTimeStart = NtpTime.nowUtcOrNull(),
     );
     drawNextWord();
   }
@@ -73,7 +73,7 @@ class TurnStateTransformer {
     turnState = turnState.rebuild((b) => b
       ..turnPaused = true
       ..turnTimeBeforePause = turnState.turnTimeBeforePause +
-          (NtpTime.nowUtc().difference(turnState.turnTimeStart)));
+          (NtpTime.nowUtcOrNull()?.difference(turnState.turnTimeStart)));
   }
 
   void resumeExplaning() {
@@ -82,7 +82,7 @@ class TurnStateTransformer {
     turnState = turnState.rebuild(
       (b) => b
         ..turnPaused = false
-        ..turnTimeStart = NtpTime.nowUtc(),
+        ..turnTimeStart = NtpTime.nowUtcOrNull(),
     );
   }
 
@@ -101,7 +101,7 @@ class TurnStateTransformer {
         ..turnPaused = null
         ..turnTimeBeforePause = null
         ..turnTimeStart = null
-        ..bonusTimeStart = NtpTime.nowUtc(),
+        ..bonusTimeStart = NtpTime.nowUtcOrNull(),
     );
   }
 
@@ -205,7 +205,8 @@ class GameController {
 
   static List<DBColumnData> _newGameRecord() {
     return [
-      DBColCreationTimeUtc().withData(NtpTime.nowUtc().toString()),
+      DBColCreationTimeUtc()
+          .withData(NtpTime.nowUtcNoPrecisionGuarantee().toString()),
       DBColHostAppVersion().withData(appVersion),
     ];
   }

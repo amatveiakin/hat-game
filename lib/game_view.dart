@@ -401,25 +401,28 @@ class PlayAreaState extends State<PlayArea>
           // Use unique key to make sure Flutter doesn't cache timer state,
           // therefore updates from gameState are effective.
           // Flutter usually uses parent-owned controllers for this.
-          // OPTIMIZATION POTENTIAL: The cost of recreating anumation
+          // OPTIMIZATION POTENTIAL: The cost of recreating animation
           // controller (inside the timer) may turn out to be non-zero, in
           // which case Flutter approach would be faster.
-          turnState.turnPaused
-              ? TimerView(
-                  key: UniqueKey(),
-                  style: TimerViewStyle.turnTime,
-                  duration: Duration(seconds: gameConfig.rules.turnSeconds),
-                  startTime: turnState.turnTimeBeforePause,
-                  startPaused: true,
-                )
-              : TimerView(
-                  key: UniqueKey(),
-                  style: TimerViewStyle.turnTime,
-                  duration: Duration(seconds: gameConfig.rules.turnSeconds),
-                  startTime: turnState.turnTimeBeforePause +
-                      anyMax(Duration.zero,
-                          NtpTime.nowUtc().difference(turnState.turnTimeStart)),
-                ),
+          if (NtpTime.initialized && turnState.turnTimeStart != null)
+            turnState.turnPaused
+                ? TimerView(
+                    key: UniqueKey(),
+                    style: TimerViewStyle.turnTime,
+                    duration: Duration(seconds: gameConfig.rules.turnSeconds),
+                    startTime: turnState.turnTimeBeforePause,
+                    startPaused: true,
+                  )
+                : TimerView(
+                    key: UniqueKey(),
+                    style: TimerViewStyle.turnTime,
+                    duration: Duration(seconds: gameConfig.rules.turnSeconds),
+                    startTime: turnState.turnTimeBeforePause +
+                        anyMax(
+                            Duration.zero,
+                            NtpTime.nowUtcOrThrow()
+                                .difference(turnState.turnTimeStart)),
+                  ),
           SizedBox(height: 12.0),
         ]);
       case TurnPhase.review:
@@ -427,13 +430,15 @@ class PlayAreaState extends State<PlayArea>
           Expanded(
             child: wordReviewView,
           ),
-          TimerView(
-            key: UniqueKey(),
-            style: TimerViewStyle.bonusTime,
-            duration: Duration(seconds: gameConfig.rules.bonusSeconds),
-            startTime: (NtpTime.nowUtc().difference(turnState.bonusTimeStart)),
-            hideOnTimeEnded: true,
-          ),
+          if (NtpTime.initialized && turnState.bonusTimeStart != null)
+            TimerView(
+              key: UniqueKey(),
+              style: TimerViewStyle.bonusTime,
+              duration: Duration(seconds: gameConfig.rules.bonusSeconds),
+              startTime: anyMax(Duration.zero,
+                  NtpTime.nowUtcOrThrow().difference(turnState.bonusTimeStart)),
+              hideOnTimeEnded: true,
+            ),
           SizedBox(height: 12.0),
         ]);
     }

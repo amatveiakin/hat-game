@@ -7,8 +7,12 @@ import 'package:hatgame/game_data.dart';
 import 'package:hatgame/util/ntp_time.dart';
 import 'package:test/test.dart';
 
-void initAppForTests() {
-  NtpTime.initForUnitTests();
+class AppConfig {
+  bool hasNtp = true;
+}
+
+void setupApp(AppConfig config) {
+  NtpTime.test_setInitialized(config.hasNtp);
 }
 
 GameConfig twoVsTwoConfig() {
@@ -21,30 +25,33 @@ GameConfig twoVsTwoConfig() {
   );
 }
 
+Future<void> minimalGameTest() async {
+  LocalGameData localGameData = await GameController.newOffineGame();
+  await GameController.startGame(localGameData.gameReference, twoVsTwoConfig());
+  final controller = GameController.fromDB(localGameData);
+  await controller.testAwaitInitialized();
+
+  await controller.startExplaning();
+  await controller.wordGuessed();
+  await controller.wordGuessed();
+  await controller.wordGuessed();
+  await controller.wordGuessed();
+  await controller.nextTurn();
+
+  expect(controller.gameData.gameFinished(), isTrue);
+}
+
 // TODO: Unit test for online mode.
 
 void main() {
-  initAppForTests();
-
   group('e2e', () {
     test('minimal game', () async {
-      LocalGameData localGameData = await GameController.newOffineGame();
-      await GameController.startGame(
-          localGameData.gameReference, twoVsTwoConfig());
-      final controller = GameController.fromDB(localGameData);
-      await controller.testAwaitInitialized();
-
-      await controller.startExplaning();
-      await controller.wordGuessed();
-      await controller.wordGuessed();
-      await controller.wordGuessed();
-      await controller.wordGuessed();
-      await controller.nextTurn();
-
-      expect(controller.gameData.gameFinished(), isTrue);
+      setupApp(AppConfig());
+      await minimalGameTest();
     });
 
     test('sample 2 vs 2 game', () async {
+      setupApp(AppConfig());
       LocalGameData localGameData = await GameController.newOffineGame();
       await GameController.startGame(
           localGameData.gameReference, twoVsTwoConfig());
@@ -79,6 +86,11 @@ void main() {
       expect(scoreData.length, equals(2));
       expect(scoreData[0].totalScore, equals(2));
       expect(scoreData[1].totalScore, equals(1));
+    });
+
+    test('no NTP', () async {
+      setupApp(AppConfig()..hasNtp = false);
+      await minimalGameTest();
     });
   });
 }

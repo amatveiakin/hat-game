@@ -9,32 +9,36 @@ import 'package:ntp/ntp.dart';
 // but it hanged during TrueTime.init(), at least in debug web version.
 //
 class NtpTime {
-  static Duration _offset;
+  static Duration _ntpOffset;
 
   static init() async {
     try {
       final int _offsetMilliseconds =
           await NTP.getNtpOffset().timeout(Duration(seconds: 3));
-      _offset = Duration(milliseconds: _offsetMilliseconds);
-      debugPrint('NTP time offset = $_offset');
+      _ntpOffset = Duration(milliseconds: _offsetMilliseconds);
+      debugPrint('NTP time offset = $_ntpOffset');
     } catch (e) {
       // TODO: Firebase log.
       // TODO: Investigate how often this happens.
-      _offset = Duration.zero;
-      debugPrint("Couldn't get NTP time offset! In online game this "
-          "could lead to weird timer behavior for inactive players. "
-          "The actual time accounting is done locally on the device of "
-          "the player who is explaining and should not be affected.");
+      debugPrint("Couldn't get NTP time offset! This means, in online game "
+          "you wouldn't see the timer when somebody else is explaining "
+          "and nobody else will see the timer when you're explaining.");
       debugPrint('The error was: $e');
     }
   }
 
-  static initForUnitTests() {
-    _offset = Duration.zero;
-    debugPrint("NTP initialized in test mode.");
+  static test_setInitialized(bool initialized) {
+    _ntpOffset = initialized ? Duration.zero : null;
+    debugPrint("NTP running in test mode, initialized = $initialized.");
   }
 
-  static DateTime nowUtc() {
-    return DateTime.now().toUtc().add(_offset);
-  }
+  static bool get initialized => _ntpOffset != null;
+
+  static DateTime nowUtcOrNull() =>
+      _ntpOffset == null ? null : DateTime.now().toUtc().add(_ntpOffset);
+
+  static DateTime nowUtcOrThrow() => DateTime.now().toUtc().add(_ntpOffset);
+
+  static DateTime nowUtcNoPrecisionGuarantee() =>
+      DateTime.now().toUtc().add(_ntpOffset ?? Duration.zero);
 }
