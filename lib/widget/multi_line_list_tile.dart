@@ -18,7 +18,6 @@ class MultiLineListTile extends StatelessWidget {
   final Widget title;
   final Widget subtitle;
   final Widget trailing;
-  final bool isThreeLine;
   final bool dense;
   final EdgeInsetsGeometry contentPadding;
   final bool enabled;
@@ -32,7 +31,6 @@ class MultiLineListTile extends StatelessWidget {
     this.title,
     this.subtitle,
     this.trailing,
-    this.isThreeLine = false,
     this.dense,
     this.contentPadding,
     this.enabled = true,
@@ -55,7 +53,7 @@ class MultiLineListTile extends StatelessWidget {
         child: subtitle,
       ),
       trailing: trailing,
-      isThreeLine: isThreeLine,
+      isThreeLine: false,
       dense: dense,
       contentPadding: contentPadding,
       enabled: enabled,
@@ -78,7 +76,6 @@ class MultiLineSwitchListTile extends StatelessWidget {
   final Widget title;
   final Widget subtitle;
   final Widget secondary;
-  final bool isThreeLine;
   final bool dense;
   final EdgeInsetsGeometry contentPadding;
   final bool selected;
@@ -95,7 +92,6 @@ class MultiLineSwitchListTile extends StatelessWidget {
     this.inactiveThumbImage,
     this.title,
     this.subtitle,
-    this.isThreeLine = false,
     this.dense,
     this.contentPadding,
     this.secondary,
@@ -122,7 +118,7 @@ class MultiLineSwitchListTile extends StatelessWidget {
         child: subtitle,
       ),
       secondary: secondary,
-      isThreeLine: isThreeLine,
+      isThreeLine: false,
       dense: dense,
       contentPadding: contentPadding,
       selected: selected,
@@ -138,7 +134,6 @@ class MultiLineRadioListTile<T> extends StatelessWidget {
   final Widget title;
   final Widget subtitle;
   final Widget secondary;
-  final bool isThreeLine;
   final bool dense;
   final bool selected;
   final ListTileControlAffinity controlAffinity;
@@ -151,7 +146,6 @@ class MultiLineRadioListTile<T> extends StatelessWidget {
     this.activeColor,
     this.title,
     this.subtitle,
-    this.isThreeLine = false,
     this.dense,
     this.secondary,
     this.selected = false,
@@ -174,7 +168,7 @@ class MultiLineRadioListTile<T> extends StatelessWidget {
         padding: EdgeInsets.only(bottom: _padding),
         child: subtitle,
       ),
-      isThreeLine: isThreeLine,
+      isThreeLine: false,
       dense: dense,
       secondary: secondary,
       selected: selected,
