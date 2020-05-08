@@ -41,11 +41,15 @@ class SectionsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double boxWidth = 480;
+    const double minBoxWidth = 360;
+    const double maxBoxWidth = 480;
     const double boxMargin = 16;
-    final double wideLayoutWidth = (boxWidth + 2 * boxMargin) * sections.length;
-    final bool wideLayout =
-        allowWideMode && MediaQuery.of(context).size.width >= wideLayoutWidth;
+    final double minWideLayoutWidth =
+        (minBoxWidth + 2 * boxMargin) * sections.length;
+    final double maxWideLayoutWidth =
+        (maxBoxWidth + 2 * boxMargin) * sections.length;
+    final bool wideLayout = allowWideMode &&
+        MediaQuery.of(context).size.width >= minWideLayoutWidth;
 
     if (!wideLayout) {
       // One-column view for phones and tablets in portrait mode.
@@ -102,10 +106,9 @@ class SectionsView extends StatelessWidget {
       final boxes = List<Widget>();
       for (int i = 0; i < sections.length; i++) {
         boxes.add(
-          Padding(
-            padding: EdgeInsets.all(boxMargin),
-            child: SizedBox(
-              width: boxWidth,
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.all(boxMargin),
               child: Card(
                 clipBehavior: Clip.antiAlias,
                 child: Column(
@@ -144,20 +147,21 @@ class SectionsView extends StatelessWidget {
           automaticallyImplyLeading: appBarAutomaticallyImplyLeading,
           title: Text(appTitle),
         ),
-        body: Column(
-          children: [
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: boxes,
-              ),
+        body: Center(
+          child: SizedBox(
+            width: maxWideLayoutWidth,
+            child: Column(
+              children: [
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: boxes,
+                  ),
+                ),
+                if (bottonWidget != null) bottonWidget,
+              ],
             ),
-            if (bottonWidget != null)
-              SizedBox(
-                width: wideLayoutWidth,
-                child: bottonWidget,
-              )
-          ],
+          ),
         ),
       );
     }
