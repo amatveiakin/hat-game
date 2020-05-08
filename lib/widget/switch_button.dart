@@ -66,6 +66,7 @@ class SwitchButton extends StatelessWidget {
                 ),
                 child: Text(
                   text,
+                  textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.subtitle1.copyWith(
                         fontWeight: FontWeight.w400, // normal font weight
                       ),
@@ -76,6 +77,7 @@ class SwitchButton extends StatelessWidget {
           : FlatButton(
               child: Text(
                 text,
+                textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.subtitle1.copyWith(
                       fontWeight: FontWeight.w300,
                       color: Colors.black54,
@@ -100,6 +102,7 @@ class SwitchButton extends StatelessWidget {
               child: Center(
                 child: Text(
                   text,
+                  textAlign: TextAlign.center,
                   style: Theme.of(context)
                       .textTheme
                       .subtitle1
@@ -110,6 +113,7 @@ class SwitchButton extends StatelessWidget {
           : Center(
               child: Text(
                 text,
+                textAlign: TextAlign.center,
                 style: Theme.of(context)
                     .textTheme
                     .subtitle1
