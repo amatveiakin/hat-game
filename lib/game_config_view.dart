@@ -13,7 +13,7 @@ import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/widget/invalid_operation_dialog.dart';
-import 'package:hatgame/widget/sections_layout.dart';
+import 'package:hatgame/widget/sections_scaffold.dart';
 import 'package:hatgame/widget/wide_button.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
 
@@ -177,7 +177,7 @@ class _GameConfigViewState extends State<GameConfigView>
           ),
         );
 
-        return SectionsView(
+        return SectionsScaffold(
           appBarAutomaticallyImplyLeading: false,
           appTitle: localGameData.onlineMode
               ? 'Hat Game ID: ${localGameData.gameID}'

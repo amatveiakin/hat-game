@@ -16,7 +16,7 @@ class SectionData {
   SectionData({@required this.title, @required this.body});
 }
 
-class SectionsView extends StatelessWidget {
+class SectionsScaffold extends StatelessWidget {
   final bool appBarAutomaticallyImplyLeading;
   final String appTitle;
   final bool appTitlePresentInNarrowMode;
@@ -25,7 +25,7 @@ class SectionsView extends StatelessWidget {
   final TabController tabController;
   final Widget bottonWidget;
 
-  SectionsView({
+  SectionsScaffold({
     @required this.appBarAutomaticallyImplyLeading,
     @required this.appTitle,
     @required this.appTitlePresentInNarrowMode,

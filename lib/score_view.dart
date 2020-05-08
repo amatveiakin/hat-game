@@ -3,7 +3,7 @@ import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/theme.dart';
-import 'package:hatgame/widget/sections_layout.dart';
+import 'package:hatgame/widget/sections_scaffold.dart';
 import 'package:hatgame/widget/spacing.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
 
@@ -199,7 +199,7 @@ class ScoreView extends StatelessWidget {
       ),
     ];
 
-    return SectionsView(
+    return SectionsScaffold(
       appBarAutomaticallyImplyLeading: true,
       appTitle: 'Game Over',
       appTitlePresentInNarrowMode: true,
