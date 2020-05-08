@@ -5,6 +5,7 @@ import 'package:hatgame/game_data.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/widget/enum_option_selector.dart';
 import 'package:hatgame/widget/multi_line_list_tile.dart';
+import 'package:hatgame/widget/switch_button.dart';
 
 // TODO: Add explanation images (ideally: animated) for the selection option
 // on top of each subwindow, as in Android settings.
@@ -16,20 +17,18 @@ getIndividualPlayStyleOptions() {
   return [
     OptionDescription(
       value: IndividualPlayStyle.chain,
-      title: 'Chain',
+      title: 'Explain in a circle',
       subtitle: 'The “hat” goes in a circle. '
           'Always explain to the next person in sequence.',
     ),
     OptionDescription(
       value: IndividualPlayStyle.fluidPairs,
-      title: 'Fluid pairs',
-      subtitle: 'Explain to a new person every time '
-          '(until you\'ve been paired up with every other player, '
-          'at which point the loop starts anew).',
+      title: 'Each player explains to each',
+      subtitle: 'Explainer-guesser pairs change constantly.',
     ),
     OptionDescription(
       value: IndividualPlayStyle.broadcast,
-      title: 'One to all',
+      title: 'Explain to everybody at once',
       subtitle: 'Non-competitive mode. '
           'One player explains, everybody else guesses.',
     ),
@@ -55,6 +54,40 @@ class IndividualPlayStyleSelectorState extends EnumOptionSelectorState<
     IndividualPlayStyle, IndividualPlayStyleSelector> {}
 
 // =============================================================================
+// Random teams
+
+getRandomizeTeamsOptions() {
+  return [
+    OptionDescription(
+      value: true,
+      title: 'Random teams',
+      subtitle: 'The app divides players into teams.',
+    ),
+    OptionDescription(
+      value: false,
+      title: 'Manual teams',
+      subtitle: 'You divide players into teams yourself.',
+    ),
+  ];
+}
+
+class RandomizeTeamsSelector extends EnumOptionSelector<bool> {
+  RandomizeTeamsSelector(bool initialValue, Function changeCallback)
+      : super(
+          windowTitle: 'Team Forming',
+          allValues: getRandomizeTeamsOptions(),
+          initialValue: initialValue,
+          changeCallback: changeCallback,
+        );
+
+  @override
+  createState() => RandomizeTeamsSelectorState();
+}
+
+class RandomizeTeamsSelectorState
+    extends EnumOptionSelectorState<bool, RandomizeTeamsSelector> {}
+
+// =============================================================================
 // DesiredTeamSize
 
 getDesiredTeamSizeOptions() {
@@ -62,28 +95,21 @@ getDesiredTeamSizeOptions() {
     OptionDescription(
       value: DesiredTeamSize.teamsOf2,
       title: 'Teams of 2',
-      subtitle: 'Each teams has 2 players. '
-          'If unequal teams are allowed, teams will be bigger '
-          'when the total number of players is odd.',
+      subtitle: '(if bigger teams are allowed, some teams may have 3 players)',
     ),
     OptionDescription(
       value: DesiredTeamSize.teamsOf3,
       title: 'Teams of 3',
-      subtitle: 'Each teams has 3 players. '
-          'If unequal teams are allowed, teams will be bigger '
-          'when the total number of players is not divisible by 3.',
+      subtitle: '(if bigger teams are allowed, some teams may have 4 players)',
     ),
     OptionDescription(
       value: DesiredTeamSize.teamsOf4,
       title: 'Teams of 4',
-      subtitle: 'Each teams has 4 players. '
-          'If unequal teams are allowed, teams will be bigger '
-          'when the total number of players is not divisible by 4.',
+      subtitle: '(if bigger teams are allowed, some teams may have 5 players)',
     ),
     OptionDescription(
       value: DesiredTeamSize.twoTeams,
-      title: 'Two teams',
-      subtitle: 'Divide all player into two teams.',
+      title: 'Two teams total',
     ),
   ];
 }
@@ -110,25 +136,24 @@ class DesiredTeamSizeSelectorState
 getUnequalTeamSizeOptions() {
   return [
     OptionDescription(
+      value: UnequalTeamSize.expandTeams,
+      title: 'Allow bigger teams',
+      subtitle: 'If players cannot be divided into equally sized teams, '
+          'some teams will be bigger.',
+    ),
+    OptionDescription(
       value: UnequalTeamSize.forbid,
-      title: 'Forbid unequal team sizes',
-      subtitle: 'Game wouldn\'t start unless the players can be divided '
+      title: 'Strict team sizes',
+      subtitle: "Game won't start if players cannot be divided "
           'into teams of specified size.',
     ),
     OptionDescription(
-      value: UnequalTeamSize.expandTeams,
-      title: 'Allow unequal team sizes',
-      subtitle: 'If players cannot be divided into teams of equal sizes, '
-          'some teams are going to be bigger.',
-    ),
-    OptionDescription(
       value: UnequalTeamSize.dropPlayers,
-      title: 'Drop players to equalize teams',
+      title: 'Strict team sizes; drop players',
       // TODO: Make the lot fair (don't ban the same person twice in a row)
       // and comment on this.
-      subtitle: 'Each team must have the same number of players. '
-          'If this is not possible, '
-          'a lot is drawn to determine the players who skip the round. ',
+      subtitle: "If it's not possible to divide players into "
+          'into teams of specified size, some players will skip the round.',
     ),
   ];
 }
@@ -136,7 +161,7 @@ getUnequalTeamSizeOptions() {
 class UnequalTeamSizeSelector extends EnumOptionSelector<UnequalTeamSize> {
   UnequalTeamSizeSelector(UnequalTeamSize initialValue, Function changeCallback)
       : super(
-          windowTitle: 'Unequal teams',
+          windowTitle: 'Unequal Team Sizes',
           allValues: getUnequalTeamSizeOptions(),
           initialValue: initialValue,
           changeCallback: changeCallback,
@@ -156,15 +181,15 @@ getGuessingInLargeTeamOptions() {
   return [
     OptionDescription(
       value: IndividualPlayStyle.fluidPairs,
-      title: 'Always one guesser',
+      title: 'One team member guesses',
       subtitle: 'Exactly one person guesses every turn. '
-          'Teams with more than two players rotate roles.',
+          'Teams of three or more rotate roles.',
     ),
     OptionDescription(
       value: IndividualPlayStyle.broadcast,
       title: 'The whole team guesses',
-      subtitle: 'In teams with more than two players '
-          'each team member except the presenter can guess.',
+      subtitle: 'In teams of three or more '
+          'the whole team guesses together.',
     ),
   ];
 }
@@ -174,7 +199,7 @@ class GuessingInLargeTeamSelector
   GuessingInLargeTeamSelector(
       IndividualPlayStyle initialValue, Function changeCallback)
       : super(
-          windowTitle: 'Guessing in large teams',
+          windowTitle: 'Guessing in Large Teams',
           allValues: getGuessingInLargeTeamOptions(),
           initialValue: initialValue,
           changeCallback: changeCallback,
@@ -200,34 +225,57 @@ class TeamingConfigView extends StatelessWidget {
       @required this.config,
       @required this.configController});
 
+  static int _maxPossbleTeamSize(TeamingConfig config) {
+    const int infinity = 1000;
+    if (!config.randomizeTeams) {
+      return infinity;
+    }
+    int baseTeamSize = 0;
+    switch (config.desiredTeamSize) {
+      case DesiredTeamSize.teamsOf2:
+        baseTeamSize = 2;
+        break;
+      case DesiredTeamSize.teamsOf3:
+        baseTeamSize = 3;
+        break;
+      case DesiredTeamSize.teamsOf4:
+        baseTeamSize = 4;
+        break;
+      case DesiredTeamSize.twoTeams:
+        return infinity;
+    }
+    return config.unequalTeamSize == UnequalTeamSize.expandTeams
+        ? baseTeamSize + 1
+        : baseTeamSize;
+  }
+
   // TODO: Irrelevant settings: hide or disable?
   @override
   Widget build(BuildContext context) {
-    final bool largeTeamsPossible =
-        config.desiredTeamSize != DesiredTeamSize.teamsOf2 ||
-            config.unequalTeamSize == UnequalTeamSize.expandTeams ||
-            !config.randomizeTeams;
+    final int maxPossbleTeamSize = _maxPossbleTeamSize(config);
     var items = <Widget>[];
-    items.add(
-      MultiLineSwitchListTile(
-        // Don't gray out disabled text for inactive players.
-        title: Text(
-          config.teamPlay ? 'Team play: on' : 'Team play: off',
-          style: TextStyle(color: Theme.of(context).textTheme.subtitle1.color),
+    if (configController.isReadOnly) {
+      items.add(
+        MultiLineListTile(
+          title: Text(config.teamPlay ? 'Team mode' : 'Individual mode'),
         ),
-        subtitle: Text(
-          config.teamPlay
-              ? 'Fixed teams. Score is per team.'
-              : 'Fluid pairing. Score is per player.',
-          style: TextStyle(color: Theme.of(context).textTheme.caption.color),
+      );
+    } else {
+      items.add(
+        MultiLineListTile(
+          title: SwitchButton(
+            options: ['Team mode', 'Individual mode'],
+            selectedOption: config.teamPlay ? 0 : 1,
+            onSelectedOptionChanged: configController.isReadOnly
+                ? null
+                : (int newOption) =>
+                    configController.updateTeaming((config) => config.rebuild(
+                          (b) => b..teamPlay = (newOption == 0),
+                        )),
+          ),
         ),
-        value: config.teamPlay,
-        onChanged: configController.isReadOnly
-            ? null
-            : (bool checked) => configController.updateTeaming(
-                (config) => config.rebuild((b) => b..teamPlay = checked)),
-      ),
-    );
+      );
+    }
     if (!config.teamPlay) {
       final onTap = configController.isReadOnly
           ? null
@@ -243,44 +291,50 @@ class TeamingConfigView extends StatelessWidget {
       switch (config.individualPlayStyle) {
         case IndividualPlayStyle.chain:
           items.add(
-            MultiLineListTile(
-                title: Text('Turn order: chain'),
-                subtitle: Text('The “hat” goes in a circle. '
-                    'Always explain to the next person.'),
-                onTap: onTap),
+            OptionSelectorHeader(
+                title: Text('Explain in a circle'), onTap: onTap),
           );
           break;
         case IndividualPlayStyle.fluidPairs:
           items.add(
-            MultiLineListTile(
-                title: Text('Turn order: fluid pairs'),
-                subtitle: Text('Explain to a new person every time.'),
-                onTap: onTap),
+            OptionSelectorHeader(
+                title: Text('Each player explains to each'), onTap: onTap),
           );
           break;
         case IndividualPlayStyle.broadcast:
           items.add(
-            MultiLineListTile(
-                title: Text('Turn order: one to all'),
-                subtitle: Text('Explains to everybody else.'),
-                onTap: onTap),
+            OptionSelectorHeader(
+                title: Text('Explain to everybody at once'), onTap: onTap),
           );
           break;
       }
     }
     if (config.teamPlay && !onlineMode) {
-      items.add(
-        MultiLineSwitchListTile(
-          title: Text(
-              config.randomizeTeams ? 'Random teams: on' : 'Random teams: off'),
-          subtitle: Text(config.randomizeTeams
-              ? 'Players are divided into teams randomly.'
-              : 'Players are divided into teams manually.'),
-          value: config.randomizeTeams,
-          onChanged: (bool checked) => configController.updateTeaming(
-              (config) => config.rebuild((b) => b..randomizeTeams = checked)),
-        ),
-      );
+      final onTap = configController.isReadOnly
+          ? null
+          : () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => RandomizeTeamsSelector(
+                        config.randomizeTeams,
+                        (bool newValue) => configController.updateTeaming(
+                            (config) => config
+                                .rebuild((b) => b..randomizeTeams = newValue)),
+                      )));
+            };
+      switch (config.randomizeTeams) {
+        case true:
+          items.add(OptionSelectorHeader(
+            title: Text('Random teams'),
+            onTap: onTap,
+          ));
+          break;
+        case false:
+          items.add(OptionSelectorHeader(
+            title: Text('Manual teams'),
+            onTap: onTap,
+          ));
+          break;
+      }
     }
     if (config.teamPlay && config.randomizeTeams) {
       final onTap = configController.isReadOnly
@@ -296,30 +350,26 @@ class TeamingConfigView extends StatelessWidget {
             };
       switch (config.desiredTeamSize) {
         case DesiredTeamSize.teamsOf2:
-          items.add(MultiLineListTile(
+          items.add(OptionSelectorHeader(
             title: Text('Teams of 2'),
-            subtitle: Text('Minimum team size is 2 players.'),
             onTap: onTap,
           ));
           break;
         case DesiredTeamSize.teamsOf3:
-          items.add(MultiLineListTile(
+          items.add(OptionSelectorHeader(
             title: Text('Teams of 3'),
-            subtitle: Text('Minimum team size is 3 players.'),
             onTap: onTap,
           ));
           break;
         case DesiredTeamSize.teamsOf4:
-          items.add(MultiLineListTile(
+          items.add(OptionSelectorHeader(
             title: Text('Teams of 4'),
-            subtitle: Text('Minimum team size is 4 players.'),
             onTap: onTap,
           ));
           break;
         case DesiredTeamSize.twoTeams:
-          items.add(MultiLineListTile(
-            title: Text('Two teams'),
-            subtitle: Text('Divide all player into two teams.'),
+          items.add(OptionSelectorHeader(
+            title: Text('Two teams total'),
             onTap: onTap,
           ));
           break;
@@ -338,48 +388,42 @@ class TeamingConfigView extends StatelessWidget {
                       )));
             };
       switch (config.unequalTeamSize) {
-        case UnequalTeamSize.forbid:
-          String subtitle;
-          switch (config.desiredTeamSize) {
-            case DesiredTeamSize.teamsOf2:
-            case DesiredTeamSize.twoTeams:
-              subtitle = 'Game wouldn\'t start unless '
-                  'the number of players is even.';
-              break;
-            case DesiredTeamSize.teamsOf3:
-              subtitle = 'Game wouldn\'t start unless '
-                  'the number of players is divisible by 3.';
-              break;
-            case DesiredTeamSize.teamsOf4:
-              subtitle = 'Game wouldn\'t start unless '
-                  'the number of players is divisible by 4.';
-              break;
-          }
-          items.add(MultiLineListTile(
-            title: Text('Forbid unequal team sizes'),
-            subtitle: Text(subtitle),
-            onTap: onTap,
-          ));
-          break;
         case UnequalTeamSize.expandTeams:
           String subtitle;
           switch (config.desiredTeamSize) {
             case DesiredTeamSize.teamsOf2:
             case DesiredTeamSize.twoTeams:
-              subtitle = 'Teams will has different size '
-                  'if the total number of players is odd.';
+              subtitle = '... if the number of players is odd';
               break;
             case DesiredTeamSize.teamsOf3:
-              subtitle = 'Teams will has different size '
-                  'if the total number of players is not divisible by 3.';
+              subtitle = '... if the number of players is not divisible by 3';
               break;
             case DesiredTeamSize.teamsOf4:
-              subtitle = 'Teams will has different size '
-                  'if the total number of players is not divisible by 4.';
+              subtitle = '... if the number of players is not divisible by 4';
               break;
           }
-          items.add(MultiLineListTile(
-            title: Text('Allow unequal team sizes'),
+          items.add(OptionSelectorHeader(
+            title: Text('Allow bigger teams'),
+            subtitle: Text(subtitle),
+            onTap: onTap,
+          ));
+          break;
+        case UnequalTeamSize.forbid:
+          String subtitle;
+          switch (config.desiredTeamSize) {
+            case DesiredTeamSize.teamsOf2:
+            case DesiredTeamSize.twoTeams:
+              subtitle = 'The number of players must be even';
+              break;
+            case DesiredTeamSize.teamsOf3:
+              subtitle = 'The number of players must be divisible by 3';
+              break;
+            case DesiredTeamSize.teamsOf4:
+              subtitle = 'The number of players must be divisible by 4';
+              break;
+          }
+          items.add(OptionSelectorHeader(
+            title: Text('Strict team sizes'),
             subtitle: Text(subtitle),
             onTap: onTap,
           ));
@@ -390,27 +434,26 @@ class TeamingConfigView extends StatelessWidget {
             case DesiredTeamSize.teamsOf2:
             case DesiredTeamSize.twoTeams:
               subtitle = 'One player will skip the round '
-                  'if the total number of players is odd.';
+                  'if the total number of players is odd';
               break;
             case DesiredTeamSize.teamsOf3:
               subtitle = 'Some players will skip the round '
-                  'if the total number of players is not divisible by 3.';
+                  'if the total number of players is not divisible by 3';
               break;
             case DesiredTeamSize.teamsOf4:
               subtitle = 'Some players will skip the round '
-                  'if the total number of players is not divisible by 4.';
+                  'if the total number of players is not divisible by 4';
               break;
           }
-          items.add(MultiLineListTile(
-            title: Text('Drop players to equalize teams'),
+          items.add(OptionSelectorHeader(
+            title: Text('Strict team sizes; drop players'),
             subtitle: Text(subtitle),
             onTap: onTap,
           ));
           break;
       }
     }
-    if (config.teamPlay && largeTeamsPossible) {
-      // TODO: Consider uniting with IndividualPlayStyle.
+    if (config.teamPlay && maxPossbleTeamSize > 2) {
       final onTap = configController.isReadOnly
           ? null
           : () {
@@ -425,19 +468,21 @@ class TeamingConfigView extends StatelessWidget {
       switch (config.guessingInLargeTeam) {
         case IndividualPlayStyle.fluidPairs:
           items.add(
-            MultiLineListTile(
-                title: Text('Large teams: always one guesser'),
-                subtitle: Text('Exactly one person guesses every turn. '
-                    'Teams with more than two players rotate roles.'),
+            OptionSelectorHeader(
+                title: Text('One player guesses each turn'),
+                subtitle: maxPossbleTeamSize == 3
+                    ? Text('Teams of three rotate roles')
+                    : Text('Teams of three or more rotate roles'),
                 onTap: onTap),
           );
           break;
         case IndividualPlayStyle.broadcast:
           items.add(
-            MultiLineListTile(
-                title: Text('Large teams: whole team guesses'),
-                subtitle: Text(
-                    'Everybody can guess in teams with more than two players.'),
+            OptionSelectorHeader(
+                title: Text('The whole team guesses'),
+                subtitle: maxPossbleTeamSize == 3
+                    ? Text('Everybody can guess in teams of three')
+                    : Text('Everybody can guess in teams of three or more'),
                 onTap: onTap),
           );
           break;

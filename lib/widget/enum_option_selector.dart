@@ -1,6 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:hatgame/widget/multi_line_list_tile.dart';
 
+// =============================================================================
+// Auxiliary item suggest to use for opening selector page
+
+class OptionSelectorHeader extends StatelessWidget {
+  final Widget title;
+  final Widget subtitle;
+  final GestureTapCallback onTap;
+
+  OptionSelectorHeader({
+    @required this.title,
+    this.subtitle,
+    @required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiLineListTile(
+        title: title,
+        subtitle: subtitle,
+        trailing: onTap == null ? null : Icon(Icons.chevron_right),
+        onTap: onTap);
+  }
+}
+
+// =============================================================================
+// Selector page
+
 class OptionDescription<E> {
   final E value;
   final String title;
@@ -9,7 +36,7 @@ class OptionDescription<E> {
   OptionDescription({
     @required this.value,
     @required this.title,
-    @required this.subtitle,
+    this.subtitle,
   });
 }
 
@@ -55,7 +82,7 @@ class EnumOptionSelectorState<E, W extends EnumOptionSelector>
             .map(
               (e) => MultiLineRadioListTile<E>(
                 title: Text(e.title),
-                subtitle: Text(e.subtitle),
+                subtitle: e.subtitle == null ? null : Text(e.subtitle),
                 value: e.value,
                 groupValue: currentValue,
                 onChanged: _valueChanged,

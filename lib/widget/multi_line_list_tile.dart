@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 // Out of the box it supports only items with one to three lines,
 // and the number of line has to be specified explicitly.
 //
-// On the other hand, this solution supports and number of lines
-// and is fully automatic. I honestly don't understand why
-// Flutter doesn't do this by default.
-//
-// Limitation: subtitle must exist. Use standard types if there
-// is no subtitle.
+// On the other hand, this solution supports any number of lines and
+// is fully automatic. The losses compared to vanilla ListTile-s are
+// negligible:
+//   - It doesn't add a tiny margin between title and subtitle when
+//     subtitle is more than one line long.
+//   - Radio button positioning in MultiLineRadioListTile is different
+//     from RadioListTile (although personally I think the new positioning
+//     is better).
 
 const double _padding = 8;
 
@@ -41,26 +43,44 @@ class MultiLineListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      key: key,
-      leading: leading,
-      title: Padding(
-        padding: EdgeInsets.only(top: _padding),
-        child: title,
-      ),
-      subtitle: Padding(
-        padding: EdgeInsets.only(bottom: _padding),
-        child: subtitle,
-      ),
-      trailing: trailing,
-      isThreeLine: false,
-      dense: dense,
-      contentPadding: contentPadding,
-      enabled: enabled,
-      onTap: onTap,
-      onLongPress: onLongPress,
-      selected: selected,
-    );
+    return subtitle == null
+        ? ListTile(
+            key: key,
+            leading: leading,
+            title: Padding(
+              padding: EdgeInsets.symmetric(vertical: _padding),
+              child: title,
+            ),
+            subtitle: null,
+            trailing: trailing,
+            isThreeLine: false,
+            dense: dense,
+            contentPadding: contentPadding,
+            enabled: enabled,
+            onTap: onTap,
+            onLongPress: onLongPress,
+            selected: selected,
+          )
+        : ListTile(
+            key: key,
+            leading: leading,
+            title: Padding(
+              padding: EdgeInsets.only(top: _padding),
+              child: title,
+            ),
+            subtitle: Padding(
+              padding: EdgeInsets.only(bottom: _padding),
+              child: subtitle,
+            ),
+            trailing: trailing,
+            isThreeLine: false,
+            dense: dense,
+            contentPadding: contentPadding,
+            enabled: enabled,
+            onTap: onTap,
+            onLongPress: onLongPress,
+            selected: selected,
+          );
   }
 }
 
@@ -100,29 +120,50 @@ class MultiLineSwitchListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SwitchListTile(
-      value: value,
-      onChanged: onChanged,
-      activeColor: activeColor,
-      activeTrackColor: activeTrackColor,
-      inactiveThumbColor: inactiveThumbColor,
-      inactiveTrackColor: inactiveTrackColor,
-      activeThumbImage: activeThumbImage,
-      inactiveThumbImage: inactiveThumbImage,
-      title: Padding(
-        padding: EdgeInsets.only(top: _padding),
-        child: title,
-      ),
-      subtitle: Padding(
-        padding: EdgeInsets.only(bottom: _padding),
-        child: subtitle,
-      ),
-      secondary: secondary,
-      isThreeLine: false,
-      dense: dense,
-      contentPadding: contentPadding,
-      selected: selected,
-    );
+    return subtitle == null
+        ? SwitchListTile(
+            value: value,
+            onChanged: onChanged,
+            activeColor: activeColor,
+            activeTrackColor: activeTrackColor,
+            inactiveThumbColor: inactiveThumbColor,
+            inactiveTrackColor: inactiveTrackColor,
+            activeThumbImage: activeThumbImage,
+            inactiveThumbImage: inactiveThumbImage,
+            title: Padding(
+              padding: EdgeInsets.symmetric(vertical: _padding),
+              child: title,
+            ),
+            subtitle: null,
+            secondary: secondary,
+            isThreeLine: false,
+            dense: dense,
+            contentPadding: contentPadding,
+            selected: selected,
+          )
+        : SwitchListTile(
+            value: value,
+            onChanged: onChanged,
+            activeColor: activeColor,
+            activeTrackColor: activeTrackColor,
+            inactiveThumbColor: inactiveThumbColor,
+            inactiveTrackColor: inactiveTrackColor,
+            activeThumbImage: activeThumbImage,
+            inactiveThumbImage: inactiveThumbImage,
+            title: Padding(
+              padding: EdgeInsets.only(top: _padding),
+              child: title,
+            ),
+            subtitle: Padding(
+              padding: EdgeInsets.only(bottom: _padding),
+              child: subtitle,
+            ),
+            secondary: secondary,
+            isThreeLine: false,
+            dense: dense,
+            contentPadding: contentPadding,
+            selected: selected,
+          );
   }
 }
 
@@ -154,25 +195,43 @@ class MultiLineRadioListTile<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RadioListTile<T>(
-      key: key,
-      value: value,
-      groupValue: groupValue,
-      onChanged: onChanged,
-      activeColor: activeColor,
-      title: Padding(
-        padding: EdgeInsets.only(top: _padding),
-        child: title,
-      ),
-      subtitle: Padding(
-        padding: EdgeInsets.only(bottom: _padding),
-        child: subtitle,
-      ),
-      isThreeLine: false,
-      dense: dense,
-      secondary: secondary,
-      selected: selected,
-      controlAffinity: controlAffinity,
-    );
+    return subtitle == null
+        ? RadioListTile<T>(
+            key: key,
+            value: value,
+            groupValue: groupValue,
+            onChanged: onChanged,
+            activeColor: activeColor,
+            title: Padding(
+              padding: EdgeInsets.symmetric(vertical: _padding),
+              child: title,
+            ),
+            subtitle: null,
+            isThreeLine: false,
+            dense: dense,
+            secondary: secondary,
+            selected: selected,
+            controlAffinity: controlAffinity,
+          )
+        : RadioListTile<T>(
+            key: key,
+            value: value,
+            groupValue: groupValue,
+            onChanged: onChanged,
+            activeColor: activeColor,
+            title: Padding(
+              padding: EdgeInsets.only(top: _padding),
+              child: title,
+            ),
+            subtitle: Padding(
+              padding: EdgeInsets.only(bottom: _padding),
+              child: subtitle,
+            ),
+            isThreeLine: false,
+            dense: dense,
+            secondary: secondary,
+            selected: selected,
+            controlAffinity: controlAffinity,
+          );
   }
 }
