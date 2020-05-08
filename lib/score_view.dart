@@ -5,6 +5,7 @@ import 'package:hatgame/game_data.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/widget/sections_layout.dart';
 import 'package:hatgame/widget/spacing.dart';
+import 'package:outline_material_icons/outline_material_icons.dart';
 
 // TODO: Allow final results editing on ScoreView.
 // TODO: Does it make sense to show words guessed in modes with many guessers?
@@ -87,7 +88,7 @@ class _WordView extends StatelessWidget {
   Icon _icon(WordStatus status) {
     switch (status) {
       case WordStatus.notExplained:
-        return Icon(Icons.redo, color: _style(status).color);
+        return Icon(OMIcons.removeRedEye, color: _style(status).color);
       case WordStatus.explained:
         // TODO: Find a clearer solution.
         return Icon(Icons.check, color: Colors.transparent);
