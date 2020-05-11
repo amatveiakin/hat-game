@@ -1,13 +1,11 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:hatgame/built_value/game_config.dart';
-import 'package:hatgame/built_value/serializers.dart';
 import 'package:hatgame/db/db_columns.dart';
 import 'package:hatgame/db/db_document.dart';
-import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/util/assertion.dart';
+import 'package:hatgame/util/future.dart';
 
 class GameConfigPlus {
   final GameConfig config;
@@ -40,6 +38,8 @@ class GameConfigController {
   Stream<GameConfigPlus> get stateUpdatesStream => _streamController.stream;
   bool get isReadOnly => !localGameData.isAdmin;
 
+  bool isInitialized() => _rawConfig != null;
+
   static GameConfig defaultConfig() {
     return GameConfig(
       (b) => b
@@ -67,6 +67,10 @@ class GameConfigController {
     );
   }
 
+  Future<void> testAwaitInitialized() {
+    return FutureUtil.doWhileDelayed(() => !isInitialized());
+  }
+
   static GameConfigReadResult configFromSnapshot(
       LocalGameData localGameData, DBDocumentSnapshot snapshot) {
     Assert.holds(snapshot.exists);
@@ -87,13 +91,13 @@ class GameConfigController {
     return GameConfigReadResult(rawConfig, playerNamesOverrides);
   }
 
-  GameConfig _configWithOverrides() {
+  GameConfig configWithOverrides() {
     return GameConfigReadResult(_rawConfig, _playerNamesOverrides)
         .configWithOverrides;
   }
 
-  GameConfigPlus _configPlus() =>
-      GameConfigPlus(_configWithOverrides(), _gameHasStarted);
+  GameConfigPlus configPlus() =>
+      GameConfigPlus(configWithOverrides(), _gameHasStarted);
 
   void _onUpdateFromDB(final DBDocumentSnapshot snapshot) {
     GameConfigReadResult readResult =
@@ -114,7 +118,7 @@ class GameConfigController {
     } else {
       Assert.holds(_playerNamesOverrides == null);
     }
-    _streamController.add(_configPlus());
+    _streamController.add(configPlus());
   }
 
   void _checkWritesAllowed() {
@@ -123,12 +127,13 @@ class GameConfigController {
         inRelease: AssertInRelease.log);
   }
 
-  void update(GameConfig Function(GameConfig) updater) {
+  Future<void> update(GameConfig Function(GameConfig) updater) {
     _checkWritesAllowed();
     _rawConfig = updater(_rawConfig);
-    localGameData.gameReference
-        .updateColumns([DBColConfig().withData(_rawConfig)]);
-    _streamController.add(_configPlus());
+    _streamController.add(configPlus());
+    return localGameData.gameReference.updateColumns([
+      DBColConfig().withData(_rawConfig),
+    ]);
   }
 
   void updateRules(RulesConfig Function(RulesConfig) updater) {

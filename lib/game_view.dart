@@ -355,7 +355,7 @@ class PlayAreaState extends State<PlayArea>
 
   @override
   Widget build(BuildContext context) {
-    if (gameController.isActivePlayer) {
+    if (gameController.isActivePlayer()) {
       return _buildActivePlayer(context);
     } else {
       return _buildInactivePlayer(context);

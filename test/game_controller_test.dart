@@ -1,11 +1,11 @@
+import 'package:cloud_firestore_mocks/cloud_firestore_mocks.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
-import 'package:hatgame/db/db_local.dart';
 import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/util/ntp_time.dart';
-import 'package:test/test.dart';
 
 class AppConfig {
   bool hasNtp = true;
@@ -15,7 +15,17 @@ void setupApp(AppConfig config) {
   NtpTime.test_setInitialized(config.hasNtp);
 }
 
-GameConfig twoVsTwoConfig() {
+class Client {
+  LocalGameData localGameData;
+  GameController controller;
+
+  Future<void> createGameController() async {
+    controller = GameController.fromDB(localGameData);
+    await controller.testAwaitInitialized();
+  }
+}
+
+GameConfig twoVsTwoOfflineConfig() {
   return GameConfigController.defaultConfig().rebuild(
     (b) => b
       ..players
@@ -25,9 +35,10 @@ GameConfig twoVsTwoConfig() {
   );
 }
 
-Future<void> minimalGameTest() async {
+Future<void> minimalOfflineGameTest() async {
   LocalGameData localGameData = await GameController.newOffineGame();
-  await GameController.startGame(localGameData.gameReference, twoVsTwoConfig());
+  await GameController.startGame(
+      localGameData.gameReference, twoVsTwoOfflineConfig());
   final controller = GameController.fromDB(localGameData);
   await controller.testAwaitInitialized();
 
@@ -41,20 +52,21 @@ Future<void> minimalGameTest() async {
   expect(controller.gameData.gameFinished(), isTrue);
 }
 
-// TODO: Unit test for online mode.
-
 void main() {
-  group('e2e', () {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  final firestoreInstance = MockFirestoreInstance();
+
+  group('e2e offline', () {
     test('minimal game', () async {
       setupApp(AppConfig());
-      await minimalGameTest();
+      await minimalOfflineGameTest();
     });
 
     test('sample 2 vs 2 game', () async {
       setupApp(AppConfig());
       LocalGameData localGameData = await GameController.newOffineGame();
       await GameController.startGame(
-          localGameData.gameReference, twoVsTwoConfig());
+          localGameData.gameReference, twoVsTwoOfflineConfig());
       final controller = GameController.fromDB(localGameData);
       await controller.testAwaitInitialized();
 
@@ -90,7 +102,51 @@ void main() {
 
     test('no NTP', () async {
       setupApp(AppConfig()..hasNtp = false);
-      await minimalGameTest();
+      await minimalOfflineGameTest();
+    });
+  });
+
+  group('e2e online', () {
+    test('simple game', () async {
+      setupApp(AppConfig());
+      final host = Client();
+      final guest = Client();
+
+      host.localGameData =
+          await GameController.newLobby(firestoreInstance, 'user_host');
+      guest.localGameData = await GameController.joinLobby(
+          firestoreInstance, 'user_guest', host.localGameData.gameID);
+
+      final configController = GameConfigController.fromDB(host.localGameData);
+      await configController.testAwaitInitialized();
+      await configController.update((config) => config.rebuild(
+            (b) => b
+              ..teaming.teamPlay = false
+              ..rules.wordsPerPlayer = 2,
+          ));
+
+      await GameController.startGame(host.localGameData.gameReference,
+          configController.configWithOverrides());
+      await host.createGameController();
+      await guest.createGameController();
+
+      await host.controller.startExplaning();
+      await host.controller.finishExplanation();
+      await host.controller.nextTurn();
+
+      await guest.controller.startExplaning();
+      await guest.controller.wordGuessed();
+      await guest.controller.wordGuessed();
+      await guest.controller.wordGuessed();
+      await guest.controller.finishExplanation();
+      await guest.controller.nextTurn();
+
+      await host.controller.startExplaning();
+      await host.controller.wordGuessed();
+      await host.controller.nextTurn();
+
+      expect(host.controller.gameData.gameFinished(), isTrue);
+      expect(guest.controller.gameData.gameFinished(), isTrue);
     });
   });
 }

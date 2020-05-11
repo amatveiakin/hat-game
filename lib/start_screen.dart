@@ -122,7 +122,8 @@ class StartScreenState extends State<StartScreen> {
     }
     LocalGameData localGameData;
     try {
-      localGameData = await GameController.newLobby(playerName);
+      localGameData =
+          await GameController.newLobby(Firestore.instance, playerName);
     } on InvalidOperation catch (e) {
       showInvalidOperationDialog(context: context, error: e);
       return;
@@ -142,8 +143,8 @@ class StartScreenState extends State<StartScreen> {
     }
     LocalGameData localGameData;
     try {
-      localGameData =
-          await GameController.joinLobby(params.playerName, params.gameID);
+      localGameData = await GameController.joinLobby(
+          Firestore.instance, params.playerName, params.gameID);
     } on InvalidOperation catch (e) {
       showInvalidOperationDialog(context: context, error: e);
       return;

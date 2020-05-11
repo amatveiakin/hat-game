@@ -17,6 +17,7 @@ import 'package:hatgame/game_data.dart';
 import 'package:hatgame/partying_strategy.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/built_value_ext.dart';
+import 'package:hatgame/util/future.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/util/list_ext.dart';
 import 'package:hatgame/util/ntp_time.dart';
@@ -195,9 +196,9 @@ class GameController {
   //   - config and initialState don't change,
   //   - isInitialized stays true,
   //   - stateUpdatesStream starts sending updates.
-  bool get isInitialized => config != null;
+  bool isInitialized() => config != null;
 
-  bool get isActivePlayer => turnState == null
+  bool isActivePlayer() => turnState == null
       ? false
       : (localGameData.onlineMode
           ? activePlayer(turnState) == localGameData.myPlayerID
@@ -263,7 +264,8 @@ class GameController {
     );
   }
 
-  static Future<LocalGameData> newLobby(String myName) async {
+  static Future<LocalGameData> newLobby(
+      firestore.Firestore firestoreInstance, String myName) async {
     checkPlayerNameIsValid(myName);
     const int minIDLength = 4;
     const int maxIDLength = 8;
@@ -278,11 +280,11 @@ class GameController {
     for (int idLength = minIDLength;
         idLength <= maxIDLength && gameID == null;
         idLength++) {
-      await firestore.Firestore.instance
-          .runTransaction((firestore.Transaction tx) async {
+      await firestoreInstance.runTransaction((firestore.Transaction tx) async {
         for (int iter = 0; iter < attemptsPerTransaction; iter++) {
           gameID = newFirestoreGameID(idLength, idPrefix);
-          reference = firestoreGameReference(gameID: gameID);
+          reference = firestoreGameReference(
+              firestoreInstance: firestoreInstance, gameID: gameID);
           firestore.DocumentSnapshot snapshot = await tx.get(reference);
           if (!snapshot.exists) {
             await tx.set(
@@ -311,11 +313,12 @@ class GameController {
     );
   }
 
-  static Future<LocalGameData> joinLobby(String myName, String gameID) async {
+  static Future<LocalGameData> joinLobby(firestore.Firestore firestoreInstance,
+      String myName, String gameID) async {
     checkPlayerNameIsValid(myName);
     // TODO: Check if the game has already started.
-    final firestore.DocumentReference reference =
-        firestoreGameReference(gameID: gameID);
+    final firestore.DocumentReference reference = firestoreGameReference(
+        firestoreInstance: firestoreInstance, gameID: gameID);
 
     if (!(await reference.get()).exists) {
       // [1/2] Workaround flutter/firestore error:
@@ -344,8 +347,7 @@ class GameController {
     //         'InvalidOperation', null)
     InvalidOperation error;
 
-    await firestore.Firestore.instance
-        .runTransaction((firestore.Transaction tx) async {
+    await firestoreInstance.runTransaction((firestore.Transaction tx) async {
       firestore.DocumentSnapshot snapshot = await tx.get(reference);
       if (!snapshot.exists) {
         error = InvalidOperation("Game $gameID doesn't exist");
@@ -480,7 +482,7 @@ class GameController {
 
   void _onUpdateFromDB(final DBDocumentSnapshot snapshot) {
     Assert.holds(snapshot.exists);
-    if (!isInitialized) {
+    if (!isInitialized()) {
       final GameConfigReadResult configReadResult =
           GameConfigController.configFromSnapshot(localGameData, snapshot);
       if (!snapshot.contains(DBColInitialState())) {
@@ -493,7 +495,7 @@ class GameController {
 
     TurnState newTurnState = snapshot.tryGet(DBColCurrentTurn());
     List<TurnRecord> newTurnLog = _parseTurnLog(snapshot);
-    if (isActivePlayer) {
+    if (isActivePlayer()) {
       if (localGameData.onlineMode) {
         final int newActivePlayer = activePlayer(newTurnState);
         Assert.eq(localGameData.myPlayerID, newActivePlayer,
@@ -542,7 +544,7 @@ class GameController {
   }
 
   Future<void> testAwaitInitialized() {
-    return Future.doWhile(() async => !isInitialized);
+    return FutureUtil.doWhileDelayed(() => !isInitialized());
   }
 
   static Future<void> _writeInitialState(
@@ -550,7 +552,7 @@ class GameController {
       GameConfig config,
       InitialGameState initialState,
       TurnState turnState) async {
-    reference.updateColumns([
+    return reference.updateColumns([
       DBColConfig().withData(config),
       DBColInitialState().withData(initialState),
       DBColCurrentTurn().withData(turnState),
@@ -558,7 +560,7 @@ class GameController {
   }
 
   Future<void> _updateTurnState(TurnState newState) {
-    Assert.holds(isActivePlayer,
+    Assert.holds(isActivePlayer(),
         message: 'Only the active player can change game state');
     turnState = newState;
     _streamController.add(gameData);
@@ -576,7 +578,7 @@ class GameController {
   }
 
   Future<void> nextTurn() {
-    Assert.holds(isActivePlayer,
+    Assert.holds(isActivePlayer(),
         message: 'Only the active player can change game state');
     final int turnIndex = DerivedGameState.turnIndex(turnLog);
     turnLog.add(TurnStateTransformer.turnRecord(turnState));

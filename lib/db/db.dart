@@ -10,8 +10,10 @@ String newFirestoreGameID(int length, String prefix) {
       Random().nextInt(pow(10, length)).toString().padLeft(length, '0');
 }
 
-firestore.DocumentReference firestoreGameReference({@required String gameID}) {
-  return firestore.Firestore.instance.collection('games').document(gameID);
+firestore.DocumentReference firestoreGameReference(
+    {@required firestore.Firestore firestoreInstance,
+    @required String gameID}) {
+  return firestoreInstance.collection('games').document(gameID);
 }
 
 LocalDocumentReference newLocalGameReference() {
