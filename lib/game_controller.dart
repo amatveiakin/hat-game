@@ -364,13 +364,17 @@ class GameController {
         error = e;
         return;
       }
-      while (dbContains(snapshot.data, DBColPlayer(playerID))) {
-        if (myName == dbGet(snapshot.data, DBColPlayer(playerID)).name) {
+
+      final playerData = dbGetAll(snapshot.data, DBColPlayerManager(),
+          documentPath: reference.path);
+      for (final p in playerData.values()) {
+        if (myName == p.name) {
           error = InvalidOperation("Name $myName is already taken");
           return;
         }
-        playerID++;
       }
+      playerID = dbNextIndex(playerData);
+
       await tx.update(
           reference,
           dbData([
@@ -459,25 +463,13 @@ class GameController {
 
   Map<int, PersonalState> _parsePersonalStates(
       final DBDocumentSnapshot snapshot) {
-    // TODO: Support gaps in player ID space.
-    final states = Map<int, PersonalState>();
-    int playerID = 0;
-    while (snapshot.contains(DBColPlayer(playerID))) {
-      states[playerID] = snapshot.get(DBColPlayer(playerID));
-      playerID++;
-    }
-    return states;
+    return Map.fromEntries(snapshot
+        .getAll(DBColPlayerManager())
+        .map((e) => MapEntry(e.id, e.value)));
   }
 
   List<TurnRecord> _parseTurnLog(final DBDocumentSnapshot snapshot) {
-    // TODO: Check that there are no gaps.
-    final turns = List<TurnRecord>();
-    int turnIndex = 0;
-    while (snapshot.contains(DBColTurnRecord(turnIndex))) {
-      turns.add(snapshot.get(DBColTurnRecord(turnIndex)));
-      turnIndex++;
-    }
-    return turns;
+    return snapshot.getAll(DBColTurnRecordManager()).values().toList();
   }
 
   void _onUpdateFromDB(final DBDocumentSnapshot snapshot) {
@@ -513,7 +505,7 @@ class GameController {
       // a stale update from the previous turn.
     } else {
       turnState = newTurnState;
-      turnLog = _parseTurnLog(snapshot);
+      turnLog = newTurnLog;
     }
 
     if (localGameData.onlineMode) {

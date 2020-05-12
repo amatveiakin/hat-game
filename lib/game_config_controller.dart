@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:hatgame/built_value/game_config.dart';
+import 'package:hatgame/built_value/personal_state.dart';
 import 'package:hatgame/db/db_columns.dart';
 import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/game_data.dart';
@@ -78,15 +79,9 @@ class GameConfigController {
     Map<int, String> playerNamesOverrides;
     if (rawConfig.players == null && localGameData.onlineMode) {
       // This happens in online mode before the game has started.
-      playerNamesOverrides = Map<int, String>();
-      // TODO: Support gaps or check that there are none.
-      for (int playerID = 0;; playerID++) {
-        final playerColumn = DBColPlayer(playerID);
-        if (!snapshot.contains(playerColumn)) {
-          break;
-        }
-        playerNamesOverrides[playerID] = snapshot.get(playerColumn).name;
-      }
+      playerNamesOverrides = Map.fromEntries(snapshot
+          .getAll(DBColPlayerManager())
+          .map((c) => MapEntry(c.id, c.value.name)));
     }
     return GameConfigReadResult(rawConfig, playerNamesOverrides);
   }

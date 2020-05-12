@@ -1,8 +1,10 @@
-extension ListUtil<T> on List<T> {
-  List<T> shuffled() {
-    final result = List<T>.from(this);
-    result.shuffle();
-    return result;
+extension ListUtil<E> on List<E> {
+  List<E> sorted([int compare(E a, E b)]) {
+    return List<E>.from(this)..sort(compare);
+  }
+
+  List<E> shuffled() {
+    return List<E>.from(this)..shuffle();
   }
 }
 

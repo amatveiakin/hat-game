@@ -51,6 +51,10 @@ abstract class DBDocumentSnapshot {
 
   T tryGet<T>(DBColumn<T> col) => dbTryGet(rawData, col);
 
+  List<DBIndexedColumnData<T>> getAll<T, ColumnT extends DBColumnFamily<T>>(
+          DBColumnFamilyManager<T, ColumnT> columnFactory) =>
+      dbGetAll(rawData, columnFactory, documentPath: reference.path);
+
   @protected
   Map<String, dynamic> get rawData;
 }
