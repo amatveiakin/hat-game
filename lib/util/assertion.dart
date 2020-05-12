@@ -1,6 +1,6 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
-import 'package:hatgame/util/strings.dart';
+import 'package:hatgame/util/list_ext.dart';
 import 'package:meta/meta.dart';
 
 enum AssertInRelease {
@@ -73,6 +73,6 @@ class Assert {
   }
 
   static _combine(List<String> messages) {
-    return messages.where((s) => !isNullOrEmpty(s)).join(': ');
+    return messages.joinNonEmpty(': ');
   }
 }

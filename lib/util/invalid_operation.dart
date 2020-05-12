@@ -1,3 +1,5 @@
+import 'package:hatgame/util/list_ext.dart';
+
 class InvalidOperation implements Exception {
   final String message;
   final String comment;
@@ -8,4 +10,10 @@ class InvalidOperation implements Exception {
     this.comment,
     this.isInternalError = false,
   });
+
+  @override
+  String toString() {
+    return ['InvalidOperation (internal = $isInternalError): $message', comment]
+        .joinNonEmpty('; ');
+  }
 }
