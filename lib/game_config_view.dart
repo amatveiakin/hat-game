@@ -208,7 +208,7 @@ class _GameConfigViewState extends State<GameConfigView>
           appTitlePresentInNarrowMode: localGameData.onlineMode,
           sections: sections,
           tabController: _tabController,
-          bottonWidget: startButton,
+          bottomWidget: startButton,
         );
       },
     );

@@ -23,7 +23,7 @@ class SectionsScaffold extends StatelessWidget {
   final List<SectionData> sections;
   final bool allowWideMode;
   final TabController tabController;
-  final Widget bottonWidget;
+  final Widget bottomWidget;
 
   SectionsScaffold({
     @required this.appBarAutomaticallyImplyLeading,
@@ -32,7 +32,7 @@ class SectionsScaffold extends StatelessWidget {
     @required this.sections,
     this.allowWideMode = true,
     this.tabController,
-    this.bottonWidget,
+    this.bottomWidget,
   }) {
     if (appBarAutomaticallyImplyLeading) {
       Assert.holds(appTitlePresentInNarrowMode);
@@ -53,8 +53,7 @@ class SectionsScaffold extends StatelessWidget {
 
     if (!wideLayout) {
       // One-column view for phones and tablets in portrait mode.
-      // TODO: Limit column width. Create LimitedWidthScaffold class
-      // and use it here as well as for screens without sections.
+      // TODO: Automatically increase padding on large screens.
       final tabBar = TabBar(
         controller: tabController,
         tabs: sections
@@ -92,7 +91,7 @@ class SectionsScaffold extends StatelessWidget {
                 children: sections.map((s) => s.body).toList(),
               ),
             ),
-            if (bottonWidget != null) bottonWidget,
+            if (bottomWidget != null) bottomWidget,
           ],
         ),
       );
@@ -158,7 +157,7 @@ class SectionsScaffold extends StatelessWidget {
                     children: boxes,
                   ),
                 ),
-                if (bottonWidget != null) bottonWidget,
+                if (bottomWidget != null) bottomWidget,
               ],
             ),
           ),
