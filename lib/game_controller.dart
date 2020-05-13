@@ -358,6 +358,7 @@ class GameController {
         return Future.error(e);
       }
 
+      // Note: include kicked players.
       final playerData = dbGetAll(snapshot.data, DBColPlayerManager(),
           documentPath: reference.path);
       for (final p in playerData.values()) {
@@ -385,9 +386,38 @@ class GameController {
     );
   }
 
+  static Future<void> kickPlayer(
+      DBDocumentReference firestoreReference, int playerID) async {
+    final firestore.DocumentReference reference =
+        (firestoreReference as FirestoreDocumentReference).firestoreReference;
+    firestore.Firestore firestoreInstance = reference.firestore;
+    // Same caveats as in joinLobby.
+    await firestoreInstance.runTransaction((firestore.Transaction tx) async {
+      firestore.DocumentSnapshot snapshot = await tx.get(reference);
+      if (!snapshot.exists) {
+        return Future.error(
+            InvalidOperation("Game ${firestoreReference.path} doesn't exist"));
+      }
+      {
+        // Workaround flutter/firestore error. Do a dumb write.
+        await tx.set(reference, snapshot.data);
+      }
+      final playerRecord = dbGet(snapshot.data, DBColPlayer(playerID),
+          documentPath: reference.path);
+      await tx.update(
+          reference,
+          dbData([
+            DBColPlayer(playerID)
+                .withData(playerRecord.rebuild((b) => b..kicked = true))
+          ]));
+    });
+  }
+
   static Future<void> startGame(
-      DBDocumentReference reference, GameConfig config) {
+      DBDocumentReference reference, GameConfig config,
+      {MockShuffler<int> individualOrderMockShuffler}) {
     final numPlayers = config.players.names.length;
+    final playerIDs = config.players.names.keys.toList();
     BuiltList<BuiltList<int>> teams;
     BuiltList<int> individualOrder;
     if (config.teaming.teamPlay) {
@@ -400,8 +430,7 @@ class GameController {
         final List<int> teamSizes = generateTeamSizes(numPlayers,
             config.teaming.desiredTeamSize, config.teaming.unequalTeamSize);
         final teamsMutable = generateTeamPlayers(
-            playerIDs: config.players.names.keys.toList().shuffled(),
-            teamSizes: teamSizes.shuffled());
+            playerIDs: playerIDs.shuffled(), teamSizes: teamSizes.shuffled());
         teams = BuiltList<BuiltList<int>>.from(
             teamsMutable.map((t) => BuiltList<int>(t)));
       }
@@ -411,7 +440,7 @@ class GameController {
       checkNumPlayersForIndividualPlay(
           numPlayers, config.teaming.individualPlayStyle);
       individualOrder = BuiltList<int>.from(
-          List<int>.generate(numPlayers, (i) => i).shuffled());
+          playerIDs.shuffled(mockShuffler: individualOrderMockShuffler));
     }
 
     final int totalWords = config.rules.wordsPerPlayer * numPlayers;
@@ -454,6 +483,7 @@ class GameController {
       final DBDocumentSnapshot snapshot) {
     return Map.fromEntries(snapshot
         .getAll(DBColPlayerManager())
+        .where((e) => !(e.value.kicked ?? false))
         .map((e) => MapEntry(e.id, e.value)));
   }
 
@@ -508,6 +538,7 @@ class GameController {
       personalState = snapshot.get(DBColLocalPlayer());
       otherPersonalStates = [];
     }
+    Assert.holds(!(personalState.kicked ?? false));
 
     _streamController.add(gameData);
   }

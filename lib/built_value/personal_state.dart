@@ -28,15 +28,20 @@ class WordFeedback extends EnumClass {
   static Serializer<WordFeedback> get serializer => _$wordFeedbackSerializer;
 }
 
-// Various per-player information that is not core to the game.
-// GameState should never depend on it directly. Can be updated only
-// by the corresponding player.
+// Combines:
+//   - Player login information (relevant before the game has started)
+//   - Various per-player information that is not core to the game.
+//     GameState should never depend on it directly. Can be updated only
+//     by the corresponding player.
+// TODO: Split the two.
 abstract class PersonalState
     implements Built<PersonalState, PersonalStateBuilder> {
   // TODO: Mark things that don't make sense in offline mode as nullable OR
   // move everything else to a separate class and reference it from here.
   int get id;
   String get name;
+  @nullable
+  bool get kicked;
   BuiltMap<int, WordFeedback> get wordFeedback;
   BuiltSet<int> get wordFlags;
 

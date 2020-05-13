@@ -1,9 +1,9 @@
 import 'package:built_collection/built_collection.dart';
-import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/invalid_operation.dart';
+import 'package:meta/meta.dart';
 
 // =============================================================================
 // Team Generators
@@ -117,7 +117,7 @@ abstract class PartyingStrategy {
           initialState.teams, config.teaming.guessingInLargeTeam);
     } else {
       return IndividualStrategy(
-          config.players.names.length, config.teaming.individualPlayStyle);
+          initialState.individualOrder, config.teaming.individualPlayStyle);
     }
   }
 }
@@ -125,12 +125,29 @@ abstract class PartyingStrategy {
 // =============================================================================
 // IndividualStrategy
 
-abstract class IndividualStrategy extends PartyingStrategy {
+class IndividualStrategy extends PartyingStrategy {
+  final BuiltList<int> players;
+  final IndividualStrategyImpl _impl;
+
+  IndividualStrategy(this.players, IndividualPlayStyle playStyle)
+      : _impl = IndividualStrategyImpl(players.length, playStyle);
+
+  @override
+  Party getParty(int turn) {
+    final Party p = _impl.getPartyImpl(turn);
+    return Party((b) => b
+      ..performer = players[p.performer]
+      ..recipients.addAll(p.recipients.map((idx) => players[idx])));
+  }
+}
+
+abstract class IndividualStrategyImpl {
   final int numPlayers;
 
-  IndividualStrategy.internal(this.numPlayers);
+  IndividualStrategyImpl.internal(this.numPlayers);
 
-  factory IndividualStrategy(int numPlayers, IndividualPlayStyle playStyle) {
+  factory IndividualStrategyImpl(
+      int numPlayers, IndividualPlayStyle playStyle) {
     switch (playStyle) {
       case IndividualPlayStyle.chain:
         return ChainIndividualStrategy(numPlayers);
@@ -141,13 +158,15 @@ abstract class IndividualStrategy extends PartyingStrategy {
     }
     Assert.fail('Unknown IndividualPlayStyle:' + playStyle.toString());
   }
+
+  Party getPartyImpl(int turn);
 }
 
-class ChainIndividualStrategy extends IndividualStrategy {
+class ChainIndividualStrategy extends IndividualStrategyImpl {
   ChainIndividualStrategy(int numPlayers) : super.internal(numPlayers);
 
   @override
-  Party getParty(int turn) {
+  Party getPartyImpl(int turn) {
     final int performer = turn % numPlayers;
     final int recipient = (performer + 1) % numPlayers;
     return Party((b) => b
@@ -156,11 +175,11 @@ class ChainIndividualStrategy extends IndividualStrategy {
   }
 }
 
-class FluidPairsIndividualStrategy extends IndividualStrategy {
+class FluidPairsIndividualStrategy extends IndividualStrategyImpl {
   FluidPairsIndividualStrategy(int numPlayers) : super.internal(numPlayers);
 
   @override
-  Party getParty(int turn) {
+  Party getPartyImpl(int turn) {
     final int localIdx = turn % numPlayers;
     final int shift = turn ~/ numPlayers % (numPlayers - 1) + 1;
     // Any function of `shift` and `numPlayers` is a valid seed, although
@@ -176,11 +195,11 @@ class FluidPairsIndividualStrategy extends IndividualStrategy {
   }
 }
 
-class BroadcastIndividualStrategy extends IndividualStrategy {
+class BroadcastIndividualStrategy extends IndividualStrategyImpl {
   BroadcastIndividualStrategy(int numPlayers) : super.internal(numPlayers);
 
   @override
-  Party getParty(int turn) {
+  Party getPartyImpl(int turn) {
     final int performer = turn % numPlayers;
     final recipients = Iterable<int>.generate(numPlayers)
         .where((p) => p != performer)
@@ -205,11 +224,7 @@ class FixedTeamsStrategy extends PartyingStrategy {
     final int teamIdx = turn % teamPlayers.length;
     final team = teamPlayers[teamIdx];
     final int subturn = turn ~/ teamPlayers.length;
-    final singleTeamStrategy =
-        IndividualStrategy(team.length, individualPlayStyle);
-    final subparty = singleTeamStrategy.getParty(subturn);
-    return Party((b) => b
-      ..performer = team[subparty.performer]
-      ..recipients.addAll(subparty.recipients.map((idx) => team[idx])));
+    final singleTeamStrategy = IndividualStrategy(team, individualPlayStyle);
+    return singleTeamStrategy.getParty(subturn);
   }
 }

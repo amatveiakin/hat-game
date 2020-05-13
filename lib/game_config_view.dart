@@ -4,6 +4,7 @@ import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/game_view.dart';
+import 'package:hatgame/kicked_screen.dart';
 import 'package:hatgame/offline_player_config_view.dart';
 import 'package:hatgame/online_player_config_view.dart';
 import 'package:hatgame/partying_strategy.dart';
@@ -60,6 +61,7 @@ class _GameConfigViewState extends State<GameConfigView>
   LocalGameData get localGameData => widget.localGameData;
   GameConfigController get configController => widget.configController;
   bool get isAdmin => localGameData.isAdmin;
+  bool _navigatedToKicked = false;
   bool _navigatedToGame = false;
 
   TabController _tabController;
@@ -80,6 +82,17 @@ class _GameConfigViewState extends State<GameConfigView>
     _tabController.dispose();
     _rulesConfigViewController.dispose();
     super.dispose();
+  }
+
+  void _goToKicked() {
+    // Hide virtual keyboard
+    FocusScope.of(context).unfocus();
+    Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (context) => KickedScreen(),
+          settings: RouteSettings(name: 'Kicked'),
+        ),
+        ModalRoute.withName('/'));
   }
 
   void _startGame(GameConfig gameConfig) {
@@ -121,17 +134,26 @@ class _GameConfigViewState extends State<GameConfigView>
         if (!snapshot.hasData) {
           return Center(child: CircularProgressIndicator());
         }
+
         final GameConfigPlus gameConfigPlus = snapshot.data;
-        final GameConfig gameConfig = gameConfigPlus.config;
-        Assert.holds(gameConfig != null);
+        if (gameConfigPlus.kicked) {
+          // Cannot navigate from within `build`.
+          if (!_navigatedToKicked) {
+            Future(_goToKicked);
+            _navigatedToKicked = true;
+          }
+          return Center(child: CircularProgressIndicator());
+        }
         if (gameConfigPlus.gameHasStarted) {
           // Cannot navigate from within `build`.
           if (!_navigatedToGame) {
-            Future.delayed(Duration.zero, () => _goToGame());
+            Future(_goToGame);
             _navigatedToGame = true;
           }
           return Center(child: CircularProgressIndicator());
         }
+        final GameConfig gameConfig = gameConfigPlus.config;
+        Assert.holds(gameConfig != null);
 
         _rulesConfigViewController.updateFromConfig(gameConfig.rules);
         final sections = [
@@ -154,6 +176,7 @@ class _GameConfigViewState extends State<GameConfigView>
             title: playersSectionTitle(gameConfig.players.names.length),
             body: localGameData.onlineMode
                 ? OnlinePlayersConfigView(
+                    localGameData: localGameData,
                     playersConfig: gameConfig.players,
                   )
                 : OfflinePlayersConfigView(

@@ -7,6 +7,8 @@ class FirestoreDocumentReference extends DBDocumentReference {
 
   FirestoreDocumentReference(this._ref);
 
+  firestore.DocumentReference get firestoreReference => _ref;
+
   String get path => _ref.path;
 
   Future<void> setColumns(List<DBColumnData> columns) =>

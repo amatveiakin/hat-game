@@ -12,12 +12,12 @@ import 'package:tuple/tuple.dart';
 
 // TODO: Test all strategies.
 
-class FluidPairsIndividualStrategy_Variant0 extends IndividualStrategy {
+class FluidPairsIndividualStrategy_Variant0 extends IndividualStrategyImpl {
   FluidPairsIndividualStrategy_Variant0(int numPlayers)
       : super.internal(numPlayers);
 
   @override
-  Party getParty(int turn) {
+  Party getPartyImpl(int turn) {
     final int performer = turn % numPlayers;
     final int shift = turn ~/ numPlayers % (numPlayers - 1) + 1;
     final int recipient = (performer + shift) % numPlayers;
@@ -27,12 +27,12 @@ class FluidPairsIndividualStrategy_Variant0 extends IndividualStrategy {
   }
 }
 
-class FluidPairsIndividualStrategy_Variant1 extends IndividualStrategy {
+class FluidPairsIndividualStrategy_Variant1 extends IndividualStrategyImpl {
   FluidPairsIndividualStrategy_Variant1(int numPlayers)
       : super.internal(numPlayers);
 
   @override
-  Party getParty(int turn) {
+  Party getPartyImpl(int turn) {
     final int localIdx = turn % numPlayers;
     final int shift = turn ~/ numPlayers % (numPlayers - 1) + 1;
     final int seed = shift;
@@ -44,12 +44,12 @@ class FluidPairsIndividualStrategy_Variant1 extends IndividualStrategy {
   }
 }
 
-class FluidPairsIndividualStrategy_Variant2 extends IndividualStrategy {
+class FluidPairsIndividualStrategy_Variant2 extends IndividualStrategyImpl {
   FluidPairsIndividualStrategy_Variant2(int numPlayers)
       : super.internal(numPlayers);
 
   @override
-  Party getParty(int turn) {
+  Party getPartyImpl(int turn) {
     final int localIdx = turn % numPlayers;
     final int shift = turn ~/ numPlayers % (numPlayers - 1) + 1;
     final int seed = shift % 2;
@@ -61,12 +61,12 @@ class FluidPairsIndividualStrategy_Variant2 extends IndividualStrategy {
   }
 }
 
-class FluidPairsIndividualStrategy_Variant3 extends IndividualStrategy {
+class FluidPairsIndividualStrategy_Variant3 extends IndividualStrategyImpl {
   FluidPairsIndividualStrategy_Variant3(int numPlayers)
       : super.internal(numPlayers);
 
   @override
-  Party getParty(int turn) {
+  Party getPartyImpl(int turn) {
     final int shift = turn ~/ numPlayers % (numPlayers - 1) + 1;
     final int localIdx = turn % numPlayers;
     final int numSubcircles = numPlayers.gcd(shift);
@@ -81,12 +81,12 @@ class FluidPairsIndividualStrategy_Variant3 extends IndividualStrategy {
   }
 }
 
-class FluidPairsIndividualStrategy_Variant4 extends IndividualStrategy {
+class FluidPairsIndividualStrategy_Variant4 extends IndividualStrategyImpl {
   FluidPairsIndividualStrategy_Variant4(int numPlayers)
       : super.internal(numPlayers);
 
   @override
-  Party getParty(int turn) {
+  Party getPartyImpl(int turn) {
     final int halfRoundLength = numPlayers * (numPlayers - 1) ~/ 2;
     final int halfRoundIdx = turn ~/ halfRoundLength;
     final int idsInHalfRound = turn % halfRoundLength;
@@ -136,7 +136,7 @@ qualEq(int maxIdleTime, int maxRoleStreak) => TypeMatcher<StrategyQuality>()
     .having((t) => t.maxIdleTime, 'maxIdleTime', equals(maxIdleTime))
     .having((t) => t.maxRoleStreak, 'maxRoleStreak', equals(maxRoleStreak));
 
-StrategyQuality qual(IndividualStrategy strategy) {
+StrategyQuality qual(IndividualStrategyImpl strategy) {
   final int numPlayers = strategy.numPlayers;
   final int fullRound = numPlayers * (numPlayers - 1);
   final int totalTurns = fullRound * 2;
@@ -154,7 +154,7 @@ StrategyQuality qual(IndividualStrategy strategy) {
       maxGuessingStreak = max(maxGuessingStreak, guessingStreak[p]);
     }
 
-    final party = strategy.getParty(turn);
+    final party = strategy.getPartyImpl(turn);
     expect(party.recipients.length, equals(1));
     final int performer = party.performer;
     final int recipient = party.recipients.first;
@@ -170,7 +170,7 @@ StrategyQuality qual(IndividualStrategy strategy) {
       maxWaitTime, max(maxPerformingStreak, maxGuessingStreak));
 }
 
-void checkCorrectness(IndividualStrategy strategy) {
+void checkCorrectness(IndividualStrategyImpl strategy) {
   final int numPlayers = strategy.numPlayers;
   final int fullRound = numPlayers * (numPlayers - 1);
   final int totalPairs = fullRound ~/ 2;
@@ -178,7 +178,7 @@ void checkCorrectness(IndividualStrategy strategy) {
   final unorderedPairs = Set<Tuple2<int, int>>();
 
   for (int turn = 0; turn < fullRound; turn++) {
-    final party = strategy.getParty(turn);
+    final party = strategy.getPartyImpl(turn);
     expect(party.recipients.length, equals(1));
     final int performer = party.performer;
     final int recipient = party.recipients.first;

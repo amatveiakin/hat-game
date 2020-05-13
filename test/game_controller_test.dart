@@ -5,6 +5,7 @@ import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
+import 'package:hatgame/util/list_ext.dart';
 import 'package:hatgame/util/ntp_time.dart';
 
 class AppConfig {
@@ -18,6 +19,12 @@ void setupApp(AppConfig config) {
 class Client {
   LocalGameData localGameData;
   GameController controller;
+  GameConfigController configController;
+
+  Future<void> createGameConfigController() async {
+    configController = GameConfigController.fromDB(localGameData);
+    await configController.testAwaitInitialized();
+  }
 
   Future<void> createGameController() async {
     controller = GameController.fromDB(localGameData);
@@ -117,16 +124,19 @@ void main() {
       guest.localGameData = await GameController.joinLobby(
           firestoreInstance, 'user_guest', host.localGameData.gameID);
 
-      final configController = GameConfigController.fromDB(host.localGameData);
-      await configController.testAwaitInitialized();
-      await configController.update((config) => config.rebuild(
+      await host.createGameConfigController();
+      await host.configController.update((config) => config.rebuild(
             (b) => b
               ..teaming.teamPlay = false
               ..rules.wordsPerPlayer = 2,
           ));
 
+      // Don't shuffle players, so that host explains first.
+      final MockShuffler<int> shuffler = (l) => l;
+
       await GameController.startGame(host.localGameData.gameReference,
-          configController.configWithOverrides());
+          host.configController.configWithOverrides(),
+          individualOrderMockShuffler: shuffler);
       await host.createGameController();
       await guest.createGameController();
 
@@ -147,6 +157,47 @@ void main() {
 
       expect(host.controller.gameData.gameFinished(), isTrue);
       expect(guest.controller.gameData.gameFinished(), isTrue);
+    });
+
+    test('kick player', () async {
+      setupApp(AppConfig());
+      final host = Client();
+      final user1 = Client();
+      final user2 = Client();
+
+      host.localGameData =
+          await GameController.newLobby(firestoreInstance, 'user_0');
+
+      user1.localGameData = await GameController.joinLobby(
+          firestoreInstance, 'user_1', host.localGameData.gameID);
+      expect(user1.localGameData.myPlayerID, equals(1));
+
+      await GameController.kickPlayer(host.localGameData.gameReference, 1);
+
+      user2.localGameData = await GameController.joinLobby(
+          firestoreInstance, 'user_2', host.localGameData.gameID);
+      expect(user2.localGameData.myPlayerID, equals(2));
+
+      await user1.createGameConfigController();
+      expect(user1.configController.configPlus().kicked, equals(true));
+
+      await user2.createGameConfigController();
+      expect(user2.configController.configPlus().kicked, equals(false));
+
+      await host.createGameConfigController();
+      await host.configController.update((config) => config.rebuild(
+            (b) => b..teaming.teamPlay = false,
+          ));
+
+      await GameController.startGame(host.localGameData.gameReference,
+          host.configController.configWithOverrides());
+      await host.createGameController();
+
+      expect(host.controller.initialState.individualOrder.asList(),
+          unorderedEquals([0, 2]));
+      final party = host.controller.turnState.party;
+      expect([party.performer] + party.recipients.toList(),
+          unorderedEquals([0, 2]));
     });
   });
 }

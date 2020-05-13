@@ -7,39 +7,54 @@ import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/future.dart';
+import 'package:meta/meta.dart';
 
 class GameConfigPlus {
   final GameConfig config;
   final bool gameHasStarted;
+  final bool kicked;
 
-  GameConfigPlus(this.config, this.gameHasStarted);
+  GameConfigPlus(
+    this.config, {
+    @required this.gameHasStarted,
+    @required this.kicked,
+  });
 }
 
 class GameConfigReadResult {
   final GameConfig rawConfig;
-  final Map<int, String> playerNamesOverrides;
+  final List<PersonalState> playerStates; // online-only
   GameConfig get configWithOverrides =>
-      rawConfig.players != null || playerNamesOverrides == null
+      rawConfig.players != null || playerStates == null
           ? rawConfig
           : rawConfig.rebuild((b) => b
             ..players.replace(PlayersConfig(
-              (b) => b..names.replace(playerNamesOverrides),
+              (b) => b
+                ..names.replace(Map.fromEntries(playerStates
+                    .where((e) => !(e.kicked ?? false))
+                    .map((p) => MapEntry(p.id, p.name)))),
             )));
 
-  GameConfigReadResult(this.rawConfig, this.playerNamesOverrides);
+  GameConfigReadResult(this.rawConfig, this.playerStates);
 }
 
 class GameConfigController {
   final LocalGameData localGameData;
   GameConfig _rawConfig;
-  Map<int, String> _playerNamesOverrides;
+  List<PersonalState> _playerStates;
   bool _gameHasStarted = false;
   final _streamController = StreamController<GameConfigPlus>(sync: true);
 
   Stream<GameConfigPlus> get stateUpdatesStream => _streamController.stream;
   bool get isReadOnly => !localGameData.isAdmin;
 
-  bool isInitialized() => _rawConfig != null;
+  bool isInitialized() =>
+      _rawConfig != null &&
+      (_playerStates == null ||
+          _playerStates.length > localGameData.myPlayerID);
+  bool _kicked() =>
+      _playerStates != null &&
+      (_playerStates[localGameData.myPlayerID].kicked ?? false);
 
   static GameConfig defaultConfig() {
     return GameConfig(
@@ -76,28 +91,28 @@ class GameConfigController {
       LocalGameData localGameData, DBDocumentSnapshot snapshot) {
     Assert.holds(snapshot.exists);
     GameConfig rawConfig = snapshot.get(DBColConfig());
-    Map<int, String> playerNamesOverrides;
+    List<PersonalState> playerStates;
     if (rawConfig.players == null && localGameData.onlineMode) {
       // This happens in online mode before the game has started.
-      playerNamesOverrides = Map.fromEntries(snapshot
-          .getAll(DBColPlayerManager())
-          .map((c) => MapEntry(c.id, c.value.name)));
+      playerStates = snapshot.getAll(DBColPlayerManager()).values().toList();
     }
-    return GameConfigReadResult(rawConfig, playerNamesOverrides);
+    return GameConfigReadResult(rawConfig, playerStates);
   }
 
   GameConfig configWithOverrides() {
-    return GameConfigReadResult(_rawConfig, _playerNamesOverrides)
-        .configWithOverrides;
+    return GameConfigReadResult(_rawConfig, _playerStates).configWithOverrides;
   }
 
-  GameConfigPlus configPlus() =>
-      GameConfigPlus(configWithOverrides(), _gameHasStarted);
+  GameConfigPlus configPlus() => GameConfigPlus(
+        configWithOverrides(),
+        gameHasStarted: _gameHasStarted,
+        kicked: _kicked(),
+      );
 
   void _onUpdateFromDB(final DBDocumentSnapshot snapshot) {
     GameConfigReadResult readResult =
         configFromSnapshot(localGameData, snapshot);
-    _playerNamesOverrides = readResult.playerNamesOverrides;
+    _playerStates = readResult.playerStates;
     _gameHasStarted = snapshot.contains(DBColInitialState());
     if (!isReadOnly && _rawConfig != null && !_gameHasStarted) {
       // Skip updating the config. The host is the only user who is updating
@@ -107,11 +122,14 @@ class GameConfigController {
     } else {
       _rawConfig = readResult.rawConfig;
     }
+    if (!isInitialized()) {
+      return;
+    }
     if (localGameData.onlineMode) {
       Assert.eq(_gameHasStarted, _rawConfig.players != null);
-      Assert.eq(_gameHasStarted, _playerNamesOverrides == null);
+      Assert.eq(_gameHasStarted, _playerStates == null);
     } else {
-      Assert.holds(_playerNamesOverrides == null);
+      Assert.holds(_playerStates == null);
     }
     _streamController.add(configPlus());
   }
