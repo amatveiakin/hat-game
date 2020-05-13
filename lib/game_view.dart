@@ -591,12 +591,12 @@ class GameViewState extends State<GameView> {
                 "(this is not implemented yet)"),
             actions: [
               FlatButton(
-                child: Text('Leave'),
-                onPressed: () => Navigator.of(context).pop(true),
-              ),
-              FlatButton(
                 child: Text('Stay'),
                 onPressed: () => Navigator.of(context).pop(false),
+              ),
+              FlatButton(
+                child: Text('Leave'),
+                onPressed: () => Navigator.of(context).pop(true),
               ),
             ],
           ),
