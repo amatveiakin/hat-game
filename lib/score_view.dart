@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/theme.dart';
-import 'package:hatgame/widget/sections_scaffold.dart';
+import 'package:hatgame/widget/primary_secondary_scaffold.dart';
 import 'package:hatgame/widget/spacing.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
 
@@ -179,39 +178,26 @@ class ScoreView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sections = [
-      SectionData(
-        title: SectionTitleData(
-            // TODO: Proper icon.
-            icon: Icon(Icons.score),
-            text: 'Scoreboard'),
-        body: ListView(
+    return PrimarySecondaryScaffold(
+      primaryAutomaticallyImplyLeading: true,
+      primaryTitle: 'Game Over',
+      primary: Padding(
+        padding: EdgeInsets.all(6.0),
+        child: ListView(
           children:
               gameData.scoreData().map((s) => _TeamScoreView(data: s)).toList(),
         ),
       ),
-      SectionData(
-        title: SectionTitleData(
-            // TODO: Proper icon.
-            icon: Icon(Icons.list),
-            text: 'Game Log'),
-        body: ListView(
+      secondary: Padding(
+        padding: EdgeInsets.all(6.0),
+        child: ListView(
           children:
               gameData.turnLogData().map((t) => _TurnView(data: t)).toList(),
         ),
       ),
-    ];
-
-    return SectionsScaffold(
-      appBarAutomaticallyImplyLeading: true,
-      appTitle: 'Game Over',
-      appTitlePresentInNarrowMode: true,
-      sections: sections,
-      // Don't allow wide mode:
-      //   - Nested cards look bad (although this might be fixed with bigger
-      //     padding and making inner cards flat or some other redesign).
-      //   - It focuses on the most relevant info: score.
-      allowWideMode: false,
+      // TODO: Proper icon.
+      secondaryIcon: Icon(Icons.list),
+      secondaryTitle: 'Game Log',
     );
   }
 }

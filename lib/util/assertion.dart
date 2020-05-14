@@ -72,6 +72,46 @@ class Assert {
         inRelease: inRelease);
   }
 
+  static void lt<T extends Comparable>(T a, T b,
+      {String message,
+      MessageProducer lazyMessage,
+      AssertInRelease inRelease = defaultReleaseBehavior}) {
+    holds(a.compareTo(b) < 0,
+        message: _combine([a.toString() + ' < ' + b.toString(), message]),
+        lazyMessage: lazyMessage,
+        inRelease: inRelease);
+  }
+
+  static void le<T extends Comparable>(T a, T b,
+      {String message,
+      MessageProducer lazyMessage,
+      AssertInRelease inRelease = defaultReleaseBehavior}) {
+    holds(a.compareTo(b) <= 0,
+        message: _combine([a.toString() + ' <= ' + b.toString(), message]),
+        lazyMessage: lazyMessage,
+        inRelease: inRelease);
+  }
+
+  static void gt<T extends Comparable>(T a, T b,
+      {String message,
+      MessageProducer lazyMessage,
+      AssertInRelease inRelease = defaultReleaseBehavior}) {
+    holds(a.compareTo(b) > 0,
+        message: _combine([a.toString() + ' > ' + b.toString(), message]),
+        lazyMessage: lazyMessage,
+        inRelease: inRelease);
+  }
+
+  static void ge<T extends Comparable>(T a, T b,
+      {String message,
+      MessageProducer lazyMessage,
+      AssertInRelease inRelease = defaultReleaseBehavior}) {
+    holds(a.compareTo(b) >= 0,
+        message: _combine([a.toString() + ' >= ' + b.toString(), message]),
+        lazyMessage: lazyMessage,
+        inRelease: inRelease);
+  }
+
   static _combine(List<String> messages) {
     return messages.joinNonEmpty(': ');
   }

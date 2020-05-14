@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:hatgame/widget/constrained_scaffold.dart';
 
 class KickedScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ConstrainedScaffold(
       appBar: AppBar(
         title: Text('Hat Game'),
       ),

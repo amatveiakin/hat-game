@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/assertion.dart';
+import 'package:hatgame/widget/constrained_scaffold.dart';
 
 class SectionTitleData {
   final String text;
@@ -21,7 +22,6 @@ class SectionsScaffold extends StatelessWidget {
   final String appTitle;
   final bool appTitlePresentInNarrowMode;
   final List<SectionData> sections;
-  final bool allowWideMode;
   final TabController tabController;
   final Widget bottomWidget;
 
@@ -30,7 +30,6 @@ class SectionsScaffold extends StatelessWidget {
     @required this.appTitle,
     @required this.appTitlePresentInNarrowMode,
     @required this.sections,
-    this.allowWideMode = true,
     this.tabController,
     this.bottomWidget,
   }) {
@@ -48,7 +47,7 @@ class SectionsScaffold extends StatelessWidget {
         (minBoxWidth + 2 * boxMargin) * sections.length;
     final double maxWideLayoutWidth =
         (maxBoxWidth + 2 * boxMargin) * sections.length;
-    final bool wideLayout = allowWideMode &&
+    final bool wideLayout =
         MediaQuery.of(context).size.width >= minWideLayoutWidth;
 
     if (!wideLayout) {
@@ -63,7 +62,7 @@ class SectionsScaffold extends StatelessWidget {
                 ))
             .toList(),
       );
-      final scaffold = Scaffold(
+      final scaffold = ConstrainedScaffold(
         resizeToAvoidBottomInset: false,
         appBar: appTitlePresentInNarrowMode
             ? AppBar(
@@ -102,6 +101,7 @@ class SectionsScaffold extends StatelessWidget {
               length: sections.length,
             );
     } else {
+      // Multi-column view for tablets in landscape mode and desktops.
       final boxes = List<Widget>();
       for (int i = 0; i < sections.length; i++) {
         boxes.add(
@@ -139,7 +139,6 @@ class SectionsScaffold extends StatelessWidget {
           ),
         );
       }
-      // Multi-column view for tablets in landscape mode and desktops.
       return Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(

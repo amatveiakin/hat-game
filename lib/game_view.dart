@@ -14,6 +14,7 @@ import 'package:hatgame/util/functions.dart';
 import 'package:hatgame/util/ntp_time.dart';
 import 'package:hatgame/util/sounds.dart';
 import 'package:hatgame/util/vibration.dart';
+import 'package:hatgame/widget/constrained_scaffold.dart';
 import 'package:hatgame/widget/padlock.dart';
 import 'package:hatgame/widget/timer.dart';
 import 'package:hatgame/widget/wide_button.dart';
@@ -617,7 +618,7 @@ class GameViewState extends State<GameView> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () => _onBackPressed(),
-      child: Scaffold(
+      child: ConstrainedScaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
           title: Text('Hat Game'),
