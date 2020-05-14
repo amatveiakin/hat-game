@@ -546,16 +546,13 @@ class PlayAreaState extends State<PlayArea>
               duration: Duration(seconds: gameConfig.rules.bonusSeconds),
               hideOnTimeEnded: true,
             ),
-            SizedBox(height: 40),
-            Container(
-              padding: EdgeInsets.symmetric(vertical: 12.0),
-              child: WideButton(
-                onPressed: _reviewDone,
-                color: MyTheme.accent,
-                child: Text('Done'),
-              ),
+            SizedBox(height: 28.0),
+            WideButton(
+              onPressed: _reviewDone,
+              color: MyTheme.accent,
+              child: Text('Done'),
+              margin: WideButton.bottomButtonMargin,
             ),
-            SizedBox(height: 12),
           ]);
         }
     }

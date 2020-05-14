@@ -186,18 +186,16 @@ class _GameConfigViewState extends State<GameConfigView>
                   ),
           ),
         ];
-        final startButton = Padding(
-          padding: EdgeInsets.symmetric(vertical: 12.0),
-          child: WideButton(
-            onPressed: isAdmin ? () => _startGame(gameConfig) : null,
-            onPressedDisabled: () {
-              final snackBar =
-                  SnackBar(content: Text('Only the host can start the game.'));
-              Scaffold.of(context).showSnackBar(snackBar);
-            },
-            color: MyTheme.accent,
-            child: Text('Start Game'),
-          ),
+        final startButton = WideButton(
+          onPressed: isAdmin ? () => _startGame(gameConfig) : null,
+          onPressedDisabled: () {
+            final snackBar =
+                SnackBar(content: Text('Only the host can start the game.'));
+            Scaffold.of(context).showSnackBar(snackBar);
+          },
+          color: MyTheme.accent,
+          child: Text('Start Game'),
+          margin: WideButton.bottomButtonMargin,
         );
 
         return SectionsScaffold(
