@@ -64,12 +64,15 @@ class _TeamScoreView extends StatelessWidget {
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-                  child: Column(
+                  child: Center(
+                    child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: addSpacing(
                         vertical: 4,
                         tiles: data.players.map(_playerView).toList(),
-                      )),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],
