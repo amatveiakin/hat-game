@@ -361,7 +361,7 @@ class GameController {
       // Note: include kicked players.
       final playerData = dbGetAll(snapshot.data, DBColPlayerManager(),
           documentPath: reference.path);
-      for (final p in playerData.values()) {
+      for (final p in playerData.values().where((v) => !(v.kicked ?? false))) {
         if (myName == p.name) {
           return Future.error(
               InvalidOperation("Name $myName is already taken"));
