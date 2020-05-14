@@ -1,16 +1,23 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hatgame/about_screen.dart';
 import 'package:hatgame/app_version.dart';
 import 'package:hatgame/game_config_view.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
+import 'package:hatgame/rules_screen.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/util/ntp_time.dart';
 import 'package:hatgame/util/sounds.dart';
 import 'package:hatgame/widget/constrained_scaffold.dart';
 import 'package:hatgame/widget/invalid_operation_dialog.dart';
 import 'package:hatgame/widget/wide_button.dart';
+
+enum _AdditionalAction {
+  gameRules,
+  aboutApp,
+}
 
 Future<String> _newGameOnlineDialog(BuildContext context) async {
   String playerName = '';
@@ -98,6 +105,8 @@ Future<JoinGameParams> _joinGameDialog(BuildContext context) async {
 }
 
 class StartScreen extends StatefulWidget {
+  static const String routeName = '/';
+
   @override
   State<StatefulWidget> createState() => StartScreenState();
 }
@@ -158,6 +167,17 @@ class StartScreenState extends State<StartScreen> {
     ));
   }
 
+  void executeAdditionalAction(_AdditionalAction action) {
+    switch (action) {
+      case _AdditionalAction.gameRules:
+        Navigator.of(context).pushNamed(RulesScreen.routeName);
+        break;
+      case _AdditionalAction.aboutApp:
+        Navigator.of(context).pushNamed(AboutScreen.routeName);
+        break;
+    }
+  }
+
   void _initFirestore() {
     // Enable offline mode. This is the default for Android and iOS, but
     // on web it need to be enabled explicitly:
@@ -188,6 +208,22 @@ class StartScreenState extends State<StartScreen> {
     return ConstrainedScaffold(
       appBar: AppBar(
         title: Text('Hat Game'),
+        actions: [
+          PopupMenuButton(
+            icon: Icon(Icons.more_vert),
+            itemBuilder: (BuildContext context) => [
+              PopupMenuItem<_AdditionalAction>(
+                value: _AdditionalAction.gameRules,
+                child: Text('Hat game rules'),
+              ),
+              PopupMenuItem<_AdditionalAction>(
+                value: _AdditionalAction.aboutApp,
+                child: Text('About the app'),
+              ),
+            ],
+            onSelected: executeAdditionalAction,
+          ),
+        ],
       ),
       body: Center(
         child: _initialized
