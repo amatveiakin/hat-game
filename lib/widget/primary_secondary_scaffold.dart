@@ -7,6 +7,7 @@ class PrimarySecondaryScaffold extends StatefulWidget {
   final bool primaryAutomaticallyImplyLeading;
   final Widget primary;
   final String primaryTitle;
+  final String secondaryRouteName;
   final Widget secondary;
   final String secondaryTitle; // used by narrow mode only
   final Widget secondaryIcon;
@@ -15,6 +16,7 @@ class PrimarySecondaryScaffold extends StatefulWidget {
     @required this.primaryAutomaticallyImplyLeading,
     @required this.primary,
     @required this.primaryTitle,
+    @required this.secondaryRouteName,
     @required this.secondary,
     @required this.secondaryTitle,
     @required this.secondaryIcon,
@@ -46,13 +48,13 @@ class _SecondaryView extends StatelessWidget {
 }
 
 class _PrimarySecondaryScaffoldState extends State<PrimarySecondaryScaffold> {
-  static const String gameLogRoute = 'GameLog';
   bool _secondaryCollapsed = true; // wide mode only
 
   bool get primaryAutomaticallyImplyLeading =>
       widget.primaryAutomaticallyImplyLeading;
   Widget get primary => widget.primary;
   String get primaryTitle => widget.primaryTitle;
+  String get secondaryRouteName => widget.secondaryRouteName;
   Widget get secondary => widget.secondary;
   String get secondaryTitle => widget.secondaryTitle;
   Widget get secondaryIcon => widget.secondaryIcon;
@@ -63,7 +65,7 @@ class _PrimarySecondaryScaffoldState extends State<PrimarySecondaryScaffold> {
         body: secondary,
         title: secondaryTitle,
       ),
-      settings: RouteSettings(name: gameLogRoute),
+      settings: RouteSettings(name: secondaryRouteName),
     ));
   }
 

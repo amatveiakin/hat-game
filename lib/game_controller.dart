@@ -15,6 +15,7 @@ import 'package:hatgame/db/db_firestore.dart';
 import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/partying_strategy.dart';
+import 'package:hatgame/start_game_online_screen.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/built_value_ext.dart';
 import 'package:hatgame/util/future.dart';
@@ -23,7 +24,6 @@ import 'package:hatgame/util/list_ext.dart';
 import 'package:hatgame/util/ntp_time.dart';
 import 'package:hatgame/util/strings.dart';
 import 'package:russian_words/russian_words.dart' as russian_words;
-import 'package:unicode/unicode.dart' as unicode;
 
 class TurnStateTransformer {
   final GameConfig config;
@@ -214,21 +214,6 @@ class GameController {
 
   static int activePlayer(TurnState currentTurn) => currentTurn.party.performer;
 
-  static void checkPlayerNameIsValid(String name) {
-    if (name.isEmpty) {
-      throw InvalidOperation('Player name is empty');
-    }
-    if (name.length > 50) {
-      throw InvalidOperation('Player name too long');
-    }
-    for (final c in name.codeUnits) {
-      if (unicode.isControl(c) || unicode.isFormat(c)) {
-        throw InvalidOperation('Player name contans invalid character: '
-            '${String.fromCharCode(c)} (code $c)');
-      }
-    }
-  }
-
   static void checkVersionCompatibility(
       String hostVersion, String clientVersion) {
     if (isNullOrEmpty(hostVersion)) {
@@ -266,7 +251,6 @@ class GameController {
 
   static Future<LocalGameData> newLobby(
       firestore.Firestore firestoreInstance, String myName) async {
-    checkPlayerNameIsValid(myName);
     const int minIDLength = 4;
     const int maxIDLength = 8;
     const int attemptsPerTransaction = 100;
@@ -315,7 +299,6 @@ class GameController {
 
   static Future<LocalGameData> joinLobby(firestore.Firestore firestoreInstance,
       String myName, String gameID) async {
-    checkPlayerNameIsValid(myName);
     // TODO: Check if the game has already started.
     final firestore.DocumentReference reference = firestoreGameReference(
         firestoreInstance: firestoreInstance, gameID: gameID);
@@ -330,7 +313,8 @@ class GameController {
       // the documents can be deleted (which may be the case), but I don't
       // see what else we can do.
       // TODO: Remove the workaround whe the bug is fixed.
-      throw InvalidOperation("Game $gameID doesn't exist");
+      throw InvalidOperation("Game $gameID doesn't exist")
+        ..addTag(JoinGameErrorSource.gameID);
     }
 
     // TODO: Adhere to best practices: get `playerID` as a return value from
@@ -351,7 +335,8 @@ class GameController {
     await firestoreInstance.runTransaction((firestore.Transaction tx) async {
       firestore.DocumentSnapshot snapshot = await tx.get(reference);
       if (!snapshot.exists) {
-        error = InvalidOperation("Game $gameID doesn't exist");
+        error = InvalidOperation("Game $gameID doesn't exist")
+          ..addTag(JoinGameErrorSource.gameID);
         return;
       }
       {
@@ -371,7 +356,8 @@ class GameController {
           documentPath: reference.path);
       for (final p in playerData.values().where((v) => !(v.kicked ?? false))) {
         if (myName == p.name) {
-          error = InvalidOperation("Name $myName is already taken");
+          error = InvalidOperation("Name $myName is already taken")
+            ..addTag(JoinGameErrorSource.playerName);
           return;
         }
       }

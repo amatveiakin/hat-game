@@ -19,6 +19,8 @@ import 'package:hatgame/widget/wide_button.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
 
 class GameConfigView extends StatefulWidget {
+  static const String routeName = '/game-config';
+
   final GameConfigController configController;
   final LocalGameData localGameData;
 

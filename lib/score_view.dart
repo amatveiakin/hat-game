@@ -188,6 +188,7 @@ class ScoreView extends StatelessWidget {
               gameData.scoreData().map((s) => _TeamScoreView(data: s)).toList(),
         ),
       ),
+      secondaryRouteName: '/game-log',
       secondary: Padding(
         padding: EdgeInsets.all(6.0),
         child: ListView(
