@@ -5,6 +5,7 @@ import 'package:hatgame/built_value/personal_state.dart';
 import 'package:hatgame/db/db_columns.dart';
 import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/game_data.dart';
+import 'package:hatgame/local_storage.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/future.dart';
 import 'package:meta/meta.dart';
@@ -69,6 +70,10 @@ class GameConfigController {
         ..teaming.unequalTeamSize = UnequalTeamSize.forbid
         ..teaming.guessingInLargeTeam = IndividualPlayStyle.fluidPairs,
     );
+  }
+
+  static GameConfig initialConfig() {
+    return LocalStorage.instance.get(LocalColLastConfig()) ?? defaultConfig();
   }
 
   GameConfigController.fromDB(this.localGameData) {
@@ -140,9 +145,16 @@ class GameConfigController {
         inRelease: AssertInRelease.log);
   }
 
+  void _updateLastConfig(GameConfig config) {
+    // Best-effort, don't wait.
+    LocalStorage.instance
+        .set(LocalColLastConfig(), config.rebuild((b) => b..players = null));
+  }
+
   Future<void> update(GameConfig Function(GameConfig) updater) {
     _checkWritesAllowed();
     _rawConfig = updater(_rawConfig);
+    _updateLastConfig(_rawConfig);
     _streamController.add(configPlus());
     return localGameData.gameReference.updateColumns([
       DBColConfig().withData(_rawConfig),

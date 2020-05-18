@@ -231,7 +231,7 @@ class GameController {
   static Future<LocalGameData> newOffineGame() async {
     DBDocumentReference reference = newLocalGameReference();
     await reference.delete();
-    final GameConfig config = GameConfigController.defaultConfig().rebuild(
+    final GameConfig config = GameConfigController.initialConfig().rebuild(
       (b) => b.players.names.replace({}),
     );
     await reference.setColumns(
@@ -258,8 +258,7 @@ class GameController {
     String gameID;
     firestore.DocumentReference reference;
     final int playerID = 0;
-    // TODO: Use config from local storage OR from account.
-    final GameConfig config = GameConfigController.defaultConfig();
+    final GameConfig config = GameConfigController.initialConfig();
     final gameRecordStub = _newGameRecord();
     for (int idLength = minIDLength;
         idLength <= maxIDLength && gameID == null;

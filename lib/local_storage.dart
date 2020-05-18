@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/db/db_columns.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,6 +8,7 @@ import 'package:unicode/unicode.dart' as unicode;
 // =============================================================================
 // Local config interface
 
+// TODO: Also sync to personal account when it exists.
 abstract class LocalStorage {
   static LocalStorage instance;
 
@@ -34,6 +36,11 @@ abstract class LocalStorage {
 
 class LocalColPlayerName extends DBColumn<String> with DBColSerializeString {
   String get name => 'player_name';
+}
+
+class LocalColLastConfig extends DBColumn<GameConfig>
+    with DBColSerializeBuiltValue {
+  String get name => 'last_config';
 }
 
 // =============================================================================
