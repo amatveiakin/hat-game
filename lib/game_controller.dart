@@ -341,11 +341,18 @@ class GameController {
     //         java.lang.Exception: DoTransaction failed: Invalid argument:
     //         Instance of '_CompactLinkedHashSet<Object>', null)
     int playerID = 0;
+    // For some reason, throwing or returning Future.error from `runTransaction`
+    // doesn't work. Got:
+    //     Unhandled Exception: PlatformException(Error performing transaction,
+    //         java.lang.Exception: DoTransaction failed: Instance of
+    //         'InvalidOperation', null)
+    InvalidOperation error;
 
     await firestoreInstance.runTransaction((firestore.Transaction tx) async {
       firestore.DocumentSnapshot snapshot = await tx.get(reference);
       if (!snapshot.exists) {
-        return Future.error(InvalidOperation("Game $gameID doesn't exist"));
+        error = InvalidOperation("Game $gameID doesn't exist");
+        return;
       }
       {
         // [2/2] Workaround flutter/firestore error. Do a dumb write.
@@ -355,7 +362,8 @@ class GameController {
         checkVersionCompatibility(
             dbTryGet(snapshot.data, DBColHostAppVersion()), appVersion);
       } on InvalidOperation catch (e) {
-        return Future.error(e);
+        error = e;
+        return;
       }
 
       // Note: include kicked players.
@@ -363,8 +371,8 @@ class GameController {
           documentPath: reference.path);
       for (final p in playerData.values().where((v) => !(v.kicked ?? false))) {
         if (myName == p.name) {
-          return Future.error(
-              InvalidOperation("Name $myName is already taken"));
+          error = InvalidOperation("Name $myName is already taken");
+          return;
         }
       }
       playerID = dbNextIndex(playerData);
@@ -377,6 +385,10 @@ class GameController {
               ..name = myName))
           ]));
     });
+
+    if (error != null) {
+      throw error;
+    }
 
     return LocalGameData(
       onlineMode: true,
