@@ -4,8 +4,10 @@ import 'package:url_launcher/url_launcher.dart';
 
 class MarkdownUtil {
   static String joinParagraphs(String text) {
-    final regExp = RegExp('(?<!\n)\n(?!\n)', multiLine: true);
-    return text.replaceAll(regExp, ' ');
+    return text
+        .split(RegExp('\n\n+'))
+        .map((s) => s.split('\n').join(' '))
+        .join('\n');
   }
 
   static MarkdownStyleSheet defaultStyle(BuildContext context) {
