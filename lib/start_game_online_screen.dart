@@ -4,8 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:hatgame/game_config_view.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
-import 'package:hatgame/local_config.dart';
-import 'package:hatgame/util/assertion.dart';
+import 'package:hatgame/local_storage.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/widget/checked_text_field.dart';
 import 'package:hatgame/widget/constrained_scaffold.dart';
@@ -37,7 +36,7 @@ class NewGameOnlineScreenState extends State<NewGameOnlineScreen> {
   final playerNameController =
       CheckedTextFieldController(checker: checkPlayerName);
 
-  LocalConfig get localConfig => LocalConfig.singleton;
+  LocalStorage get localStorage => LocalStorage.instance;
 
   Future<void> _createGame(BuildContext context) async {
     if (!checkTextFields([
@@ -66,9 +65,11 @@ class NewGameOnlineScreenState extends State<NewGameOnlineScreen> {
 
   @override
   void initState() {
-    playerNameController.textController.text = localConfig.lastPlayerName;
+    playerNameController.textController.text =
+        localStorage.get(LocalColPlayerName());
     playerNameController.textController.addListener(() {
-      localConfig.lastPlayerName = playerNameController.textController.text;
+      localStorage.set(
+          LocalColPlayerName(), playerNameController.textController.text);
     });
     playerNameController.focusNode.requestFocus();
     super.initState();
@@ -124,7 +125,7 @@ class JoinGameOnlineScreenState extends State<JoinGameOnlineScreen> {
   final playerNameController =
       CheckedTextFieldController(checker: checkPlayerName);
 
-  LocalConfig get localConfig => LocalConfig.singleton;
+  LocalStorage get localStorage => LocalStorage.instance;
 
   Future<void> _joinGame(BuildContext context) async {
     if (!checkTextFields([
@@ -161,9 +162,11 @@ class JoinGameOnlineScreenState extends State<JoinGameOnlineScreen> {
 
   @override
   void initState() {
-    playerNameController.textController.text = localConfig.lastPlayerName;
+    playerNameController.textController.text =
+        localStorage.get(LocalColPlayerName());
     playerNameController.textController.addListener(() {
-      localConfig.lastPlayerName = playerNameController.textController.text;
+      localStorage.set(
+          LocalColPlayerName(), playerNameController.textController.text);
     });
     gameIDController.focusNode.requestFocus();
     super.initState();

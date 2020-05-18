@@ -125,25 +125,25 @@ Map<String, dynamic> dbData(List<DBColumnData> columns) {
 // =============================================================================
 // Columns
 
-class DBColCreationTimeUtc extends DBColumn<String> with _SerializeString {
+class DBColCreationTimeUtc extends DBColumn<String> with DBColSerializeString {
   String get name => 'creation_time_utc';
 }
 
-class DBColHostAppVersion extends DBColumn<String> with _SerializeString {
+class DBColHostAppVersion extends DBColumn<String> with DBColSerializeString {
   String get name => 'host_app_version';
 }
 
-class DBColConfig extends DBColumn<GameConfig> with _SerializeBuiltValue {
+class DBColConfig extends DBColumn<GameConfig> with DBColSerializeBuiltValue {
   String get name => 'config';
 }
 
 class DBColInitialState extends DBColumn<InitialGameState>
-    with _SerializeBuiltValue {
+    with DBColSerializeBuiltValue {
   String get name => 'initial_state';
 }
 
 class DBColTurnRecord extends DBColumnFamily<TurnRecord>
-    with _SerializeBuiltValue {
+    with DBColSerializeBuiltValue {
   static const String prefix = 'turn-';
   DBColTurnRecord(int id) : super(id);
   String get name => '$prefix$id';
@@ -161,13 +161,13 @@ class DBColTurnRecordManager
   int idFromData(TurnRecord data) => null;
 }
 
-class DBColCurrentTurn extends DBColumn<TurnState> with _SerializeBuiltValue {
+class DBColCurrentTurn extends DBColumn<TurnState> with DBColSerializeBuiltValue {
   String get name => 'turn_current';
 }
 
 // Per-player state in online mode.
 class DBColPlayer extends DBColumnFamily<PersonalState>
-    with _SerializeBuiltValue {
+    with DBColSerializeBuiltValue {
   static const String prefix = 'player-';
   DBColPlayer(int id) : super(id);
   String get name => '$prefix$id';
@@ -189,7 +189,7 @@ class DBColPlayerManager
 // per-player state, so this column is separate from DBColState for the purely
 // technical reason of trying to keep offline and online implementations close.
 class DBColLocalPlayer extends DBColumn<PersonalState>
-    with _SerializeBuiltValue {
+    with DBColSerializeBuiltValue {
   DBColLocalPlayer();
   String get name => 'additional_state';
 }
@@ -197,7 +197,7 @@ class DBColLocalPlayer extends DBColumn<PersonalState>
 // =============================================================================
 // Implementation
 
-mixin _SerializeBuiltValue<T> on DBColumn<T> {
+mixin DBColSerializeBuiltValue<T> on DBColumn<T> {
   Serializer _serializer() => serializers.serializerForType(T);
   String serializeImpl(T value) =>
       json.encode(serializers.serializeWith(_serializer(), value));
@@ -205,7 +205,7 @@ mixin _SerializeBuiltValue<T> on DBColumn<T> {
       serializers.deserializeWith(_serializer(), json.decode(serialized));
 }
 
-mixin _SerializeString on DBColumn<String> {
+mixin DBColSerializeString on DBColumn<String> {
   String serializeImpl(String value) => value;
   String deserializeImpl(String serialized) => serialized;
 }

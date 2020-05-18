@@ -6,6 +6,7 @@ import 'package:hatgame/app_version.dart';
 import 'package:hatgame/game_config_view.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
+import 'package:hatgame/local_storage.dart';
 import 'package:hatgame/rules_screen.dart';
 import 'package:hatgame/start_game_online_screen.dart';
 import 'package:hatgame/util/invalid_operation.dart';
@@ -74,6 +75,8 @@ class StartScreenState extends State<StartScreen> {
 
   _initPlatformState() async {
     _initFirestore();
+    // TODO: Start all init-s in parallel, with a common timeout.
+    await LocalStorage.init();
     await Sounds.init();
     await NtpTime.init();
     setState(() {
