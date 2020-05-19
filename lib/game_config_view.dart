@@ -15,6 +15,7 @@ import 'package:hatgame/teaming_config_view.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/invalid_operation.dart';
+import 'package:hatgame/widget/async_snapshot_error.dart';
 import 'package:hatgame/widget/invalid_operation_dialog.dart';
 import 'package:hatgame/widget/sections_scaffold.dart';
 import 'package:hatgame/widget/wide_button.dart';
@@ -172,13 +173,8 @@ class _GameConfigViewState extends State<GameConfigView>
     return StreamBuilder<GameConfigPlus>(
       stream: configController.stateUpdatesStream,
       builder: (BuildContext context, AsyncSnapshot<GameConfigPlus> snapshot) {
-        // TODO: Deal with errors and loading.
         if (snapshot.hasError) {
-          return Center(
-              child: Text(
-            'Error getting game config:\n' + snapshot.error.toString(),
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
-          ));
+          return AsyncSnapshotError(snapshot, dataName: 'game config');
         }
         if (!snapshot.hasData) {
           return Center(child: CircularProgressIndicator());

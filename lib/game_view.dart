@@ -14,6 +14,7 @@ import 'package:hatgame/util/functions.dart';
 import 'package:hatgame/util/ntp_time.dart';
 import 'package:hatgame/util/sounds.dart';
 import 'package:hatgame/util/vibration.dart';
+import 'package:hatgame/widget/async_snapshot_error.dart';
 import 'package:hatgame/widget/constrained_scaffold.dart';
 import 'package:hatgame/widget/padlock.dart';
 import 'package:hatgame/widget/timer.dart';
@@ -626,16 +627,9 @@ class GameViewState extends State<GameView> {
           stream: gameController.stateUpdatesStream,
           builder: (BuildContext context, AsyncSnapshot<GameData> snapshot) {
             if (snapshot.hasError) {
-              // TODO: Deal with errors.
-              return Center(
-                  child: Text(
-                'Error getting game data:\n' + snapshot.error.toString(),
-                style:
-                    TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
-              ));
+              return AsyncSnapshotError(snapshot, dataName: 'game data');
             }
             if (!snapshot.hasData) {
-              // TODO: Deal with loading (use snapshot.connectionState?)
               return Center(child: CircularProgressIndicator());
             }
             final gameData = snapshot.data;
