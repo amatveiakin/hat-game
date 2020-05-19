@@ -562,6 +562,8 @@ class PlayAreaState extends State<PlayArea>
 }
 
 class GameView extends StatefulWidget {
+  static const String routeName = '/game';
+
   final GameController gameController;
   final LocalGameData localGameData;
 
@@ -606,7 +608,7 @@ class GameViewState extends State<GameView> {
     Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
           builder: (context) => ScoreView(gameData: gameData),
-          settings: RouteSettings(name: 'Scoreboard'),
+          settings: RouteSettings(name: ScoreView.routeName),
         ),
         ModalRoute.withName('/'));
   }

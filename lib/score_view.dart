@@ -172,6 +172,8 @@ class _TurnView extends StatelessWidget {
 }
 
 class ScoreView extends StatelessWidget {
+  static const String routeName = '/scoreboard';
+
   final GameData gameData;
 
   ScoreView({@required this.gameData});

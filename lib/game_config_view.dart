@@ -94,7 +94,7 @@ class _GameConfigViewState extends State<GameConfigView>
     Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
           builder: (context) => KickedScreen(),
-          settings: RouteSettings(name: 'Kicked'),
+          settings: RouteSettings(name: KickedScreen.routeName),
         ),
         ModalRoute.withName('/'));
   }
@@ -117,7 +117,7 @@ class _GameConfigViewState extends State<GameConfigView>
           builder: (context) => GameView(
             localGameData: localGameData,
           ),
-          settings: RouteSettings(name: 'Game'),
+          settings: RouteSettings(name: GameView.routeName),
         ),
         ModalRoute.withName('/'));
   }
