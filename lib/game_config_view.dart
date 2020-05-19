@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/game_controller.dart';
@@ -9,6 +10,7 @@ import 'package:hatgame/offline_player_config_view.dart';
 import 'package:hatgame/online_player_config_view.dart';
 import 'package:hatgame/partying_strategy.dart';
 import 'package:hatgame/rules_config_view.dart';
+import 'package:hatgame/start_game_online_screen.dart';
 import 'package:hatgame/teaming_config_view.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/assertion.dart';
@@ -25,6 +27,7 @@ class GameConfigView extends StatefulWidget {
 
   final GameConfigController configController;
   final LocalGameData localGameData;
+  final scaffoldKey = GlobalKey<ScaffoldState>();
 
   GameConfigView({@required this.localGameData})
       : configController = GameConfigController.fromDB(localGameData);
@@ -86,6 +89,48 @@ class _GameConfigViewState extends State<GameConfigView>
     _tabController.dispose();
     _rulesConfigViewController.dispose();
     super.dispose();
+  }
+
+  void _getJoinLink(GlobalKey<ScaffoldState> scaffoldKey) {
+    final String link = JoinGameOnlineScreen.makeLink(localGameData.gameID);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Game join link'),
+          content: Row(
+            children: [
+              Expanded(
+                child: Text(link),
+              ),
+              IconButton(
+                icon: Icon(Icons.content_copy),
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: link)).then((_) {
+                    scaffoldKey.currentState.showSnackBar(
+                        SnackBar(content: Text('Link copied to clipboard')));
+                  }, onError: (error) {
+                    // TODO: Log to firebase.
+                    debugPrint('Cannot copy to clipboard. Error: $error');
+                    scaffoldKey.currentState.showSnackBar(SnackBar(
+                        content: Text('Cannot copy link to clipboard :(')));
+                  });
+                },
+              ),
+            ],
+          ),
+          actions: [
+            FlatButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _goToKicked() {
@@ -203,11 +248,20 @@ class _GameConfigViewState extends State<GameConfigView>
         );
 
         return SectionsScaffold(
+          scaffoldKey: widget.scaffoldKey,
           appBarAutomaticallyImplyLeading: false,
           appTitle: localGameData.onlineMode
               ? 'Hat Game ID: ${localGameData.gameID}'
               : 'Hat Game',
           appTitlePresentInNarrowMode: localGameData.onlineMode,
+          actions: localGameData.onlineMode
+              ? [
+                  IconButton(
+                    icon: Icon(Icons.link),
+                    onPressed: () => _getJoinLink(widget.scaffoldKey),
+                  )
+                ]
+              : [],
           sections: sections,
           tabController: _tabController,
           bottomWidget: startButton,

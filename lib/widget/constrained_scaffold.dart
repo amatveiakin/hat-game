@@ -5,12 +5,14 @@ import 'package:flutter/material.dart';
 class ConstrainedScaffold extends StatelessWidget {
   static const double defaultWidth = 800.0;
 
+  final Key scaffoldKey;
   final PreferredSizeWidget appBar;
   final Widget body;
   final bool resizeToAvoidBottomInset;
   final double width;
 
   ConstrainedScaffold({
+    this.scaffoldKey,
     @required this.appBar,
     @required this.body,
     this.resizeToAvoidBottomInset,
@@ -20,6 +22,7 @@ class ConstrainedScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: scaffoldKey,
       appBar: appBar,
       body: Center(
         child: ConstrainedBox(

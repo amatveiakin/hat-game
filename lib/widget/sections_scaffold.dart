@@ -18,22 +18,29 @@ class SectionData {
 }
 
 class SectionsScaffold extends StatelessWidget {
+  final Key scaffoldKey;
   final bool appBarAutomaticallyImplyLeading;
   final String appTitle;
   final bool appTitlePresentInNarrowMode;
   final List<SectionData> sections;
+  final List<Widget> actions;
   final TabController tabController;
   final Widget bottomWidget;
 
   SectionsScaffold({
+    this.scaffoldKey,
     @required this.appBarAutomaticallyImplyLeading,
     @required this.appTitle,
     @required this.appTitlePresentInNarrowMode,
     @required this.sections,
+    this.actions,
     this.tabController,
     this.bottomWidget,
   }) {
     if (appBarAutomaticallyImplyLeading) {
+      Assert.holds(appTitlePresentInNarrowMode);
+    }
+    if (actions.isNotEmpty) {
       Assert.holds(appTitlePresentInNarrowMode);
     }
   }
@@ -63,11 +70,13 @@ class SectionsScaffold extends StatelessWidget {
             .toList(),
       );
       final scaffold = ConstrainedScaffold(
+        scaffoldKey: scaffoldKey,
         resizeToAvoidBottomInset: false,
         appBar: appTitlePresentInNarrowMode
             ? AppBar(
                 automaticallyImplyLeading: appBarAutomaticallyImplyLeading,
                 title: Text(appTitle),
+                actions: actions,
                 // For some reason PreferredSize affects not only the bottom of
                 // the AppBar but also the title, making it misaligned with the
                 // normal title text position. Hopefully this is not too
@@ -140,10 +149,12 @@ class SectionsScaffold extends StatelessWidget {
         );
       }
       return Scaffold(
+        key: scaffoldKey,
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
           automaticallyImplyLeading: appBarAutomaticallyImplyLeading,
           title: Text(appTitle),
+          actions: actions,
         ),
         body: Center(
           child: SizedBox(
