@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/db/db_columns.dart';
+import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unicode/unicode.dart' as unicode;
@@ -13,6 +14,7 @@ abstract class LocalStorage {
   static LocalStorage instance;
 
   static Future<void> init() async {
+    Assert.holds(instance == null);
     try {
       instance = await LocalStorageFromSharedPreferences.getInstance();
       debugPrint('Local storage loaded successfully.');
@@ -25,6 +27,11 @@ abstract class LocalStorage {
         instance = LocalStorageInMemory();
       }
     }
+  }
+
+  static void test_init() {
+    debugPrint("LocalStorage running in test mode.");
+    instance = LocalStorageInMemory();
   }
 
   T get<T>(DBColumn<T> column);

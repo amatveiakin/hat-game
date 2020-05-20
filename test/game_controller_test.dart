@@ -5,6 +5,7 @@ import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
+import 'package:hatgame/local_storage.dart';
 import 'package:hatgame/util/list_ext.dart';
 import 'package:hatgame/util/ntp_time.dart';
 
@@ -13,6 +14,7 @@ class AppConfig {
 }
 
 void setupApp(AppConfig config) {
+  LocalStorage.test_init();
   NtpTime.test_setInitialized(config.hasNtp);
 }
 
