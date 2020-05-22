@@ -27,6 +27,8 @@ abstract class DBColumn<T> {
   // Note: `data` can be null, in which case null is written to the DB.
   // This is similar, but not equivalent to removing the column (`dbTryGet`
   // doesn't distinguish between the two, but `dbContains` does).
+  // TODO: Consider: forbid null; add 'delete column' sentinel; delete
+  // `dbContainsNonNull`.
   DBColumnData<T> withData(T data) {
     return DBColumnData<T>(this, data);
   }
@@ -68,6 +70,10 @@ extension DBColumnDataIterableUtil<T> on Iterable<DBIndexedColumnData<T>> {
 
 bool dbContains<T>(Map<String, dynamic> data, DBColumn<T> column) {
   return data.containsKey(column.name);
+}
+
+bool dbContainsNonNull<T>(Map<String, dynamic> data, DBColumn<T> column) {
+  return dbTryGet(data, column) != null;
 }
 
 T dbGet<T>(Map<String, dynamic> data, DBColumn<T> column,

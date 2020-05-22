@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_state.dart';
+import 'package:hatgame/db/db_document.dart';
+import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
+import 'package:hatgame/game_navigator.dart';
+import 'package:hatgame/game_phase.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/widget/primary_secondary_scaffold.dart';
 import 'package:hatgame/widget/spacing.dart';
@@ -174,12 +178,24 @@ class _TurnView extends StatelessWidget {
 class ScoreView extends StatelessWidget {
   static const String routeName = '/scoreboard';
 
-  final GameData gameData;
+  final LocalGameData localGameData;
+  final GameNavigator navigator =
+      GameNavigator(currentPhase: GamePhase.gameOver);
 
-  ScoreView({@required this.gameData});
+  ScoreView({@required this.localGameData});
 
   @override
   Widget build(BuildContext context) {
+    return navigator.buildWrapper(
+      context: context,
+      localGameData: localGameData,
+      buildBody: buildBody,
+    );
+  }
+
+  Widget buildBody(BuildContext context, DBDocumentSnapshot snapshot) {
+    final gameController = GameController.fromSnapshot(localGameData, snapshot);
+    final gameData = gameController.gameData;
     return PrimarySecondaryScaffold(
       primaryAutomaticallyImplyLeading: true,
       primaryTitle: 'Game Over',

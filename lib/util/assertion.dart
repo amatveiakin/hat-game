@@ -112,6 +112,16 @@ class Assert {
         inRelease: inRelease);
   }
 
+  static void isIn<T>(T a, Set<T> b,
+      {String message,
+      MessageProducer lazyMessage,
+      AssertInRelease inRelease = defaultReleaseBehavior}) {
+    holds(b.contains(a),
+        message: _combine([a.toString() + ' in ' + b.toString(), message]),
+        lazyMessage: lazyMessage,
+        inRelease: inRelease);
+  }
+
   static _combine(List<String> messages) {
     return messages.joinNonEmpty(': ');
   }

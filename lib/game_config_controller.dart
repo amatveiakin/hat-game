@@ -1,61 +1,25 @@
 import 'dart:async';
 
+import 'package:built_collection/built_collection.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/personal_state.dart';
 import 'package:hatgame/db/db_columns.dart';
 import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/game_data.dart';
+import 'package:hatgame/game_phase.dart';
 import 'package:hatgame/local_storage.dart';
 import 'package:hatgame/util/assertion.dart';
-import 'package:hatgame/util/future.dart';
-import 'package:meta/meta.dart';
-
-class GameConfigPlus {
-  final GameConfig config;
-  final bool gameHasStarted;
-  final bool kicked;
-
-  GameConfigPlus(
-    this.config, {
-    @required this.gameHasStarted,
-    @required this.kicked,
-  });
-}
-
-class GameConfigReadResult {
-  final GameConfig rawConfig;
-  final List<PersonalState> playerStates; // online-only
-  GameConfig get configWithOverrides =>
-      rawConfig.players != null || playerStates == null
-          ? rawConfig
-          : rawConfig.rebuild((b) => b
-            ..players.replace(PlayersConfig(
-              (b) => b
-                ..names.replace(Map.fromEntries(playerStates
-                    .where((e) => !(e.kicked ?? false))
-                    .map((p) => MapEntry(p.id, p.name)))),
-            )));
-
-  GameConfigReadResult(this.rawConfig, this.playerStates);
-}
 
 class GameConfigController {
   final LocalGameData localGameData;
-  GameConfig _rawConfig;
-  List<PersonalState> _playerStates;
-  bool _gameHasStarted = false;
-  final _streamController = StreamController<GameConfigPlus>(sync: true);
+  final GameConfig rawConfig;
+  final BuiltList<PersonalState> playerStates; // online-only
 
-  Stream<GameConfigPlus> get stateUpdatesStream => _streamController.stream;
   bool get isReadOnly => !localGameData.isAdmin;
 
-  bool isInitialized() =>
-      _rawConfig != null &&
-      (_playerStates == null ||
-          _playerStates.length > localGameData.myPlayerID);
-  bool _kicked() =>
-      _playerStates != null &&
-      (_playerStates[localGameData.myPlayerID].kicked ?? false);
+  bool get isInitialized =>
+      rawConfig != null &&
+      (playerStates == null || playerStates.length > localGameData.myPlayerID);
 
   static GameConfig defaultConfig() {
     return GameConfig(
@@ -76,67 +40,46 @@ class GameConfigController {
     return LocalStorage.instance.get(LocalColLastConfig()) ?? defaultConfig();
   }
 
-  GameConfigController.fromDB(this.localGameData) {
-    localGameData.gameReference.snapshots().listen(
-      _onUpdateFromDB,
-      onError: (error) {
-        Assert.fail('GameConfigController: DB error: $error');
-      },
-      onDone: () {
-        Assert.fail('GameConfigController: DB updates stream aborted');
-      },
-    );
+  GameConfig configWithOverrides() {
+    return rawConfig.players != null || playerStates == null
+        ? rawConfig
+        : rawConfig.rebuild((b) => b
+          ..players.replace(PlayersConfig(
+            (b) => b
+              ..names.replace(Map.fromEntries(playerStates
+                  .where((e) => !(e.kicked ?? false))
+                  .map((p) => MapEntry(p.id, p.name)))),
+          )));
   }
 
-  Future<void> testAwaitInitialized() {
-    return FutureUtil.doWhileDelayed(() => !isInitialized());
+  GameConfigController._(
+      this.localGameData, this.rawConfig, this.playerStates) {
+    if (isInitialized) {
+      if (localGameData.onlineMode) {
+        Assert.holds(rawConfig.players == null);
+        Assert.holds(playerStates != null);
+      } else {
+        Assert.holds(rawConfig.players != null);
+        Assert.holds(playerStates == null);
+      }
+    }
   }
 
-  static GameConfigReadResult configFromSnapshot(
+  factory GameConfigController.fromSnapshot(
       LocalGameData localGameData, DBDocumentSnapshot snapshot) {
     Assert.holds(snapshot.exists);
+    Assert.eq(
+        GamePhaseReader.getPhase(localGameData, snapshot), GamePhase.configure);
+
     GameConfig rawConfig = snapshot.get(DBColConfig());
-    List<PersonalState> playerStates;
+    BuiltList<PersonalState> playerStates;
     if (rawConfig.players == null && localGameData.onlineMode) {
       // This happens in online mode before the game has started.
-      playerStates = snapshot.getAll(DBColPlayerManager()).values().toList();
+      playerStates = BuiltList<PersonalState>.from(
+          snapshot.getAll(DBColPlayerManager()).values());
     }
-    return GameConfigReadResult(rawConfig, playerStates);
-  }
 
-  GameConfig configWithOverrides() {
-    return GameConfigReadResult(_rawConfig, _playerStates).configWithOverrides;
-  }
-
-  GameConfigPlus configPlus() => GameConfigPlus(
-        configWithOverrides(),
-        gameHasStarted: _gameHasStarted,
-        kicked: _kicked(),
-      );
-
-  void _onUpdateFromDB(final DBDocumentSnapshot snapshot) {
-    GameConfigReadResult readResult =
-        configFromSnapshot(localGameData, snapshot);
-    _playerStates = readResult.playerStates;
-    _gameHasStarted = snapshot.contains(DBColInitialState());
-    if (!isReadOnly && _rawConfig != null && !_gameHasStarted) {
-      // Skip updating the config. The host is the only user who is updating
-      // the config, so DB contains no information that we don't have. On
-      // the other hand, information from DB can lag behing and cause UI
-      // flickering if the config was updated many times in a row.
-    } else {
-      _rawConfig = readResult.rawConfig;
-    }
-    if (!isInitialized()) {
-      return;
-    }
-    if (localGameData.onlineMode) {
-      Assert.eq(_gameHasStarted, _rawConfig.players != null);
-      Assert.eq(_gameHasStarted, _playerStates == null);
-    } else {
-      Assert.holds(_playerStates == null);
-    }
-    _streamController.add(configPlus());
+    return GameConfigController._(localGameData, rawConfig, playerStates);
   }
 
   void _checkWritesAllowed() {
@@ -153,11 +96,10 @@ class GameConfigController {
 
   Future<void> update(GameConfig Function(GameConfig) updater) {
     _checkWritesAllowed();
-    _rawConfig = updater(_rawConfig);
-    _updateLastConfig(_rawConfig);
-    _streamController.add(configPlus());
+    final newRawConfig = updater(rawConfig);
+    _updateLastConfig(newRawConfig);
     return localGameData.gameReference.updateColumns([
-      DBColConfig().withData(_rawConfig),
+      DBColConfig().withData(newRawConfig),
     ]);
   }
 

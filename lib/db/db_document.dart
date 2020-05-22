@@ -46,6 +46,8 @@ abstract class DBDocumentSnapshot {
 
   bool contains(DBColumn col) => dbContains(rawData, col);
 
+  bool containsNonNull(DBColumn col) => dbContainsNonNull(rawData, col);
+
   T get<T>(DBColumn<T> col) =>
       dbGet(rawData, col, documentPath: reference.path);
 

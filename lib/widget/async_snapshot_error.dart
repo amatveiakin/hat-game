@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:hatgame/game_phase.dart';
 
 class AsyncSnapshotError extends StatelessWidget {
   final String errorMessage;
-  final String dataName;
+  final GamePhase gamePhase;
 
   AsyncSnapshotError(
     AsyncSnapshot<dynamic> snapshot, {
-    @required this.dataName,
+    @required this.gamePhase,
   }) : errorMessage = snapshot.error.toString() {
     // TODO: Log to firebase.
   }
@@ -15,7 +16,7 @@ class AsyncSnapshotError extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Text(
-        'Error getting $dataName:\n' + errorMessage,
+        'Error getting data at $gamePhase:\n' + errorMessage,
         style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
       ),
     );

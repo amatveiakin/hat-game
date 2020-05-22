@@ -14,11 +14,11 @@ import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/db/db_firestore.dart';
 import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/game_data.dart';
+import 'package:hatgame/game_phase.dart';
 import 'package:hatgame/partying_strategy.dart';
 import 'package:hatgame/start_game_online_screen.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/built_value_ext.dart';
-import 'package:hatgame/util/future.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/util/list_ext.dart';
 import 'package:hatgame/util/ntp_time.dart';
@@ -28,7 +28,7 @@ import 'package:russian_words/russian_words.dart' as russian_words;
 class TurnStateTransformer {
   final GameConfig config;
   final InitialGameState initialState;
-  final List<TurnRecord> turnLog;
+  final BuiltList<TurnRecord> turnLog;
   TurnState turnState;
 
   TurnStateTransformer(
@@ -170,33 +170,19 @@ class PersonalStateTransformer {
 
 class GameController {
   final LocalGameData localGameData;
-  GameConfig config;
-  // TODO: Should UI be able to get state from here or only from the stream?
-  InitialGameState initialState;
-  List<TurnRecord> turnLog;
-  TurnState turnState;
-  PersonalState personalState;
-  List<PersonalState> otherPersonalStates; // online-only
-  final localState = LocalGameState();
-  final _streamController = StreamController<GameData>(sync: true);
-
-  Stream<GameData> get stateUpdatesStream => _streamController.stream;
+  final GameConfig config;
+  final InitialGameState initialState;
+  final BuiltList<TurnRecord> turnLog;
+  final TurnState turnState;
+  final PersonalState personalState;
+  final BuiltList<PersonalState> otherPersonalStates; // online-only
 
   GameData get gameData => GameData(config, initialState, turnLog, turnState,
-      personalState, otherPersonalStates, localState);
+      personalState, otherPersonalStates);
   TurnStateTransformer get _transformer =>
       TurnStateTransformer(config, initialState, turnLog, turnState);
   PersonalStateTransformer get _personalTransformer =>
       PersonalStateTransformer(personalState);
-
-  // INVARIANTS. Since isInitialized becomes true:
-  //   - config, initialState, turnLog, personalState and otherPersonalStates
-  //     are always non-null,
-  //   - turnState is not null until the game is over,
-  //   - config and initialState don't change,
-  //   - isInitialized stays true,
-  //   - stateUpdatesStream starts sending updates.
-  bool isInitialized() => config != null;
 
   bool isActivePlayer() => turnState == null
       ? false
@@ -476,84 +462,55 @@ class GameController {
     return _writeInitialState(reference, config, initialState, turnState);
   }
 
-  Map<int, PersonalState> _parsePersonalStates(
-      final DBDocumentSnapshot snapshot) {
+  static Map<int, PersonalState> _parsePersonalStates(
+      DBDocumentSnapshot snapshot) {
     return Map.fromEntries(snapshot
         .getAll(DBColPlayerManager())
         .where((e) => !(e.value.kicked ?? false))
         .map((e) => MapEntry(e.id, e.value)));
   }
 
-  List<TurnRecord> _parseTurnLog(final DBDocumentSnapshot snapshot) {
-    return snapshot.getAll(DBColTurnRecordManager()).values().toList();
+  GameController._(
+    this.localGameData,
+    this.config,
+    this.initialState,
+    this.turnLog,
+    this.turnState,
+    this.personalState,
+    this.otherPersonalStates,
+  ) {
+    Assert.holds(!(personalState.kicked ?? false));
   }
 
-  void _onUpdateFromDB(final DBDocumentSnapshot snapshot) {
+  factory GameController.fromSnapshot(
+      LocalGameData localGameData, DBDocumentSnapshot snapshot) {
     Assert.holds(snapshot.exists);
-    if (!isInitialized()) {
-      final GameConfigReadResult configReadResult =
-          GameConfigController.configFromSnapshot(localGameData, snapshot);
-      if (!snapshot.contains(DBColInitialState())) {
-        return;
-      }
-      // This is the one and only place where the config changes.
-      config = configReadResult.configWithOverrides;
-      initialState = snapshot.get(DBColInitialState());
-    }
+    Assert.isIn(GamePhaseReader.getPhase(localGameData, snapshot),
+        {GamePhase.play, GamePhase.gameOver});
 
-    TurnState newTurnState = snapshot.tryGet(DBColCurrentTurn());
-    List<TurnRecord> newTurnLog = _parseTurnLog(snapshot);
-    if (isActivePlayer()) {
-      if (localGameData.onlineMode) {
-        final int newActivePlayer = activePlayer(newTurnState);
-        Assert.eq(localGameData.myPlayerID, newActivePlayer,
-            message: 'Active player unexpectedly changed from '
-                '${localGameData.myPlayerID} to $newActivePlayer');
-      }
-      // Ignore the update, because the state of truth is on the client while
-      // we are the active player.
-    } else if (turnLog != null &&
-        DerivedGameState.turnIndex(newTurnLog) <
-            DerivedGameState.turnIndex(turnLog)) {
-      // Similar to above. There is only one case when update in the DB can
-      // be older than the local version: we used to be the active player,
-      // wrote an update indicating that a new turn started and then received
-      // a stale update from the previous turn.
-    } else {
-      turnState = newTurnState;
-      turnLog = newTurnLog;
-    }
+    final GameConfig config = snapshot.get(DBColConfig());
+    final InitialGameState initialState = snapshot.get(DBColInitialState());
+    final BuiltList<TurnRecord> turnLog =
+        BuiltList.from(snapshot.getAll(DBColTurnRecordManager()).values());
+    final TurnState turnState = snapshot.tryGet(DBColCurrentTurn());
 
+    PersonalState personalState;
+    BuiltList<PersonalState> otherPersonalStates;
     if (localGameData.onlineMode) {
       final allPersonalStates = _parsePersonalStates(snapshot);
       Assert.holds(allPersonalStates.containsKey(localGameData.myPlayerID));
       personalState = allPersonalStates[localGameData.myPlayerID];
       allPersonalStates
           .removeWhere((playerID, _) => playerID == localGameData.myPlayerID);
-      otherPersonalStates = allPersonalStates.values.toList();
+      otherPersonalStates =
+          BuiltList<PersonalState>.from(allPersonalStates.values.toList());
     } else {
       personalState = snapshot.get(DBColLocalPlayer());
-      otherPersonalStates = [];
+      otherPersonalStates = BuiltList<PersonalState>.from([]);
     }
-    Assert.holds(!(personalState.kicked ?? false));
 
-    _streamController.add(gameData);
-  }
-
-  GameController.fromDB(this.localGameData) {
-    localGameData.gameReference.snapshots().listen(
-      _onUpdateFromDB,
-      onError: (error) {
-        Assert.fail('GameController: DB error: $error');
-      },
-      onDone: () {
-        Assert.fail('GameController: DB updates stream aborted');
-      },
-    );
-  }
-
-  Future<void> testAwaitInitialized() {
-    return FutureUtil.doWhileDelayed(() => !isInitialized());
+    return GameController._(localGameData, config, initialState, turnLog,
+        turnState, personalState, otherPersonalStates);
   }
 
   static Future<void> _writeInitialState(
@@ -571,16 +528,12 @@ class GameController {
   Future<void> _updateTurnState(TurnState newState) {
     Assert.holds(isActivePlayer(),
         message: 'Only the active player can change game state');
-    turnState = newState;
-    _streamController.add(gameData);
     return localGameData.gameReference.updateColumns([
       DBColCurrentTurn().withData(newState),
     ]);
   }
 
   Future<void> _updatePersonalState(PersonalState newState) {
-    personalState = newState;
-    _streamController.add(gameData);
     return localGameData.gameReference.updateColumns([
       DBColPlayer(localGameData.myPlayerID).withData(newState),
     ]);
@@ -590,20 +543,21 @@ class GameController {
     Assert.holds(isActivePlayer(),
         message: 'Only the active player can change game state');
     final int turnIndex = DerivedGameState.turnIndex(turnLog);
-    turnLog.add(TurnStateTransformer.turnRecord(turnState));
-    turnState = TurnStateTransformer.newTurn(
+    final TurnRecord newTurnRecord = TurnStateTransformer.turnRecord(turnState);
+    final BuiltList<TurnRecord> newTurnLog =
+        turnLog.rebuild((b) => b..add(newTurnRecord));
+    final TurnState newTurnState = TurnStateTransformer.newTurn(
       config,
       initialState,
       // pass (turnState == null) to `wordsInHat`, because words from the
-      // currect turn have already been moved to turnLog
+      // current turn have already been moved to turn log.
       timeToEndGame:
-          DerivedGameState.wordsInHat(initialState, turnLog, null).isEmpty,
+          DerivedGameState.wordsInHat(initialState, newTurnLog, null).isEmpty,
       turnIndex: turnIndex + 1,
     );
-    _streamController.add(gameData);
     return localGameData.gameReference.updateColumns([
-      DBColCurrentTurn().withData(turnState),
-      DBColTurnRecord(turnIndex).withData(turnLog.last),
+      DBColCurrentTurn().withData(newTurnState),
+      DBColTurnRecord(turnIndex).withData(newTurnRecord),
     ]);
   }
 

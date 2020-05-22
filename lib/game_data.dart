@@ -37,10 +37,10 @@ class LocalGameState {
 // GameData directly.
 //
 class DerivedGameState {
-  static int turnIndex(List<TurnRecord> turnLog) => turnLog.length;
+  static int turnIndex(Iterable<TurnRecord> turnLog) => turnLog.length;
 
   static Set<int> wordsInHat(InitialGameState initialState,
-      List<TurnRecord> turnLog, TurnState turnState) {
+      Iterable<TurnRecord> turnLog, TurnState turnState) {
     final Set<int> wordsInHat = initialState.words.map((w) => w.id).toSet();
     for (final t in turnLog) {
       wordsInHat.removeAll(t.wordsInThisTurn
@@ -54,7 +54,7 @@ class DerivedGameState {
   }
 
   static Set<int> wordsFlaggedByOthers(
-      List<PersonalState> otherPersonalStates) {
+      Iterable<PersonalState> otherPersonalStates) {
     final wordsFlaggedByOthers = Set<int>();
     for (final st in otherPersonalStates) {
       wordsFlaggedByOthers.addAll(st.wordFlags);
@@ -137,14 +137,13 @@ class TurnLogViewData {
 class GameData {
   final GameConfig config;
   final InitialGameState initialState;
-  final List<TurnRecord> turnLog;
+  final BuiltList<TurnRecord> turnLog;
   final TurnState turnState;
   final PersonalState personalState;
-  final List<PersonalState> otherPersonalStates; // online-only
-  final LocalGameState localState;
+  final BuiltList<PersonalState> otherPersonalStates; // online-only
 
   GameData(this.config, this.initialState, this.turnLog, this.turnState,
-      this.personalState, this.otherPersonalStates, this.localState);
+      this.personalState, this.otherPersonalStates);
 
   bool gameFinished() => turnState == null;
 

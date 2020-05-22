@@ -5,8 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value/personal_state.dart';
+import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
+import 'package:hatgame/game_navigator.dart';
+import 'package:hatgame/game_phase.dart';
 import 'package:hatgame/score_view.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/assertion.dart';
@@ -258,11 +261,13 @@ class PlayArea extends StatefulWidget {
   final LocalGameData localGameData;
   final GameController gameController;
   final GameData gameData;
+  final LocalGameState localGameState;
 
   PlayArea({
     @required this.localGameData,
     @required this.gameController,
     @required this.gameData,
+    @required this.localGameState,
   });
 
   @override
@@ -276,7 +281,7 @@ class PlayAreaState extends State<PlayArea>
   GameConfig get gameConfig => gameData.config;
   GameData get gameData => widget.gameData;
   TurnState get turnState => gameData.turnState;
-  LocalGameState get localGameState => gameData.localState;
+  LocalGameState get localGameState => widget.localGameState;
 
   AnimationController _padlockAnimationController;
   bool _turnActive = false;
@@ -565,103 +570,55 @@ class PlayAreaState extends State<PlayArea>
 class GameView extends StatefulWidget {
   static const String routeName = '/game';
 
-  final GameController gameController;
   final LocalGameData localGameData;
 
-  GameView({@required this.localGameData})
-      : gameController = GameController.fromDB(localGameData);
+  GameView({@required this.localGameData});
 
   @override
   State<StatefulWidget> createState() => GameViewState();
 }
 
 class GameViewState extends State<GameView> {
-  bool _navigatedToScoreboard = false;
+  final GameNavigator navigator = GameNavigator(currentPhase: GamePhase.play);
+  final LocalGameState localGameState = LocalGameState();
 
-  GameController get gameController => widget.gameController;
   LocalGameData get localGameData => widget.localGameData;
-
-  Future<bool> _onBackPressed() {
-    return showDialog(
-          context: context,
-          builder: (context) => new AlertDialog(
-            title: Text('Leave game?'),
-            // TODO: Replace with a description of how to re-join when it's
-            // possible to re-join.
-            content: Text("You wouldn't be able to join back "
-                "(this is not implemented yet)"),
-            actions: [
-              FlatButton(
-                child: Text('Stay'),
-                onPressed: () => Navigator.of(context).pop(false),
-              ),
-              FlatButton(
-                child: Text('Leave'),
-                onPressed: () => Navigator.of(context).pop(true),
-              ),
-            ],
-          ),
-        ) ??
-        false;
-  }
-
-  void _goToScoreboard(GameData gameData) {
-    Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (context) => ScoreView(gameData: gameData),
-          settings: RouteSettings(name: ScoreView.routeName),
-        ),
-        ModalRoute.withName('/'));
-  }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () => _onBackPressed(),
-      child: ConstrainedScaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          title: Text('Hat Game'),
-        ),
-        body: StreamBuilder<GameData>(
-          stream: gameController.stateUpdatesStream,
-          builder: (BuildContext context, AsyncSnapshot<GameData> snapshot) {
-            if (snapshot.hasError) {
-              return AsyncSnapshotError(snapshot, dataName: 'game data');
-            }
-            if (!snapshot.hasData) {
-              return Center(child: CircularProgressIndicator());
-            }
-            final gameData = snapshot.data;
+    return navigator.buildWrapper(
+      context: context,
+      localGameData: localGameData,
+      buildBody: buildBody,
+    );
+  }
 
-            if (gameData.gameFinished()) {
-              // Cannot navigate from within `build`.
-              if (!_navigatedToScoreboard) {
-                Future.delayed(Duration.zero, () => _goToScoreboard(gameData));
-                _navigatedToScoreboard = true;
-              }
-              return Center(child: CircularProgressIndicator());
-            }
-
-            return Container(
-              child: Column(
-                children: [
-                  PartyView(
-                    gameData.currentPartyViewData(),
-                    gameData.turnState.turnPhase,
-                    localGameData.myPlayerID,
-                  ),
-                  Expanded(
-                    child: PlayArea(
-                      localGameData: localGameData,
-                      gameController: gameController,
-                      gameData: gameData,
-                    ),
-                  ),
-                ],
+  Widget buildBody(BuildContext context, DBDocumentSnapshot snapshot) {
+    final gameController = GameController.fromSnapshot(localGameData, snapshot);
+    final gameData = gameController.gameData;
+    Assert.holds(gameData != null);
+    return ConstrainedScaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Text('Hat Game'),
+      ),
+      body: Container(
+        child: Column(
+          children: [
+            PartyView(
+              gameData.currentPartyViewData(),
+              gameData.turnState.turnPhase,
+              localGameData.myPlayerID,
+            ),
+            Expanded(
+              child: PlayArea(
+                localGameData: localGameData,
+                gameController: gameController,
+                gameData: gameData,
+                localGameState: localGameState,
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
     );
