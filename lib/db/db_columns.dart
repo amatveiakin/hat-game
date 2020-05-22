@@ -124,30 +124,73 @@ Map<String, dynamic> dbData(List<DBColumnData> columns) {
 
 // =============================================================================
 // Columns
+//
+// DB usage philosophy. At any point in time each column can we updated by at
+// most one player, called 'owner'. This allows to mostly avoid transactions.
+// Transactions are used only to generate unique IDs for games, players, etc.
+// Some columns are 'immutable' meaning that they cannot be updated or deleted
+// after they were initially writter.
 
+// Written when game lobby is created. Immutable.
 class DBColCreationTimeUtc extends DBColumn<String> with DBColSerializeString {
   String get name => 'creation_time_utc';
 }
 
+// Written when game lobby is created. Immutable.
 class DBColHostAppVersion extends DBColumn<String> with DBColSerializeString {
   String get name => 'host_app_version';
 }
 
+// Owned by the host during configuration phase. Immutable afterwards.
 class DBColConfig extends DBColumn<GameConfig> with DBColSerializeBuiltValue {
   String get name => 'config';
 }
 
+// Written when game starts. Immutable.
 class DBColInitialState extends DBColumn<InitialGameState>
     with DBColSerializeBuiltValue {
   String get name => 'initial_state';
 }
 
+// Written after turn. Immutable. Uses sequential numeration.
 class DBColTurnRecord extends DBColumnFamily<TurnRecord>
     with DBColSerializeBuiltValue {
   static const String prefix = 'turn-';
   DBColTurnRecord(int id) : super(id);
   String get name => '$prefix$id';
 }
+
+// Exists while the game is in progress, i.e. started but not finished.
+// Owned by the active player (the performer). For a new player to become
+// active, the previous active player must write an update handing over
+// the active player status.
+class DBColCurrentTurn extends DBColumn<TurnState>
+    with DBColSerializeBuiltValue {
+  String get name => 'turn_current';
+}
+
+// Per-player state in online mode. Owned by the corresponding player.
+class DBColPlayer extends DBColumnFamily<PersonalState>
+    with DBColSerializeBuiltValue {
+  static const String prefix = 'player-';
+  DBColPlayer(int id) : super(id);
+  String get name => '$prefix$id';
+}
+
+// Analog of DBColPlayer for offline mode. In offline mode there is no
+// per-player state, so this column is separate from DBColState for the purely
+// technical reason of trying to keep offline and online implementations close.
+class DBColLocalPlayer extends DBColumn<PersonalState>
+    with DBColSerializeBuiltValue {
+  DBColLocalPlayer();
+  String get name => 'additional_state';
+}
+
+// =============================================================================
+// Column managers
+//
+// These are helper classes used to work around the fact that Dart doesn't
+// allow to instantiate a generic type.
 
 class DBColTurnRecordManager
     extends DBColumnFamilyManager<TurnRecord, DBColTurnRecord> {
@@ -161,18 +204,6 @@ class DBColTurnRecordManager
   int idFromData(TurnRecord data) => null;
 }
 
-class DBColCurrentTurn extends DBColumn<TurnState> with DBColSerializeBuiltValue {
-  String get name => 'turn_current';
-}
-
-// Per-player state in online mode.
-class DBColPlayer extends DBColumnFamily<PersonalState>
-    with DBColSerializeBuiltValue {
-  static const String prefix = 'player-';
-  DBColPlayer(int id) : super(id);
-  String get name => '$prefix$id';
-}
-
 class DBColPlayerManager
     extends DBColumnFamilyManager<PersonalState, DBColPlayer> {
   @override
@@ -183,15 +214,6 @@ class DBColPlayerManager
 
   @override
   int idFromData(PersonalState data) => data.id;
-}
-
-// Analog of DBColPlayer for offline mode. In offline mode there is no
-// per-player state, so this column is separate from DBColState for the purely
-// technical reason of trying to keep offline and online implementations close.
-class DBColLocalPlayer extends DBColumn<PersonalState>
-    with DBColSerializeBuiltValue {
-  DBColLocalPlayer();
-  String get name => 'additional_state';
 }
 
 // =============================================================================
