@@ -47,8 +47,11 @@ class Assert {
 
   // TODO: Replace `@alwaysThrows` with `Never` return type when it's ready.
   @alwaysThrows
-  static void fail(String message,
-      {AssertInRelease inRelease = defaultReleaseBehavior}) {
+  static void fail(String message) {
+    holds(false, message: message, inRelease: AssertInRelease.fail);
+  }
+
+  static void failDebug(String message, {@required AssertInRelease inRelease}) {
     holds(false, message: message, inRelease: inRelease);
   }
 

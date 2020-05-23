@@ -29,7 +29,7 @@ class MyVibration {
   }
 
   static void _logVibrationError(e) {
-    Assert.fail('Vibration plugin failed with: ${e.toString()}',
+    Assert.failDebug('Vibration plugin failed with: ${e.toString()}',
         inRelease: AssertInRelease.log);
   }
 }

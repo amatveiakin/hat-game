@@ -26,7 +26,7 @@ class GameNavigator {
     @required LocalGameData localGameData,
   }) async {
     final snapshot = await localGameData.gameReference.get();
-    _navigate(
+    await _navigate(
       context: context,
       localGameData: localGameData,
       newPhase: GamePhaseReader.getPhase(localGameData, snapshot),
@@ -78,12 +78,13 @@ class GameNavigator {
     _navigationState = GameNavigationState.expected;
   }
 
-  static void _navigate({
+  static Future<void> _navigate({
     @required BuildContext context,
     @required LocalGameData localGameData,
     GamePhase oldPhase,
     @required GamePhase newPhase,
-  }) {
+  }) async {
+    await localGameData.gameReference.assertLocalCacheIsEmpty();
     // Hide virtual keyboard
     FocusScope.of(context).unfocus();
     switch (newPhase) {

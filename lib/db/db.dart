@@ -17,5 +17,5 @@ firestore.DocumentReference firestoreGameReference(
 }
 
 LocalDocumentReference newLocalGameReference() {
-  return LocalDocumentReference(path: LocalDB.instance.newRowPath());
+  return LocalDB.instance.add();
 }

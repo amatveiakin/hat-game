@@ -518,6 +518,7 @@ class GameController {
       GameConfig config,
       InitialGameState initialState,
       TurnState turnState) async {
+    await reference.clearLocalCache();
     return reference.updateColumns([
       DBColConfig().withData(config),
       DBColInitialState().withData(initialState),
@@ -530,7 +531,7 @@ class GameController {
         message: 'Only the active player can change game state');
     return localGameData.gameReference.updateColumns([
       DBColCurrentTurn().withData(newState),
-    ]);
+    ], localCache: LocalCacheBehavior.cache);
   }
 
   Future<void> _updatePersonalState(PersonalState newState) {
@@ -539,7 +540,7 @@ class GameController {
     ]);
   }
 
-  Future<void> nextTurn() {
+  Future<void> nextTurn() async {
     Assert.holds(isActivePlayer(),
         message: 'Only the active player can change game state');
     final int turnIndex = DerivedGameState.turnIndex(turnLog);
@@ -555,6 +556,7 @@ class GameController {
           DerivedGameState.wordsInHat(initialState, newTurnLog, null).isEmpty,
       turnIndex: turnIndex + 1,
     );
+    await localGameData.gameReference.clearLocalCache();
     return localGameData.gameReference.updateColumns([
       DBColCurrentTurn().withData(newTurnState),
       DBColTurnRecord(turnIndex).withData(newTurnRecord),

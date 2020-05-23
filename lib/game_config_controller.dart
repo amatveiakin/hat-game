@@ -100,7 +100,7 @@ class GameConfigController {
     _updateLastConfig(newRawConfig);
     return localGameData.gameReference.updateColumns([
       DBColConfig().withData(newRawConfig),
-    ]);
+    ], localCache: LocalCacheBehavior.cache);
   }
 
   void updateRules(RulesConfig Function(RulesConfig) updater) {

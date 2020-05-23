@@ -7,43 +7,56 @@ import 'package:hatgame/db/db_document.dart';
 import 'package:quiver/async.dart' as quiver_async;
 
 class LocalDocumentReference extends DBDocumentReference {
-  final String _path;
+  final LocalDB localDB;
+  final String path;
 
-  LocalDocumentReference({@required String path}) : _path = path;
-
-  String get path => _path;
+  LocalDocumentReference({@required this.localDB, @required this.path});
 
   Future<void> setColumns(List<DBColumnData> columns) {
-    _localDB.setRow(path, dbData(columns));
+    localDB.setRow(path, dbData(columns));
     return Future<void>.value();
   }
 
-  Future<void> updateColumnsImpl(List<DBColumnData> columns) {
-    _localDB.setRow(
-        path, Map.from(_localDB.getRow(path))..addAll(dbData(columns)));
+  // Ignore LocalCacheBehavior, since this is already a local DB.
+  Future<void> updateColumnsImpl(
+      List<DBColumnData> columns, LocalCacheBehavior _) {
+    localDB.setRow(
+        path, Map.from(localDB.getRow(path))..addAll(dbData(columns)));
     return Future<void>.value();
+  }
+
+  LocalDocumentSnapshot instaGet() {
+    return LocalDocumentSnapshot(this, localDB.getRow(path));
   }
 
   Future<LocalDocumentSnapshot> get() {
-    return Future.value(LocalDocumentSnapshot(this, _localDB.getRow(path)));
+    return Future.value(instaGet());
   }
 
   Future<void> delete() {
-    _localDB.removeRow(path);
+    localDB.removeRow(path);
+    return Future<void>.value();
+  }
+
+  Future<void> clearLocalCache() {
+    // Ignore LocalCacheBehavior, since this is already a local DB.
+    return Future<void>.value();
+  }
+
+  Future<void> assertLocalCacheIsEmpty() {
+    // Ignore LocalCacheBehavior, since this is already a local DB.
     return Future<void>.value();
   }
 
   Stream<LocalDocumentSnapshot> snapshots() {
     return quiver_async.concat([
       Stream.fromFuture(get()),
-      _localDB
+      localDB
           .snapshots()
           .where((update) => update.path == path)
           .map((update) => LocalDocumentSnapshot(this, update.data))
     ]);
   }
-
-  LocalDB get _localDB => LocalDB.instance;
 }
 
 class LocalDocumentSnapshot extends DBDocumentSnapshot {
@@ -111,6 +124,11 @@ class LocalDB {
     _rows[path] = null;
     _streamController.add(LocalDocumentRawUpdate(path, null));
   }
+
+  LocalDocumentReference document(String path) =>
+      LocalDocumentReference(localDB: this, path: path);
+
+  LocalDocumentReference add() => document(newRowPath());
 
   Stream<LocalDocumentRawUpdate> snapshots() => _streamController.stream;
 }

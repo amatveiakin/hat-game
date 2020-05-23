@@ -3,6 +3,11 @@ import 'package:hatgame/db/db_columns.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 import 'package:hatgame/util/assertion.dart';
 
+enum LocalCacheBehavior {
+  noCache,
+  cache,
+}
+
 abstract class DBDocumentReference {
   String get path;
 
@@ -10,19 +15,24 @@ abstract class DBDocumentReference {
 
   // Set new content for each column. Doesn't support nested updates
   // (in contrast to Firestore).
-  Future<void> updateColumns(List<DBColumnData> columns) {
+  Future<void> updateColumns(List<DBColumnData> columns,
+      {LocalCacheBehavior localCache = LocalCacheBehavior.noCache}) {
     checkNoNestedOverrides(columns);
-    return updateColumnsImpl(columns);
+    return updateColumnsImpl(columns, localCache);
   }
 
   Future<DBDocumentSnapshot> get();
 
   Future<void> delete();
 
+  Future<void> clearLocalCache();
+  Future<void> assertLocalCacheIsEmpty();
+
   Stream<DBDocumentSnapshot> snapshots();
 
   @protected
-  Future<void> updateColumnsImpl(List<DBColumnData> columns);
+  Future<void> updateColumnsImpl(
+      List<DBColumnData> columns, LocalCacheBehavior localCache);
 
   @protected
   void checkNoNestedOverrides(List<DBColumnData> columns) {
