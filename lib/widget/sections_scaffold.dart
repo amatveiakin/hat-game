@@ -157,19 +157,23 @@ class SectionsScaffold extends StatelessWidget {
           actions: actions,
         ),
         body: Center(
-          child: SizedBox(
-            width: maxWideLayoutWidth,
-            child: Column(
-              children: [
-                Expanded(
+          child: Column(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  width: maxWideLayoutWidth,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: boxes,
                   ),
                 ),
-                if (bottomWidget != null) bottomWidget,
-              ],
-            ),
+              ),
+              if (bottomWidget != null)
+                SizedBox(
+                  width: ConstrainedScaffold.defaultWidth,
+                  child: bottomWidget,
+                ),
+            ],
           ),
         ),
       );
