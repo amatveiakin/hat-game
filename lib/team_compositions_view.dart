@@ -12,6 +12,7 @@ import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/widget/async_snapshot_error.dart';
 import 'package:hatgame/widget/constrained_scaffold.dart';
+import 'package:hatgame/widget/image_assert_icon.dart';
 import 'package:hatgame/widget/invalid_operation_dialog.dart';
 import 'package:hatgame/widget/spacing.dart';
 import 'package:hatgame/widget/wide_button.dart';
@@ -21,8 +22,6 @@ enum NavigationState {
   expected,
   requested,
 }
-
-// TODO: Re-randomize button.
 
 // This is similar to _TeamScoreView from score_view.dart, but not similar
 // enough to unify the implementations.
@@ -76,6 +75,13 @@ class TeamCompositionsView extends StatelessWidget {
     GameController.discardTeamCompositions(localGameData.gameReference);
   }
 
+  void _regenerateTeamCompositions(GameConfig gameConfig) async {
+    // Shouldn't throw, because initial compositions have been generated
+    // successfully.
+    await GameController.generateTeamCompositions(
+        localGameData.gameReference, gameConfig);
+  }
+
   void _startGame(BuildContext context, GameConfig gameConfig,
       TeamCompositions teamCompositions) async {
     try {
@@ -107,6 +113,17 @@ class TeamCompositionsView extends StatelessWidget {
         title: Text(teamCompositionsViewData.gameConfig.teaming.teamPlay
             ? 'Team Compositions'
             : 'Turn Order'),
+        actions: [
+          if (localGameData.isAdmin)
+            IconButton(
+              icon: ImageAssetIcon('images/dice.png'),
+              onPressed: () => _regenerateTeamCompositions(
+                  teamCompositionsViewData.gameConfig),
+              tooltip: teamCompositionsViewData.gameConfig.teaming.teamPlay
+                  ? 'New random teams and turn order'
+                  : 'New random turn order',
+            )
+        ],
       ),
       body: Column(
         children: [

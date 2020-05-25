@@ -89,6 +89,7 @@ flutter:
   uses-material-design: true
 
   assets:
+    - images/dice.png
     - images/word_censored.png
     - sounds/time_over.ogg
 
