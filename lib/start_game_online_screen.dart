@@ -75,8 +75,13 @@ class NewGameOnlineScreenState extends State<NewGameOnlineScreen> {
       localStorage.set(
           LocalColPlayerName(), playerNameController.textController.text);
     });
-    playerNameController.focusNode.requestFocus();
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    playerNameController.focusNode.requestFocus();
+    super.didChangeDependencies();
   }
 
   @override
@@ -193,12 +198,17 @@ class JoinGameOnlineScreenState extends State<JoinGameOnlineScreen> {
       localStorage.set(
           LocalColPlayerName(), playerNameController.textController.text);
     });
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
     if (gameIDController.textController.text.isEmpty) {
       gameIDController.focusNode.requestFocus();
     } else {
       playerNameController.focusNode.requestFocus();
     }
-    super.initState();
+    super.didChangeDependencies();
   }
 
   @override
