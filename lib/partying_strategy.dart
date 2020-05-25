@@ -1,6 +1,7 @@
 import 'package:built_collection/built_collection.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
+import 'package:hatgame/built_value/team_compositions.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:meta/meta.dart';
@@ -111,13 +112,13 @@ abstract class PartyingStrategy {
   PartyingStrategy();
 
   factory PartyingStrategy.fromGame(
-      GameConfig config, InitialGameState initialState) {
-    if (initialState.teams != null) {
+      GameConfig config, TeamCompositions teamCompositions) {
+    if (teamCompositions.teams != null) {
       return FixedTeamsStrategy(
-          initialState.teams, config.teaming.guessingInLargeTeam);
+          teamCompositions.teams, config.teaming.guessingInLargeTeam);
     } else {
       return IndividualStrategy(
-          initialState.individualOrder, config.teaming.individualPlayStyle);
+          teamCompositions.individualOrder, config.teaming.individualPlayStyle);
     }
   }
 }

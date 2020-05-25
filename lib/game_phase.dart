@@ -6,6 +6,7 @@ import 'package:hatgame/util/assertion.dart';
 enum GamePhase {
   // Normal phases
   configure,
+  composeTeams,
   play,
   gameOver,
 
@@ -34,6 +35,8 @@ class GamePhaseReader {
       } else {
         return GamePhase.gameOver;
       }
+    } else if (snapshot.containsNonNull(DBColTeamCompositions())) {
+      return GamePhase.composeTeams;
     } else {
       return GamePhase.configure;
     }
@@ -43,16 +46,25 @@ class GamePhaseReader {
     switch (phase) {
       case GamePhase.configure:
         Assert.holds(snapshot.containsNonNull(DBColConfig()));
+        Assert.holds(!snapshot.containsNonNull(DBColTeamCompositions()));
+        Assert.holds(!snapshot.containsNonNull(DBColInitialState()));
+        Assert.holds(!snapshot.containsNonNull(DBColCurrentTurn()));
+        break;
+      case GamePhase.composeTeams:
+        Assert.holds(snapshot.containsNonNull(DBColConfig()));
+        Assert.holds(snapshot.containsNonNull(DBColTeamCompositions()));
         Assert.holds(!snapshot.containsNonNull(DBColInitialState()));
         Assert.holds(!snapshot.containsNonNull(DBColCurrentTurn()));
         break;
       case GamePhase.play:
         Assert.holds(snapshot.containsNonNull(DBColConfig()));
+        Assert.holds(!snapshot.containsNonNull(DBColTeamCompositions()));
         Assert.holds(snapshot.containsNonNull(DBColInitialState()));
         Assert.holds(snapshot.containsNonNull(DBColCurrentTurn()));
         break;
       case GamePhase.gameOver:
         Assert.holds(snapshot.containsNonNull(DBColConfig()));
+        Assert.holds(!snapshot.containsNonNull(DBColTeamCompositions()));
         Assert.holds(snapshot.containsNonNull(DBColInitialState()));
         Assert.holds(!snapshot.containsNonNull(DBColCurrentTurn()));
         break;

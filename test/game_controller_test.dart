@@ -1,8 +1,12 @@
+import 'package:built_collection/built_collection.dart';
 import 'package:cloud_firestore_mocks/cloud_firestore_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
+import 'package:hatgame/built_value/team_compositions.dart';
+import 'package:hatgame/db/db_columns.dart';
+import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
@@ -10,6 +14,7 @@ import 'package:hatgame/game_phase.dart';
 import 'package:hatgame/local_storage.dart';
 import 'package:hatgame/util/list_ext.dart';
 import 'package:hatgame/util/ntp_time.dart';
+import 'package:meta/meta.dart';
 
 class AppConfig {
   bool hasNtp = true;
@@ -51,11 +56,33 @@ GameConfig twoVsTwoOfflineConfig() {
   );
 }
 
+TeamCompositions twoVsTwoSimpleComposition() {
+  return TeamCompositions(
+    (b) => b
+      ..teams.replace([
+        BuiltList<int>([0, 1]),
+        BuiltList<int>([2, 3])
+      ]),
+  );
+}
+
+TeamCompositions ascendingIndividualTurnOrder({@required int numPlayers}) {
+  return TeamCompositions(
+    (b) => b..individualOrder.replace(List<int>.generate(numPlayers, (i) => i)),
+  );
+}
+
+// TODO: Hook this into all DB writes automatically for invariant checks.
+Future<GamePhase> getGamePhase(LocalGameData localGameData) async {
+  final DBDocumentSnapshot snapshot = await localGameData.gameReference.get();
+  return GamePhaseReader.getPhase(localGameData, snapshot);
+}
+
 Future<void> minimalOfflineGameTest() async {
   final client = Client();
   client.localGameData = await GameController.newOffineGame();
-  await GameController.startGame(
-      client.localGameData.gameReference, twoVsTwoOfflineConfig());
+  await GameController.startGame(client.localGameData.gameReference,
+      twoVsTwoOfflineConfig(), twoVsTwoSimpleComposition());
 
   await (await client.controller()).startExplaning();
   await (await client.controller()).wordGuessed();
@@ -81,8 +108,8 @@ void main() {
       setupApp(AppConfig());
       final client = Client();
       client.localGameData = await GameController.newOffineGame();
-      await GameController.startGame(
-          client.localGameData.gameReference, twoVsTwoOfflineConfig());
+      await GameController.startGame(client.localGameData.gameReference,
+          twoVsTwoOfflineConfig(), twoVsTwoSimpleComposition());
 
       await (await client.controller()).startExplaning();
       final int w0 =
@@ -144,12 +171,10 @@ void main() {
               ..rules.wordsPerPlayer = 2,
           ));
 
-      // Don't shuffle players, so that host explains first.
-      final MockShuffler<int> shuffler = (l) => l;
-
-      await GameController.startGame(host.localGameData.gameReference,
+      await GameController.startGame(
+          host.localGameData.gameReference,
           (await host.configController()).configWithOverrides(),
-          individualOrderMockShuffler: shuffler);
+          ascendingIndividualTurnOrder(numPlayers: 2));
 
       await (await host.controller()).startExplaning();
       await (await host.controller()).finishExplanation();
@@ -195,15 +220,64 @@ void main() {
       await (await host.configController()).update((config) => config.rebuild(
             (b) => b..teaming.teamPlay = false,
           ));
+      final config = (await host.configController()).configWithOverrides();
 
-      await GameController.startGame(host.localGameData.gameReference,
-          (await host.configController()).configWithOverrides());
+      await GameController.generateTeamCompositions(
+          host.localGameData.gameReference, config);
+      final teamCompositions = (await host.localGameData.gameReference.get())
+          .get(DBColTeamCompositions());
+      expect(teamCompositions.individualOrder, unorderedEquals([0, 2]));
 
-      expect((await host.controller()).initialState.individualOrder.asList(),
-          unorderedEquals([0, 2]));
+      await GameController.startGame(
+          host.localGameData.gameReference, config, teamCompositions);
+
       final party = (await host.controller()).turnState.party;
       expect([party.performer] + party.recipients.toList(),
           unorderedEquals([0, 2]));
+    });
+
+    test('go to and from team compositions', () async {
+      setupApp(AppConfig());
+      final host = Client();
+      final guest = Client();
+
+      host.localGameData =
+          await GameController.newLobby(firestoreInstance, 'user_host');
+      expect(
+          await getGamePhase(host.localGameData), equals(GamePhase.configure));
+
+      guest.localGameData = await GameController.joinLobby(
+          firestoreInstance, 'user_guest', host.localGameData.gameID);
+      expect(
+          await getGamePhase(host.localGameData), equals(GamePhase.configure));
+
+      await (await host.configController()).update(
+          (config) => config.rebuild((b) => b..teaming.teamPlay = false));
+      expect(
+          await getGamePhase(host.localGameData), equals(GamePhase.configure));
+
+      await GameController.generateTeamCompositions(
+          host.localGameData.gameReference,
+          (await host.configController()).configWithOverrides());
+      expect(await getGamePhase(host.localGameData),
+          equals(GamePhase.composeTeams));
+
+      await GameController.discardTeamCompositions(
+          host.localGameData.gameReference);
+      expect(
+          await getGamePhase(host.localGameData), equals(GamePhase.configure));
+
+      await GameController.generateTeamCompositions(
+          host.localGameData.gameReference,
+          (await host.configController()).configWithOverrides());
+      expect(await getGamePhase(host.localGameData),
+          equals(GamePhase.composeTeams));
+
+      await GameController.startGame(
+          host.localGameData.gameReference,
+          (await host.configController()).configWithOverrides(),
+          ascendingIndividualTurnOrder(numPlayers: 2));
+      expect(await getGamePhase(host.localGameData), equals(GamePhase.play));
     });
   });
 }

@@ -8,6 +8,7 @@ import 'package:hatgame/app_version.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value/personal_state.dart';
+import 'package:hatgame/built_value/team_compositions.dart';
 import 'package:hatgame/db/db.dart';
 import 'package:hatgame/db/db_columns.dart';
 import 'package:hatgame/db/db_document.dart';
@@ -51,8 +52,9 @@ class TurnStateTransformer {
     return timeToEndGame
         ? null
         : TurnState((b) => b
-          ..party.replace(PartyingStrategy.fromGame(config, initialState)
-              .getParty(turnIndex))
+          ..party.replace(
+              PartyingStrategy.fromGame(config, initialState.teamCompositions)
+                  .getParty(turnIndex))
           ..turnPhase = TurnPhase.prepare);
   }
 
@@ -396,14 +398,13 @@ class GameController {
     });
   }
 
-  static Future<void> startGame(
-      DBDocumentReference reference, GameConfig config,
-      {MockShuffler<int> individualOrderMockShuffler}) {
+  static Future<void> generateTeamCompositions(
+      DBDocumentReference reference, GameConfig config) async {
     final numPlayers = config.players.names.length;
     final playerIDs = config.players.names.keys.toList();
-    BuiltList<BuiltList<int>> teams;
-    BuiltList<int> individualOrder;
+    TeamCompositions teamCompositions;
     if (config.teaming.teamPlay) {
+      BuiltList<BuiltList<int>> teams;
       if (config.players.teams != null) {
         teams = BuiltList<BuiltList<int>>.from(config.players.teams
             .map((team) => BuiltList<int>(team.toList().shuffled()))
@@ -418,13 +419,60 @@ class GameController {
             teamsMutable.map((t) => BuiltList<int>(t)));
       }
       checkTeamSizes(teams);
+      teamCompositions = TeamCompositions((b) => b..teams.replace(teams));
     } else {
       Assert.holds(config.players.teams == null);
       checkNumPlayersForIndividualPlay(
           numPlayers, config.teaming.individualPlayStyle);
-      individualOrder = BuiltList<int>.from(
-          playerIDs.shuffled(mockShuffler: individualOrderMockShuffler));
+      teamCompositions = TeamCompositions((b) => b
+        ..individualOrder.replace(
+          playerIDs.shuffled(),
+        ));
     }
+    await reference.clearLocalCache();
+    return reference.updateColumns([
+      DBColTeamCompositions().withData(teamCompositions),
+    ]);
+  }
+
+  static Future<void> discardTeamCompositions(DBDocumentReference reference) {
+    return reference.updateColumns([
+      DBColTeamCompositions().withData(null),
+    ]);
+  }
+
+  static TeamCompositionsViewData getTeamCompositions(
+      LocalGameData localGameData, DBDocumentSnapshot snapshot) {
+    List<String> _playerNames(GameConfig config, Iterable<int> playerIDs) {
+      return playerIDs.map((id) => config.players.names[id]).toList();
+    }
+
+    if (GamePhaseReader.getPhase(localGameData, snapshot) !=
+        GamePhase.composeTeams) {
+      return null;
+    }
+    final GameConfig gameConfig =
+        GameConfigController.fromSnapshot(localGameData, snapshot)
+            .configWithOverrides();
+    final TeamCompositions teamCompositions =
+        snapshot.get(DBColTeamCompositions());
+    final List<List<String>> playerNames = teamCompositions.teams != null
+        ? teamCompositions.teams
+            .map((t) => _playerNames(gameConfig, t))
+            .toList()
+        : teamCompositions.individualOrder
+            .map((p) => _playerNames(gameConfig, [p]))
+            .toList();
+    Assert.eq(teamCompositions.teams != null, gameConfig.teaming.teamPlay);
+    return TeamCompositionsViewData(
+        gameConfig: gameConfig,
+        teamCompositions: teamCompositions,
+        playerNames: playerNames);
+  }
+
+  static Future<void> startGame(DBDocumentReference reference,
+      GameConfig config, TeamCompositions teamCompositions) {
+    final numPlayers = config.players.names.length;
 
     final int totalWords = config.rules.wordsPerPlayer * numPlayers;
     final words = List<Word>();
@@ -445,11 +493,8 @@ class GameController {
         ..text = text));
     }
 
-    final InitialGameState initialState = InitialGameState((b) => b
-      ..individualOrder =
-          (individualOrder != null ? ListBuilder(individualOrder) : null)
-      ..teams = (teams != null ? ListBuilder(teams) : null)
-      ..words.replace(words));
+    final InitialGameState initialState = InitialGameState((b) =>
+        b..teamCompositions.replace(teamCompositions)..words.replace(words));
     final TurnState turnState = TurnStateTransformer.newTurn(
       config,
       initialState,
@@ -521,6 +566,7 @@ class GameController {
     await reference.clearLocalCache();
     return reference.updateColumns([
       DBColConfig().withData(config),
+      DBColTeamCompositions().withData(null),
       DBColInitialState().withData(initialState),
       DBColCurrentTurn().withData(turnState),
     ]);

@@ -35,8 +35,9 @@ class FirestoreDocumentReference extends DBDocumentReference {
 
   Future<void> assertLocalCacheIsEmpty() async {
     final localCache = _FirestoreLocalCache.singleton.get(this);
-    if (localCache != null) {
-      Assert.failDebug('Local cache should be empty, but found: $localCache',
+    if (localCache?.rawData != null) {
+      Assert.failDebug(
+          'Local cache should be empty, but found: ${localCache.rawData}',
           inRelease: AssertInRelease.log);
       await clearLocalCache();
     }

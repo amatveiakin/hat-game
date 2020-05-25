@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value/personal_state.dart';
+import 'package:hatgame/built_value/team_compositions.dart';
 import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/util/assertion.dart';
 
@@ -61,6 +62,18 @@ class DerivedGameState {
     }
     return wordsFlaggedByOthers;
   }
+}
+
+class TeamCompositionsViewData {
+  final GameConfig gameConfig;
+  final TeamCompositions teamCompositions;
+  final List<List<String>> playerNames;
+
+  TeamCompositionsViewData({
+    @required this.gameConfig,
+    @required this.teamCompositions,
+    @required this.playerNames,
+  });
 }
 
 class PlayerViewData {
@@ -202,8 +215,8 @@ class GameData {
     }
 
     final scoreItems = List<TeamScoreViewData>();
-    if (initialState.teams != null) {
-      for (final team in initialState.teams) {
+    if (initialState.teamCompositions.teams != null) {
+      for (final team in initialState.teamCompositions.teams) {
         final players = List<PlayerScoreViewData>();
         int totalWordsExplained = 0;
         int totalWordsGuessed = 0;
@@ -248,15 +261,17 @@ class GameData {
   }
 
   List<TurnLogViewData> turnLogData() {
-    return turnLog.map((t) => TurnLogViewData(
-          party: _partyToString(t.party),
-          wordsInThisTurn: t.wordsInThisTurn
-              .map((w) => WordInTurnLogViewData(
-                    text: _wordText(w.id),
-                    status: w.status,
-                  ))
-              .toList(),
-        )).toList();
+    return turnLog
+        .map((t) => TurnLogViewData(
+              party: _partyToString(t.party),
+              wordsInThisTurn: t.wordsInThisTurn
+                  .map((w) => WordInTurnLogViewData(
+                        text: _wordText(w.id),
+                        status: w.status,
+                      ))
+                  .toList(),
+            ))
+        .toList();
   }
 
   String _partyToString(Party p) {

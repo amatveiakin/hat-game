@@ -14,6 +14,7 @@ import 'package:hatgame/online_player_config_view.dart';
 import 'package:hatgame/partying_strategy.dart';
 import 'package:hatgame/rules_config_view.dart';
 import 'package:hatgame/start_game_online_screen.dart';
+import 'package:hatgame/team_compositions_view.dart';
 import 'package:hatgame/teaming_config_view.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/assertion.dart';
@@ -43,13 +44,6 @@ class _GameConfigViewState extends State<GameConfigView>
   final GameNavigator navigator =
       GameNavigator(currentPhase: GamePhase.configure);
 
-  // TODO: Consider: change 'Start Game' button to:
-  //   - advance to the next screen unless on the last screen alreay; OR
-  //   - move to player tab if players empty or incorrect
-  //     - this can be half-official, e.g. the button would be disabled and
-  //       display a warning, but still change the tab.
-  // (Are there best practices?)
-
   SectionTitleData rulesSectionTitle() => SectionTitleData(
         text: 'Rules',
         icon: Icon(Icons.settings),
@@ -73,7 +67,7 @@ class _GameConfigViewState extends State<GameConfigView>
   LocalGameData get localGameData => widget.localGameData;
   bool get isAdmin => localGameData.isAdmin;
   bool _navigatedToKicked = false;
-  bool _navigatedToGame = false;
+  bool _navigatedToTeamCompositions = false;
 
   TabController _tabController;
   final _rulesConfigViewController = RulesConfigViewController();
@@ -137,24 +131,13 @@ class _GameConfigViewState extends State<GameConfigView>
     );
   }
 
-  void _goToKicked() {
-    // Hide virtual keyboard
-    FocusScope.of(context).unfocus();
-    Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (context) => KickedScreen(),
-          settings: RouteSettings(name: KickedScreen.routeName),
-        ),
-        ModalRoute.withName('/'));
-  }
-
-  void _startGame(GameConfig gameConfig) {
+  void _generateTeamCompositions(GameConfig gameConfig) async {
     try {
-      GameController.startGame(localGameData.gameReference, gameConfig);
+      await GameController.generateTeamCompositions(
+          localGameData.gameReference, gameConfig);
     } on InvalidOperation catch (e) {
       showInvalidOperationDialog(context: context, error: e);
       _tabController.animateTo(playersTabIndex);
-      return;
     }
   }
 
@@ -205,14 +188,18 @@ class _GameConfigViewState extends State<GameConfigView>
       ),
     ];
     final startButton = WideButton(
-      onPressed: isAdmin ? () => _startGame(gameConfig) : null,
-      onPressedDisabled: () {
-        final snackBar =
-            SnackBar(content: Text('Only the host can start the game.'));
-        widget.scaffoldKey.currentState.showSnackBar(snackBar);
-      },
+      onPressed: isAdmin ? () => _generateTeamCompositions(gameConfig) : null,
       color: MyTheme.accent,
-      child: Text('Start Game'),
+      child: Row(
+        children: [
+          Expanded(child: Container()),
+          Text(gameConfig.teaming.teamPlay
+              ? 'Teams & Turn Order'
+              : 'Turn Order'),
+          Icon(Icons.arrow_right),
+          Expanded(child: Container()),
+        ],
+      ),
       margin: WideButton.bottomButtonMargin,
     );
 

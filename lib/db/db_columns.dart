@@ -6,6 +6,7 @@ import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value/personal_state.dart';
 import 'package:hatgame/built_value/serializers.dart';
+import 'package:hatgame/built_value/team_compositions.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/list_ext.dart';
 
@@ -150,6 +151,12 @@ class DBColHostAppVersion extends DBColumn<String> with DBColSerializeString {
 // Owned by the host during configuration phase. Immutable afterwards.
 class DBColConfig extends DBColumn<GameConfig> with DBColSerializeBuiltValue {
   String get name => 'config';
+}
+
+// Owned by the host during team compositions phase. Deleted afterwards.
+class DBColTeamCompositions extends DBColumn<TeamCompositions>
+    with DBColSerializeBuiltValue {
+  String get name => 'team_compositions';
 }
 
 // Written when game starts. Immutable.

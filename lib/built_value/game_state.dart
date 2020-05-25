@@ -3,6 +3,7 @@ library game_state;
 import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
+import 'package:hatgame/built_value/team_compositions.dart';
 
 part 'game_state.g.dart';
 
@@ -63,12 +64,7 @@ abstract class WordInTurn implements Built<WordInTurn, WordInTurnBuilder> {
 // ask the question: "Will this data be copied as-is for a rematch?"
 abstract class InitialGameState
     implements Built<InitialGameState, InitialGameStateBuilder> {
-  // Exactly one of `individualOrder` and `teams` must be set.
-  @nullable
-  BuiltList<int> get individualOrder;
-  // == PlayersConfig.teams, but teams and players within a team are shuffled.
-  @nullable
-  BuiltList<BuiltList<int>> get teams;
+  TeamCompositions get teamCompositions;
 
   // Store word IDs rather than words themselves for disambigution in case
   // two words are equal.
