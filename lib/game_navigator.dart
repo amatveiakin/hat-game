@@ -10,11 +10,16 @@ import 'package:hatgame/start_screen.dart';
 import 'package:hatgame/team_compositions_view.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/widget/async_snapshot_error.dart';
+import 'package:hatgame/widget/dialog.dart';
 
+// TODO: Remove or fix how it looks. Don't show loading indicator when
+//   loading is very fast. Idea: prefetch the first state for half-second
+//   and start navigation afterwards; show a screenshot meanwhile or show
+//   widgets based on the latest state for the current phase and block
+//   interactions.
 enum _GameNavigationState {
   none,
   expected,
-  requested,
 }
 
 // We never pop the the previous game stage directly: this is done only
@@ -25,19 +30,8 @@ enum _PopResponse {
   exitGame,
 }
 
-class _Destination {
-  final MaterialPageRoute route;
-  final GamePhase parent; // pop action target (optional)
-
-  _Destination(this.route, {this.parent});
-}
-
 // OPTIMIZATION POTENTIAL: This class might be simplified when Navigator 2.0
 //   is out: https://github.com/flutter/flutter/issues/45938.
-// TODO: Don't show loading indicator when loading is very fast. Idea:
-//   prefetch the first state for half-second and start navigation afterwards;
-//   show a screenshot meanwhile or show widgets based on the latest state
-//   for the current phase and block interactions.
 // TODO: Consider setting maintainState == false.
 // TODO: Is it ok that GameNavigator smuggles state into StalelessWidget?
 //   May be GameNavigator should be a mixin on top of StatefulWidget.
@@ -49,20 +43,20 @@ class GameNavigator {
     @required this.currentPhase,
   });
 
-  // TODO: Allow re-join game in the middle, use this.
-  /*
+  // TODO: Disable bonus turn timer after reconnect.
   static Future<void> navigateToGame({
     @required BuildContext context,
     @required LocalGameData localGameData,
   }) async {
     final snapshot = await localGameData.gameReference.get();
-    await _navigate(
+    final gamePhase = GamePhaseReader.fromSnapshot(localGameData, snapshot);
+    localGameData.lastSeenGamePhase = gamePhase;
+    await _navigateAndPushParents(
       context: context,
       localGameData: localGameData,
-      newPhase: GamePhaseReader.getPhase(localGameData, snapshot),
+      phase: gamePhase,
     );
   }
-  */
 
   Widget buildWrapper({
     @required BuildContext context,
@@ -84,16 +78,18 @@ class GameNavigator {
             return Center(child: CircularProgressIndicator());
           }
           final newPhase =
-              GamePhaseReader.getPhase(localGameData, snapshot.data);
-          if (newPhase != currentPhase &&
-              _navigationState != _GameNavigationState.requested) {
-            _navigationState = _GameNavigationState.requested;
-            Future(() => _navigate(
-                  context: context,
-                  localGameData: localGameData,
-                  oldPhase: currentPhase,
-                  newPhase: newPhase,
-                ));
+              GamePhaseReader.fromSnapshot(localGameData, snapshot.data);
+          if (newPhase != currentPhase) {
+            if (newPhase != localGameData.lastSeenGamePhase) {
+              localGameData.lastSeenGamePhase = newPhase;
+              Future(() => _navigate(
+                    context: context,
+                    localGameData: localGameData,
+                    oldPhase: currentPhase,
+                    newPhase: newPhase,
+                  ));
+            }
+            return Center(child: CircularProgressIndicator());
           }
           if (_navigationState != _GameNavigationState.none) {
             return Center(child: CircularProgressIndicator());
@@ -115,7 +111,28 @@ class GameNavigator {
   }
   */
 
-  Future<void> _navigate({
+  static Future<void> _navigateAndPushParents({
+    @required BuildContext context,
+    @required LocalGameData localGameData,
+    @required GamePhase phase,
+  }) async {
+    final GamePhase parent = _parentPhase(phase: phase);
+    if (parent != null) {
+      await _navigateAndPushParents(
+        context: context,
+        localGameData: localGameData,
+        phase: parent,
+      );
+    }
+    await _navigate(
+      context: context,
+      localGameData: localGameData,
+      oldPhase: parent,
+      newPhase: phase,
+    );
+  }
+
+  static Future<void> _navigate({
     @required BuildContext context,
     @required LocalGameData localGameData,
     @required GamePhase oldPhase,
@@ -124,110 +141,99 @@ class GameNavigator {
     await localGameData.gameReference.assertLocalCacheIsEmpty();
     // Hide virtual keyboard
     FocusScope.of(context).unfocus();
-    _Destination oldDest =
-        _destination(localGameData: localGameData, phase: oldPhase);
-    _Destination newDest =
-        _destination(localGameData: localGameData, phase: newPhase);
-    if (newPhase == oldDest.parent) {
+    final GamePhase oldPhaseParent = _parentPhase(phase: oldPhase);
+    final GamePhase newPhaseParent = _parentPhase(phase: newPhase);
+    final newRoute = _route(localGameData: localGameData, phase: newPhase);
+    if (newPhase == oldPhaseParent) {
       Navigator.of(context).pop(); // does not trigger `onWillPop`
       return;
     }
-    if (newDest.parent != null) {
-      Assert.eq(newDest.parent, oldPhase);
+    if (newPhaseParent != null) {
+      Assert.eq(newPhaseParent, oldPhase);
       Navigator.of(context).push(
-        newDest.route,
+        newRoute,
       );
-      // Reset _navigationState to allow navigating from this screen again if
-      // the user goes back to it. Don't reset _navigationState immediately,
-      // as in this case navigation to the next page happens multiple times.
-      newDest.route.popped.then((_) {
-        _navigationState = _GameNavigationState.none;
-      });
     } else {
       Navigator.of(context).pushAndRemoveUntil(
-        newDest.route,
+        newRoute,
         ModalRoute.withName('/'),
       );
     }
   }
 
-  static _Destination _destination({
+  static MaterialPageRoute _route({
     @required LocalGameData localGameData,
     @required GamePhase phase,
   }) {
+    final routeSettings = RouteSettings(name: localGameData.gameRoute);
     switch (phase) {
       case GamePhase.configure:
-        return _Destination(
-          MaterialPageRoute(
-            builder: (context) => GameConfigView(localGameData: localGameData),
-            settings: RouteSettings(name: GameConfigView.routeName),
-          ),
+        return MaterialPageRoute(
+          builder: (context) => GameConfigView(localGameData: localGameData),
+          settings: routeSettings,
         );
       case GamePhase.composeTeams:
-        return _Destination(
-          MaterialPageRoute(
-            builder: (context) =>
-                TeamCompositionsView(localGameData: localGameData),
-            settings: RouteSettings(name: TeamCompositionsView.routeName),
-          ),
-          parent: GamePhase.configure,
+        return MaterialPageRoute(
+          builder: (context) =>
+              TeamCompositionsView(localGameData: localGameData),
+          settings: routeSettings,
         );
       case GamePhase.play:
-        return _Destination(
-          MaterialPageRoute(
-            builder: (context) => GameView(localGameData: localGameData),
-            settings: RouteSettings(name: GameView.routeName),
-          ),
+        return MaterialPageRoute(
+          builder: (context) => GameView(localGameData: localGameData),
+          settings: routeSettings,
         );
       case GamePhase.gameOver:
-        return _Destination(
-          MaterialPageRoute(
-            builder: (context) => ScoreView(localGameData: localGameData),
-            settings: RouteSettings(name: ScoreView.routeName),
-          ),
+        return MaterialPageRoute(
+          builder: (context) => ScoreView(localGameData: localGameData),
+          settings: routeSettings,
         );
       case GamePhase.kicked:
-        return _Destination(
-          MaterialPageRoute(
-            builder: (context) => KickedScreen(),
-            settings: RouteSettings(name: KickedScreen.routeName),
-          ),
+        return MaterialPageRoute(
+          builder: (context) => KickedScreen(),
+          settings: routeSettings,
         );
     }
     Assert.fail('Unexpected GamePhase: $phase');
   }
 
-  Future<_PopResponse> _confimLeaveGame(
+  static GamePhase _parentPhase({
+    @required GamePhase phase,
+  }) {
+    if (phase == null) {
+      return null;
+    }
+    switch (phase) {
+      case GamePhase.configure:
+        return null;
+      case GamePhase.composeTeams:
+        return GamePhase.configure;
+      case GamePhase.play:
+      case GamePhase.gameOver:
+      case GamePhase.kicked:
+        return null;
+    }
+    Assert.fail('Unexpected GamePhase: $phase');
+  }
+
+  static Future<_PopResponse> _confimLeaveGame(
     BuildContext context, {
     @required LocalGameData localGameData,
   }) {
-    // TODO: Change text for offline game.
-    return showDialog(
-          context: context,
-          builder: (context) => new AlertDialog(
-            title: Text('Leave game?'),
-            // TODO: Replace with a description of how to re-join / continue
-            // when it's possible to re-join / continue.
-            content: Text(localGameData.onlineMode
-                ? "You wouldn't be able to join back "
-                    "(this is not implemented yet)"
-                : "You wouldn't be able to continue "
-                    "(this is not implemented yet)"),
-            actions: [
-              FlatButton(
-                child: Text('Stay'),
-                onPressed: () =>
-                    Navigator.of(context).pop(_PopResponse.disabled),
-              ),
-              FlatButton(
-                child: Text('Leave'),
-                onPressed: () =>
-                    Navigator.of(context).pop(_PopResponse.exitGame),
-              ),
-            ],
-          ),
-        ) ??
-        _PopResponse.disabled;
+    // TODO: Replace with a description of how to continue when it's
+    // possible to continue.
+    return multipleChoiceDialog(
+      context: context,
+      titleText: 'Leave game?',
+      contentText: localGameData.onlineMode
+          ? 'To re-connect, use this link:\n${localGameData.gameUrl}'
+          : "You wouldn't be able to continue (this is not implemented yet)",
+      choices: [
+        DialogChoice(_PopResponse.disabled, 'Stay'),
+        DialogChoice(_PopResponse.exitGame, 'Leave'),
+      ],
+      defaultChoice: _PopResponse.disabled,
+    );
   }
 
   Future<bool> _onWillPop(

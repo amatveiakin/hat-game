@@ -7,19 +7,13 @@ import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/game_navigator.dart';
 import 'package:hatgame/game_phase.dart';
-import 'package:hatgame/game_view.dart';
-import 'package:hatgame/kicked_screen.dart';
 import 'package:hatgame/offline_player_config_view.dart';
 import 'package:hatgame/online_player_config_view.dart';
-import 'package:hatgame/partying_strategy.dart';
 import 'package:hatgame/rules_config_view.dart';
-import 'package:hatgame/start_game_online_screen.dart';
-import 'package:hatgame/team_compositions_view.dart';
 import 'package:hatgame/teaming_config_view.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/invalid_operation.dart';
-import 'package:hatgame/widget/async_snapshot_error.dart';
 import 'package:hatgame/widget/invalid_operation_dialog.dart';
 import 'package:hatgame/widget/sections_scaffold.dart';
 import 'package:hatgame/widget/wide_button.dart';
@@ -28,7 +22,7 @@ import 'package:outline_material_icons/outline_material_icons.dart';
 // TODO: 'Revert to default' button.
 
 class GameConfigView extends StatefulWidget {
-  static const String routeName = '/game-config';
+  static const String routeName = '/game-config'; // for offline only
 
   final LocalGameData localGameData;
   final scaffoldKey = GlobalKey<ScaffoldState>();
@@ -90,7 +84,9 @@ class _GameConfigViewState extends State<GameConfigView>
   }
 
   void _getJoinLink(GlobalKey<ScaffoldState> scaffoldKey) {
-    final String link = JoinGameOnlineScreen.makeLink(localGameData.gameID);
+    // TODO: Make link redirect to app on mobile.
+    // TODO: Hint that this is the same as site address in web version.
+    final String link = localGameData.gameUrl;
 
     showDialog(
       context: context,

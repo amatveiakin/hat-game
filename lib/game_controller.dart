@@ -26,6 +26,19 @@ import 'package:hatgame/util/ntp_time.dart';
 import 'package:hatgame/util/strings.dart';
 import 'package:russian_words/russian_words.dart' as russian_words;
 
+enum Reconnection {
+  connectForTheFirstTime,
+  reconnectBeforeGame,
+  reconnectDuringName,
+}
+
+class JoinGameResult {
+  final LocalGameData localGameData;
+  final Reconnection reconnection;
+
+  JoinGameResult({@required this.localGameData, @required this.reconnection});
+}
+
 class TurnStateTransformer {
   final GameConfig config;
   final InitialGameState initialState;
@@ -284,7 +297,7 @@ class GameController {
     );
   }
 
-  static Future<LocalGameData> joinLobby(firestore.Firestore firestoreInstance,
+  static Future<JoinGameResult> joinLobby(firestore.Firestore firestoreInstance,
       String myName, String gameID) async {
     // TODO: Check if the game has already started.
     final firestore.DocumentReference reference = firestoreGameReference(
@@ -311,7 +324,8 @@ class GameController {
     //     Unhandled Exception: PlatformException(Error performing transaction,
     //         java.lang.Exception: DoTransaction failed: Invalid argument:
     //         Instance of '_CompactLinkedHashSet<Object>', null)
-    int playerID = 0;
+    int playerID;
+    Reconnection reconnection;
     // For some reason, throwing or returning Future.error from `runTransaction`
     // doesn't work. Got:
     //     Unhandled Exception: PlatformException(Error performing transaction,
@@ -337,37 +351,58 @@ class GameController {
         error = e;
         return;
       }
+      final GamePhase gamePhase = GamePhaseReader.fromSnapshotNoPersonal(
+          FirestoreDocumentSnapshot.fromFirestore(snapshot));
+      final bool userCreationPhase = (gamePhase == GamePhase.configure);
 
       // Note: include kicked players.
       final playerData = dbGetAll(snapshot.data, DBColPlayerManager(),
           documentPath: reference.path);
+      int existingPlayerID;
       for (final p in playerData.values().where((v) => !(v.kicked ?? false))) {
         if (myName == p.name) {
-          error = InvalidOperation("Name $myName is already taken")
-            ..addTag(JoinGameErrorSource.playerName);
-          return;
+          existingPlayerID = p.id;
+          break;
         }
       }
-      playerID = dbNextIndex(playerData);
 
-      await tx.update(
-          reference,
-          dbData([
-            DBColPlayer(playerID).withData(PersonalState((b) => b
-              ..id = playerID
-              ..name = myName))
-          ]));
+      if (existingPlayerID != null) {
+        playerID = existingPlayerID;
+        if (userCreationPhase) {
+          reconnection = Reconnection.reconnectBeforeGame;
+        } else {
+          reconnection = Reconnection.reconnectDuringName;
+        }
+      } else {
+        if (userCreationPhase) {
+          playerID = dbNextIndex(playerData);
+          reconnection = Reconnection.connectForTheFirstTime;
+          await tx.update(
+              reference,
+              dbData([
+                DBColPlayer(playerID).withData(PersonalState((b) => b
+                  ..id = playerID
+                  ..name = myName))
+              ]));
+        } else {
+          error = InvalidOperation("Name $myName is already taken")
+            ..addTag(JoinGameErrorSource.playerName);
+        }
+      }
     });
 
     if (error != null) {
       throw error;
     }
 
-    return LocalGameData(
-      onlineMode: true,
-      gameID: gameID,
-      gameReference: FirestoreDocumentReference(reference),
-      myPlayerID: playerID,
+    return JoinGameResult(
+      localGameData: LocalGameData(
+        onlineMode: true,
+        gameID: gameID,
+        gameReference: FirestoreDocumentReference(reference),
+        myPlayerID: playerID,
+      ),
+      reconnection: reconnection,
     );
   }
 
@@ -447,7 +482,7 @@ class GameController {
       return playerIDs.map((id) => config.players.names[id]).toList();
     }
 
-    if (GamePhaseReader.getPhase(localGameData, snapshot) !=
+    if (GamePhaseReader.fromSnapshot(localGameData, snapshot) !=
         GamePhase.composeTeams) {
       return null;
     }
@@ -530,7 +565,7 @@ class GameController {
   factory GameController.fromSnapshot(
       LocalGameData localGameData, DBDocumentSnapshot snapshot) {
     Assert.holds(snapshot.exists);
-    Assert.isIn(GamePhaseReader.getPhase(localGameData, snapshot),
+    Assert.isIn(GamePhaseReader.fromSnapshot(localGameData, snapshot),
         {GamePhase.play, GamePhase.gameOver});
 
     final GameConfig config = snapshot.get(DBColConfig());

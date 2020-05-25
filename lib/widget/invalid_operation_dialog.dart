@@ -1,25 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:hatgame/util/invalid_operation.dart';
+import 'package:hatgame/widget/dialog.dart';
 
 Future<void> showInvalidOperationDialog(
     {@required BuildContext context, @required InvalidOperation error}) async {
-  // TODO: Close on enter (try using RawKeyEvent).
-  await showDialog(
+  await simpleDialog(
     context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text(
-            (error.isInternalError ? 'Internal error! ' : '') + error.message),
-        content: error.comment != null ? Text(error.comment) : null,
-        actions: <Widget>[
-          FlatButton(
-            child: Text('OK'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      );
-    },
+    titleText:
+        (error.isInternalError ? 'Internal error! ' : '') + error.message,
+    contentText: error.comment,
+    closeButtonText: 'OK',
   );
 }

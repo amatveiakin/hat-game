@@ -15,19 +15,27 @@ enum GamePhase {
 }
 
 class GamePhaseReader {
-  static GamePhase getPhase(
+  static GamePhase fromSnapshot(
       LocalGameData localGameData, DBDocumentSnapshot snapshot) {
-    final gamePhase = _getPhaseImpl(localGameData, snapshot);
+    final gamePhase = _getPhase(snapshot, localGameData: localGameData);
     _checkDB(snapshot, gamePhase);
     return gamePhase;
   }
 
-  static GamePhase _getPhaseImpl(
-      LocalGameData localGameData, DBDocumentSnapshot snapshot) {
-    final personalState =
-        snapshot.tryGet(DBColPlayer(localGameData.myPlayerID));
-    if (personalState?.kicked ?? false) {
-      return GamePhase.kicked;
+  static GamePhase fromSnapshotNoPersonal(DBDocumentSnapshot snapshot) {
+    final gamePhase = _getPhase(snapshot);
+    _checkDB(snapshot, gamePhase);
+    return gamePhase;
+  }
+
+  static GamePhase _getPhase(DBDocumentSnapshot snapshot,
+      {LocalGameData localGameData}) {
+    if (localGameData != null) {
+      final personalState =
+          snapshot.tryGet(DBColPlayer(localGameData.myPlayerID));
+      if (personalState?.kicked ?? false) {
+        return GamePhase.kicked;
+      }
     }
     if (snapshot.containsNonNull(DBColInitialState())) {
       if (snapshot.containsNonNull(DBColCurrentTurn())) {

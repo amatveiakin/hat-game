@@ -53,6 +53,9 @@ class FirestoreDocumentSnapshot extends DBDocumentSnapshot {
 
   FirestoreDocumentSnapshot(this._snapshot, this._localCacheOverrides);
 
+  FirestoreDocumentSnapshot.fromFirestore(this._snapshot)
+      : _localCacheOverrides = null;
+
   FirestoreDocumentReference get reference =>
       FirestoreDocumentReference(_snapshot.reference);
 

@@ -568,8 +568,6 @@ class PlayAreaState extends State<PlayArea>
 }
 
 class GameView extends StatefulWidget {
-  static const String routeName = '/game';
-
   final LocalGameData localGameData;
 
   GameView({@required this.localGameData});

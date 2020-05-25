@@ -176,8 +176,6 @@ class _TurnView extends StatelessWidget {
 }
 
 class ScoreView extends StatelessWidget {
-  static const String routeName = '/scoreboard';
-
   final LocalGameData localGameData;
   final GameNavigator navigator =
       GameNavigator(currentPhase: GamePhase.gameOver);

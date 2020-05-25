@@ -68,7 +68,7 @@ class GameConfigController {
   factory GameConfigController.fromSnapshot(
       LocalGameData localGameData, DBDocumentSnapshot snapshot) {
     Assert.holds(snapshot.exists);
-    Assert.isIn(GamePhaseReader.getPhase(localGameData, snapshot),
+    Assert.isIn(GamePhaseReader.fromSnapshot(localGameData, snapshot),
         {GamePhase.configure, GamePhase.composeTeams});
 
     GameConfig rawConfig = snapshot.get(DBColConfig());

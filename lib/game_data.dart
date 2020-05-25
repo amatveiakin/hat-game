@@ -1,20 +1,34 @@
 import 'package:built_collection/built_collection.dart';
 import 'package:flutter/material.dart';
+import 'package:hatgame/app_info.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value/personal_state.dart';
 import 'package:hatgame/built_value/team_compositions.dart';
 import 'package:hatgame/db/db_document.dart';
+import 'package:hatgame/game_phase.dart';
 import 'package:hatgame/util/assertion.dart';
 
-// TODO: Rename in order to make it explicit that these are immutable settings.
 class LocalGameData {
   final bool onlineMode;
   final String gameID;
   final DBDocumentReference gameReference;
   final int myPlayerID;
+  GamePhase lastSeenGamePhase;
 
   bool get isAdmin => !onlineMode || myPlayerID == 0;
+
+  String get gameRoute => '/game-$gameID';
+  String get gameUrl => webAppPath + gameRoute;
+
+  // Returns Game ID
+  static String parseRoute(String route) {
+    final String routePrefix = '/game-';
+    if (!route.startsWith(routePrefix)) {
+      return null;
+    }
+    return route.substring(routePrefix.length);
+  }
 
   LocalGameData(
       {@required this.onlineMode,

@@ -5,11 +5,13 @@ import 'package:hatgame/app_info.dart';
 import 'package:hatgame/game_config_view.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
+import 'package:hatgame/game_navigator.dart';
 import 'package:hatgame/local_storage.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/widget/checked_text_field.dart';
 import 'package:hatgame/widget/constrained_scaffold.dart';
+import 'package:hatgame/widget/dialog.dart';
 import 'package:hatgame/widget/invalid_operation_dialog.dart';
 import 'package:hatgame/widget/wide_button.dart';
 
@@ -25,6 +27,7 @@ InvalidOperation checkGameID(String gameID) {
   if (gameID.isEmpty) {
     return InvalidOperation('Game ID is empty');
   }
+  return null;
 }
 
 class NewGameOnlineScreen extends StatefulWidget {
@@ -41,8 +44,12 @@ class NewGameOnlineScreenState extends State<NewGameOnlineScreen> {
   LocalStorage get localStorage => LocalStorage.instance;
   CheckedTextFieldController get playerNameController =>
       widget.playerNameController;
+  bool navigatedToGame = false;
 
   Future<void> _createGame(BuildContext context) async {
+    if (navigatedToGame) {
+      return;
+    }
     if (!checkTextFields([
       playerNameController,
     ])) {
@@ -56,15 +63,10 @@ class NewGameOnlineScreenState extends State<NewGameOnlineScreen> {
       showInvalidOperationDialog(context: context, error: e);
       return;
     }
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(
-        builder: (context) => GameConfigView(
-          localGameData: localGameData,
-        ),
-        settings: RouteSettings(name: GameConfigView.routeName),
-      ),
-      ModalRoute.withName('/'),
-    );
+    // Work around: text field `onSubmitted` triggered on focus lost on web.
+    navigatedToGame = true;
+    await GameNavigator.navigateToGame(
+        context: context, localGameData: localGameData);
   }
 
   @override
@@ -105,7 +107,8 @@ class NewGameOnlineScreenState extends State<NewGameOnlineScreen> {
                 textInputAction: TextInputAction.go,
                 labelText: 'Player name',
                 controller: playerNameController,
-                onSubmitted: (_) => _createGame(context),
+                // TODO: Uncomment; disable auto-submit on unfocus on web.
+                // onSubmitted: (_) => _createGame(context),
               ),
             ),
             Expanded(child: Container()),
@@ -129,19 +132,13 @@ class JoinGameOnlineScreen extends StatefulWidget {
   final playerNameController =
       CheckedTextFieldController(checker: checkPlayerName);
 
-  static String makeLink(String gameID) {
-    // TODO: Make link redirect to app on mobile.
-    return '$webAppPath$routeName/$gameID';
-  }
-
   JoinGameOnlineScreen();
 
   factory JoinGameOnlineScreen.fromRoute(RouteSettings settings) {
-    final String routePrefix = '$routeName/';
-    if (!settings.name.startsWith(routePrefix)) {
+    final String gameID = LocalGameData.parseRoute(settings.name);
+    if (gameID == null) {
       return null;
     }
-    final String gameID = settings.name.substring(routePrefix.length);
     final screen = JoinGameOnlineScreen();
     screen.gameIDController.textController.text = gameID;
     return screen;
@@ -156,20 +153,39 @@ class JoinGameOnlineScreenState extends State<JoinGameOnlineScreen> {
   CheckedTextFieldController get gameIDController => widget.gameIDController;
   CheckedTextFieldController get playerNameController =>
       widget.playerNameController;
+  bool navigatedToGame = false;
+
+  Future<bool> confirmReconnect(
+      {@required String playerName, @required bool gameStarted}) {
+    return multipleChoiceDialog<bool>(
+      context: context,
+      contentText: gameStarted
+          ? 'Reconnect as $playerName?'
+          : 'Player $playerName already exists! '
+              'Reconnect as this player?',
+      choices: [
+        DialogChoice(false, 'Cancel'),
+        DialogChoice(true, 'Re-connect'),
+      ],
+      defaultChoice: false,
+    );
+  }
 
   Future<void> _joinGame(BuildContext context) async {
+    if (navigatedToGame) {
+      return;
+    }
     if (!checkTextFields([
       gameIDController,
       playerNameController,
     ])) {
       return;
     }
-    LocalGameData localGameData;
+    final String playerName = playerNameController.textController.text;
+    JoinGameResult joinGameResult;
     try {
-      localGameData = await GameController.joinLobby(
-          Firestore.instance,
-          playerNameController.textController.text,
-          gameIDController.textController.text);
+      joinGameResult = await GameController.joinLobby(
+          Firestore.instance, playerName, gameIDController.textController.text);
     } on InvalidOperation catch (e) {
       showInvalidOperationDialog(context: context, error: e);
       if (e.tag<JoinGameErrorSource>() == JoinGameErrorSource.playerName) {
@@ -179,15 +195,31 @@ class JoinGameOnlineScreenState extends State<JoinGameOnlineScreen> {
       }
       return;
     }
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(
-        builder: (context) => GameConfigView(
-          localGameData: localGameData,
-        ),
-        settings: RouteSettings(name: GameConfigView.routeName),
-      ),
-      ModalRoute.withName('/'),
-    );
+
+    final navigateToGame = () {
+      navigatedToGame = true;
+      return GameNavigator.navigateToGame(
+          context: context, localGameData: joinGameResult.localGameData);
+    };
+    switch (joinGameResult.reconnection) {
+      case Reconnection.connectForTheFirstTime:
+        await navigateToGame();
+        break;
+      case Reconnection.reconnectBeforeGame:
+        final bool reconnectConfirmed =
+            await confirmReconnect(playerName: playerName, gameStarted: false);
+        if (reconnectConfirmed) {
+          await navigateToGame();
+        }
+        break;
+      case Reconnection.reconnectDuringName:
+        final bool reconnectConfirmed =
+            await confirmReconnect(playerName: playerName, gameStarted: true);
+        if (reconnectConfirmed) {
+          await navigateToGame();
+        }
+        break;
+    }
   }
 
   @override
@@ -245,7 +277,8 @@ class JoinGameOnlineScreenState extends State<JoinGameOnlineScreen> {
                     textInputAction: TextInputAction.go,
                     labelText: 'Player name',
                     controller: playerNameController,
-                    onSubmitted: (_) => _joinGame(context),
+                    // TODO: Uncomment; disable auto-submit on unfocus on web.
+                    // onSubmitted: (_) => _joinGame(context),
                   ),
                 ],
               ),

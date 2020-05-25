@@ -32,7 +32,7 @@ class Client {
 
   Future<GamePhase> gamePhase() async {
     final snapshot = await localGameData.gameReference.get();
-    return GamePhaseReader.getPhase(localGameData, snapshot);
+    return GamePhaseReader.fromSnapshot(localGameData, snapshot);
   }
 
   Future<GameConfigController> configController() async {
@@ -75,7 +75,7 @@ TeamCompositions ascendingIndividualTurnOrder({@required int numPlayers}) {
 // TODO: Hook this into all DB writes automatically for invariant checks.
 Future<GamePhase> getGamePhase(LocalGameData localGameData) async {
   final DBDocumentSnapshot snapshot = await localGameData.gameReference.get();
-  return GamePhaseReader.getPhase(localGameData, snapshot);
+  return GamePhaseReader.fromSnapshot(localGameData, snapshot);
 }
 
 Future<void> minimalOfflineGameTest() async {
@@ -162,8 +162,9 @@ void main() {
 
       host.localGameData =
           await GameController.newLobby(firestoreInstance, 'user_host');
-      guest.localGameData = await GameController.joinLobby(
-          firestoreInstance, 'user_guest', host.localGameData.gameID);
+      guest.localGameData = (await GameController.joinLobby(
+              firestoreInstance, 'user_guest', host.localGameData.gameID))
+          .localGameData;
 
       await (await host.configController()).update((config) => config.rebuild(
             (b) => b
@@ -204,14 +205,16 @@ void main() {
       host.localGameData =
           await GameController.newLobby(firestoreInstance, 'user_0');
 
-      user1.localGameData = await GameController.joinLobby(
-          firestoreInstance, 'user_1', host.localGameData.gameID);
+      user1.localGameData = (await GameController.joinLobby(
+              firestoreInstance, 'user_1', host.localGameData.gameID))
+          .localGameData;
       expect(user1.localGameData.myPlayerID, equals(1));
 
       await GameController.kickPlayer(host.localGameData.gameReference, 1);
 
-      user2.localGameData = await GameController.joinLobby(
-          firestoreInstance, 'user_2', host.localGameData.gameID);
+      user2.localGameData = (await GameController.joinLobby(
+              firestoreInstance, 'user_2', host.localGameData.gameID))
+          .localGameData;
       expect(user2.localGameData.myPlayerID, equals(2));
 
       expect(await user1.gamePhase(), equals(GamePhase.kicked));
@@ -246,8 +249,9 @@ void main() {
       expect(
           await getGamePhase(host.localGameData), equals(GamePhase.configure));
 
-      guest.localGameData = await GameController.joinLobby(
-          firestoreInstance, 'user_guest', host.localGameData.gameID);
+      guest.localGameData = (await GameController.joinLobby(
+              firestoreInstance, 'user_guest', host.localGameData.gameID))
+          .localGameData;
       expect(
           await getGamePhase(host.localGameData), equals(GamePhase.configure));
 

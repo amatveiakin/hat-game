@@ -3,6 +3,7 @@ import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/util/assertion.dart';
+import 'package:hatgame/widget/dialog.dart';
 
 class OnlinePlayersConfigView extends StatelessWidget {
   final LocalGameData localGameData;
@@ -15,23 +16,14 @@ class OnlinePlayersConfigView extends StatelessWidget {
 
   static Future<bool> _kickConfimationDialog(BuildContext context,
       {@required String playerName}) async {
-    return showDialog<bool>(
+    return multipleChoiceDialog<bool>(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: Text('Are you sure you want to kick $playerName?'),
-          actions: [
-            FlatButton(
-              child: Text('Cancel'),
-              onPressed: () => Navigator.of(context).pop(false),
-            ),
-            FlatButton(
-              child: Text('Kick'),
-              onPressed: () => Navigator.of(context).pop(true),
-            ),
-          ],
-        );
-      },
+      contentText: 'Are you sure you want to kick $playerName?',
+      choices: [
+        DialogChoice(false, 'Cancel'),
+        DialogChoice(true, 'Kick'),
+      ],
+      defaultChoice: false,
     );
   }
 

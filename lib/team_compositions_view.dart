@@ -63,8 +63,6 @@ class _TeamView extends StatelessWidget {
 }
 
 class TeamCompositionsView extends StatelessWidget {
-  static const String routeName = '/team-compositions';
-
   final LocalGameData localGameData;
   final GameNavigator navigator =
       GameNavigator(currentPhase: GamePhase.composeTeams);
