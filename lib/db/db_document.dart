@@ -25,8 +25,8 @@ abstract class DBDocumentReference {
 
   Future<void> delete();
 
-  Future<void> clearLocalCache();
-  Future<void> assertLocalCacheIsEmpty();
+  void clearLocalCache();
+  void assertLocalCacheIsEmpty();
 
   Stream<DBDocumentSnapshot> snapshots();
 

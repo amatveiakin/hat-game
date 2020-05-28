@@ -12,41 +12,30 @@ class LocalDocumentReference extends DBDocumentReference {
 
   LocalDocumentReference({@required this.localDB, @required this.path});
 
-  Future<void> setColumns(List<DBColumnData> columns) {
-    localDB.setRow(path, dbData(columns));
-    return Future<void>.value();
-  }
+  void syncGetColumns(List<DBColumnData> columns) =>
+      localDB.setRow(path, dbData(columns));
+  Future<void> setColumns(List<DBColumnData> columns) async =>
+      syncGetColumns(columns);
 
   // Ignore LocalCacheBehavior, since this is already a local DB.
+  void syncUpdateColumnsImpl(
+          List<DBColumnData> columns, LocalCacheBehavior _) =>
+      localDB.setRow(
+          path, Map.from(localDB.getRow(path))..addAll(dbData(columns)));
   Future<void> updateColumnsImpl(
-      List<DBColumnData> columns, LocalCacheBehavior _) {
-    localDB.setRow(
-        path, Map.from(localDB.getRow(path))..addAll(dbData(columns)));
-    return Future<void>.value();
-  }
+          List<DBColumnData> columns, LocalCacheBehavior _) async =>
+      syncUpdateColumnsImpl(columns, _);
 
-  LocalDocumentSnapshot instaGet() {
-    return LocalDocumentSnapshot(this, localDB.getRow(path));
-  }
+  LocalDocumentSnapshot syncGet() =>
+      LocalDocumentSnapshot(this, localDB.getRow(path));
+  Future<LocalDocumentSnapshot> get() async => syncGet();
 
-  Future<LocalDocumentSnapshot> get() {
-    return Future.value(instaGet());
-  }
+  void syncDelete() => localDB.removeRow(path);
+  Future<void> delete() async => syncDelete();
 
-  Future<void> delete() {
-    localDB.removeRow(path);
-    return Future<void>.value();
-  }
-
-  Future<void> clearLocalCache() {
-    // Ignore LocalCacheBehavior, since this is already a local DB.
-    return Future<void>.value();
-  }
-
-  Future<void> assertLocalCacheIsEmpty() {
-    // Ignore LocalCacheBehavior, since this is already a local DB.
-    return Future<void>.value();
-  }
+  // Ignore LocalCacheBehavior, since this is already a local DB.
+  void clearLocalCache() {}
+  void assertLocalCacheIsEmpty() {}
 
   Stream<LocalDocumentSnapshot> snapshots() {
     return quiver_async.concat([

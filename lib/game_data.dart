@@ -9,12 +9,17 @@ import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/game_phase.dart';
 import 'package:hatgame/util/assertion.dart';
 
+class NavigationState {
+  GamePhase lastSeenGamePhase;
+  bool exitingGame = false;
+}
+
 class LocalGameData {
   final bool onlineMode;
   final String gameID;
   final DBDocumentReference gameReference;
   final int myPlayerID;
-  GamePhase lastSeenGamePhase;
+  final navigationState = NavigationState();
 
   bool get isAdmin => !onlineMode || myPlayerID == 0;
 

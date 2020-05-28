@@ -12,22 +12,18 @@ import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/widget/async_snapshot_error.dart';
 import 'package:hatgame/widget/dialog.dart';
 
-// TODO: Remove or fix how it looks. Don't show loading indicator when
-//   loading is very fast. Idea: prefetch the first state for half-second
-//   and start navigation afterwards; show a screenshot meanwhile or show
-//   widgets based on the latest state for the current phase and block
-//   interactions.
-enum _GameNavigationState {
-  none,
-  expected,
-}
-
 // We never pop the the previous game stage directly: this is done only
 // through the navigator.
 enum _PopResponse {
   disabled,
   custom,
   exitGame,
+}
+
+class RouteArguments {
+  final GamePhase phase;
+
+  RouteArguments({@required this.phase});
 }
 
 // OPTIMIZATION POTENTIAL: This class might be simplified when Navigator 2.0
@@ -37,7 +33,6 @@ enum _PopResponse {
 //   May be GameNavigator should be a mixin on top of StatefulWidget.
 class GameNavigator {
   final GamePhase currentPhase;
-  _GameNavigationState _navigationState = _GameNavigationState.none;
 
   GameNavigator({
     @required this.currentPhase,
@@ -50,11 +45,11 @@ class GameNavigator {
   }) async {
     final snapshot = await localGameData.gameReference.get();
     final gamePhase = GamePhaseReader.fromSnapshot(localGameData, snapshot);
-    localGameData.lastSeenGamePhase = gamePhase;
-    await _navigateAndPushParents(
+    _navigateTo(
       context: context,
       localGameData: localGameData,
-      phase: gamePhase,
+      oldPhase: null,
+      newPhase: gamePhase,
     );
   }
 
@@ -80,18 +75,15 @@ class GameNavigator {
           final newPhase =
               GamePhaseReader.fromSnapshot(localGameData, snapshot.data);
           if (newPhase != currentPhase) {
-            if (newPhase != localGameData.lastSeenGamePhase) {
-              localGameData.lastSeenGamePhase = newPhase;
-              Future(() => _navigate(
-                    context: context,
-                    localGameData: localGameData,
-                    oldPhase: currentPhase,
-                    newPhase: newPhase,
-                  ));
+            if (newPhase != localGameData.navigationState.lastSeenGamePhase &&
+                !localGameData.navigationState.exitingGame) {
+              _navigateTo(
+                context: context,
+                localGameData: localGameData,
+                oldPhase: currentPhase,
+                newPhase: newPhase,
+              );
             }
-            return Center(child: CircularProgressIndicator());
-          }
-          if (_navigationState != _GameNavigationState.none) {
             return Center(child: CircularProgressIndicator());
           }
           Assert.eq(newPhase, currentPhase);
@@ -101,9 +93,11 @@ class GameNavigator {
     );
   }
 
-  // Call when a user action means navigation is inevitable.
-  // TODO: Use this widely or delete.
-  // TODO: Shouldn't this be called only inside setState()?
+  // TODO: Remove or fix how it looks. Don't show loading indicator when
+  //   loading is very fast. Idea: prefetch the first state for half-second
+  //   and start navigation afterwards; show a screenshot meanwhile or show
+  //   widgets based on the latest state for the current phase and block
+  //   interactions.
   /*
   void setNavigationExpected() {
     Assert.eq(_navigationState, _GameNavigationState.none);
@@ -111,61 +105,97 @@ class GameNavigator {
   }
   */
 
-  static Future<void> _navigateAndPushParents({
-    @required BuildContext context,
-    @required LocalGameData localGameData,
-    @required GamePhase phase,
-  }) async {
-    final GamePhase parent = _parentPhase(phase: phase);
-    if (parent != null) {
-      await _navigateAndPushParents(
-        context: context,
-        localGameData: localGameData,
-        phase: parent,
-      );
-    }
-    await _navigate(
-      context: context,
-      localGameData: localGameData,
-      oldPhase: parent,
-      newPhase: phase,
-    );
-  }
-
-  static Future<void> _navigate({
+  static void _navigateTo({
     @required BuildContext context,
     @required LocalGameData localGameData,
     @required GamePhase oldPhase,
     @required GamePhase newPhase,
-  }) async {
-    await localGameData.gameReference.assertLocalCacheIsEmpty();
+  }) {
+    localGameData.navigationState.lastSeenGamePhase = newPhase;
+    localGameData.gameReference.assertLocalCacheIsEmpty();
+    // Use `Future` because it's not allowed to navigate from `build`.
+    Future(() => _navigateToImpl(
+          context: context,
+          localGameData: localGameData,
+          oldPhase: oldPhase,
+          newPhase: newPhase,
+        ));
+  }
+
+  static void _navigateToImpl({
+    @required BuildContext context,
+    @required LocalGameData localGameData,
+    @required GamePhase oldPhase,
+    @required GamePhase newPhase,
+  }) {
+    // TODO: Put everything below into a Future !!!
     // Hide virtual keyboard
     FocusScope.of(context).unfocus();
-    final GamePhase oldPhaseParent = _parentPhase(phase: oldPhase);
-    final GamePhase newPhaseParent = _parentPhase(phase: newPhase);
-    final newRoute = _route(localGameData: localGameData, phase: newPhase);
-    if (newPhase == oldPhaseParent) {
-      Navigator.of(context).pop(); // does not trigger `onWillPop`
-      return;
-    }
-    if (newPhaseParent != null) {
-      Assert.eq(newPhaseParent, oldPhase);
-      Navigator.of(context).push(
-        newRoute,
-      );
+    if (_isGrandparentPhase(newPhase, oldPhase)) {
+      // Note: does not trigger `onWillPop`.
+      Navigator.of(context).popUntil((route) =>
+          (route.settings.arguments as RouteArguments).phase == newPhase);
     } else {
-      Navigator.of(context).pushAndRemoveUntil(
-        newRoute,
-        ModalRoute.withName('/'),
+      GamePhase pushFrom;
+      if (_isGrandparentPhase(oldPhase, newPhase)) {
+        pushFrom = oldPhase;
+      } else {
+        pushFrom = _firstGrandparentPhase(newPhase);
+        final route = _route(localGameData: localGameData, phase: pushFrom);
+        Navigator.of(context).pushAndRemoveUntil(
+          route,
+          ModalRoute.withName('/'),
+        );
+      }
+      _pushPhases(
+        context: context,
+        localGameData: localGameData,
+        fromPhase: pushFrom,
+        toPhase: newPhase,
       );
     }
+  }
+
+  static void _pushPhases({
+    @required BuildContext context,
+    @required LocalGameData localGameData,
+    @required GamePhase fromPhase, // non-inclusive
+    @required GamePhase toPhase, // inclusive
+  }) {
+    Assert.holds(fromPhase != null);
+    Assert.holds(toPhase != null);
+    if (fromPhase != toPhase) {
+      _pushPhases(
+        context: context,
+        localGameData: localGameData,
+        fromPhase: fromPhase,
+        toPhase: _parentPhase(toPhase),
+      );
+    }
+    _pushPhase(
+      context: context,
+      localGameData: localGameData,
+      phase: toPhase,
+    );
+  }
+
+  static void _pushPhase({
+    @required BuildContext context,
+    @required LocalGameData localGameData,
+    @required GamePhase phase,
+  }) {
+    final route = _route(localGameData: localGameData, phase: phase);
+    Navigator.of(context).push(route);
   }
 
   static MaterialPageRoute _route({
     @required LocalGameData localGameData,
     @required GamePhase phase,
   }) {
-    final routeSettings = RouteSettings(name: localGameData.gameRoute);
+    final routeSettings = RouteSettings(
+      name: localGameData.gameRoute,
+      arguments: RouteArguments(phase: phase),
+    );
     switch (phase) {
       case GamePhase.configure:
         return MaterialPageRoute(
@@ -197,9 +227,20 @@ class GameNavigator {
     Assert.fail('Unexpected GamePhase: $phase');
   }
 
-  static GamePhase _parentPhase({
-    @required GamePhase phase,
-  }) {
+  static GamePhase _firstGrandparentPhase(GamePhase phase) {
+    final parent = _parentPhase(phase);
+    return parent != null ? _firstGrandparentPhase(parent) : phase;
+  }
+
+  static bool _isGrandparentPhase(GamePhase phaseA, GamePhase phaseB) {
+    if (phaseA == null || phaseB == null) {
+      return false;
+    }
+    final phaseBParent = _parentPhase(phaseB);
+    return phaseBParent == phaseA ?? _isGrandparentPhase(phaseA, phaseBParent);
+  }
+
+  static GamePhase _parentPhase(GamePhase phase) {
     if (phase == null) {
       return null;
     }
@@ -250,19 +291,8 @@ class GameNavigator {
         onBackPressed();
         break;
       case _PopResponse.exitGame:
-        _navigationState = _GameNavigationState.expected;
-        // This would look better with a pop animation, something like:
-        //     Navigator.of(context).popUntil((route) => route.isFirst);
-        // However it doesn't work, because it triggers `route.popped`, which
-        // reset navigation state. When Navigator 2.0 is out, this logic could
-        // be replaced with remove_underlying_routes + pop.
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (context) => StartScreen(),
-            settings: RouteSettings(name: StartScreen.routeName),
-          ),
-          (route) => true,
-        );
+        localGameData.navigationState.exitingGame = true;
+        Navigator.of(context).popUntil(ModalRoute.withName('/'));
         break;
     }
     return false;

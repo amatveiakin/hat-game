@@ -464,7 +464,7 @@ class GameController {
           playerIDs.shuffled(),
         ));
     }
-    await reference.clearLocalCache();
+    reference.clearLocalCache();
     return reference.updateColumns([
       DBColTeamCompositions().withData(teamCompositions),
     ]);
@@ -598,7 +598,7 @@ class GameController {
       GameConfig config,
       InitialGameState initialState,
       TurnState turnState) async {
-    await reference.clearLocalCache();
+    reference.clearLocalCache();
     return reference.updateColumns([
       DBColConfig().withData(config),
       DBColTeamCompositions().withData(null),
@@ -637,7 +637,7 @@ class GameController {
           DerivedGameState.wordsInHat(initialState, newTurnLog, null).isEmpty,
       turnIndex: turnIndex + 1,
     );
-    await localGameData.gameReference.clearLocalCache();
+    localGameData.gameReference.clearLocalCache();
     return localGameData.gameReference.updateColumns([
       DBColCurrentTurn().withData(newTurnState),
       DBColTurnRecord(turnIndex).withData(newTurnRecord),

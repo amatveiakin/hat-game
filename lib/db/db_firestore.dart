@@ -29,17 +29,17 @@ class FirestoreDocumentReference extends DBDocumentReference {
 
   Future<void> delete() => _ref.delete();
 
-  Future<void> clearLocalCache() async {
+  void clearLocalCache() {
     return _FirestoreLocalCache.singleton.clearCache(this);
   }
 
-  Future<void> assertLocalCacheIsEmpty() async {
+  void assertLocalCacheIsEmpty() {
     final localCache = _FirestoreLocalCache.singleton.get(this);
     if (localCache?.rawData != null) {
       Assert.failDebug(
           'Local cache should be empty, but found: ${localCache.rawData}',
           inRelease: AssertInRelease.log);
-      await clearLocalCache();
+      clearLocalCache();
     }
   }
 
@@ -89,15 +89,15 @@ class _FirestoreLocalCache {
 
   static final singleton = _FirestoreLocalCache();
 
-  Future<void> updateColumns(
-      FirestoreDocumentReference reference, List<DBColumnData> columns) async {
+  void updateColumns(
+      FirestoreDocumentReference reference, List<DBColumnData> columns) {
     final firestore.Firestore instance = reference.firestoreReference.firestore;
     if (cachePerInstance[instance] == null) {
       cachePerInstance[instance] = LocalDB();
     }
     final document = cachePerInstance[instance].document(reference.path);
-    await document.setColumns([]);
-    return document.updateColumns(columns);
+    document.syncGetColumns([]);
+    return document.syncUpdateColumnsImpl(columns, LocalCacheBehavior.noCache);
   }
 
   LocalDocumentSnapshot get(FirestoreDocumentReference reference) {
@@ -105,14 +105,14 @@ class _FirestoreLocalCache {
     if (cachePerInstance[instance] == null) {
       return null;
     }
-    return cachePerInstance[instance].document(reference.path).instaGet();
+    return cachePerInstance[instance].document(reference.path).syncGet();
   }
 
-  Future<void> clearCache(FirestoreDocumentReference reference) async {
+  void clearCache(FirestoreDocumentReference reference) {
     final firestore.Firestore instance = reference.firestoreReference.firestore;
     if (cachePerInstance[instance] == null) {
       return;
     }
-    return cachePerInstance[instance].document(reference.path).delete();
+    return cachePerInstance[instance].document(reference.path).syncDelete();
   }
 }
