@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:built_collection/built_collection.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
@@ -49,8 +51,9 @@ class WriteWordsViewController {
 
   void updateWords(BuiltList<String> words) {
     Assert.holds(words != null);
-    Assert.eq(words.length, controllers.length);
-    for (int i = 0; i < words.length; i++) {
+    // There can be a mismatch between words.length and controllers.length
+    // if you go back to config and change num words per player.
+    for (int i = 0; i < min(words.length, controllers.length); i++) {
       controllers[i].textController.text = words[i];
     }
   }
