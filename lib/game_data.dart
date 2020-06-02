@@ -2,11 +2,11 @@ import 'package:built_collection/built_collection.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/app_info.dart';
 import 'package:hatgame/built_value/game_config.dart';
+import 'package:hatgame/built_value/game_phase.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value/personal_state.dart';
 import 'package:hatgame/built_value/team_compositions.dart';
 import 'package:hatgame/db/db_document.dart';
-import 'package:hatgame/game_phase.dart';
 import 'package:hatgame/util/assertion.dart';
 
 class NavigationState {
@@ -85,13 +85,25 @@ class DerivedGameState {
 
 class TeamCompositionsViewData {
   final GameConfig gameConfig;
-  final TeamCompositions teamCompositions;
   final List<List<String>> playerNames;
 
   TeamCompositionsViewData({
     @required this.gameConfig,
-    @required this.teamCompositions,
     @required this.playerNames,
+  });
+}
+
+class WordWritingViewData {
+  final PersonalState playerState;
+  final int numPlayers;
+  final int numPlayersReady;
+  final List<String> playersNotReady;
+
+  WordWritingViewData({
+    @required this.playerState,
+    @required this.numPlayers,
+    @required this.numPlayersReady,
+    @required this.playersNotReady,
   });
 }
 

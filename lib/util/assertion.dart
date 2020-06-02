@@ -10,16 +10,31 @@ enum AssertInRelease {
 }
 
 typedef MessageProducer = String Function();
+typedef VoidCallback = void Function();
 
 class Assert {
   // TODO: Change to log when stable.
   static const defaultReleaseBehavior = AssertInRelease.fail;
 
+  static withContext(
+      {@required MessageProducer context, @required VoidCallback body}) {
+    _AssertContext.push(context);
+    try {
+      body();
+    } finally {
+      _AssertContext.pop();
+    }
+  }
+
   static void holds(bool condition,
       {String message,
       MessageProducer lazyMessage,
       AssertInRelease inRelease = defaultReleaseBehavior}) {
-    final String combinedMessage = _combine([message, lazyMessage?.call()]);
+    final String combinedMessage = _combine([
+      message,
+      lazyMessage?.call(),
+      ..._AssertContext.get().map((c) => c()),
+    ]);
     assert(condition, combinedMessage);
     if (!condition) {
       final decoratedMessage = _combine(['Assertion failed', combinedMessage]);
@@ -128,4 +143,12 @@ class Assert {
   static _combine(List<String> messages) {
     return messages.joinNonEmpty(': ');
   }
+}
+
+class _AssertContext {
+  static List<MessageProducer> _stack = [];
+
+  static void push(MessageProducer context) => _stack.add(context);
+  static void pop() => _stack.removeLast();
+  static List<MessageProducer> get() => _stack;
 }

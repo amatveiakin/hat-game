@@ -34,8 +34,21 @@ abstract class LocalStorage {
     instance = LocalStorageInMemory();
   }
 
-  T get<T>(DBColumn<T> column);
+  T get<T>(DBColumn<T> column) {
+    try {
+      return getImpl(column);
+    } catch (e) {
+      // Can happen after config format changes, e.g. adding required field.
+      // TODO: Firebase log.
+      debugPrint('Warning: cannot read "${column.name}" from LocalStorage: $e');
+      return null;
+    }
+  }
+
   Future<void> set<T>(DBColumn<T> column, T data);
+
+  @protected
+  T getImpl<T>(DBColumn<T> column);
 }
 
 // =============================================================================
@@ -83,7 +96,7 @@ class LocalStorageFromSharedPreferences extends LocalStorage {
 
   LocalStorageFromSharedPreferences._(this.prefs);
 
-  T get<T>(DBColumn<T> column) {
+  T getImpl<T>(DBColumn<T> column) {
     return column.deserialize(prefs.getString(column.name));
   }
 
@@ -95,7 +108,7 @@ class LocalStorageFromSharedPreferences extends LocalStorage {
 class LocalStorageInMemory extends LocalStorage {
   final _data = Map<String, String>();
 
-  T get<T>(DBColumn<T> column) {
+  T getImpl<T>(DBColumn<T> column) {
     return column.deserialize(_data[column.name]);
   }
 

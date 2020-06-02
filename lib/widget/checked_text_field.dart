@@ -48,7 +48,6 @@ class CheckedTextFieldController {
   InvalidOperation get displayError => _shouldDisplayError ? error : null;
 
   void setDisplayErrorListener(void Function() newListener) {
-    Assert.holds(_displayErrorListener == null);
     _displayErrorListener = newListener;
   }
 
@@ -81,6 +80,7 @@ class CheckedTextField extends StatefulWidget {
   final TextInputType keyboardType;
   final List<TextInputFormatter> inputFormatters;
   final ValueChanged<String> onSubmitted;
+  final VoidCallback onEditingComplete;
 
   CheckedTextField({
     @required this.controller,
@@ -89,6 +89,7 @@ class CheckedTextField extends StatefulWidget {
     this.keyboardType,
     this.inputFormatters,
     this.onSubmitted,
+    this.onEditingComplete,
   });
 
   @override
@@ -115,6 +116,7 @@ class CheckedTextFieldState extends State<CheckedTextField> {
       keyboardType: widget.keyboardType,
       inputFormatters: widget.inputFormatters,
       onSubmitted: widget.onSubmitted,
+      onEditingComplete: widget.onEditingComplete,
       controller: controller.textController,
       focusNode: controller.focusNode,
     );

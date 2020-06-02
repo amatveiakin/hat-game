@@ -3,13 +3,13 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hatgame/built_value/game_config.dart';
+import 'package:hatgame/built_value/game_phase.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value/personal_state.dart';
 import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/game_navigator.dart';
-import 'package:hatgame/game_phase.dart';
 import 'package:hatgame/score_view.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/assertion.dart';
@@ -162,6 +162,7 @@ class WordReviewItem extends StatelessWidget {
       return checked ? WordStatus.explained : WordStatus.notExplained;
     }
 
+    // TODO: Consider using LabeledCheckbox.
     return InkWell(
       onTap: () {
         setStatus(_checkedToStatus(!_statusToChecked(status)));

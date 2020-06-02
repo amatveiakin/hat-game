@@ -40,14 +40,20 @@ abstract class PersonalState
   // move everything else to a separate class and reference it from here.
   int get id;
   String get name;
+
   @nullable
   bool get kicked;
+
+  // only with manual word-writing
+  @nullable
+  BuiltList<String> get words;
+  @nullable
+  bool get wordsReady;
+
   BuiltMap<int, WordFeedback> get wordFeedback;
   BuiltSet<int> get wordFlags;
 
   PersonalState._();
-  factory PersonalState([updates(PersonalStateBuilder b)]) =
-      _$PersonalState;
-  static Serializer<PersonalState> get serializer =>
-      _$personalStateSerializer;
+  factory PersonalState([updates(PersonalStateBuilder b)]) = _$PersonalState;
+  static Serializer<PersonalState> get serializer => _$personalStateSerializer;
 }

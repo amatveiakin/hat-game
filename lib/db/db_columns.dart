@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:built_value/serializer.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
+import 'package:hatgame/built_value/game_phase.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value/personal_state.dart';
 import 'package:hatgame/built_value/serializers.dart';
@@ -146,6 +147,11 @@ class DBColCreationTimeUtc extends DBColumn<String> with DBColSerializeString {
 // Written when game lobby is created. Immutable.
 class DBColHostAppVersion extends DBColumn<String> with DBColSerializeString {
   String get name => 'host_app_version';
+}
+
+// Owned by the host.
+class DBColGamePhase extends DBColumn<GamePhase> with DBColSerializeBuiltValue {
+  String get name => 'game_phase';
 }
 
 // Owned by the host during configuration phase. Immutable afterwards.

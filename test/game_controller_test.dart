@@ -3,6 +3,7 @@ import 'package:cloud_firestore_mocks/cloud_firestore_mocks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hatgame/built_value/game_config.dart';
+import 'package:hatgame/built_value/game_phase.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value/team_compositions.dart';
 import 'package:hatgame/db/db_columns.dart';
@@ -10,7 +11,7 @@ import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
-import 'package:hatgame/game_phase.dart';
+import 'package:hatgame/game_phase_reader.dart';
 import 'package:hatgame/local_storage.dart';
 import 'package:hatgame/util/list_ext.dart';
 import 'package:hatgame/util/ntp_time.dart';
@@ -43,6 +44,23 @@ class Client {
   Future<GameController> controller() async {
     final snapshot = await localGameData.gameReference.get();
     return GameController.fromSnapshot(localGameData, snapshot);
+  }
+
+  Future<void> startGame(
+      {GameConfig config, TeamCompositions teamCompositions}) async {
+    if (config != null) {
+      await localGameData.gameReference.updateColumns([
+        DBColConfig().withData(config),
+      ]);
+    }
+    if (teamCompositions != null) {
+      await localGameData.gameReference.updateColumns([
+        DBColTeamCompositions().withData(teamCompositions),
+        DBColGamePhase().withData(GamePhase.composeTeams),
+      ]);
+    }
+    final snapshot = await localGameData.gameReference.get();
+    await GameController.startGame(localGameData, snapshot);
   }
 }
 
@@ -81,8 +99,9 @@ Future<GamePhase> getGamePhase(LocalGameData localGameData) async {
 Future<void> minimalOfflineGameTest() async {
   final client = Client();
   client.localGameData = await GameController.newOffineGame();
-  await GameController.startGame(client.localGameData.gameReference,
-      twoVsTwoOfflineConfig(), twoVsTwoSimpleComposition());
+  await client.startGame(
+      config: twoVsTwoOfflineConfig(),
+      teamCompositions: twoVsTwoSimpleComposition());
 
   await (await client.controller()).startExplaning();
   await (await client.controller()).wordGuessed();
@@ -108,8 +127,9 @@ void main() {
       setupApp(AppConfig());
       final client = Client();
       client.localGameData = await GameController.newOffineGame();
-      await GameController.startGame(client.localGameData.gameReference,
-          twoVsTwoOfflineConfig(), twoVsTwoSimpleComposition());
+      await client.startGame(
+          config: twoVsTwoOfflineConfig(),
+          teamCompositions: twoVsTwoSimpleComposition());
 
       await (await client.controller()).startExplaning();
       final int w0 =
@@ -172,10 +192,8 @@ void main() {
               ..rules.wordsPerPlayer = 2,
           ));
 
-      await GameController.startGame(
-          host.localGameData.gameReference,
-          (await host.configController()).configWithOverrides(),
-          ascendingIndividualTurnOrder(numPlayers: 2));
+      await host.startGame(
+          teamCompositions: ascendingIndividualTurnOrder(numPlayers: 2));
 
       await (await host.controller()).startExplaning();
       await (await host.controller()).finishExplanation();
@@ -225,14 +243,13 @@ void main() {
           ));
       final config = (await host.configController()).configWithOverrides();
 
-      await GameController.generateTeamCompositions(
+      await GameController.updateTeamCompositions(
           host.localGameData.gameReference, config);
       final teamCompositions = (await host.localGameData.gameReference.get())
           .get(DBColTeamCompositions());
       expect(teamCompositions.individualOrder, unorderedEquals([0, 2]));
 
-      await GameController.startGame(
-          host.localGameData.gameReference, config, teamCompositions);
+      await host.startGame();
 
       final party = (await host.controller()).turnState.party;
       expect([party.performer] + party.recipients.toList(),
@@ -260,7 +277,7 @@ void main() {
       expect(
           await getGamePhase(host.localGameData), equals(GamePhase.configure));
 
-      await GameController.generateTeamCompositions(
+      await GameController.updateTeamCompositions(
           host.localGameData.gameReference,
           (await host.configController()).configWithOverrides());
       expect(await getGamePhase(host.localGameData),
@@ -271,17 +288,74 @@ void main() {
       expect(
           await getGamePhase(host.localGameData), equals(GamePhase.configure));
 
-      await GameController.generateTeamCompositions(
+      await GameController.updateTeamCompositions(
           host.localGameData.gameReference,
           (await host.configController()).configWithOverrides());
       expect(await getGamePhase(host.localGameData),
           equals(GamePhase.composeTeams));
 
-      await GameController.startGame(
-          host.localGameData.gameReference,
-          (await host.configController()).configWithOverrides(),
-          ascendingIndividualTurnOrder(numPlayers: 2));
+      await host.startGame(
+          teamCompositions: ascendingIndividualTurnOrder(numPlayers: 2));
       expect(await getGamePhase(host.localGameData), equals(GamePhase.play));
+    });
+
+    test('write words', () async {
+      setupApp(AppConfig());
+      final host = Client();
+      final guest = Client();
+
+      host.localGameData =
+          await GameController.newLobby(firestoreInstance, 'user_host');
+      guest.localGameData = (await GameController.joinLobby(
+              firestoreInstance, 'user_guest', host.localGameData.gameID))
+          .localGameData;
+
+      await (await host.configController()).update((config) => config.rebuild(
+            (b) => b
+              ..teaming.teamPlay = false
+              ..rules.wordsPerPlayer = 1
+              ..rules.writeWords = true,
+          ));
+
+      {
+        final wordWritingViewData = GameController.getWordWritingViewData(
+            host.localGameData, await host.localGameData.gameReference.get());
+        await GameController.updatePersonalState(
+            host.localGameData,
+            wordWritingViewData.playerState.rebuild(
+              (b) => b
+                ..words.replace(['foo'])
+                ..wordsReady = true,
+            ));
+      }
+      {
+        final wordWritingViewData = GameController.getWordWritingViewData(
+            host.localGameData, await host.localGameData.gameReference.get());
+        expect(wordWritingViewData.numPlayersReady, equals(1));
+      }
+      {
+        final wordWritingViewData = GameController.getWordWritingViewData(
+            guest.localGameData, await guest.localGameData.gameReference.get());
+        await GameController.updatePersonalState(
+            guest.localGameData,
+            wordWritingViewData.playerState.rebuild(
+              (b) => b
+                ..words.replace(['bar'])
+                ..wordsReady = true,
+            ));
+      }
+      {
+        final wordWritingViewData = GameController.getWordWritingViewData(
+            host.localGameData, await host.localGameData.gameReference.get());
+        expect(wordWritingViewData.numPlayersReady, equals(2));
+      }
+
+      await host.startGame(
+          teamCompositions: ascendingIndividualTurnOrder(numPlayers: 2));
+
+      await (await host.controller()).startExplaning();
+      final word = (await host.controller()).gameData.currentWordText();
+      expect(word, isIn(['foo', 'bar']));
     });
   });
 }

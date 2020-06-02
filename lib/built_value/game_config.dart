@@ -14,6 +14,7 @@ abstract class RulesConfig implements Built<RulesConfig, RulesConfigBuilder> {
   int get turnSeconds;
   int get bonusSeconds;
   int get wordsPerPlayer;
+  bool get writeWords;
 
   RulesConfig._();
   factory RulesConfig([void Function(RulesConfigBuilder) updates]) =

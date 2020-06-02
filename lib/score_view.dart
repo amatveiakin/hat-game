@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:hatgame/built_value/game_phase.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/game_navigator.dart';
-import 'package:hatgame/game_phase.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/widget/primary_secondary_scaffold.dart';
 import 'package:hatgame/widget/spacing.dart';

@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 import 'package:flutter/foundation.dart';
 import 'package:hatgame/app_version.dart';
 import 'package:hatgame/built_value/game_config.dart';
+import 'package:hatgame/built_value/game_phase.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value/personal_state.dart';
 import 'package:hatgame/built_value/team_compositions.dart';
@@ -15,7 +16,8 @@ import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/db/db_firestore.dart';
 import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/game_data.dart';
-import 'package:hatgame/game_phase.dart';
+import 'package:hatgame/game_phase_reader.dart';
+import 'package:hatgame/lexicon.dart';
 import 'package:hatgame/partying_strategy.dart';
 import 'package:hatgame/start_game_online_screen.dart';
 import 'package:hatgame/util/assertion.dart';
@@ -24,7 +26,6 @@ import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/util/list_ext.dart';
 import 'package:hatgame/util/ntp_time.dart';
 import 'package:hatgame/util/strings.dart';
-import 'package:russian_words/russian_words.dart' as russian_words;
 
 enum Reconnection {
   connectForTheFirstTime,
@@ -210,6 +211,7 @@ class GameController {
       DBColCreationTimeUtc()
           .withData(NtpTime.nowUtcNoPrecisionGuarantee().toString()),
       DBColHostAppVersion().withData(appVersion),
+      DBColGamePhase().withData(GamePhase.configure),
     ];
   }
 
@@ -232,7 +234,8 @@ class GameController {
   static Future<LocalGameData> newOffineGame() async {
     DBDocumentReference reference = newLocalGameReference();
     await reference.delete();
-    final GameConfig config = GameConfigController.initialConfig().rebuild(
+    final GameConfig config =
+        GameConfigController.initialConfig(onlineMode: false).rebuild(
       (b) => b.players.names.replace({}),
     );
     await reference.setColumns(
@@ -259,7 +262,8 @@ class GameController {
     String gameID;
     firestore.DocumentReference reference;
     final int playerID = 0;
-    final GameConfig config = GameConfigController.initialConfig();
+    final GameConfig config =
+        GameConfigController.initialConfig(onlineMode: true);
     final gameRecordStub = _newGameRecord();
     for (int idLength = minIDLength;
         idLength <= maxIDLength && gameID == null;
@@ -433,11 +437,25 @@ class GameController {
     });
   }
 
-  static Future<void> generateTeamCompositions(
-      DBDocumentReference reference, GameConfig config) async {
+  static Future<void> toWriteWordsPhase(DBDocumentReference reference) async {
+    reference.clearLocalCache();
+    return reference.updateColumns([
+      DBColGamePhase().withData(GamePhase.writeWords),
+    ]);
+  }
+
+  static Future<void> backFromWordWritingPhase(
+      DBDocumentReference reference) async {
+    reference.clearLocalCache();
+    return reference.updateColumns([
+      DBColGamePhase().withData(GamePhase.configure),
+    ]);
+  }
+
+  static TeamCompositions generateTeamCompositions(
+      DBDocumentReference reference, GameConfig config) {
     final numPlayers = config.players.names.length;
     final playerIDs = config.players.names.keys.toList();
-    TeamCompositions teamCompositions;
     if (config.teaming.teamPlay) {
       BuiltList<BuiltList<int>> teams;
       if (config.players.teams != null) {
@@ -454,25 +472,33 @@ class GameController {
             teamsMutable.map((t) => BuiltList<int>(t)));
       }
       checkTeamSizes(teams);
-      teamCompositions = TeamCompositions((b) => b..teams.replace(teams));
+      return TeamCompositions((b) => b..teams.replace(teams));
     } else {
       Assert.holds(config.players.teams == null);
       checkNumPlayersForIndividualPlay(
           numPlayers, config.teaming.individualPlayStyle);
-      teamCompositions = TeamCompositions((b) => b
+      return TeamCompositions((b) => b
         ..individualOrder.replace(
           playerIDs.shuffled(),
         ));
     }
+  }
+
+  static Future<void> updateTeamCompositions(
+      DBDocumentReference reference, GameConfig config) async {
+    final TeamCompositions teamCompositions =
+        generateTeamCompositions(reference, config);
     reference.clearLocalCache();
     return reference.updateColumns([
       DBColTeamCompositions().withData(teamCompositions),
+      DBColGamePhase().withData(GamePhase.composeTeams),
     ]);
   }
 
   static Future<void> discardTeamCompositions(DBDocumentReference reference) {
     return reference.updateColumns([
       DBColTeamCompositions().withData(null),
+      DBColGamePhase().withData(GamePhase.configure),
     ]);
   }
 
@@ -500,33 +526,44 @@ class GameController {
             .toList();
     Assert.eq(teamCompositions.teams != null, gameConfig.teaming.teamPlay);
     return TeamCompositionsViewData(
-        gameConfig: gameConfig,
-        teamCompositions: teamCompositions,
-        playerNames: playerNames);
+        gameConfig: gameConfig, playerNames: playerNames);
   }
 
-  static Future<void> startGame(DBDocumentReference reference,
-      GameConfig config, TeamCompositions teamCompositions) {
-    final numPlayers = config.players.names.length;
-
+  static List<String> _generateRandomWords(GameConfig config) {
+    final int numPlayers = config.players.names.length;
     final int totalWords = config.rules.wordsPerPlayer * numPlayers;
-    final words = List<Word>();
-    while (words.length < totalWords) {
-      final String text =
-          russian_words.nouns[Random().nextInt(russian_words.nouns.length)];
-      // This dictionary contains a lot of words with diminutive sufficies -
-      // try to filter them out. This will also throw away some legit words,
-      // but that's ok. Eventually we'll find a better dictionary.
-      if (text.toLowerCase() != text ||
-          text.endsWith('ик') ||
-          text.endsWith('ек') ||
-          text.endsWith('ок')) {
-        continue;
-      }
-      words.add(Word((b) => b
-        ..id = words.length
-        ..text = text));
-    }
+    return List.generate(totalWords, (_) => Lexion.randomWord());
+  }
+
+  static List<String> _collectWordsFromPlayers(DBDocumentSnapshot snapshot) {
+    final personalStates = _parsePersonalStates(snapshot);
+    return personalStates.values
+        .fold([], (total, state) => total + state.words.asList());
+  }
+
+  static List<Word> _wordsFromWordTexts(List<String> wordTexts) {
+    return wordTexts
+        .mapWithIndex(
+          (index, text) => Word((b) => b
+            ..id = index
+            ..text = text),
+        )
+        .toList();
+  }
+
+  static Future<void> startGame(
+      LocalGameData localGameData, DBDocumentSnapshot snapshot) {
+    final GameConfig config =
+        GameConfigController.fromSnapshot(localGameData, snapshot)
+            .configWithOverrides();
+    final TeamCompositions teamCompositions =
+        snapshot.get(DBColTeamCompositions());
+
+    final List<Word> words = _wordsFromWordTexts(
+      config.rules.writeWords
+          ? _collectWordsFromPlayers(snapshot)
+          : _generateRandomWords(config),
+    );
 
     final InitialGameState initialState = InitialGameState((b) =>
         b..teamCompositions.replace(teamCompositions)..words.replace(words));
@@ -539,7 +576,31 @@ class GameController {
     // In addition to initial state, write the config:
     //   - just to be sure;
     //   - to fill in players field.  // TODO: Better solution for this?
-    return _writeInitialState(reference, config, initialState, turnState);
+    return _writeInitialState(
+        snapshot.reference, config, initialState, turnState);
+  }
+
+  static WordWritingViewData getWordWritingViewData(
+      LocalGameData localGameData, DBDocumentSnapshot snapshot) {
+    final Iterable<PersonalState> playerStates =
+        _parsePersonalStates(snapshot).values;
+    return WordWritingViewData(
+      playerState: snapshot.get(DBColPlayer(localGameData.myPlayerID)),
+      numPlayers: playerStates.length,
+      numPlayersReady:
+          playerStates.where((p) => (p.wordsReady ?? false)).length,
+      playersNotReady: playerStates
+          .where((p) => !(p.wordsReady ?? false))
+          .map((p) => p.name)
+          .toList(),
+    );
+  }
+
+  static Future<void> updatePersonalState(
+      LocalGameData localGameData, PersonalState newState) {
+    return localGameData.gameReference.updateColumns([
+      DBColPlayer(localGameData.myPlayerID).withData(newState),
+    ], localCache: LocalCacheBehavior.cache);
   }
 
   static Map<int, PersonalState> _parsePersonalStates(
@@ -600,6 +661,7 @@ class GameController {
       TurnState turnState) async {
     reference.clearLocalCache();
     return reference.updateColumns([
+      DBColGamePhase().withData(GamePhase.play),
       DBColConfig().withData(config),
       DBColTeamCompositions().withData(null),
       DBColInitialState().withData(initialState),
@@ -616,9 +678,7 @@ class GameController {
   }
 
   Future<void> _updatePersonalState(PersonalState newState) {
-    return localGameData.gameReference.updateColumns([
-      DBColPlayer(localGameData.myPlayerID).withData(newState),
-    ]);
+    return updatePersonalState(localGameData, newState);
   }
 
   Future<void> nextTurn() async {
@@ -628,17 +688,19 @@ class GameController {
     final TurnRecord newTurnRecord = TurnStateTransformer.turnRecord(turnState);
     final BuiltList<TurnRecord> newTurnLog =
         turnLog.rebuild((b) => b..add(newTurnRecord));
+    final bool timeToEndGame =
+        DerivedGameState.wordsInHat(initialState, newTurnLog, null).isEmpty;
     final TurnState newTurnState = TurnStateTransformer.newTurn(
       config,
       initialState,
       // pass (turnState == null) to `wordsInHat`, because words from the
       // current turn have already been moved to turn log.
-      timeToEndGame:
-          DerivedGameState.wordsInHat(initialState, newTurnLog, null).isEmpty,
+      timeToEndGame: timeToEndGame,
       turnIndex: turnIndex + 1,
     );
     localGameData.gameReference.clearLocalCache();
     return localGameData.gameReference.updateColumns([
+      if (timeToEndGame) DBColGamePhase().withData(GamePhase.gameOver),
       DBColCurrentTurn().withData(newTurnState),
       DBColTurnRecord(turnIndex).withData(newTurnRecord),
     ]);

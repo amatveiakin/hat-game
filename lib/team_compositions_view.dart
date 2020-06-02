@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
+import 'package:hatgame/built_value/game_phase.dart';
 import 'package:hatgame/built_value/team_compositions.dart';
 import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/game_navigator.dart';
-import 'package:hatgame/game_phase.dart';
 import 'package:hatgame/game_view.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/assertion.dart';
@@ -76,15 +76,13 @@ class TeamCompositionsView extends StatelessWidget {
   void _regenerateTeamCompositions(GameConfig gameConfig) async {
     // Shouldn't throw, because initial compositions have been generated
     // successfully.
-    await GameController.generateTeamCompositions(
+    await GameController.updateTeamCompositions(
         localGameData.gameReference, gameConfig);
   }
 
-  void _startGame(BuildContext context, GameConfig gameConfig,
-      TeamCompositions teamCompositions) async {
+  void _startGame(BuildContext context, DBDocumentSnapshot snapshot) async {
     try {
-      await GameController.startGame(
-          localGameData.gameReference, gameConfig, teamCompositions);
+      await GameController.startGame(localGameData, snapshot);
     } on InvalidOperation catch (e) {
       showInvalidOperationDialog(context: context, error: e);
     }
@@ -137,8 +135,7 @@ class TeamCompositionsView extends StatelessWidget {
           ),
           WideButton(
             onPressed: localGameData.isAdmin
-                ? () => _startGame(context, teamCompositionsViewData.gameConfig,
-                    teamCompositionsViewData.teamCompositions)
+                ? () => _startGame(context, snapshot)
                 : null,
             color: MyTheme.accent,
             child: Text('Start Game!'),

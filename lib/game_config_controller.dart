@@ -2,13 +2,15 @@ import 'dart:async';
 
 import 'package:built_collection/built_collection.dart';
 import 'package:hatgame/built_value/game_config.dart';
+import 'package:hatgame/built_value/game_phase.dart';
 import 'package:hatgame/built_value/personal_state.dart';
 import 'package:hatgame/db/db_columns.dart';
 import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/game_data.dart';
-import 'package:hatgame/game_phase.dart';
+import 'package:hatgame/game_phase_reader.dart';
 import 'package:hatgame/local_storage.dart';
 import 'package:hatgame/util/assertion.dart';
+import 'package:meta/meta.dart';
 
 class GameConfigController {
   final LocalGameData localGameData;
@@ -27,6 +29,7 @@ class GameConfigController {
         ..rules.turnSeconds = 15
         ..rules.bonusSeconds = 5
         ..rules.wordsPerPlayer = 5
+        ..rules.writeWords = false
         ..teaming.teamPlay = true
         ..teaming.randomizeTeams = true
         ..teaming.individualPlayStyle = IndividualPlayStyle.fluidPairs
@@ -36,8 +39,24 @@ class GameConfigController {
     );
   }
 
-  static GameConfig initialConfig() {
-    return LocalStorage.instance.get(LocalColLastConfig()) ?? defaultConfig();
+  static GameConfig _adaptForOfflineMode(GameConfig config) {
+    return config.rebuild(
+      (b) => b..rules.writeWords = false,
+    );
+  }
+
+  static GameConfig _adaptForOnlineMode(GameConfig config) {
+    return config;
+  }
+
+  static GameConfig initialConfig({@required bool onlineMode}) {
+    final GameConfig config =
+        LocalStorage.instance.get(LocalColLastConfig()) ?? defaultConfig();
+    // TODO: Do something to avoid breaking online-only and offline-only
+    // fields in LocalColLastConfig.
+    return onlineMode
+        ? _adaptForOnlineMode(config)
+        : _adaptForOfflineMode(config);
   }
 
   GameConfig configWithOverrides() {
@@ -69,7 +88,7 @@ class GameConfigController {
       LocalGameData localGameData, DBDocumentSnapshot snapshot) {
     Assert.holds(snapshot.exists);
     Assert.isIn(GamePhaseReader.fromSnapshot(localGameData, snapshot),
-        {GamePhase.configure, GamePhase.composeTeams});
+        {GamePhase.configure, GamePhase.composeTeams, GamePhase.writeWords});
 
     GameConfig rawConfig = snapshot.get(DBColConfig());
     BuiltList<PersonalState> playerStates;

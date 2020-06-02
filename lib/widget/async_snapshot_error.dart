@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hatgame/game_phase.dart';
+import 'package:hatgame/built_value/game_phase.dart';
 
 class AsyncSnapshotError extends StatelessWidget {
   final String errorMessage;

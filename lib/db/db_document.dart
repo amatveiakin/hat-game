@@ -67,6 +67,9 @@ abstract class DBDocumentSnapshot {
           DBColumnFamilyManager<T, ColumnT> columnFactory) =>
       dbGetAll(rawData, columnFactory, documentPath: reference.path);
 
+  @override
+  String toString() => rawData.toString();
+
   @protected
   Map<String, dynamic> get rawData;
 }

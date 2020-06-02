@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:hatgame/built_value/game_phase.dart';
 import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/game_config_view.dart';
 import 'package:hatgame/game_data.dart';
-import 'package:hatgame/game_phase.dart';
+import 'package:hatgame/game_phase_reader.dart';
 import 'package:hatgame/game_view.dart';
 import 'package:hatgame/kicked_screen.dart';
 import 'package:hatgame/score_view.dart';
@@ -11,6 +12,7 @@ import 'package:hatgame/team_compositions_view.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/widget/async_snapshot_error.dart';
 import 'package:hatgame/widget/dialog.dart';
+import 'package:hatgame/write_words_view.dart';
 
 // We never pop the the previous game stage directly: this is done only
 // through the navigator.
@@ -128,7 +130,6 @@ class GameNavigator {
     @required GamePhase oldPhase,
     @required GamePhase newPhase,
   }) {
-    // TODO: Put everything below into a Future !!!
     // Hide virtual keyboard
     FocusScope.of(context).unfocus();
     if (_isGrandparentPhase(newPhase, oldPhase)) {
@@ -138,6 +139,7 @@ class GameNavigator {
     } else {
       GamePhase pushFrom;
       if (_isGrandparentPhase(oldPhase, newPhase)) {
+        // TODO: Also `pushAndRemoveUntil` in case there was a subscreen
         pushFrom = oldPhase;
       } else {
         pushFrom = _firstGrandparentPhase(newPhase);
@@ -202,6 +204,11 @@ class GameNavigator {
           builder: (context) => GameConfigView(localGameData: localGameData),
           settings: routeSettings,
         );
+      case GamePhase.writeWords:
+        return MaterialPageRoute(
+          builder: (context) => WriteWordsView(localGameData: localGameData),
+          settings: routeSettings,
+        );
       case GamePhase.composeTeams:
         return MaterialPageRoute(
           builder: (context) =>
@@ -247,7 +254,10 @@ class GameNavigator {
     switch (phase) {
       case GamePhase.configure:
         return null;
+      case GamePhase.writeWords:
+        return GamePhase.configure;
       case GamePhase.composeTeams:
+        // TODO: Should we go back to writeWords?
         return GamePhase.configure;
       case GamePhase.play:
       case GamePhase.gameOver:
@@ -308,6 +318,7 @@ class GameNavigator {
             ? _PopResponse.exitGame
             : _confimLeaveGame(context, localGameData: localGameData);
       case GamePhase.composeTeams:
+      case GamePhase.writeWords:
         return localGameData.isAdmin
             ? _PopResponse.custom
             : _confimLeaveGame(context, localGameData: localGameData);

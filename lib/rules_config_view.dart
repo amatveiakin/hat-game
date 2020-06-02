@@ -26,11 +26,17 @@ class RulesConfigViewController {
 }
 
 class RulesConfigView extends StatefulWidget {
+  final bool onlineMode;
   final RulesConfigViewController viewController;
+  final RulesConfig config;
   final GameConfigController configController;
 
-  RulesConfigView(
-      {@required this.viewController, @required this.configController});
+  RulesConfigView({
+    @required this.onlineMode,
+    @required this.viewController,
+    @required this.config,
+    @required this.configController,
+  });
 
   @override
   State<StatefulWidget> createState() => RulesConfigViewState();
@@ -80,7 +86,9 @@ class RulesConfigViewState extends State<RulesConfigView> {
     50,
   ];
 
+  bool get onlineMode => widget.onlineMode;
   RulesConfigViewController get viewController => widget.viewController;
+  RulesConfig get config => widget.config;
   GameConfigController get configController => widget.configController;
 
   @override
@@ -116,6 +124,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
 
   @override
   Widget build(BuildContext context) {
+    // TODO: Add visual separators between logical sections
     return ListView(
       children: [
         SizedBox(height: 4),
@@ -163,6 +172,13 @@ class RulesConfigViewState extends State<RulesConfigView> {
             ],
           ),
         ),
+        if (onlineMode)
+          SwitchListTile(
+            title: Text('Write your own words'),
+            value: config.writeWords,
+            onChanged: (value) => configController.updateRules(
+                (config) => config.rebuild((b) => b..writeWords = value)),
+          )
       ],
     );
   }

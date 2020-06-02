@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hatgame/built_value/game_config.dart';
+import 'package:hatgame/built_value/game_phase.dart';
 import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/game_navigator.dart';
-import 'package:hatgame/game_phase.dart';
 import 'package:hatgame/offline_player_config_view.dart';
 import 'package:hatgame/online_player_config_view.dart';
 import 'package:hatgame/rules_config_view.dart';
@@ -127,10 +127,17 @@ class _GameConfigViewState extends State<GameConfigView>
     );
   }
 
-  void _generateTeamCompositions(GameConfig gameConfig) async {
+  void _next(GameConfig gameConfig) async {
     try {
-      await GameController.generateTeamCompositions(
-          localGameData.gameReference, gameConfig);
+      if (gameConfig.rules.writeWords) {
+        // Check that teams can be generate, don't write them down yet.
+        GameController.generateTeamCompositions(
+            localGameData.gameReference, gameConfig);
+        await GameController.toWriteWordsPhase(localGameData.gameReference);
+      } else {
+        await GameController.updateTeamCompositions(
+            localGameData.gameReference, gameConfig);
+      }
     } on InvalidOperation catch (e) {
       showInvalidOperationDialog(context: context, error: e);
       _tabController.animateTo(playersTabIndex);
@@ -157,7 +164,9 @@ class _GameConfigViewState extends State<GameConfigView>
       SectionData(
         title: rulesSectionTitle(),
         body: RulesConfigView(
+          onlineMode: localGameData.onlineMode,
           viewController: _rulesConfigViewController,
+          config: gameConfig.rules,
           configController: configController,
         ),
       ),
@@ -184,18 +193,11 @@ class _GameConfigViewState extends State<GameConfigView>
       ),
     ];
     final startButton = WideButton(
-      onPressed: isAdmin ? () => _generateTeamCompositions(gameConfig) : null,
+      onPressed: isAdmin ? () => _next(gameConfig) : null,
       color: MyTheme.accent,
-      child: Row(
-        children: [
-          Expanded(child: Container()),
-          Text(gameConfig.teaming.teamPlay
-              ? 'Teams & Turn Order'
-              : 'Turn Order'),
-          Icon(Icons.arrow_right),
-          Expanded(child: Container()),
-        ],
-      ),
+      child: GoNextButtonCaption(gameConfig.rules.writeWords
+          ? 'Write Words'
+          : gameConfig.teaming.teamPlay ? 'Teams & Turn Order' : 'Turn Order'),
       margin: WideButton.bottomButtonMargin,
     );
 
