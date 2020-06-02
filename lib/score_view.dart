@@ -6,8 +6,11 @@ import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/game_navigator.dart';
 import 'package:hatgame/theme.dart';
+import 'package:hatgame/util/invalid_operation.dart';
+import 'package:hatgame/widget/invalid_operation_dialog.dart';
 import 'package:hatgame/widget/primary_secondary_scaffold.dart';
 import 'package:hatgame/widget/spacing.dart';
+import 'package:hatgame/widget/wide_button.dart';
 import 'package:outline_material_icons/outline_material_icons.dart';
 
 // TODO: Allow final results editing on ScoreView.
@@ -182,6 +185,14 @@ class ScoreView extends StatelessWidget {
 
   ScoreView({@required this.localGameData});
 
+  void _rematch(BuildContext context, DBDocumentSnapshot snapshot) async {
+    try {
+      await GameController.rematch(localGameData, snapshot);
+    } on InvalidOperation catch (e) {
+      showInvalidOperationDialog(context: context, error: e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return navigator.buildWrapper(
@@ -197,12 +208,28 @@ class ScoreView extends StatelessWidget {
     return PrimarySecondaryScaffold(
       primaryAutomaticallyImplyLeading: true,
       primaryTitle: 'Game Over',
-      primary: Padding(
-        padding: EdgeInsets.all(6.0),
-        child: ListView(
-          children:
-              gameData.scoreData().map((s) => _TeamScoreView(data: s)).toList(),
-        ),
+      primary: Column(
+        children: [
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.all(6.0),
+              child: ListView(
+                children: gameData
+                    .scoreData()
+                    .map((s) => _TeamScoreView(data: s))
+                    .toList(),
+              ),
+            ),
+          ),
+          WideButton(
+            onPressed: localGameData.isAdmin
+                ? () => _rematch(context, snapshot)
+                : null,
+            color: MyTheme.accent,
+            child: Text('Rematch!'),
+            margin: WideButton.bottomButtonMargin,
+          ),
+        ],
       ),
       secondaryRouteName: '/game-log',
       secondary: Padding(

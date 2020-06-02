@@ -16,6 +16,7 @@ class GamePhase extends EnumClass {
 
   // Special personal phases. Game cannot be in this phase.
   static const GamePhase kicked = _$kicked;
+  static const GamePhase rematch = _$rematch;
 
   const GamePhase._(String name) : super(name);
 

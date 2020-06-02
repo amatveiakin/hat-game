@@ -27,6 +27,9 @@ class GamePhaseReader {
         return GamePhase.kicked;
       }
     }
+    if (snapshot.containsNonNull(DBColRematchNextGameID())) {
+      return GamePhase.rematch;
+    }
     return snapshot.get(DBColGamePhase());
   }
 
@@ -61,6 +64,7 @@ class GamePhaseReader {
             Assert.holds(!snapshot.containsNonNull(DBColCurrentTurn()));
             break;
           case GamePhase.kicked:
+          case GamePhase.rematch:
             break;
         }
       },

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_phase.dart';
 import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/game_config_view.dart';
+import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/game_phase_reader.dart';
 import 'package:hatgame/game_view.dart';
@@ -50,6 +51,7 @@ class GameNavigator {
     _navigateTo(
       context: context,
       localGameData: localGameData,
+      snapshot: snapshot,
       oldPhase: null,
       newPhase: gamePhase,
     );
@@ -82,6 +84,7 @@ class GameNavigator {
               _navigateTo(
                 context: context,
                 localGameData: localGameData,
+                snapshot: snapshot.data,
                 oldPhase: currentPhase,
                 newPhase: newPhase,
               );
@@ -110,15 +113,26 @@ class GameNavigator {
   static void _navigateTo({
     @required BuildContext context,
     @required LocalGameData localGameData,
+    @required DBDocumentSnapshot snapshot,
     @required GamePhase oldPhase,
     @required GamePhase newPhase,
   }) {
     localGameData.navigationState.lastSeenGamePhase = newPhase;
     localGameData.gameReference.clearLocalCache();
+    if (newPhase == GamePhase.rematch) {
+      localGameData.navigationState.exitingGame = true;
+      final LocalGameData newLocalGameData =
+          GameController.joinRematch(localGameData, snapshot);
+      // Use `Future` because it's not allowed to navigate from `build`.
+      Future(() =>
+          navigateToGame(context: context, localGameData: newLocalGameData));
+      return;
+    }
     // Use `Future` because it's not allowed to navigate from `build`.
     Future(() => _navigateToImpl(
           context: context,
           localGameData: localGameData,
+          snapshot: snapshot,
           oldPhase: oldPhase,
           newPhase: newPhase,
         ));
@@ -127,6 +141,7 @@ class GameNavigator {
   static void _navigateToImpl({
     @required BuildContext context,
     @required LocalGameData localGameData,
+    @required DBDocumentSnapshot snapshot,
     @required GamePhase oldPhase,
     @required GamePhase newPhase,
   }) {
@@ -143,7 +158,11 @@ class GameNavigator {
         pushFrom = oldPhase;
       } else {
         pushFrom = _firstGrandparentPhase(newPhase);
-        final route = _route(localGameData: localGameData, phase: pushFrom);
+        final route = _route(
+          localGameData: localGameData,
+          snapshot: snapshot,
+          phase: pushFrom,
+        );
         Navigator.of(context).pushAndRemoveUntil(
           route,
           ModalRoute.withName('/'),
@@ -152,6 +171,7 @@ class GameNavigator {
       _pushPhases(
         context: context,
         localGameData: localGameData,
+        snapshot: snapshot,
         fromPhase: pushFrom,
         toPhase: newPhase,
       );
@@ -161,6 +181,7 @@ class GameNavigator {
   static void _pushPhases({
     @required BuildContext context,
     @required LocalGameData localGameData,
+    @required DBDocumentSnapshot snapshot,
     @required GamePhase fromPhase, // non-inclusive
     @required GamePhase toPhase, // inclusive
   }) {
@@ -170,6 +191,7 @@ class GameNavigator {
       _pushPhases(
         context: context,
         localGameData: localGameData,
+        snapshot: snapshot,
         fromPhase: fromPhase,
         toPhase: _parentPhase(toPhase),
       );
@@ -177,6 +199,7 @@ class GameNavigator {
     _pushPhase(
       context: context,
       localGameData: localGameData,
+      snapshot: snapshot,
       phase: toPhase,
     );
   }
@@ -184,14 +207,20 @@ class GameNavigator {
   static void _pushPhase({
     @required BuildContext context,
     @required LocalGameData localGameData,
+    @required DBDocumentSnapshot snapshot,
     @required GamePhase phase,
   }) {
-    final route = _route(localGameData: localGameData, phase: phase);
+    final route = _route(
+      localGameData: localGameData,
+      snapshot: snapshot,
+      phase: phase,
+    );
     Navigator.of(context).push(route);
   }
 
   static MaterialPageRoute _route({
     @required LocalGameData localGameData,
+    @required DBDocumentSnapshot snapshot,
     @required GamePhase phase,
   }) {
     final routeSettings = RouteSettings(
@@ -230,6 +259,8 @@ class GameNavigator {
           builder: (context) => KickedScreen(),
           settings: routeSettings,
         );
+      case GamePhase.rematch:
+        Assert.fail('There is no route for GamePhase.rematch');
     }
     Assert.fail('Unexpected GamePhase: $phase');
   }
@@ -262,6 +293,7 @@ class GameNavigator {
       case GamePhase.play:
       case GamePhase.gameOver:
       case GamePhase.kicked:
+      case GamePhase.rematch:
         return null;
     }
     Assert.fail('Unexpected GamePhase: $phase');
@@ -325,8 +357,8 @@ class GameNavigator {
       case GamePhase.play:
         return _confimLeaveGame(context, localGameData: localGameData);
       case GamePhase.gameOver:
-        return _PopResponse.exitGame;
       case GamePhase.kicked:
+      case GamePhase.rematch:
         return _PopResponse.exitGame;
     }
     Assert.fail('Unexpected game phase: $currentPhase');

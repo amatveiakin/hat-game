@@ -6,6 +6,7 @@ import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_phase.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value/personal_state.dart';
+import 'package:hatgame/built_value/rematch_source.dart';
 import 'package:hatgame/built_value/serializers.dart';
 import 'package:hatgame/built_value/team_compositions.dart';
 import 'package:hatgame/util/assertion.dart';
@@ -203,6 +204,19 @@ class DBColLocalPlayer extends DBColumn<PersonalState>
     with DBColSerializeBuiltValue {
   DBColLocalPlayer();
   String get name => 'additional_state';
+}
+
+// Written after game over if host requested a re-match. Immutable.
+class DBColRematchNextGameID extends DBColumn<String>
+    with DBColSerializeString {
+  String get name => 'rematch_next_game_id';
+}
+
+// Written when game is created if this is a rematch. Immutable.
+// Invariant: game[game[X].rematch_prev.gameID].rematch_next_game_id == X
+class DBColRematchPrev extends DBColumn<RematchSource>
+    with DBColSerializeBuiltValue {
+  String get name => 'rematch_prev';
 }
 
 // =============================================================================

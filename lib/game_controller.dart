@@ -231,59 +231,34 @@ class GameController {
     }
   }
 
-  static Future<LocalGameData> newOffineGame() async {
-    DBDocumentReference reference = newLocalGameReference();
-    await reference.delete();
-    final GameConfig config =
-        GameConfigController.initialConfig(onlineMode: false).rebuild(
-      (b) => b.players.names.replace({}),
-    );
-    await reference.setColumns(
-      _newGameRecord() +
-          [
-            DBColConfig().withData(config),
-            DBColLocalPlayer().withData(PersonalState((b) => b
-              ..id = 0
-              ..name = 'fake')),
-          ],
-    );
-    return LocalGameData(
-      onlineMode: false,
-      gameReference: reference,
-    );
+  // Returns game ID.
+  static Future<String> _createGameOffline(
+      List<DBColumnData> initialColumns) async {
+    final String gameID = newLocalGameID();
+    DBDocumentReference reference = localGameReference(gameID: gameID);
+    await reference.setColumns(initialColumns);
+    return gameID;
   }
 
-  static Future<LocalGameData> newLobby(
-      firestore.Firestore firestoreInstance, String myName) async {
+  // Returns game ID.
+  static Future<String> _createGameOnline(firestore.Firestore firestoreInstance,
+      List<DBColumnData> initialColumns) async {
     const int minIDLength = 4;
     const int maxIDLength = 8;
     const int attemptsPerTransaction = 100;
     final String idPrefix = kReleaseMode ? '' : '.';
     String gameID;
-    firestore.DocumentReference reference;
-    final int playerID = 0;
-    final GameConfig config =
-        GameConfigController.initialConfig(onlineMode: true);
-    final gameRecordStub = _newGameRecord();
     for (int idLength = minIDLength;
         idLength <= maxIDLength && gameID == null;
         idLength++) {
       await firestoreInstance.runTransaction((firestore.Transaction tx) async {
         for (int iter = 0; iter < attemptsPerTransaction; iter++) {
           gameID = newFirestoreGameID(idLength, idPrefix);
-          reference = firestoreGameReference(
+          final reference = firestoreGameReference(
               firestoreInstance: firestoreInstance, gameID: gameID);
           firestore.DocumentSnapshot snapshot = await tx.get(reference);
           if (!snapshot.exists) {
-            await tx.set(
-                reference,
-                dbData(gameRecordStub +
-                    [
-                      DBColConfig().withData(config),
-                      DBColPlayer(playerID).withData(PersonalState((b) => b
-                        ..id = playerID
-                        ..name = myName)),
-                    ]));
+            await tx.set(reference, dbData(initialColumns));
             return;
           }
         }
@@ -293,10 +268,45 @@ class GameController {
     if (gameID == null) {
       throw InvalidOperation('Cannot generate game ID', isInternalError: true);
     }
+    return gameID;
+  }
+
+  static Future<LocalGameData> newGameOffine() async {
+    final GameConfig config =
+        GameConfigController.initialConfig(onlineMode: false).rebuild(
+      (b) => b.players.names.replace({}),
+    );
+    final String gameID = await _createGameOffline([
+      ..._newGameRecord(),
+      DBColConfig().withData(config),
+      DBColLocalPlayer().withData(PersonalState((b) => b
+        ..id = 0
+        ..name = 'fake')),
+    ]);
+    return LocalGameData(
+      onlineMode: false,
+      gameID: gameID,
+      gameReference: localGameReference(gameID: gameID),
+    );
+  }
+
+  static Future<LocalGameData> newLobby(
+      firestore.Firestore firestoreInstance, String myName) async {
+    final int playerID = 0;
+    final GameConfig config =
+        GameConfigController.initialConfig(onlineMode: true);
+    final String gameID = await _createGameOnline(firestoreInstance, [
+      ..._newGameRecord(),
+      DBColConfig().withData(config),
+      DBColPlayer(playerID).withData(PersonalState((b) => b
+        ..id = playerID
+        ..name = myName)),
+    ]);
     return LocalGameData(
       onlineMode: true,
       gameID: gameID,
-      gameReference: FirestoreDocumentReference(reference),
+      gameReference: FirestoreDocumentReference(firestoreGameReference(
+          firestoreInstance: firestoreInstance, gameID: gameID)),
       myPlayerID: playerID,
     );
   }
@@ -578,6 +588,64 @@ class GameController {
     //   - to fill in players field.  // TODO: Better solution for this?
     return _writeInitialState(
         snapshot.reference, config, initialState, turnState);
+  }
+
+  static Future<void> rematch(
+      LocalGameData localGameData, DBDocumentSnapshot snapshot) async {
+    List<DBColumnData> initialColumns = _newGameRecord();
+    String gameID;
+    if (localGameData.onlineMode) {
+      final firestore.Firestore firestoreInstance =
+          (localGameData.gameReference as FirestoreDocumentReference)
+              .firestoreReference
+              .firestore;
+      initialColumns.add(DBColConfig().withData(
+          snapshot.get(DBColConfig()).rebuild((b) => b..players = null)));
+      initialColumns.addAll(snapshot
+          .getAll(DBColPlayerManager())
+          .map((c) => DBColPlayer(c.id).withData(PersonalState(
+                (b) => b
+                  ..id = c.value.id
+                  ..name = c.value.name
+                  ..kicked = c.value.kicked,
+              ))));
+      gameID = await _createGameOnline(firestoreInstance, initialColumns);
+    } else {
+      initialColumns.add(DBColConfig().withData(snapshot.get(DBColConfig())));
+      initialColumns
+          .add(DBColLocalPlayer().withData(snapshot.get(DBColLocalPlayer())));
+      gameID = await _createGameOffline(initialColumns);
+    }
+    return localGameData.gameReference.updateColumns([
+      DBColRematchNextGameID().withData(gameID),
+    ]);
+  }
+
+  static DBDocumentReference _rematchGameReference(
+      LocalGameData oldLocalGameData,
+      {@required String newGameID}) {
+    if (oldLocalGameData.onlineMode) {
+      final firestore.Firestore firestoreInstance =
+          (oldLocalGameData.gameReference as FirestoreDocumentReference)
+              .firestoreReference
+              .firestore;
+      return FirestoreDocumentReference(firestoreGameReference(
+          firestoreInstance: firestoreInstance, gameID: newGameID));
+    } else {
+      return localGameReference(gameID: newGameID);
+    }
+  }
+
+  static LocalGameData joinRematch(
+      LocalGameData oldLocalGameData, DBDocumentSnapshot snapshot) {
+    final String newGameID = snapshot.get(DBColRematchNextGameID());
+    return LocalGameData(
+      onlineMode: oldLocalGameData.onlineMode,
+      gameID: newGameID,
+      gameReference:
+          _rematchGameReference(oldLocalGameData, newGameID: newGameID),
+      myPlayerID: oldLocalGameData.myPlayerID,
+    );
   }
 
   static WordWritingViewData getWordWritingViewData(

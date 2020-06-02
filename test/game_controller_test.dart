@@ -98,7 +98,7 @@ Future<GamePhase> getGamePhase(LocalGameData localGameData) async {
 
 Future<void> minimalOfflineGameTest() async {
   final client = Client();
-  client.localGameData = await GameController.newOffineGame();
+  client.localGameData = await GameController.newGameOffine();
   await client.startGame(
       config: twoVsTwoOfflineConfig(),
       teamCompositions: twoVsTwoSimpleComposition());
@@ -113,6 +113,8 @@ Future<void> minimalOfflineGameTest() async {
   expect((await client.controller()).gameData.gameFinished(), isTrue);
 }
 
+// TODO: Add tests for rematch.
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final firestoreInstance = MockFirestoreInstance();
@@ -126,7 +128,7 @@ void main() {
     test('sample 2 vs 2 game', () async {
       setupApp(AppConfig());
       final client = Client();
-      client.localGameData = await GameController.newOffineGame();
+      client.localGameData = await GameController.newGameOffine();
       await client.startGame(
           config: twoVsTwoOfflineConfig(),
           teamCompositions: twoVsTwoSimpleComposition());

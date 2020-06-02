@@ -72,6 +72,7 @@ abstract class TeamingConfig
   DesiredTeamSize get desiredTeamSize;
   UnequalTeamSize get unequalTeamSize;
   IndividualPlayStyle get guessingInLargeTeam;
+  // TODO: Add opition: force different ream on re-match.
 
   TeamingConfig._();
   factory TeamingConfig([void Function(TeamingConfigBuilder) updates]) =

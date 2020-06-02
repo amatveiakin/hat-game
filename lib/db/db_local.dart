@@ -117,7 +117,5 @@ class LocalDB {
   LocalDocumentReference document(String path) =>
       LocalDocumentReference(localDB: this, path: path);
 
-  LocalDocumentReference add() => document(newRowPath());
-
   Stream<LocalDocumentRawUpdate> snapshots() => _streamController.stream;
 }
