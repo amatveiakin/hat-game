@@ -114,7 +114,7 @@ class GameNavigator {
     @required GamePhase newPhase,
   }) {
     localGameData.navigationState.lastSeenGamePhase = newPhase;
-    localGameData.gameReference.assertLocalCacheIsEmpty();
+    localGameData.gameReference.clearLocalCache();
     // Use `Future` because it's not allowed to navigate from `build`.
     Future(() => _navigateToImpl(
           context: context,
