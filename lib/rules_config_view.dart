@@ -176,8 +176,10 @@ class RulesConfigViewState extends State<RulesConfigView> {
           SwitchListTile(
             title: Text('Write your own words'),
             value: config.writeWords,
-            onChanged: (value) => configController.updateRules(
-                (config) => config.rebuild((b) => b..writeWords = value)),
+            onChanged: configController.isReadOnly
+                ? (value) {} // Don't gray out text. TODO: Better solution.
+                : (value) => configController.updateRules(
+                    (config) => config.rebuild((b) => b..writeWords = value)),
           )
       ],
     );
