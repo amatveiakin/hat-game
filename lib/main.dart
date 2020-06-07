@@ -3,6 +3,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_analytics/observer.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/about_screen.dart';
+import 'package:hatgame/lexicon.dart';
 import 'package:hatgame/local_storage.dart';
 import 'package:hatgame/rules_screen.dart';
 import 'package:hatgame/start_game_online_screen.dart';
@@ -20,6 +21,7 @@ void _initFirestore() {
 
 Future<void> _initApp() async {
   _initFirestore();
+  await Lexion.init(); // loading text resource: should never fail
   // TODO: Start all init-s in parallel, with a common timeout.
   await LocalStorage.init();
   await Sounds.init();

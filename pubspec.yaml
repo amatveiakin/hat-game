@@ -58,8 +58,6 @@ dependencies:
 
   vibration: ^1.2.4
 
-  russian_words: ^0.1.0
-
 dev_dependencies:
   test: ^1.14.2
   flutter_test:
@@ -91,6 +89,7 @@ flutter:
   assets:
     - images/dice.png
     - images/word_censored.png
+    - lexicon/russian_normal.txt
     - sounds/bonus_time_over.ogg
     - sounds/time_over.ogg
 
