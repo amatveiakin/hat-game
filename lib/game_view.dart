@@ -327,7 +327,9 @@ class PlayAreaState extends State<PlayArea>
   }
 
   void _endBonusTime(int turnRestriction) {
-    if (gameData.turnIndex() == turnRestriction) {
+    if (gameData.turnIndex() == turnRestriction &&
+        turnState.turnPhase == TurnPhase.review) {
+      Sounds.play(Sounds.bonusTimeOver);
       MyVibration.mediumVibration();
     }
   }

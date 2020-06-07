@@ -6,6 +6,7 @@ class Sounds {
   static Soundpool _soundpool;
 
   static int timeOver;
+  static int bonusTimeOver;
 
   static Future<void> init() async {
     try {
@@ -21,6 +22,7 @@ class Sounds {
   static Future<void> _initImpl() async {
     _soundpool = Soundpool();
     timeOver = await _load('sounds/time_over.ogg');
+    bonusTimeOver = await _load('sounds/bonus_time_over.ogg');
   }
 
   static void play(int sound) async {

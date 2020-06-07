@@ -91,6 +91,7 @@ flutter:
   assets:
     - images/dice.png
     - images/word_censored.png
+    - sounds/bonus_time_over.ogg
     - sounds/time_over.ogg
 
   # An image asset can refer to one or more resolution-specific "variants", see
