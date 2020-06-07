@@ -34,6 +34,10 @@ App version: $appVersion
 The app is written in Flutter.
 ''';
 
+  // TODO: Add: acknowledgment:
+  // О. Н. Ляшевская, С. А. Шаров, Частотный словарь современного русского языка
+  // (на материалах Национального корпуса русского языка). М.: Азбуковник, 2009.
+
   @override
   Widget build(BuildContext context) {
     return ConstrainedScaffold(
