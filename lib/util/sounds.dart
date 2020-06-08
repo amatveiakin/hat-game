@@ -7,6 +7,7 @@ class Sounds {
 
   static int timeOver;
   static int bonusTimeOver;
+  static List<int> wordGuessedCombo;
 
   static Future<void> init() async {
     try {
@@ -23,6 +24,13 @@ class Sounds {
     _soundpool = Soundpool();
     timeOver = await _load('sounds/time_over.ogg');
     bonusTimeOver = await _load('sounds/bonus_time_over.ogg');
+    wordGuessedCombo = [
+      await _load('sounds/word_guessed_combo0.ogg'),
+      await _load('sounds/word_guessed_combo1.ogg'),
+      await _load('sounds/word_guessed_combo2.ogg'),
+      await _load('sounds/word_guessed_combo3.ogg'),
+      await _load('sounds/word_guessed_combo4.ogg'),
+    ];
   }
 
   static void play(int sound) async {

@@ -313,6 +313,9 @@ class PlayAreaState extends State<PlayArea>
   }
 
   void _wordGuessed() {
+    final int combo = gameData.currentCombo();
+    Sounds.play(Sounds
+        .wordGuessedCombo[min(Sounds.wordGuessedCombo.length - 1, combo)]);
     HapticFeedback.mediumImpact();
     gameController.wordGuessed();
   }

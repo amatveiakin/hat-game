@@ -92,6 +92,11 @@ flutter:
     - lexicon/russian_normal.txt
     - sounds/bonus_time_over.ogg
     - sounds/time_over.ogg
+    - sounds/word_guessed_combo0.ogg
+    - sounds/word_guessed_combo1.ogg
+    - sounds/word_guessed_combo2.ogg
+    - sounds/word_guessed_combo3.ogg
+    - sounds/word_guessed_combo4.ogg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

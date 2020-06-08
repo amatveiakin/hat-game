@@ -201,6 +201,8 @@ class GameData {
     return _wordText(turnState.wordsInThisTurn.last.id);
   }
 
+  int currentCombo() => turnState.wordsInThisTurn.length - 1;
+
   List<WordViewData> wordsInThisTurnData() {
     final wordsFlaggedByOthers =
         DerivedGameState.wordsFlaggedByOthers(otherPersonalStates);
