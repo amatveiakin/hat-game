@@ -39,16 +39,13 @@ class _GameConfigViewState extends State<GameConfigView>
       GameNavigator(currentPhase: GamePhase.configure);
 
   SectionTitleData rulesSectionTitle() => SectionTitleData(
-        text: 'Rules',
         icon: Icon(Icons.settings),
       );
   SectionTitleData teamingSectionTitle() => SectionTitleData(
-        text: 'Teaming',
         // TODO: Add arrows / several groups of people / gearwheel.
         icon: Icon(Icons.people),
       );
   SectionTitleData playersSectionTitle(int numPlayers) => SectionTitleData(
-        text: 'Players: $numPlayers',
         // TODO: Replace squares with person icons.
         icon: Icon(OMIcons.ballot),
       );

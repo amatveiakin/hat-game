@@ -4,10 +4,9 @@ import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/widget/constrained_scaffold.dart';
 
 class SectionTitleData {
-  final String text;
   final Icon icon;
 
-  SectionTitleData({this.text, this.icon});
+  SectionTitleData({@required this.icon});
 }
 
 class SectionData {
@@ -64,7 +63,6 @@ class SectionsScaffold extends StatelessWidget {
         controller: tabController,
         tabs: sections
             .map((s) => Tab(
-                  text: s.title.text,
                   icon: s.title.icon,
                 ))
             .toList(),
@@ -82,10 +80,10 @@ class SectionsScaffold extends StatelessWidget {
                 // normal title text position. Hopefully this is not too
                 // noticeable. Without PreferredSize the AppBar is just too fat.
                 bottom: PreferredSize(
-                    preferredSize: Size.fromHeight(64.0), child: tabBar),
+                    preferredSize: Size.fromHeight(48.0), child: tabBar),
               )
             : PreferredSize(
-                preferredSize: Size.fromHeight(64.0),
+                preferredSize: Size.fromHeight(48.0),
                 child: AppBar(
                   automaticallyImplyLeading: appBarAutomaticallyImplyLeading,
                   flexibleSpace: SafeArea(child: tabBar),
@@ -125,14 +123,9 @@ class SectionsScaffold extends StatelessWidget {
                     Container(
                       color: MyTheme.primary,
                       padding: EdgeInsets.all(16.0),
-                      child: Text(
-                        sections[i].title.text,
-                        // Use the same text style as AppBar.
-                        // TODO: Why is font bigger than in actual AppBar?
-                        style: Theme.of(context).textTheme.headline6.copyWith(
-                              // TODO: Take color from the theme.
-                              color: Colors.white,
-                            ),
+                      child: IconTheme(
+                        data: Theme.of(context).primaryIconTheme,
+                        child: sections[i].title.icon,
                       ),
                     ),
                     Expanded(
