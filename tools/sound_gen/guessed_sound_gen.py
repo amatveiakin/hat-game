@@ -21,16 +21,18 @@ def newMidi(program):
     return midi
 
 
-def generateSoundFile(midi, filepath, fade_start_sec, trim_sec):
+def generateSoundFile(midi, filepath, fade_start_sec, trim_sec, volume=1.0):
     with open('tmp.midi', 'wb') as output_file:
         midi.writeFile(output_file)
     subprocess.run(['timidity', 'tmp.midi', '-Ow', '-o', 'tmp.wav'],
                    stdout=subprocess.DEVNULL)
-    subprocess.run(['ffmpeg', '-y', '-i', 'tmp.wav',
-                    '-af', 'afade=out:st={}:d={}'.format(
-                        fade_start_sec, trim_sec - fade_start_sec),
-                    '-to', '{}'.format(trim_sec),
-                    filepath],
+    ffmpeg_command = ['ffmpeg', '-y', '-i', 'tmp.wav',
+                      '-af', 'volume={},afade=out:st={}:d={}'.format(
+                          volume, fade_start_sec, trim_sec - fade_start_sec),
+                      '-to', '{}'.format(trim_sec),
+                      filepath]
+    print(' '.join(ffmpeg_command))
+    subprocess.run(ffmpeg_command,
                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
@@ -42,10 +44,13 @@ degrees = [
     [72],
     [72, 76, 79],
 ]
-time_over_program = 28
+max_combo = len(degrees)
+
 time_over_degrees = [60, 60]
 bonus_time_over_degrees = [60]
-max_combo = len(degrees)
+
+time_over_program = 28
+time_over_volume_coeff = 2.0
 
 for combo in range(0, max_combo):
     midi = newMidi(program=13)
@@ -64,7 +69,8 @@ for note in time_over_degrees:
 generateSoundFile(midi,
                   'time_over.ogg',
                   fade_start_sec=0.9,
-                  trim_sec=1.0)
+                  trim_sec=1.0,
+                  volume=time_over_volume_coeff)
 
 midi = newMidi(program=time_over_program)
 time = 0
@@ -74,7 +80,8 @@ for note in bonus_time_over_degrees:
 generateSoundFile(midi,
                   'bonus_time_over.ogg',
                   fade_start_sec=0.9,
-                  trim_sec=1.0)
+                  trim_sec=1.0,
+                  volume=time_over_volume_coeff)
 
 os.remove('tmp.midi')
 os.remove('tmp.wav')
