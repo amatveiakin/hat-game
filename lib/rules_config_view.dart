@@ -10,11 +10,18 @@ class RulesConfigViewController {
   bool _updatingFromConfig = false;
   bool get updatingFromConfig => _updatingFromConfig;
 
+  static void _updateText(TextEditingController controller, String text) {
+    if (controller.text != text) {
+      // TODO: Does this ever happen?
+      controller.text = text;
+    }
+  }
+
   void updateFromConfig(RulesConfig config) {
     _updatingFromConfig = true;
-    turnTimeController.text = config.turnSeconds.toString();
-    bonusTimeController.text = config.bonusSeconds.toString();
-    wordsPerPlayerController.text = config.wordsPerPlayer.toString();
+    _updateText(turnTimeController, config.turnSeconds.toString());
+    _updateText(bonusTimeController, config.bonusSeconds.toString());
+    _updateText(wordsPerPlayerController, config.wordsPerPlayer.toString());
     _updatingFromConfig = false;
   }
 
