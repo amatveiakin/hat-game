@@ -14,6 +14,7 @@ import 'package:hatgame/teaming_config_view.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/invalid_operation.dart';
+import 'package:hatgame/widget/image_assert_icon.dart';
 import 'package:hatgame/widget/invalid_operation_dialog.dart';
 import 'package:hatgame/widget/sections_scaffold.dart';
 import 'package:hatgame/widget/wide_button.dart';
@@ -39,15 +40,13 @@ class _GameConfigViewState extends State<GameConfigView>
       GameNavigator(currentPhase: GamePhase.configure);
 
   SectionTitleData rulesSectionTitle() => SectionTitleData(
-        icon: Icon(Icons.settings),
+        icon: ImageAssetIcon('images/rules_config.png'),
       );
   SectionTitleData teamingSectionTitle() => SectionTitleData(
-        // TODO: Add arrows / several groups of people / gearwheel.
-        icon: Icon(Icons.people),
+        icon: ImageAssetIcon('images/teaming_config.png'),
       );
   SectionTitleData playersSectionTitle(int numPlayers) => SectionTitleData(
-        // TODO: Replace squares with person icons.
-        icon: Icon(OMIcons.ballot),
+        icon: ImageAssetIcon('images/players_config.png'),
       );
 
   static const int rulesTabIndex = 0;
@@ -57,8 +56,6 @@ class _GameConfigViewState extends State<GameConfigView>
 
   LocalGameData get localGameData => widget.localGameData;
   bool get isAdmin => localGameData.isAdmin;
-  bool _navigatedToKicked = false;
-  bool _navigatedToTeamCompositions = false;
 
   TabController _tabController;
   final _rulesConfigViewController = RulesConfigViewController();

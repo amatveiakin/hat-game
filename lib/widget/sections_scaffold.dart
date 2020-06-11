@@ -4,7 +4,7 @@ import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/widget/constrained_scaffold.dart';
 
 class SectionTitleData {
-  final Icon icon;
+  final Widget icon;
 
   SectionTitleData({@required this.icon});
 }

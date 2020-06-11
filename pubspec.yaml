@@ -88,6 +88,9 @@ flutter:
 
   assets:
     - images/dice.png
+    - images/players_config.png
+    - images/rules_config.png
+    - images/teaming_config.png
     - images/word_censored.png
     - lexicon/russian_normal.txt
     - sounds/bonus_time_over.ogg
