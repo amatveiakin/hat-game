@@ -4,6 +4,7 @@ import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/assertion.dart';
+import 'package:hatgame/widget/divider.dart';
 
 // TODO: Allow to delete teams.
 
@@ -179,11 +180,8 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
       final player = _playerItems[i];
       if (player.isTeamDivider) {
         tiles.add(
-          Divider(
+          StyledDivider(
             key: UniqueKey(),
-            color: MyTheme.accent,
-            thickness: 3.0,
-            height: 20.0,
           ),
         );
       } else {

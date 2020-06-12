@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/game_config_controller.dart';
+import 'package:hatgame/game_data.dart';
+import 'package:hatgame/util/invalid_operation.dart';
+import 'package:hatgame/widget/divider.dart';
+import 'package:hatgame/widget/invalid_operation_dialog.dart';
+import 'package:hatgame/widget/multi_line_list_tile.dart';
 import 'package:hatgame/widget/numeric_field.dart';
+import 'package:hatgame/widget/switch_button.dart';
 
 class RulesConfigViewController {
   final turnTimeController = TextEditingController();
@@ -98,6 +104,19 @@ class RulesConfigViewState extends State<RulesConfigView> {
   RulesConfig get config => widget.config;
   GameConfigController get configController => widget.configController;
 
+  Future<void> _setWriteWords(bool writeWords) async {
+    if (writeWords && !onlineMode) {
+      // TODO: Support writing words in offline mode.
+      await showInvalidOperationDialog(
+          context: context,
+          error: InvalidOperation(
+              'Writing words in offline mode is not supported (yet).'));
+      return;
+    }
+    configController.updateRules(
+        (config) => config.rebuild((b) => b..writeWords = writeWords));
+  }
+
   @override
   void initState() {
     super.initState();
@@ -131,10 +150,12 @@ class RulesConfigViewState extends State<RulesConfigView> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Add visual separators between logical sections
     return ListView(
       children: [
-        SizedBox(height: 4),
+        SectionDivider(
+          title: 'Timer',
+          firstSection: true,
+        ),
         ListTile(
           title: Row(
             children: [
@@ -165,6 +186,18 @@ class RulesConfigViewState extends State<RulesConfigView> {
             ],
           ),
         ),
+        SectionDivider(
+          title: 'Words',
+        ),
+        MultiLineListTile(
+          title: SwitchButton(
+            options: ['Random words', 'Write words'],
+            selectedOption: config.writeWords ? 1 : 0,
+            onSelectedOptionChanged: configController.isReadOnly
+                ? null
+                : (int newOption) => _setWriteWords(newOption == 1),
+          ),
+        ),
         ListTile(
           title: Row(
             children: [
@@ -179,15 +212,6 @@ class RulesConfigViewState extends State<RulesConfigView> {
             ],
           ),
         ),
-        if (onlineMode)
-          SwitchListTile(
-            title: Text('Write your own words'),
-            value: config.writeWords,
-            onChanged: configController.isReadOnly
-                ? (value) {} // Don't gray out text. TODO: Better solution.
-                : (value) => configController.updateRules(
-                    (config) => config.rebuild((b) => b..writeWords = value)),
-          )
       ],
     );
   }
