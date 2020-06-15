@@ -91,6 +91,10 @@ flutter:
     - images/players_config.png
     - images/rules_config.png
     - images/teaming_config.png
+    - images/too_easy_filled.png
+    - images/too_easy_outlined.png
+    - images/too_hard_filled.png
+    - images/too_hard_outlined.png
     - images/word_censored.png
     - lexicon/russian_normal.txt
     - sounds/bonus_time_over.ogg

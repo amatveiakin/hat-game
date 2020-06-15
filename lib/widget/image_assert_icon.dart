@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 
 class ImageAssetIcon extends StatelessWidget {
   final String name;
+  final Color color;
 
-  ImageAssetIcon(this.name);
+  ImageAssetIcon(
+    this.name, {
+    this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +16,7 @@ class ImageAssetIcon extends StatelessWidget {
       size: Size.square(iconTheme.size),
       child: Image.asset(
         name,
-        color: iconTheme.color,
+        color: color ?? iconTheme.color,
       ),
     );
   }

@@ -19,6 +19,7 @@ import 'package:hatgame/util/sounds.dart';
 import 'package:hatgame/util/vibration.dart';
 import 'package:hatgame/widget/async_snapshot_error.dart';
 import 'package:hatgame/widget/constrained_scaffold.dart';
+import 'package:hatgame/widget/image_assert_icon.dart';
 import 'package:hatgame/widget/padlock.dart';
 import 'package:hatgame/widget/timer.dart';
 import 'package:hatgame/widget/wide_button.dart';
@@ -89,7 +90,8 @@ class PartyView extends StatelessWidget {
   }
 }
 
-Icon _getWordFeedbackIcon(WordFeedback feedback, bool menuButton, bool active) {
+Widget _getWordFeedbackIcon(
+    WordFeedback feedback, bool menuButton, bool active) {
   if (feedback == null) {
     return menuButton ? Icon(OMIcons.thumbsUpDown) : Icon(OMIcons.clear);
   }
@@ -103,15 +105,13 @@ Icon _getWordFeedbackIcon(WordFeedback feedback, bool menuButton, bool active) {
           ? Icon(Icons.thumb_down, color: MyTheme.accent)
           : Icon(OMIcons.thumbDown);
     case WordFeedback.tooEasy:
-      // TODO: Find a proper icon.
       return active
-          ? Icon(Icons.cake, color: MyTheme.accent)
-          : Icon(OMIcons.cake);
+          ? ImageAssetIcon('images/too_easy_filled.png', color: MyTheme.accent)
+          : ImageAssetIcon('images/too_easy_outlined.png');
     case WordFeedback.tooHard:
-      // TODO: Find a proper icon.
       return active
-          ? Icon(Icons.sentiment_very_dissatisfied, color: MyTheme.accent)
-          : Icon(OMIcons.sentimentVeryDissatisfied);
+          ? ImageAssetIcon('images/too_hard_filled.png', color: MyTheme.accent)
+          : ImageAssetIcon('images/too_hard_outlined.png');
   }
   Assert.fail("Reached end of _getWordFeedbackIcon");
 }
