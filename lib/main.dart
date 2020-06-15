@@ -21,7 +21,7 @@ void _initFirestore() {
 
 Future<void> _initApp() async {
   _initFirestore();
-  await Lexion.init(); // loading text resource: should never fail
+  await Lexicon.init(); // loading text resource: should never fail
   // TODO: Start all init-s in parallel, with a common timeout.
   await LocalStorage.init();
   await Sounds.init();

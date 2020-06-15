@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/services.dart' show rootBundle;
 
-class Lexion {
+class Lexicon {
   static List<String> _words;
 
   static Future<void> init() async {

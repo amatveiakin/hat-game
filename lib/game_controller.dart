@@ -542,7 +542,7 @@ class GameController {
   static List<String> _generateRandomWords(GameConfig config) {
     final int numPlayers = config.players.names.length;
     final int totalWords = config.rules.wordsPerPlayer * numPlayers;
-    return List.generate(totalWords, (_) => Lexion.randomWord());
+    return List.generate(totalWords, (_) => Lexicon.randomWord());
   }
 
   static List<String> _collectWordsFromPlayers(DBDocumentSnapshot snapshot) {
