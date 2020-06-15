@@ -17,11 +17,6 @@ import 'package:hatgame/widget/wide_button.dart';
 
 // TODO: Consider using Form + TextFormField instead.
 
-enum JoinGameErrorSource {
-  gameID,
-  playerName,
-}
-
 // Local checks only
 InvalidOperation checkGameID(String gameID) {
   if (gameID.isEmpty) {

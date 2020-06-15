@@ -40,6 +40,16 @@ class JoinGameResult {
   JoinGameResult({@required this.localGameData, @required this.reconnection});
 }
 
+enum JoinGameErrorSource {
+  gameID,
+  playerName,
+}
+
+enum StartGameErrorSource {
+  players,
+  dictionaries,
+}
+
 class TurnStateTransformer {
   final GameConfig config;
   final InitialGameState initialState;
@@ -462,42 +472,56 @@ class GameController {
     ]);
   }
 
-  static TeamCompositions generateTeamCompositions(
-      DBDocumentReference reference, GameConfig config) {
-    final numPlayers = config.players.names.length;
-    final playerIDs = config.players.names.keys.toList();
-    if (config.teaming.teamPlay) {
-      BuiltList<BuiltList<int>> teams;
-      if (config.players.teams != null) {
-        teams = BuiltList<BuiltList<int>>.from(config.players.teams
-            .map((team) => BuiltList<int>(team.toList().shuffled()))
-            .toList()
-            .shuffled());
+  static void preGameCheck(GameConfig config) {
+    // Check that teams can be generate, don't write them down yet.
+    GameController.generateTeamCompositions(config);
+
+    if (config.rules.writeWords == false &&
+        (config.rules.dictionaries == null ||
+            config.rules.dictionaries.isEmpty)) {
+      throw InvalidOperation('No dictionaries selected')
+        ..addTag(StartGameErrorSource.dictionaries);
+    }
+  }
+
+  static TeamCompositions generateTeamCompositions(GameConfig config) {
+    try {
+      final numPlayers = config.players.names.length;
+      final playerIDs = config.players.names.keys.toList();
+      if (config.teaming.teamPlay) {
+        BuiltList<BuiltList<int>> teams;
+        if (config.players.teams != null) {
+          teams = BuiltList<BuiltList<int>>.from(config.players.teams
+              .map((team) => BuiltList<int>(team.toList().shuffled()))
+              .toList()
+              .shuffled());
+        } else {
+          final List<int> teamSizes = generateTeamSizes(numPlayers,
+              config.teaming.desiredTeamSize, config.teaming.unequalTeamSize);
+          final teamsMutable = generateTeamPlayers(
+              playerIDs: playerIDs.shuffled(), teamSizes: teamSizes.shuffled());
+          teams = BuiltList<BuiltList<int>>.from(
+              teamsMutable.map((t) => BuiltList<int>(t)));
+        }
+        checkTeamSizes(teams);
+        return TeamCompositions((b) => b..teams.replace(teams));
       } else {
-        final List<int> teamSizes = generateTeamSizes(numPlayers,
-            config.teaming.desiredTeamSize, config.teaming.unequalTeamSize);
-        final teamsMutable = generateTeamPlayers(
-            playerIDs: playerIDs.shuffled(), teamSizes: teamSizes.shuffled());
-        teams = BuiltList<BuiltList<int>>.from(
-            teamsMutable.map((t) => BuiltList<int>(t)));
+        Assert.holds(config.players.teams == null);
+        checkNumPlayersForIndividualPlay(
+            numPlayers, config.teaming.individualPlayStyle);
+        return TeamCompositions((b) => b
+          ..individualOrder.replace(
+            playerIDs.shuffled(),
+          ));
       }
-      checkTeamSizes(teams);
-      return TeamCompositions((b) => b..teams.replace(teams));
-    } else {
-      Assert.holds(config.players.teams == null);
-      checkNumPlayersForIndividualPlay(
-          numPlayers, config.teaming.individualPlayStyle);
-      return TeamCompositions((b) => b
-        ..individualOrder.replace(
-          playerIDs.shuffled(),
-        ));
+    } on InvalidOperation catch (e) {
+      throw e..addTag(StartGameErrorSource.players);
     }
   }
 
   static Future<void> updateTeamCompositions(
       DBDocumentReference reference, GameConfig config) async {
-    final TeamCompositions teamCompositions =
-        generateTeamCompositions(reference, config);
+    final TeamCompositions teamCompositions = generateTeamCompositions(config);
     reference.clearLocalCache();
     return reference.updateColumns([
       DBColTeamCompositions().withData(teamCompositions),
@@ -542,7 +566,13 @@ class GameController {
   static List<String> _generateRandomWords(GameConfig config) {
     final int numPlayers = config.players.names.length;
     final int totalWords = config.rules.wordsPerPlayer * numPlayers;
-    return List.generate(totalWords, (_) => Lexicon.randomWord());
+    Assert.holds(
+        config.rules.dictionaries != null &&
+            config.rules.dictionaries.isNotEmpty,
+        lazyMessage: () => config.rules.toString());
+    final wordCollection =
+        Lexicon.wordCollection(config.rules.dictionaries.toList());
+    return List.generate(totalWords, (_) => wordCollection.randomWord());
   }
 
   static List<String> _collectWordsFromPlayers(DBDocumentSnapshot snapshot) {

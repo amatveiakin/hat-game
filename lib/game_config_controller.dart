@@ -8,6 +8,7 @@ import 'package:hatgame/db/db_columns.dart';
 import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/game_phase_reader.dart';
+import 'package:hatgame/lexicon.dart';
 import 'package:hatgame/local_storage.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:meta/meta.dart';
@@ -49,14 +50,22 @@ class GameConfigController {
     return config;
   }
 
+  static GameConfig _fix(GameConfig config) {
+    return config.rebuild(
+      (b) => b
+        ..rules.dictionaries.replace(
+            Lexicon.fixDictionaries(config.rules.dictionaries?.toList())),
+    );
+  }
+
   static GameConfig initialConfig({@required bool onlineMode}) {
     final GameConfig config =
         LocalStorage.instance.get(LocalColLastConfig()) ?? defaultConfig();
     // TODO: Do something to avoid breaking online-only and offline-only
     // fields in LocalColLastConfig.
-    return onlineMode
+    return _fix(onlineMode
         ? _adaptForOnlineMode(config)
-        : _adaptForOfflineMode(config);
+        : _adaptForOfflineMode(config));
   }
 
   GameConfig configWithOverrides() {

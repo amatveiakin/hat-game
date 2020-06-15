@@ -12,6 +12,7 @@ import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/game_phase_reader.dart';
+import 'package:hatgame/lexicon.dart';
 import 'package:hatgame/local_storage.dart';
 import 'package:hatgame/util/list_ext.dart';
 import 'package:hatgame/util/ntp_time.dart';
@@ -21,7 +22,8 @@ class AppConfig {
   bool hasNtp = true;
 }
 
-void setupApp(AppConfig config) {
+Future<void> setupApp(AppConfig config) async {
+  await Lexicon.init();
   LocalStorage.test_init();
   NtpTime.test_setInitialized(config.hasNtp);
 }
@@ -70,6 +72,7 @@ GameConfig twoVsTwoOfflineConfig() {
       ..players
           .names
           .replace({0: 'PlayerA', 1: 'PlayerB', 2: 'PlayerC', 3: 'PlayerD'})
+      ..rules.dictionaries.replace(Lexicon.defaultDictionaries())
       ..rules.wordsPerPlayer = 1,
   );
 }
@@ -121,12 +124,12 @@ void main() {
 
   group('e2e offline', () {
     test('minimal game', () async {
-      setupApp(AppConfig());
+      await setupApp(AppConfig());
       await minimalOfflineGameTest();
     });
 
     test('sample 2 vs 2 game', () async {
-      setupApp(AppConfig());
+      await setupApp(AppConfig());
       final client = Client();
       client.localGameData = await GameController.newGameOffine();
       await client.startGame(
@@ -171,14 +174,14 @@ void main() {
     });
 
     test('no NTP', () async {
-      setupApp(AppConfig()..hasNtp = false);
+      await setupApp(AppConfig()..hasNtp = false);
       await minimalOfflineGameTest();
     });
   });
 
   group('e2e online', () {
     test('simple game', () async {
-      setupApp(AppConfig());
+      await setupApp(AppConfig());
       final host = Client();
       final guest = Client();
 
@@ -217,7 +220,7 @@ void main() {
     });
 
     test('kick player', () async {
-      setupApp(AppConfig());
+      await setupApp(AppConfig());
       final host = Client();
       final user1 = Client();
       final user2 = Client();
@@ -259,7 +262,7 @@ void main() {
     });
 
     test('go to and from team compositions', () async {
-      setupApp(AppConfig());
+      await setupApp(AppConfig());
       final host = Client();
       final guest = Client();
 
@@ -302,7 +305,7 @@ void main() {
     });
 
     test('write words', () async {
-      setupApp(AppConfig());
+      await setupApp(AppConfig());
       final host = Client();
       final guest = Client();
 

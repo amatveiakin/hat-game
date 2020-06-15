@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
+import 'package:hatgame/dictionary_selector.dart';
 import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/game_data.dart';
+import 'package:hatgame/lexicon.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/widget/divider.dart';
 import 'package:hatgame/widget/invalid_operation_dialog.dart';
@@ -99,6 +101,8 @@ class RulesConfigViewState extends State<RulesConfigView> {
     50,
   ];
 
+  static const _numericFieldPadding = EdgeInsets.symmetric(vertical: 2.0);
+
   bool get onlineMode => widget.onlineMode;
   RulesConfigViewController get viewController => widget.viewController;
   RulesConfig get config => widget.config;
@@ -150,6 +154,26 @@ class RulesConfigViewState extends State<RulesConfigView> {
 
   @override
   Widget build(BuildContext context) {
+    final dictionariesOnTap = configController.isReadOnly
+        ? null
+        : () {
+            Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => DictionarySelector(
+                      allValues: Lexicon.allDictionaries(),
+                      initialValues: config.dictionaries.toList(),
+                      onChanged: (List<String> newValue) => configController
+                          .updateRules((config) => config.rebuild(
+                              (b) => b..dictionaries.replace(newValue))),
+                    )));
+          };
+    final String dictionariesCaption =
+        config.dictionaries == null || config.dictionaries.isEmpty
+            ? 'Dictionaries:   —'
+            : config.dictionaries.length == 1
+                ? 'Dictionary: ${config.dictionaries.first}'
+                : 'Dictionaries:\n' +
+                    config.dictionaries.map((d) => '        $d').join('\n');
+
     return ListView(
       children: [
         SectionDivider(
@@ -162,11 +186,14 @@ class RulesConfigViewState extends State<RulesConfigView> {
               Expanded(
                 child: Text('Turn time'),
               ),
-              NumericField(
-                readOnly: configController.isReadOnly,
-                controller: viewController.turnTimeController,
-                goldenValues: turnTimeGoldenValues,
-                suffixText: 's',
+              Padding(
+                padding: _numericFieldPadding,
+                child: NumericField(
+                  readOnly: configController.isReadOnly,
+                  controller: viewController.turnTimeController,
+                  goldenValues: turnTimeGoldenValues,
+                  suffixText: 's',
+                ),
               ),
             ],
           ),
@@ -177,11 +204,14 @@ class RulesConfigViewState extends State<RulesConfigView> {
               Expanded(
                 child: Text('Bonus time'),
               ),
-              NumericField(
-                readOnly: configController.isReadOnly,
-                controller: viewController.bonusTimeController,
-                goldenValues: timeGoldenValues,
-                suffixText: 's',
+              Padding(
+                padding: _numericFieldPadding,
+                child: NumericField(
+                  readOnly: configController.isReadOnly,
+                  controller: viewController.bonusTimeController,
+                  goldenValues: timeGoldenValues,
+                  suffixText: 's',
+                ),
               ),
             ],
           ),
@@ -204,14 +234,23 @@ class RulesConfigViewState extends State<RulesConfigView> {
               Expanded(
                 child: Text('Words per player'),
               ),
-              NumericField(
-                readOnly: configController.isReadOnly,
-                controller: viewController.wordsPerPlayerController,
-                goldenValues: wordsPerPlayerGoldenValues,
+              Padding(
+                padding: _numericFieldPadding,
+                child: NumericField(
+                  readOnly: configController.isReadOnly,
+                  controller: viewController.wordsPerPlayerController,
+                  goldenValues: wordsPerPlayerGoldenValues,
+                ),
               ),
             ],
           ),
         ),
+        if (!config.writeWords)
+          MultiLineListTile(
+              title: Text(dictionariesCaption),
+              trailing:
+                  dictionariesOnTap == null ? null : Icon(Icons.chevron_right),
+              onTap: dictionariesOnTap),
       ],
     );
   }

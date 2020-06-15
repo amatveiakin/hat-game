@@ -96,7 +96,9 @@ flutter:
     - images/too_hard_filled.png
     - images/too_hard_outlined.png
     - images/word_censored.png
-    - lexicon/russian_normal.txt
+    - lexicon/russian_easy.txt
+    - lexicon/russian_hard.txt
+    - lexicon/russian_medium.txt
     - sounds/bonus_time_over.ogg
     - sounds/time_over.ogg
     - sounds/word_guessed_combo0.ogg

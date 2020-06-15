@@ -167,6 +167,88 @@ class MultiLineSwitchListTile extends StatelessWidget {
   }
 }
 
+class MultiLineCheckboxListTile extends StatelessWidget {
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  final Color activeColor;
+  final Color checkColor;
+  final Widget title;
+  final Widget subtitle;
+  final Widget secondary;
+  final bool dense;
+  final bool selected;
+  final ListTileControlAffinity controlAffinity;
+  final bool autofocus;
+  final EdgeInsetsGeometry contentPadding;
+  final bool tristate;
+
+
+  const MultiLineCheckboxListTile({
+    Key key,
+    @required this.value,
+    @required this.onChanged,
+    this.activeColor,
+    this.checkColor,
+    this.title,
+    this.subtitle,
+    this.dense,
+    this.secondary,
+    this.selected = false,
+    this.controlAffinity = ListTileControlAffinity.platform,
+    this.autofocus = false,
+    this.contentPadding,
+    this.tristate = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return subtitle == null
+        ? CheckboxListTile(
+            key: key,
+            value: value,
+            onChanged: onChanged,
+            activeColor: activeColor,
+            checkColor: checkColor,
+            title: Padding(
+              padding: EdgeInsets.symmetric(vertical: _padding),
+              child: title,
+            ),
+            subtitle: null,
+            isThreeLine: false,
+            dense: dense,
+            secondary: secondary,
+            selected: selected,
+            controlAffinity: controlAffinity,
+            autofocus: autofocus,
+            contentPadding: contentPadding,
+            tristate: tristate,
+          )
+        : CheckboxListTile(
+            key: key,
+            value: value,
+            onChanged: onChanged,
+            activeColor: activeColor,
+            checkColor: checkColor,
+            title: Padding(
+              padding: EdgeInsets.only(top: _padding),
+              child: title,
+            ),
+            subtitle: Padding(
+              padding: EdgeInsets.only(bottom: _padding),
+              child: subtitle,
+            ),
+            isThreeLine: false,
+            dense: dense,
+            secondary: secondary,
+            selected: selected,
+            controlAffinity: controlAffinity,
+            autofocus: autofocus,
+            contentPadding: contentPadding,
+            tristate: tristate,
+          );
+  }
+}
+
 class MultiLineRadioListTile<T> extends StatelessWidget {
   final T value;
   final T groupValue;

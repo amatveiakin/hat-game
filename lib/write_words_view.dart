@@ -95,7 +95,7 @@ class WriteWordsViewState extends State<WriteWordsView> {
   LocalGameData get localGameData => widget.localGameData;
 
   void _generateRandomWord(TextEditingController controller) {
-    controller.text = Lexicon.randomWord();
+    controller.text = Lexicon.universalCollection().randomWord();
     FocusScope.of(context).unfocus();
   }
 

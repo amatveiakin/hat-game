@@ -140,6 +140,16 @@ class Assert {
         inRelease: inRelease);
   }
 
+  static void subset<T>(Iterable<T> a, Set<T> b,
+      {String message,
+      MessageProducer lazyMessage,
+      AssertInRelease inRelease = defaultReleaseBehavior}) {
+    holds(b.containsAll(a),
+        message: _combine([a.toString() + ' in ' + b.toString(), message]),
+        lazyMessage: lazyMessage,
+        inRelease: inRelease);
+  }
+
   static _combine(List<String> messages) {
     return messages.joinNonEmpty(': ');
   }

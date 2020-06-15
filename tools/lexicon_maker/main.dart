@@ -62,18 +62,22 @@ Word makeWord(FreqrncRec rec) {
   );
 }
 
-String printWord(Word w) {
+String describeWord(Word w) {
   return '    ${w.text.padRight(20)} ${w.rarityFactor.toStringAsFixed(3)} * '
       '${w.specificityFactor.toStringAsFixed(3)} = '
       '${w.difficulty.toStringAsFixed(3)}';
 }
 
-String printBucket(String name, List<Word> words) {
+String describeBucket(String name, List<Word> words) {
   List<Word> wordsShuffled = List.from(words);
   wordsShuffled.shuffle();
   return '  $name (${words.length}):\n'
-      '${wordsShuffled.take(30).map((w) => printWord(w)).join('\n')}\n'
+      '${wordsShuffled.take(30).map((w) => describeWord(w)).join('\n')}\n'
       '    ...\n';
+}
+
+String dumpBucket(List<Word> words) {
+  return words.map((w) => w.text).join('\n');
 }
 
 // Parser for http://dict.ruslang.ru/freq.php
@@ -106,10 +110,14 @@ Future<void> main(List<String> arguments) async {
     }
     buckets[bucket].add(word);
   }
+
+//   print(dumpBucket(buckets[2]));
+//   exit(0);
+
   print('Found words:\n' +
-      printBucket('Easy', buckets[0]) +
-      printBucket('Medium', buckets[1]) +
-      printBucket('Hard', buckets[2]) +
-      printBucket('Impossible', buckets[3]));
+      describeBucket('Easy', buckets[0]) +
+      describeBucket('Medium', buckets[1]) +
+      describeBucket('Hard', buckets[2]) +
+      describeBucket('Impossible', buckets[3]));
   exit(0);
 }

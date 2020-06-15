@@ -10,6 +10,7 @@ import 'package:hatgame/game_navigator.dart';
 import 'package:hatgame/offline_player_config_view.dart';
 import 'package:hatgame/online_player_config_view.dart';
 import 'package:hatgame/rules_config_view.dart';
+import 'package:hatgame/start_game_online_screen.dart';
 import 'package:hatgame/teaming_config_view.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/assertion.dart';
@@ -123,18 +124,29 @@ class _GameConfigViewState extends State<GameConfigView>
 
   void _next(GameConfig gameConfig) async {
     try {
-      if (gameConfig.rules.writeWords) {
-        // Check that teams can be generate, don't write them down yet.
-        GameController.generateTeamCompositions(
-            localGameData.gameReference, gameConfig);
-        await GameController.toWriteWordsPhase(localGameData.gameReference);
-      } else {
-        await GameController.updateTeamCompositions(
-            localGameData.gameReference, gameConfig);
-      }
+      GameController.preGameCheck(gameConfig);
     } on InvalidOperation catch (e) {
       showInvalidOperationDialog(context: context, error: e);
-      _tabController.animateTo(playersTabIndex);
+      final errorSource = e.tag<StartGameErrorSource>();
+      if (errorSource != null) {
+        switch (errorSource) {
+          case StartGameErrorSource.players:
+            _tabController.animateTo(playersTabIndex);
+            break;
+          case StartGameErrorSource.dictionaries:
+            _tabController.animateTo(rulesTabIndex);
+            // TODO: Highlight (2-3 blinks?) the corresponding list item.
+            break;
+        }
+      }
+      return;
+    }
+
+    if (gameConfig.rules.writeWords) {
+      await GameController.toWriteWordsPhase(localGameData.gameReference);
+    } else {
+      await GameController.updateTeamCompositions(
+          localGameData.gameReference, gameConfig);
     }
   }
 

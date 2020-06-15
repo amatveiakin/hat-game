@@ -1,16 +1,72 @@
 import 'dart:math';
 
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:hatgame/util/assertion.dart';
+import 'package:hatgame/util/invalid_operation.dart';
+
+class WordCollection {
+  // TODO: Come up with a balanced strategy somewhere between 'take words
+  // proportionally to dictionary size' and 'take words from all dictionaries
+  // with the same probability'.
+  final List<String> _words;
+
+  WordCollection(this._words);
+
+  String randomWord() {
+    return _words[Random().nextInt(_words.length)];
+  }
+}
 
 class Lexicon {
-  static List<String> _words;
+  static final _dictionaries = Map<String, List<String>>();
 
   static Future<void> init() async {
-    _words =
-        (await rootBundle.loadString('lexicon/russian_normal.txt')).split('\n');
+    for (final dict in [
+      'russian_easy',
+      'russian_medium',
+      'russian_hard',
+    ]) {
+      _dictionaries[dict] =
+          (await rootBundle.loadString('lexicon/$dict.txt')).split('\n');
+      Assert.holds(_dictionaries[dict].isNotEmpty);
+    }
   }
 
-  static String randomWord() {
-    return _words[Random().nextInt(_words.length)];
+  static List<String> allDictionaries() {
+    return _dictionaries.keys.toList();
+  }
+
+  static List<String> defaultDictionaries() {
+    final List<String> result = ['russian_medium'];
+    Assert.subset(result, allDictionaries().toSet());
+    return result;
+  }
+
+  static List<String> fixDictionaries(List<String> dicts) {
+    final existingDicts =
+        (dicts ?? []).toSet().intersection(allDictionaries().toSet());
+    return existingDicts.isEmpty
+        ? defaultDictionaries()
+        : existingDicts.toList();
+  }
+
+  static WordCollection wordCollection(List<String> dictionaries) {
+    Assert.holds(dictionaries.isNotEmpty);
+    final words = List<String>();
+    for (final dict in dictionaries) {
+      if (!_dictionaries.containsKey(dict)) {
+        throw InvalidOperation('Cannot find dictionary "$dict"',
+            isInternalError: true);
+      }
+      words.addAll(_dictionaries[dict]);
+    }
+    Assert.holds(words.isNotEmpty, lazyMessage: () => dictionaries.toString());
+    return WordCollection(words);
+  }
+
+  // Collection that contains most words. May blacklist some categories,
+  // e.g. obscene words.
+  static WordCollection universalCollection() {
+    return wordCollection(_dictionaries.keys);
   }
 }
