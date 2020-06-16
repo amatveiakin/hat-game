@@ -696,8 +696,11 @@ class GameController {
 
   static Future<void> updatePersonalState(
       LocalGameData localGameData, PersonalState newState) {
+    final DBColumn column = localGameData.onlineMode
+        ? DBColPlayer(localGameData.myPlayerID)
+        : DBColLocalPlayer();
     return localGameData.gameReference.updateColumns([
-      DBColPlayer(localGameData.myPlayerID).withData(newState),
+      column.withData(newState),
     ], localCache: LocalCacheBehavior.cache);
   }
 
