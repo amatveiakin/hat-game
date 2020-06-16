@@ -8,15 +8,15 @@ class Word {
   final String text;
   final double rarityFactor;
   final double specificityFactor;
-  final bool diminutiveSuspected;
+  final double nastinessFactor;
 
-  double get difficulty => rarityFactor * specificityFactor;
+  double get difficulty => rarityFactor * specificityFactor * nastinessFactor;
 
   Word(
     this.text, {
     @required this.rarityFactor,
     @required this.specificityFactor,
-    @required this.diminutiveSuspected,
+    @required this.nastinessFactor,
   });
 }
 
@@ -49,16 +49,23 @@ Word makeWord(FreqrncRec rec) {
   final double specificityFactor = 1.0 + (100 - rec.d) / 20.0;
   final String text = rec.text;
   assert(text.toLowerCase() == text);
-  final bool diminutiveSuspected = text.endsWith('ик') ||
-      text.endsWith('ек') ||
-      text.endsWith('ок') ||
-      text.endsWith('це') ||
-      text.endsWith('цо');
+
+  double nastinessFactor = 1.0;
+  // Nominalization suspected
+  if (text.endsWith('ая') || text.endsWith('ое') || text.endsWith('ый'))
+    nastinessFactor *= 4.0;
+  // Diminutive suspected
+  if (text.endsWith('ик') || text.endsWith('ек') || text.endsWith('ок'))
+    nastinessFactor *= 4.0;
+  // Nasty diminutive suspected
+  if (text.endsWith('це') || text.endsWith('цо'))
+    nastinessFactor *= 8.0;
+
   return Word(
     text,
     rarityFactor: rarityFactor,
     specificityFactor: specificityFactor,
-    diminutiveSuspected: diminutiveSuspected,
+    nastinessFactor: nastinessFactor,
   );
 }
 
@@ -72,12 +79,12 @@ String describeBucket(String name, List<Word> words) {
   List<Word> wordsShuffled = List.from(words);
   wordsShuffled.shuffle();
   return '  $name (${words.length}):\n'
-      '${wordsShuffled.take(30).map((w) => describeWord(w)).join('\n')}\n'
+      '${wordsShuffled.take(15).map((w) => describeWord(w)).join('\n')}\n'
       '    ...\n';
 }
 
 String dumpBucket(List<Word> words) {
-  return words.map((w) => w.text).join('\n');
+  return words.map((w) => w.text).join('\n') + '\n';
 }
 
 // Parser for http://dict.ruslang.ru/freq.php
@@ -105,19 +112,18 @@ Future<void> main(List<String> arguments) async {
     int bucket = word.difficulty > 10.0
         ? 3
         : word.difficulty > 2.0 ? 2 : word.difficulty > 0.25 ? 1 : 0;
-    if (word.diminutiveSuspected) {
-      bucket = min(3, bucket + 1);
-    }
     buckets[bucket].add(word);
   }
-
-//   print(dumpBucket(buckets[2]));
-//   exit(0);
 
   print('Found words:\n' +
       describeBucket('Easy', buckets[0]) +
       describeBucket('Medium', buckets[1]) +
       describeBucket('Hard', buckets[2]) +
       describeBucket('Impossible', buckets[3]));
+
+  await new File('russian_easy.txt').writeAsString(dumpBucket(buckets[0]));
+  await new File('russian_medium.txt').writeAsString(dumpBucket(buckets[1]));
+  await new File('russian_hard.txt').writeAsString(dumpBucket(buckets[2]));
+
   exit(0);
 }
