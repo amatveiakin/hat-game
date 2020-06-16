@@ -230,9 +230,7 @@ class WriteWordsViewState extends State<WriteWordsView> {
             color: MyTheme.accent,
             // Note: keep text in sync with game_config_view.dart
             child: everybodyReady
-                ? GoNextButtonCaption(gameConfig.teaming.teamPlay
-                    ? 'Teams & Turn Order'
-                    : 'Turn Order')
+                ? GoNextButtonCaption('Next')
                 : Text(
                     'Ready: '
                     '${viewData.numPlayersReady}/${viewData.numPlayers}',

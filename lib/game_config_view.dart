@@ -203,9 +203,8 @@ class _GameConfigViewState extends State<GameConfigView>
     final startButton = WideButton(
       onPressed: isAdmin ? () => _next(gameConfig) : null,
       color: MyTheme.accent,
-      child: GoNextButtonCaption(gameConfig.rules.writeWords
-          ? 'Write Words'
-          : gameConfig.teaming.teamPlay ? 'Teams & Turn Order' : 'Turn Order'),
+      child: GoNextButtonCaption(
+          gameConfig.rules.writeWords ? 'Write Words' : 'Next'),
       margin: WideButton.bottomButtonMargin,
     );
 
