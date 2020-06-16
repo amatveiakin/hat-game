@@ -73,11 +73,11 @@ class StartScreenState extends State<StartScreen> {
             itemBuilder: (BuildContext context) => [
               PopupMenuItem<_AdditionalAction>(
                 value: _AdditionalAction.gameRules,
-                child: Text('Hat game rules'),
+                child: Text(tr('hat_game_rules')),
               ),
               PopupMenuItem<_AdditionalAction>(
                 value: _AdditionalAction.aboutApp,
-                child: Text('About the app'),
+                child: Text(tr('about_the_app')),
               ),
             ],
             onSelected: executeAdditionalAction,
@@ -89,24 +89,24 @@ class StartScreenState extends State<StartScreen> {
           children: [
             SizedBox(height: 6),
             Text(
-              'This app is in Beta. Version: $appVersion',
+              tr('app_version', args: [appVersion]),
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 10.0, color: Colors.black45),
             ),
             Expanded(child: Container()),
             WideButton(
               onPressed: () => _newGameOffline(context),
-              child: Text('New Local Game'),
+              child: Text(tr('new_local_game')),
             ),
             SizedBox(height: 24),
             WideButton(
               onPressed: () => _newGameOnline(context),
-              child: Text('New Game Online'),
+              child: Text(tr('new_game_online')),
             ),
             SizedBox(height: 24),
             WideButton(
               onPressed: () => _joinGame(context),
-              child: Text('Join Game'),
+              child: Text(tr('join_game')),
             ),
             Expanded(child: Container()),
           ],
