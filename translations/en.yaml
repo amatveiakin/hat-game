@@ -1,0 +1,10 @@
+# Common
+app_title: Hat Game
+
+# lib/start_screen.dart
+app_version: "This app is in Beta. Version: {}"
+new_local_game: New Local Game
+new_game_online: New Game Online
+join_game: Join Game
+hat_game_rules: Hat game rules
+about_the_app: About the app
