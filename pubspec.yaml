@@ -52,6 +52,8 @@ dependencies:
 
   unicode: ^0.2.3
 
+  easy_localization: ^2.3.2
+
   flutter_markdown: ^0.3.5
 
   soundpool: ^1.0.1
@@ -106,6 +108,7 @@ flutter:
     - sounds/word_guessed_combo2.ogg
     - sounds/word_guessed_combo3.ogg
     - sounds/word_guessed_combo4.ogg
+    - translations/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

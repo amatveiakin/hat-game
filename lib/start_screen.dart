@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hatgame/about_screen.dart';
@@ -65,7 +66,7 @@ class StartScreenState extends State<StartScreen> {
     }
     return ConstrainedScaffold(
       appBar: AppBar(
-        title: Text('Hat Game'),
+        title: Text(tr('app_title')),
         actions: [
           PopupMenuButton(
             icon: Icon(Icons.more_vert),
