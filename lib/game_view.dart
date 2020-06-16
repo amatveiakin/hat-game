@@ -536,12 +536,14 @@ class PlayAreaState extends State<PlayArea>
               .map((w) => WordReviewItem(
                     text: w.text,
                     status: w.status,
-                    feedback: w.feedback,
+                    feedback: localGameData.onlineMode ? w.feedback : null,
                     hasFlag: w.flaggedByOthers,
                     setStatus: (WordStatus status) =>
                         _setWordStatus(w.id, status),
-                    setFeedback: (WordFeedback feedback) =>
-                        _setWordFeedback(w.id, feedback),
+                    setFeedback: localGameData.onlineMode
+                        ? (WordFeedback feedback) =>
+                            _setWordFeedback(w.id, feedback)
+                        : null,
                     setFlag: null,
                   ))
               .toList();
