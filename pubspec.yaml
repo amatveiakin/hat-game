@@ -89,25 +89,9 @@ flutter:
   uses-material-design: true
 
   assets:
-    - images/dice.png
-    - images/players_config.png
-    - images/rules_config.png
-    - images/teaming_config.png
-    - images/too_easy_filled.png
-    - images/too_easy_outlined.png
-    - images/too_hard_filled.png
-    - images/too_hard_outlined.png
-    - images/word_censored.png
-    - lexicon/russian_easy.txt
-    - lexicon/russian_hard.txt
-    - lexicon/russian_medium.txt
-    - sounds/bonus_time_over.ogg
-    - sounds/time_over.ogg
-    - sounds/word_guessed_combo0.ogg
-    - sounds/word_guessed_combo1.ogg
-    - sounds/word_guessed_combo2.ogg
-    - sounds/word_guessed_combo3.ogg
-    - sounds/word_guessed_combo4.ogg
+    - images/
+    - lexicon/
+    - sounds/
     - translations/
 
   # An image asset can refer to one or more resolution-specific "variants", see
