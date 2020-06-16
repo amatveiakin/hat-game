@@ -36,7 +36,7 @@ class GameConfigView extends StatefulWidget {
 }
 
 class _GameConfigViewState extends State<GameConfigView>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   final GameNavigator navigator =
       GameNavigator(currentPhase: GamePhase.configure);
 
@@ -59,7 +59,7 @@ class _GameConfigViewState extends State<GameConfigView>
   bool get isAdmin => localGameData.isAdmin;
 
   TabController _tabController;
-  final _rulesConfigViewController = RulesConfigViewController();
+  RulesConfigViewController _rulesConfigViewController;
 
   @override
   void initState() {
@@ -68,6 +68,7 @@ class _GameConfigViewState extends State<GameConfigView>
       // Hide virtual keyboard
       FocusScope.of(context).unfocus();
     });
+    _rulesConfigViewController = RulesConfigViewController(vsync: this);
     super.initState();
   }
 
@@ -126,7 +127,7 @@ class _GameConfigViewState extends State<GameConfigView>
     try {
       GameController.preGameCheck(gameConfig);
     } on InvalidOperation catch (e) {
-      showInvalidOperationDialog(context: context, error: e);
+      await showInvalidOperationDialog(context: context, error: e);
       final errorSource = e.tag<StartGameErrorSource>();
       if (errorSource != null) {
         switch (errorSource) {
@@ -135,7 +136,8 @@ class _GameConfigViewState extends State<GameConfigView>
             break;
           case StartGameErrorSource.dictionaries:
             _tabController.animateTo(rulesTabIndex);
-            // TODO: Highlight (2-3 blinks?) the corresponding list item.
+            _rulesConfigViewController.dictionariesHighlightController
+                .highlight();
             break;
         }
       }

@@ -473,49 +473,49 @@ class GameController {
   }
 
   static void preGameCheck(GameConfig config) {
-    // Check that teams can be generate, don't write them down yet.
-    GameController.generateTeamCompositions(config);
-
     if (config.rules.writeWords == false &&
         (config.rules.dictionaries == null ||
             config.rules.dictionaries.isEmpty)) {
       throw InvalidOperation('No dictionaries selected')
         ..addTag(StartGameErrorSource.dictionaries);
     }
+
+    try {
+      // Check that teams can be generate, don't write them down yet.
+      GameController.generateTeamCompositions(config);
+    } on InvalidOperation catch (e) {
+      throw e..addTag(StartGameErrorSource.players);
+    }
   }
 
   static TeamCompositions generateTeamCompositions(GameConfig config) {
-    try {
-      final numPlayers = config.players.names.length;
-      final playerIDs = config.players.names.keys.toList();
-      if (config.teaming.teamPlay) {
-        BuiltList<BuiltList<int>> teams;
-        if (config.players.teams != null) {
-          teams = BuiltList<BuiltList<int>>.from(config.players.teams
-              .map((team) => BuiltList<int>(team.toList().shuffled()))
-              .toList()
-              .shuffled());
-        } else {
-          final List<int> teamSizes = generateTeamSizes(numPlayers,
-              config.teaming.desiredTeamSize, config.teaming.unequalTeamSize);
-          final teamsMutable = generateTeamPlayers(
-              playerIDs: playerIDs.shuffled(), teamSizes: teamSizes.shuffled());
-          teams = BuiltList<BuiltList<int>>.from(
-              teamsMutable.map((t) => BuiltList<int>(t)));
-        }
-        checkTeamSizes(teams);
-        return TeamCompositions((b) => b..teams.replace(teams));
+    final numPlayers = config.players.names.length;
+    final playerIDs = config.players.names.keys.toList();
+    if (config.teaming.teamPlay) {
+      BuiltList<BuiltList<int>> teams;
+      if (config.players.teams != null) {
+        teams = BuiltList<BuiltList<int>>.from(config.players.teams
+            .map((team) => BuiltList<int>(team.toList().shuffled()))
+            .toList()
+            .shuffled());
       } else {
-        Assert.holds(config.players.teams == null);
-        checkNumPlayersForIndividualPlay(
-            numPlayers, config.teaming.individualPlayStyle);
-        return TeamCompositions((b) => b
-          ..individualOrder.replace(
-            playerIDs.shuffled(),
-          ));
+        final List<int> teamSizes = generateTeamSizes(numPlayers,
+            config.teaming.desiredTeamSize, config.teaming.unequalTeamSize);
+        final teamsMutable = generateTeamPlayers(
+            playerIDs: playerIDs.shuffled(), teamSizes: teamSizes.shuffled());
+        teams = BuiltList<BuiltList<int>>.from(
+            teamsMutable.map((t) => BuiltList<int>(t)));
       }
-    } on InvalidOperation catch (e) {
-      throw e..addTag(StartGameErrorSource.players);
+      checkTeamSizes(teams);
+      return TeamCompositions((b) => b..teams.replace(teams));
+    } else {
+      Assert.holds(config.players.teams == null);
+      checkNumPlayersForIndividualPlay(
+          numPlayers, config.teaming.individualPlayStyle);
+      return TeamCompositions((b) => b
+        ..individualOrder.replace(
+          playerIDs.shuffled(),
+        ));
     }
   }
 

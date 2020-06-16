@@ -6,6 +6,7 @@ import 'package:hatgame/game_data.dart';
 import 'package:hatgame/lexicon.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/widget/divider.dart';
+import 'package:hatgame/widget/highlightable.dart';
 import 'package:hatgame/widget/invalid_operation_dialog.dart';
 import 'package:hatgame/widget/multi_line_list_tile.dart';
 import 'package:hatgame/widget/numeric_field.dart';
@@ -15,8 +16,12 @@ class RulesConfigViewController {
   final turnTimeController = TextEditingController();
   final bonusTimeController = TextEditingController();
   final wordsPerPlayerController = TextEditingController();
+  final HighlightableController dictionariesHighlightController;
   bool _updatingFromConfig = false;
   bool get updatingFromConfig => _updatingFromConfig;
+
+  RulesConfigViewController({@required TickerProvider vsync})
+      : dictionariesHighlightController = HighlightableController(vsync: vsync);
 
   static void _updateText(TextEditingController controller, String text) {
     if (controller.text != text) {
@@ -37,6 +42,7 @@ class RulesConfigViewController {
     turnTimeController.dispose();
     bonusTimeController.dispose();
     wordsPerPlayerController.dispose();
+    dictionariesHighlightController.dispose();
   }
 }
 
@@ -246,11 +252,15 @@ class RulesConfigViewState extends State<RulesConfigView> {
           ),
         ),
         if (!config.writeWords)
-          MultiLineListTile(
-              title: Text(dictionariesCaption),
-              trailing:
-                  dictionariesOnTap == null ? null : Icon(Icons.chevron_right),
-              onTap: dictionariesOnTap),
+          Highlightable(
+            controller: viewController.dictionariesHighlightController,
+            child: MultiLineListTile(
+                title: Text(dictionariesCaption),
+                trailing: dictionariesOnTap == null
+                    ? null
+                    : Icon(Icons.chevron_right),
+                onTap: dictionariesOnTap),
+          ),
       ],
     );
   }
