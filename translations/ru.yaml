@@ -1,10 +1,95 @@
 # Common
-app_title: Шляпа
+cancel: Отмена
+hat_game: Шляпа
+join_game: Присоединиться к игре
+new_game_online: Создать сетевую игру
+next: Далее
+ok: OK
 
 # lib/start_screen.dart
-app_version: "Это приложение находится в бете. Версия: {}"
-new_local_game: Локальная игра
-new_game_online: Создать сетевую игру
-join_game: Присоединиться к игре
-hat_game_rules: Правила шляпы
 about_the_app: О приложении
+app_version: 'Это приложение находится в бете. Версия: {}'
+hat_game_rules: Правила шляпы
+new_local_game: Локальная игра
+
+# lib/game_config_view.dart
+cannot_copy_link_to_clipboard: 'Не удалось скопировать ссылку в буфер обмена :('
+game_join_link: Ссылка на игру
+hat_game_id: 'Шляпа: игра {}'
+link_copied_to_clipboard: Ссылка скопирована в буфер обмена
+write_words_titlecase: Писать слова # ???
+
+# lib/offline_player_config_view.dart
+add_player: Новый игрок
+add_team: Команда
+
+# lib/write_words_view.dart
+generate_a_random_word: Сгенерировать случайное слово
+player_readiness: 'Готовы: {ready}/{total}'
+waiting_for: 'Ждём игроков: '
+word_contains_invalid_character: "Слово содержит недопустимый символ: '{char}' (код {code})"
+word_is_empty: Слово пусто
+word_is_too_long: Слово слишком длинное
+write_your_words: Написание слов
+
+# lib/partying_strategy.dart
+at_least_one_player_required: Нужен хотя бы один игрок
+at_least_two_players_required: Для этого режима нужно хотя бы два игрока
+cannot_make_teams: Не получается составить команды
+team_has_only_one_player: Команда состоит всего из одного игрока
+there_are_zero_teams: Команд нет
+there_is_only_one_team: Команда всего одна
+
+# lib/lexicon.dart
+cannot_find_dictionary: Не удалось найти словарь "{}"
+
+# lib/widget/invalid_operation_dialog.dart
+internal_error: Внутренняя ошибка!
+
+# lib/online_player_config_view.dart
+confirm_kick_player: Вы уверены, что хотите удалить игрока {}?
+kick: Удалить
+
+# lib/team_compositions_view.dart
+new_random_teams_and_turn_order: Новые команды и порядок хода
+new_random_turn_order: Новый порядок хода
+start_game: Начать игру!
+team_compositions: Составы команд
+turn_order: Порядок хода
+
+# lib/kicked_screen.dart
+you_have_been_kicked: Вы были удалены из этой игры
+
+# lib/start_game_online_screen.dart
+create_game: Создать игру
+game_id: Код игры
+game_id_is_empty: Код игры пуст
+join_game_online: Вход в сетевую игру
+player_exists_confirm_reconnect: Игрок с таким именем уже существует! Войти как {name}?
+your_name: Имя
+reconnect: Вход
+reconnect_as: Войти как {name}?
+
+# lib/game_controller.dart
+game_doesnt_exist: Игра {} не существует
+incompatible_game_version: 'Несовместимые версии игры. Версия хоста: {hostVersion}, ваша версия: {clientVersion}'
+no_dictionaries_selected: Не выбрано ни одного словаря
+
+# lib/dictionary_selector.dart
+dictionaries: Словари
+
+# lib/rules_screen.dart
+hat_game_rules_title: Правила шляпы
+
+# lib/rules_config_view.dart
+bonus_time: Время на доугадывание
+dictionaries_many: 'Словари:'
+dictionaries_none: 'Словари:   —'
+dictionary_one: 'Словарь: '
+random_words: 'Случайные слова'
+s: с
+timer: Время
+turn_time: Время на объяснение
+words: Слова
+words_per_player: Слов на игрока
+write_words: Писать слова

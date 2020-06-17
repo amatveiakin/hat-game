@@ -99,11 +99,11 @@ class _GameConfigViewState extends State<GameConfigView>
                 icon: Icon(Icons.content_copy),
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: link)).then((_) {
-                    scaffoldKey.currentState.showSnackBar(
-                        SnackBar(content: Text(tr('link_copied_to_clipboard'))));
+                    scaffoldKey.currentState.showSnackBar(SnackBar(
+                        content: Text(tr('link_copied_to_clipboard'))));
                   }, onError: (error) {
                     // TODO: Log to firebase.
-                    debugPrint(tr('cannot_copy_to_clipboard', args: [error.toString()]));
+                    debugPrint('Cannot copy to clipboard. Error: $error');
                     scaffoldKey.currentState.showSnackBar(SnackBar(
                         content: Text(tr('cannot_copy_link_to_clipboard'))));
                   });
@@ -204,8 +204,9 @@ class _GameConfigViewState extends State<GameConfigView>
     final startButton = WideButton(
       onPressed: isAdmin ? () => _next(gameConfig) : null,
       color: MyTheme.accent,
-      child: GoNextButtonCaption(
-          gameConfig.rules.writeWords ? tr('write_words_title') : tr('next')),
+      child: GoNextButtonCaption(gameConfig.rules.writeWords
+          ? tr('write_words_titlecase')
+          : tr('next')),
       margin: WideButton.bottomButtonMargin,
     );
 

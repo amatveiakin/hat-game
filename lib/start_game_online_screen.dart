@@ -101,7 +101,7 @@ class NewGameOnlineScreenState extends State<NewGameOnlineScreen> {
               padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
               child: CheckedTextField(
                 textInputAction: TextInputAction.go,
-                labelText: tr('player_name'),
+                labelText: tr('your_name'),
                 controller: playerNameController,
                 // TODO: Uncomment; disable auto-submit on unfocus on web.
                 // onSubmitted: (_) => _createGame(context),
@@ -271,7 +271,7 @@ class JoinGameOnlineScreenState extends State<JoinGameOnlineScreen> {
                   ),
                   CheckedTextField(
                     textInputAction: TextInputAction.go,
-                    labelText: tr('player_name'),
+                    labelText: tr('your_name'),
                     controller: playerNameController,
                     // TODO: Uncomment; disable auto-submit on unfocus on web.
                     // onSubmitted: (_) => _joinGame(context),

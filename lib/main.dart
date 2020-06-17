@@ -67,7 +67,7 @@ class MyApp extends StatelessWidget {
         primaryColorDark: MyTheme.primaryDark,
         accentColor: MyTheme.accent,
       ),
-      title: tr('app_title'),
+      title: tr('hat_game'),
       // Use dashes for route names. Route names become urls on web, and Google
       // recommendations suggest to use punctuation and to prefer dashes over
       // underscores: https://support.google.com/webmasters/answer/76329.

@@ -412,7 +412,9 @@ class GameController {
                   ..name = myName))
               ]));
         } else {
-          error = InvalidOperation(tr('name_already_taken', args: [myName]))
+          // TODO: Fix message:
+          //     'Game $xxx has already started. In order to reconnect...'
+          error = InvalidOperation('Name $myName is already taken')
             ..addTag(JoinGameErrorSource.playerName);
         }
       }

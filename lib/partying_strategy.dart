@@ -70,7 +70,7 @@ List<int> generateTeamSizes(
       if (numPlayers % teamSize != 0) {
         // TODO: Discard some players on dropPlayers when we have a UI for it.
         throw InvalidOperation(
-          tr(tr('cannot_make_teams')),
+          tr('cannot_make_teams'),
           // TODO: tr
           comment: 'Players cannot be split into teams of desired size, ' +
               (unequalTeamSize == UnequalTeamSize.forbid

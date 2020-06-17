@@ -33,7 +33,7 @@ InvalidOperation checkWord(String word) {
   }
   for (final c in word.codeUnits) {
     if (unicode.isControl(c) || unicode.isFormat(c)) {
-      return InvalidOperation(tr('word_contans_invalid_character',
+      return InvalidOperation(tr('word_contains_invalid_character',
           namedArgs: {'char': String.fromCharCode(c), 'code': c.toString()}));
     }
   }
@@ -183,7 +183,7 @@ class WriteWordsViewState extends State<WriteWordsView> {
                   child: CheckedTextField(
                     controller: controller,
                     onEditingComplete: () {
-                      // Hide virtual keyboard when tr('done') is pressed.
+                      // Hide virtual keyboard when 'Done' is pressed.
                       FocusScope.of(context).unfocus();
                     },
                   ),

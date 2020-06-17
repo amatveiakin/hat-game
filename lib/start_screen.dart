@@ -66,7 +66,7 @@ class StartScreenState extends State<StartScreen> {
     }
     return ConstrainedScaffold(
       appBar: AppBar(
-        title: Text(tr('app_title')),
+        title: Text(tr('hat_game')),
         actions: [
           PopupMenuButton(
             icon: Icon(Icons.more_vert),

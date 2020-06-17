@@ -1,5 +1,4 @@
 # Common
-app_title: Hat Game
 cancel: Cancel
 hat_game: Hat Game
 join_game: Join Game
@@ -15,22 +14,20 @@ new_local_game: New Local Game
 
 # lib/game_config_view.dart
 cannot_copy_link_to_clipboard: 'Cannot copy link to clipboard :('
-cannot_copy_to_clipboard: 'Cannot copy to clipboard. Error: {}'
 game_join_link: Game join link
 hat_game_id: 'Hat Game ID: {}'
 link_copied_to_clipboard: Link copied to clipboard
-write_words_title: Write Words
+write_words_titlecase: Write Words
 
 # lib/offline_player_config_view.dart
 add_player: Add player
 add_team: Add team
 
 # lib/write_words_view.dart
-done: done
 generate_a_random_word: Generate a random word
 player_readiness: 'Ready: {ready}/{total}'
 waiting_for: 'Waiting for: '
-word_contans_invalid_character: "Word contans invalid character: '{char}' (code {code})"
+word_contains_invalid_character: "Word contains invalid character: '{char}' (code {code})"
 word_is_empty: Word is empty
 word_is_too_long: Word is too long
 write_your_words: Write Your Words
@@ -68,16 +65,14 @@ create_game: Create Game
 game_id: Game ID
 game_id_is_empty: Game ID is empty
 join_game_online: Join Game Online
-player_exists_confirm_reconnect: Player {name} already exists! Reconnect as {name}?
-player_name: Player name
-reconnect: Re-connect
+player_exists_confirm_reconnect: A player with this name already exists! Reconnect as {name}?
+reconnect: Reconnect
 reconnect_as: Reconnect as {name}?
-reconnect_as_this_player: Reconnect as this player?
+your_name: Name
 
 # lib/game_controller.dart
 game_doesnt_exist: Game {} doesn't exist
 incompatible_game_version: 'Incompatible game version. Host version: {hostVersion}, local version: {clientVersion}'
-name_already_taken: Name {} is already taken
 no_dictionaries_selected: No dictionaries selected
 
 # lib/dictionary_selector.dart
