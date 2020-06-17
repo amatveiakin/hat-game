@@ -35,7 +35,7 @@ generate words, keep track of time and score.
   Widget build(BuildContext context) {
     return ConstrainedScaffold(
       appBar: AppBar(
-        title: Text(tr('hat_game_rules')),
+        title: Text(tr('hat_game_rules_title')),
       ),
       body: Markdown(
         data: MarkdownUtil.joinParagraphs(content),

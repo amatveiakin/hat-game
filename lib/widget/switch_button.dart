@@ -22,7 +22,7 @@ class SwitchButton extends StatelessWidget {
   static const _height = 48.0;
 
   // More vivid design. Didn't suit settings page, because it was conflicting
-  // with tr('start_game') button.
+  // with the big bottom button.
   /*
   Widget _buildOptionEnabled(
       BuildContext context, int index, String text, bool selected) {

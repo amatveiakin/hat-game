@@ -1,24 +1,25 @@
 # Common
 app_title: Hat Game
+cancel: Cancel
+hat_game: Hat Game
+join_game: Join Game
+new_game_online: New Game Online
+next: Next
+ok: OK
 
 # lib/start_screen.dart
 about_the_app: About the app
 app_version: "This app is in Beta. Version: {}"
 hat_game_rules: Hat game rules
-join_game: Join Game
-new_game_online: New Game Online
 new_local_game: New Local Game
 
 # lib/game_config_view.dart
 cannot_copy_link_to_clipboard: 'Cannot copy link to clipboard :('
 cannot_copy_to_clipboard: 'Cannot copy to clipboard. Error: {}'
 game_join_link: Game join link
-hat_game: Hat Game
 hat_game_id: 'Hat Game ID: {}'
 link_copied_to_clipboard: Link copied to clipboard
-next: Next
-ok: OK
-write_words: Write Words
+write_words_title: Write Words
 
 # lib/offline_player_config_view.dart
 add_player: Add player
@@ -27,7 +28,6 @@ add_team: Add team
 # lib/write_words_view.dart
 done: done
 generate_a_random_word: Generate a random word
-next: Next
 player_readiness: 'Ready: {ready}/{total}'
 waiting_for: 'Waiting for: '
 word_contans_invalid_character: "Word contans invalid character: '{char}' (code {code})"
@@ -46,15 +46,10 @@ there_is_only_one_team: There is only one team
 # lib/lexicon.dart
 cannot_find_dictionary: Cannot find dictionary "{}"
 
-# lib/widget/switch_button.dart
-start_game: Start game
-
 # lib/widget/invalid_operation_dialog.dart
 internal_error: Internal error!
-ok: OK
 
 # lib/online_player_config_view.dart
-cancel: Cancel
 confirm_kick_player: Are you sure you want to kick {}?
 kick: Kick
 
@@ -66,17 +61,13 @@ team_compositions: Team Compositions
 turn_order: Turn Order
 
 # lib/kicked_screen.dart
-hat_game: Hat Game
 you_have_been_kicked: You have been kicked from this game
 
 # lib/start_game_online_screen.dart
-cancel: Cancel
 create_game: Create Game
 game_id: Game ID
 game_id_is_empty: Game ID is empty
-join_game: Join Game
 join_game_online: Join Game Online
-new_game_online: New Game Online
 player_exists_confirm_reconnect: Player {name} already exists! Reconnect as {name}?
 player_name: Player name
 reconnect: Re-connect
@@ -93,7 +84,7 @@ no_dictionaries_selected: No dictionaries selected
 dictionaries: Dictionaries
 
 # lib/rules_screen.dart
-hat_game_rules: Hat Game Rules
+hat_game_rules_title: Hat Game Rules
 
 # lib/rules_config_view.dart
 bonus_time: Bonus time

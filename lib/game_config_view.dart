@@ -205,7 +205,7 @@ class _GameConfigViewState extends State<GameConfigView>
       onPressed: isAdmin ? () => _next(gameConfig) : null,
       color: MyTheme.accent,
       child: GoNextButtonCaption(
-          gameConfig.rules.writeWords ? tr('write_words') : tr('next')),
+          gameConfig.rules.writeWords ? tr('write_words_title') : tr('next')),
       margin: WideButton.bottomButtonMargin,
     );
 
