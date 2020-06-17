@@ -85,6 +85,7 @@ class _PrimarySecondaryScaffoldState extends State<PrimarySecondaryScaffold> {
       return ConstrainedScaffold(
         appBar: AppBar(
           automaticallyImplyLeading: primaryAutomaticallyImplyLeading,
+          title: Text(primaryTitle),
           actions: [
             IconButton(
               icon: secondaryIcon,
@@ -99,6 +100,7 @@ class _PrimarySecondaryScaffoldState extends State<PrimarySecondaryScaffold> {
       return Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: primaryAutomaticallyImplyLeading,
+          title: Text(primaryTitle),
         ),
         body: Row(
           children: [
