@@ -128,36 +128,36 @@ reconnect_link_hint: 'Чтобы вернуться в игру, использ�
 stay: Остаться
 
 # lib/teaming_config_view.dart
-allow_bigger_teams: # ORIG: Allow bigger teams
-allow_bigger_teams_comment: # ORIG: If players cannot be divided into equally sized teams, some teams will be bigger.
-drop_players: # ORIG: Strict team sizes; drop players
-drop_players_comment: # ORIG: If it's not possible to divide players into into teams of specified size, some players will skip the round.
-each_explains_to_each: # ORIG: Each player explains to each
-each_explains_to_each_comment: # ORIG: Explainer-guesser pairs change constantly.
-explain_in_a_circle: # ORIG: Explain in a circle
-explain_in_a_circle_comment: # ORIG: The “hat” goes in a circle. Always explain to the next person in sequence.
-explain_to_everybody: # ORIG: Explain to everybody at once
-explain_to_everybody_comment: # ORIG: Non-competitive mode. One player explains, everybody else guesses.
-guessing_in_large_teams: # ORIG: Guessing in Large Teams
-individual_mode: # ORIG: Individual mode
-manual_teams: # ORIG: Manual teams
-manual_teams_comment: # ORIG: You divide players into teams yourself.
-one_team_member_guesses: # ORIG: One team member guesses
-one_team_member_guesses_comment: # ORIG: Exactly one person guesses every turn. Teams of three or more rotate roles.
-random_teams: # ORIG: Random teams
-random_teams_comment: # ORIG: The app divides players into teams.
-strict_team_sizes: # ORIG: Strict team sizes
-strict_team_sizes_comment: # ORIG: Game won't start if players cannot be divided into teams of specified size.
-team_forming: # ORIG: Team Forming
-team_mode: # ORIG: Team mode
-team_size: # ORIG: Team Size
-teams_of_2: # ORIG: Teams of 2
-teams_of_2_comment: # ORIG: (if bigger teams are allowed, some teams may have 3 players)
-teams_of_3: # ORIG: Teams of 3
-teams_of_3_comment: # ORIG: (if bigger teams are allowed, some teams may have 4 players)
-teams_of_4: # ORIG: Teams of 4
-teams_of_4_comment: # ORIG: (if bigger teams are allowed, some teams may have 5 players)
-the_whole_team_guesses: # ORIG: The whole team guesses
-the_whole_team_guesses_comment: # ORIG: In teams of three or more the whole team guesses together.
-two_teams_total: # ORIG: Two teams total
-unequal_team_sizes: # ORIG: Unequal Team Sizes
+allow_bigger_teams: Возможны неравные команды
+allow_bigger_teams_comment: Если игроков невозможно поровну разделить по командам, некоторые команды будут больше.
+drop_players: Игра с «неудачниками».
+drop_players_comment: Если игроков невозможно разделить по командам заданного размера, некоторые игроки пропустят раунд.
+each_explains_to_each: Каждый объясняет каждому
+each_explains_to_each_comment: Пары объясняющий-угадывающий постоянно меняются.
+explain_in_a_circle: Объяснять по кругу
+explain_in_a_circle_comment: «Шляпа» идёт по кругу. Каждый объясняет следующему игроку в очерёдности.
+explain_to_everybody: Объяснять всем сразу
+explain_to_everybody_comment: Несоревновательный режим. Каждый ход один игрок объясняет, а остальные угадывают.
+guessing_in_large_teams: Угадывание в больших командах
+individual_mode: Личная игра
+manual_teams: Задать команды вручную
+manual_teams_comment: Вы сами делите игроков на команды
+one_team_member_guesses: Угадывает один игрок
+one_team_member_guesses_comment: Каждый ход угадывать может только один игрок. Команды из трёх человек и более меняются ролями
+random_teams: Случайные команды
+random_teams_comment: Приложение делит игроков на команды
+strict_team_sizes: Команды должны быть равными
+strict_team_sizes_comment: Игра не начнётся, если игроков невозможно разделить по командам заданного размера.
+team_forming: Формирование команд
+team_mode: Командная игра
+team_size: Размер команды
+teams_of_2: Команды по 2
+teams_of_2_comment: (если разрешены команды большего размера, в некоторых командах может быть 3 игрока)
+teams_of_3: Команды по 3
+teams_of_3_comment: (если разрешены команды большего размера, в некоторых командах может быть 4 игрока)
+teams_of_4: Команды по 4
+teams_of_4_comment: (если разрешены команды большего размера, в некоторых командах может быть 5 игроков)
+the_whole_team_guesses: Угадывает вся команда
+the_whole_team_guesses_comment: В командах из трёх и более игроков угадывать могут все
+two_teams_total: Две команды
+unequal_team_sizes: Неравные размеры команд
