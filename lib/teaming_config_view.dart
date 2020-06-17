@@ -385,62 +385,20 @@ class TeamingConfigView extends StatelessWidget {
             };
       switch (config.unequalTeamSize) {
         case UnequalTeamSize.expandTeams:
-          String subtitle;
-          switch (config.desiredTeamSize) {
-            case DesiredTeamSize.teamsOf2:
-            case DesiredTeamSize.twoTeams:
-              subtitle = tr('unequal_teams_comment_2');
-              break;
-            case DesiredTeamSize.teamsOf3:
-              subtitle = tr('unequal_teams_comment_3');
-              break;
-            case DesiredTeamSize.teamsOf4:
-              subtitle = tr('unequal_teams_comment_4');
-              break;
-          }
           items.add(OptionSelectorHeader(
             title: Text(tr('allow_bigger_teams')),
-            subtitle: Text(subtitle),
             onTap: onTap,
           ));
           break;
         case UnequalTeamSize.forbid:
-          String subtitle;
-          switch (config.desiredTeamSize) {
-            case DesiredTeamSize.teamsOf2:
-            case DesiredTeamSize.twoTeams:
-              subtitle = tr('number_of_players_must_be_even');
-              break;
-            case DesiredTeamSize.teamsOf3:
-              subtitle = tr('number_of_players_must_div_3');
-              break;
-            case DesiredTeamSize.teamsOf4:
-              subtitle = tr('number_of_players_must_div_4');
-              break;
-          }
           items.add(OptionSelectorHeader(
             title: Text(tr('strict_team_sizes')),
-            subtitle: Text(subtitle),
             onTap: onTap,
           ));
           break;
         case UnequalTeamSize.dropPlayers:
-          String subtitle;
-          switch (config.desiredTeamSize) {
-            case DesiredTeamSize.teamsOf2:
-            case DesiredTeamSize.twoTeams:
-              subtitle = tr('drop_players_comment_2');
-              break;
-            case DesiredTeamSize.teamsOf3:
-              subtitle = tr('drop_players_comment_3');
-              break;
-            case DesiredTeamSize.teamsOf4:
-              subtitle = tr('drop_players_comment_4');
-              break;
-          }
           items.add(OptionSelectorHeader(
             title: Text(tr('drop_players')),
-            subtitle: Text(subtitle),
             onTap: onTap,
           ));
           break;
@@ -462,21 +420,17 @@ class TeamingConfigView extends StatelessWidget {
         case IndividualPlayStyle.fluidPairs:
           items.add(
             OptionSelectorHeader(
-                title: Text(tr('one_team_member_guesses')),
-                subtitle: maxPossbleTeamSize == 3
-                    ? Text(tr('one_guesser_comment_3'))
-                    : Text(tr('one_guesser_comment_4')),
-                onTap: onTap),
+              title: Text(tr('one_team_member_guesses')),
+              onTap: onTap,
+            ),
           );
           break;
         case IndividualPlayStyle.broadcast:
           items.add(
             OptionSelectorHeader(
-                title: Text(tr('the_whole_team_guesses')),
-                subtitle: maxPossbleTeamSize == 3
-                    ? Text(tr('everybody_guesses_comment_3'))
-                    : Text(tr('everybody_guesses_comment_4')),
-                onTap: onTap),
+              title: Text(tr('the_whole_team_guesses')),
+              onTap: onTap,
+            ),
           );
           break;
         case IndividualPlayStyle.chain:
