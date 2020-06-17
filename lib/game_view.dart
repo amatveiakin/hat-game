@@ -119,17 +119,17 @@ Widget _getWordFeedbackIcon(
 
 String _getWordFeedbackText(WordFeedback feedback) {
   if (feedback == null) {
-    return tr('clear');
+    return tr('word_feedback_clear');
   }
   switch (feedback) {
     case WordFeedback.good:
-      return tr('nice');
+      return tr('word_feedback_nice');
     case WordFeedback.bad:
-      return tr('ugly');
+      return tr('word_feedback_ugly');
     case WordFeedback.tooEasy:
-      return tr('too_easy');
+      return tr('word_feedback_too_easy');
     case WordFeedback.tooHard:
-      return tr('too_hard');
+      return tr('word_feedback_too_hard');
   }
   Assert.fail("Reached end of _getWordFeedbackText");
 }
@@ -222,8 +222,8 @@ class WordReviewItem extends StatelessWidget {
                     ? Icons.restore_from_trash
                     : Icons.delete_outline),
                 tooltip: status == WordStatus.discarded
-                    ? tr('restore')
-                    : tr('discard'),
+                    ? tr('restore_word')
+                    : tr('discard_word'),
                 onPressed: () {
                   setStatus(status == WordStatus.discarded
                       ? WordStatus.notExplained

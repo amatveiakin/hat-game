@@ -100,7 +100,7 @@ player_name_is_empty: Player name is empty
 player_name_too_long: Player name too long
 
 # lib/about_screen.dart
-about_hat_game: About Hat Game
+about_hat_game: About Hat Game App
 
 # lib/score_view.dart
 game_log: Game Log
@@ -108,17 +108,17 @@ game_over: Game Over
 rematch: Rematch!
 
 # lib/game_view.dart
-clear: Clear
-discard: Discard
+discard_word: Discard word
 done: Done
 flag_the_word: Raise a problem with the word (invalid explanation, word not actually guessed)
-nice: Nice
-restore: Restore
+restore_word: Restore word
 somebody_flagged_the_word: Somebody thinks there was a problem with the word (invalid explanation, word not actually guessed)
 start: Start!
-too_easy: Too easy
-too_hard: Too hard
-ugly: Ugly
+word_feedback_clear: Clear
+word_feedback_nice: Nice
+word_feedback_too_easy: Too easy
+word_feedback_too_hard: Too hard
+word_feedback_ugly: Ugly
 words_in_hat: 'Words in hat: {}'
 
 # lib/game_navigator.dart

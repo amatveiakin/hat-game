@@ -5,6 +5,7 @@ join_game: Присоединиться к игре
 new_game_online: Создать сетевую игру
 next: Далее
 ok: OK
+turn_order: Порядок хода
 
 # lib/start_screen.dart
 about_the_app: О приложении
@@ -17,7 +18,7 @@ cannot_copy_link_to_clipboard: 'Не удалось скопировать сс�
 game_join_link: Ссылка на игру
 hat_game_id: 'Шляпа: игра {}'
 link_copied_to_clipboard: Ссылка скопирована в буфер обмена
-write_words_titlecase: Писать слова # ???
+write_words_titlecase: Писать слова
 
 # lib/offline_player_config_view.dart
 add_player: Новый игрок
@@ -37,7 +38,7 @@ at_least_one_player_required: Нужен хотя бы один игрок
 at_least_two_players_required: Для этого режима нужно хотя бы два игрока
 cannot_make_teams: Не получается составить команды
 team_has_only_one_player: Команда состоит всего из одного игрока
-there_are_zero_teams: Команд нет
+there_are_zero_teams: Нет ни одной команды
 there_is_only_one_team: Команда всего одна
 
 # lib/lexicon.dart
@@ -55,7 +56,6 @@ new_random_teams_and_turn_order: Новые команды и порядок х�
 new_random_turn_order: Новый порядок хода
 start_game: Начать игру!
 team_compositions: Составы команд
-turn_order: Порядок хода
 
 # lib/kicked_screen.dart
 you_have_been_kicked: Вы были удалены из этой игры
@@ -66,9 +66,9 @@ game_id: Код игры
 game_id_is_empty: Код игры пуст
 join_game_online: Вход в сетевую игру
 player_exists_confirm_reconnect: Игрок с таким именем уже существует! Войти как {name}?
-your_name: Имя
 reconnect: Вход
 reconnect_as: Войти как {name}?
+your_name: Имя
 
 # lib/game_controller.dart
 game_doesnt_exist: Игра {} не существует
@@ -93,3 +93,84 @@ turn_time: Время на объяснение
 words: Слова
 words_per_player: Слов на игрока
 write_words: Писать слова
+
+# lib/local_storage.dart
+player_name_contains_invalid_character: "Имя игрока содержит недопустимый символ: '{char}' (код {code})"
+player_name_is_empty: Имя игрока пусто
+player_name_too_long: Имя игрока слишком длинное
+
+# lib/about_screen.dart
+about_hat_game: О приложении Hat Game
+
+# lib/score_view.dart
+game_log: Игровой журнал
+game_over: Игра окончена
+rematch: Реванш!
+
+# lib/game_view.dart
+discard_word: Удалить слово
+done: Готово
+flag_the_word: Проблема со словом (объяснение некорректно, слово не было угадано)
+restore_word: Восстановить слово
+somebody_flagged_the_word: Кто-то считает, что со словом была проблема (объяснение некорректно, слово не было угадано)
+start: 'Поехали!'
+word_feedback_clear: Отменить
+word_feedback_nice: Хорошее слово
+word_feedback_too_easy: Слишком просто
+word_feedback_too_hard: Слишком сложно
+word_feedback_ugly: Плохое слово
+words_in_hat: 'Слов в шляпе: {}'
+
+# lib/game_navigator.dart
+leave: Выйти
+leave_game: Выйти из игры
+reconnect_link_hint: 'Чтобы вернуться в игру, используйте ссылку:'
+stay: Остаться
+
+# lib/teaming_config_view.dart
+allow_bigger_teams: # ORIG: Allow bigger teams
+allow_bigger_teams_comment: # ORIG: If players cannot be divided into equally sized teams, some teams will be bigger.
+drop_players: # ORIG: Strict team sizes; drop players
+drop_players_comment: # ORIG: If it's not possible to divide players into into teams of specified size, some players will skip the round.
+drop_players_comment_2: # ORIG: One player will skip the round if the total number of players is odd
+drop_players_comment_3: # ORIG: Some players will skip the round if the total number of players is not divisible by 3
+drop_players_comment_4: # ORIG: Some players will skip the round if the total number of players is not divisible by 4
+each_explains_to_each: # ORIG: Each player explains to each
+each_explains_to_each_comment: # ORIG: Explainer-guesser pairs change constantly.
+everybody_guesses_comment_3: # ORIG: Everybody can guess in teams of three
+everybody_guesses_comment_4: # ORIG: Everybody can guess in teams of three or more
+explain_in_a_circle: # ORIG: Explain in a circle
+explain_in_a_circle_comment: # ORIG: The “hat” goes in a circle. Always explain to the next person in sequence.
+explain_to_everybody: # ORIG: Explain to everybody at once
+explain_to_everybody_comment: # ORIG: Non-competitive mode. One player explains, everybody else guesses.
+guessing_in_large_teams: # ORIG: Guessing in Large Teams
+individual_mode: # ORIG: Individual mode
+manual_teams: # ORIG: Manual teams
+manual_teams_comment: # ORIG: You divide players into teams yourself.
+number_of_players_must_be_even: # ORIG: The number of players must be even
+number_of_players_must_div_3: # ORIG: The number of players must be divisible by 3
+number_of_players_must_div_4: # ORIG: The number of players must be divisible by 4
+one_guesser_comment_3: # ORIG: Teams of three rotate roles
+one_guesser_comment_4: # ORIG: Teams of three or more rotate roles
+one_team_member_guesses: # ORIG: One team member guesses
+one_team_member_guesses_comment: # ORIG: Exactly one person guesses every turn. Teams of three or more rotate roles.
+random_teams: # ORIG: Random teams
+random_teams_comment: # ORIG: The app divides players into teams.
+strict_team_sizes: # ORIG: Strict team sizes
+strict_team_sizes_comment: # ORIG: Game won't start if players cannot be divided into teams of specified size.
+team_forming: # ORIG: Team Forming
+team_mode: # ORIG: Team mode
+team_size: # ORIG: Team Size
+teams_of_2: # ORIG: Teams of 2
+teams_of_2_comment: # ORIG: (if bigger teams are allowed, some teams may have 3 players)
+teams_of_3: # ORIG: Teams of 3
+teams_of_3_comment: # ORIG: (if bigger teams are allowed, some teams may have 4 players)
+teams_of_4: # ORIG: Teams of 4
+teams_of_4_comment: # ORIG: (if bigger teams are allowed, some teams may have 5 players)
+the_whole_team_guesses: # ORIG: The whole team guesses
+the_whole_team_guesses_comment: # ORIG: In teams of three or more the whole team guesses together.
+two_teams_total: # ORIG: Two teams total
+unequal_team_sizes: # ORIG: Unequal Team Sizes
+unequal_teams_comment_2: # ORIG: ... if the number of players is not divisible by 3
+unequal_teams_comment_3: # ORIG: ... if the number of players is odd
+unequal_teams_comment_4: # ORIG: ... if the number of players is not divisible by 4
