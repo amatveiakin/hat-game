@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hatgame/built_value/game_config.dart';
@@ -118,17 +119,17 @@ Widget _getWordFeedbackIcon(
 
 String _getWordFeedbackText(WordFeedback feedback) {
   if (feedback == null) {
-    return 'Clear';
+    return tr('clear');
   }
   switch (feedback) {
     case WordFeedback.good:
-      return 'Nice';
+      return tr('nice');
     case WordFeedback.bad:
-      return 'Ugly';
+      return tr('ugly');
     case WordFeedback.tooEasy:
-      return 'Too easy';
+      return tr('too_easy');
     case WordFeedback.tooHard:
-      return 'Too hard';
+      return tr('too_hard');
   }
   Assert.fail("Reached end of _getWordFeedbackText");
 }
@@ -204,8 +205,7 @@ class WordReviewItem extends StatelessWidget {
                 padding: EdgeInsets.all(8.0),
                 child: Tooltip(
                   child: Icon(Icons.error, color: MyTheme.primary),
-                  message: 'Somebody thinks there was a problem with the word '
-                      '(invalid explanation, word not actually guessed)',
+                  message: tr('somebody_flagged_the_word'),
                 ),
               ),
             if (setFlag != null)
@@ -213,8 +213,7 @@ class WordReviewItem extends StatelessWidget {
                 icon: hasFlag
                     ? Icon(Icons.error, color: MyTheme.accent)
                     : Icon(Icons.error_outline),
-                tooltip: 'Raise a problem with the word '
-                    '(invalid explanation, word not actually guessed)',
+                tooltip: tr('flag_the_word'),
                 onPressed: () => setFlag(!hasFlag),
               ),
             if (setStatus != null)
@@ -222,7 +221,9 @@ class WordReviewItem extends StatelessWidget {
                 icon: Icon(status == WordStatus.discarded
                     ? Icons.restore_from_trash
                     : Icons.delete_outline),
-                tooltip: status == WordStatus.discarded ? 'Restore' : 'Discard',
+                tooltip: status == WordStatus.discarded
+                    ? tr('restore')
+                    : tr('discard'),
                 onPressed: () {
                   setStatus(status == WordStatus.discarded
                       ? WordStatus.notExplained
@@ -462,7 +463,8 @@ class PlayAreaState extends State<PlayArea>
   Widget _buildActivePlayer(BuildContext context) {
     final wordsInHatWidget = Container(
       padding: EdgeInsets.symmetric(vertical: 12.0),
-      child: Text('Words in hat: ${gameData.numWordsInHat()}'),
+      child:
+          Text(tr('words_in_hat', args: [gameData.numWordsInHat().toString()])),
     );
     switch (turnState.turnPhase) {
       case TurnPhase.prepare:
@@ -479,7 +481,7 @@ class PlayAreaState extends State<PlayArea>
                         _padlockAnimationController.forward(from: 0.0),
                     color: MyTheme.accent,
                     child: Text(
-                      'Start!',
+                      tr('start'),
                       style: TextStyle(fontSize: 24.0),
                     ),
                   ),
@@ -564,7 +566,7 @@ class PlayAreaState extends State<PlayArea>
             WideButton(
               onPressed: _reviewDone,
               color: MyTheme.accent,
-              child: Text('Done'),
+              child: Text(tr('done')),
               margin: WideButton.bottomButtonMargin,
             ),
           ]);
@@ -606,7 +608,7 @@ class GameViewState extends State<GameView> {
     return ConstrainedScaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text('Hat Game'),
+        title: Text(tr('hat_game')),
       ),
       body: Container(
         child: Column(

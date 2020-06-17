@@ -5,6 +5,7 @@ join_game: Join Game
 new_game_online: New Game Online
 next: Next
 ok: OK
+turn_order: Turn Order
 
 # lib/start_screen.dart
 about_the_app: About the app
@@ -55,7 +56,6 @@ new_random_teams_and_turn_order: New random teams and turn order
 new_random_turn_order: New random turn order
 start_game: Start Game!
 team_compositions: Team Compositions
-turn_order: Turn Order
 
 # lib/kicked_screen.dart
 you_have_been_kicked: You have been kicked from this game
@@ -93,3 +93,84 @@ turn_time: Turn time
 words: Words
 words_per_player: Words per player
 write_words: Write words
+
+# lib/local_storage.dart
+player_name_contains_invalid_character: "Player name contains invalid character: '{char}' (code {code})"
+player_name_is_empty: Player name is empty
+player_name_too_long: Player name too long
+
+# lib/about_screen.dart
+about_hat_game: About Hat Game
+
+# lib/score_view.dart
+game_log: Game Log
+game_over: Game Over
+rematch: Rematch!
+
+# lib/game_view.dart
+clear: Clear
+discard: Discard
+done: Done
+flag_the_word: Raise a problem with the word (invalid explanation, word not actually guessed)
+nice: Nice
+restore: Restore
+somebody_flagged_the_word: Somebody thinks there was a problem with the word (invalid explanation, word not actually guessed)
+start: Start!
+too_easy: Too easy
+too_hard: Too hard
+ugly: Ugly
+words_in_hat: 'Words in hat: {}'
+
+# lib/game_navigator.dart
+leave: Leave
+leave_game: Leave game?
+reconnect_link_hint: 'To re-connect, use this link:'
+stay: Stay
+
+# lib/teaming_config_view.dart
+allow_bigger_teams: Allow bigger teams
+allow_bigger_teams_comment: If players cannot be divided into equally sized teams, some teams will be bigger.
+drop_players: Strict team sizes; drop players
+drop_players_comment: If it's not possible to divide players into into teams of specified size, some players will skip the round.
+drop_players_comment_2: One player will skip the round if the total number of players is odd
+drop_players_comment_3: Some players will skip the round if the total number of players is not divisible by 3
+drop_players_comment_4: Some players will skip the round if the total number of players is not divisible by 4
+each_explains_to_each: Each player explains to each
+each_explains_to_each_comment: Explainer-guesser pairs change constantly.
+everybody_guesses_comment_3: Everybody can guess in teams of three
+everybody_guesses_comment_4: Everybody can guess in teams of three or more
+explain_in_a_circle: Explain in a circle
+explain_in_a_circle_comment: The “hat” goes in a circle. Always explain to the next person in sequence.
+explain_to_everybody: Explain to everybody at once
+explain_to_everybody_comment: Non-competitive mode. One player explains, everybody else guesses.
+guessing_in_large_teams: Guessing in Large Teams
+individual_mode: Individual mode
+manual_teams: Manual teams
+manual_teams_comment: You divide players into teams yourself.
+number_of_players_must_be_even: The number of players must be even
+number_of_players_must_div_3: The number of players must be divisible by 3
+number_of_players_must_div_4: The number of players must be divisible by 4
+one_guesser_comment_3: Teams of three rotate roles
+one_guesser_comment_4: Teams of three or more rotate roles
+one_team_member_guesses: One player guesses each turn
+one_team_member_guesses_comment: Exactly one person guesses every turn. Teams of three or more rotate roles.
+random_teams: Random teams
+random_teams_comment: The app divides players into teams.
+strict_team_sizes: Strict team sizes
+strict_team_sizes_comment: Game won't start if players cannot be divided into teams of specified size.
+team_forming: Team Forming
+team_mode: Team mode
+team_size: Team Size
+teams_of_2: Teams of 2
+teams_of_2_comment: (if bigger teams are allowed, some teams may have 3 players)
+teams_of_3: Teams of 3
+teams_of_3_comment: (if bigger teams are allowed, some teams may have 4 players)
+teams_of_4: Teams of 4
+teams_of_4_comment: (if bigger teams are allowed, some teams may have 5 players)
+the_whole_team_guesses: The whole team guesses
+the_whole_team_guesses_comment: In teams of three or more the whole team guesses together.
+two_teams_total: Two teams total
+unequal_team_sizes: Unequal Team Sizes
+unequal_teams_comment_2: ... if the number of players is not divisible by 3
+unequal_teams_comment_3: ... if the number of players is odd
+unequal_teams_comment_4: ... if the number of players is not divisible by 4

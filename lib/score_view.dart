@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_phase.dart';
 import 'package:hatgame/built_value/game_state.dart';
@@ -207,7 +208,7 @@ class ScoreView extends StatelessWidget {
     final gameData = gameController.gameData;
     return PrimarySecondaryScaffold(
       primaryAutomaticallyImplyLeading: true,
-      primaryTitle: 'Game Over',
+      primaryTitle: tr('game_over'),
       primary: Column(
         children: [
           Expanded(
@@ -226,7 +227,7 @@ class ScoreView extends StatelessWidget {
                 ? () => _rematch(context, snapshot)
                 : null,
             color: MyTheme.accent,
-            child: Text('Rematch!'),
+            child: Text(tr('rematch')),
             margin: WideButton.bottomButtonMargin,
           ),
         ],
@@ -241,7 +242,7 @@ class ScoreView extends StatelessWidget {
       ),
       // TODO: Proper icon.
       secondaryIcon: Icon(Icons.list),
-      secondaryTitle: 'Game Log',
+      secondaryTitle: tr('game_log'),
     );
   }
 }

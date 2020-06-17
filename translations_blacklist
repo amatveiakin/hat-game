@@ -1,35 +1,47 @@
         $d
- and 
- in 
+ and
+ in
 $dict
 ${String.fromCharCode(c)} (code $c)
+${player.wordsExplained} / ${player.wordsGuessed}
 %version%
+(invalid explanation, word not actually guessed)
 Assertion failed
+Cannot copy to clipboard. Error: $error
 Cannot generate game ID
-Couldn't get NTP time offset! This means, in online game 
+Couldn't get NTP time offset! This means, in online game
 Couldn't initialize local storage!
 Error getting data at $gamePhase:\n
 Game ${firestoreReference.path} doesn't exist
 Host version: $hostVersion, local version: $clientVersion
+IndividualPlayStyle.chain is not supported in teams mode
 InvalidOperation
 Local storage loaded successfully.
 LocalStorage running in test mode.
 NTP running in test mode, initialized = $initialized.
 NTP time offset = $_ntpOffset
-Player name contans invalid character: 
-Player name is empty
-Player name too long
+Name $myName is already taken
+One player guesses each turn
+Only the active player can change game state
+Players cannot be split into teams of desired size,
 Players cannot be split into teams of desired size, 
+Reached end of _getWordFeedbackIcon
+Reached end of _getWordFeedbackText
 Revert to default
+Teams of three or more rotate roles.
 The error was: $e
 The method 'findRenderObject' was called on null
+There is no route for GamePhase.rematch
 Trying to update config while in read-only mode
+Unexpected GamePhase: $phase
+Unexpected game phase: $currentPhase
 Unknown IndividualPlayStyle:
 Unknown IndividualPlayStyle: $playStyle
 Unknown client version
 Unknown host version
 Warning: cannot read "${column.name}" from LocalStorage: $e
 Writing words in offline mode is not supported (yet).
+You wouldn't be able to continue (this is not implemented yet)
 \n
 \n\n+
 _CompactLinkedHashSet<Object>
@@ -37,6 +49,7 @@ and nobody else will see the timer when you're explaining.
 and support for dropping players isn\
 and unequally sized teams are disabled.
 assertion_failure
+bonus_timer
 char
 clientVersion
 code
@@ -45,7 +58,11 @@ en
 fake
 findRenderObject
 hostVersion
+if the total number of players is not divisible by 3
+if the total number of players is odd
 internal:
+into teams of specified size, some players will skip the round.
+into teams of specified size.
 last_config
 message
 name
@@ -57,8 +74,11 @@ ru
 russian_easy
 russian_hard
 russian_medium
+some teams will be bigger.
 stack_trace
+the whole team guesses together.
 total
 translations
+turn_timer
 unknown_built_type
-you wouldn't see the timer when somebody else is explaining 
+you wouldn't see the timer when somebody else is explaining

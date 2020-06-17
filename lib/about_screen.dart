@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hatgame/app_version.dart';
@@ -11,6 +12,7 @@ class AboutScreen extends StatelessWidget {
 
   // TODO: Include technical info (app version, device) in support email body.
   // TODO: Add links to web version, Play Store and App Store.
+  // TODO: tr
   final String content = '''
 ## What is this?
 
@@ -42,7 +44,7 @@ The app is written in Flutter.
   Widget build(BuildContext context) {
     return ConstrainedScaffold(
       appBar: AppBar(
-        title: Text('About Hat Game'),
+        title: Text(tr('about_hat_game')),
       ),
       body: Markdown(
         data: MarkdownUtil.joinParagraphs(content),

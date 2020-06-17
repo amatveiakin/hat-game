@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/db/db_columns.dart';
@@ -68,15 +69,15 @@ class LocalColLastConfig extends DBColumn<GameConfig>
 
 InvalidOperation checkPlayerName(String name) {
   if (name.isEmpty) {
-    return InvalidOperation('Player name is empty');
+    return InvalidOperation(tr('player_name_is_empty'));
   }
   if (name.length > 50) {
-    return InvalidOperation('Player name too long');
+    return InvalidOperation(tr('player_name_too_long'));
   }
   for (final c in name.codeUnits) {
     if (unicode.isControl(c) || unicode.isFormat(c)) {
-      return InvalidOperation('Player name contans invalid character: '
-          '${String.fromCharCode(c)} (code $c)');
+      return InvalidOperation(tr('player_name_contains_invalid_character',
+          namedArgs: {'char': String.fromCharCode(c), 'code': c.toString()}));
     }
   }
   return null;

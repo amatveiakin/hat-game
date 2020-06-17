@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/game_config_controller.dart';
@@ -17,20 +18,18 @@ getIndividualPlayStyleOptions() {
   return [
     OptionDescription(
       value: IndividualPlayStyle.chain,
-      title: 'Explain in a circle',
-      subtitle: 'The “hat” goes in a circle. '
-          'Always explain to the next person in sequence.',
+      title: tr('explain_in_a_circle'),
+      subtitle: tr('explain_in_a_circle_comment'),
     ),
     OptionDescription(
       value: IndividualPlayStyle.fluidPairs,
-      title: 'Each player explains to each',
-      subtitle: 'Explainer-guesser pairs change constantly.',
+      title: tr('each_explains_to_each'),
+      subtitle: tr('each_explains_to_each_comment'),
     ),
     OptionDescription(
       value: IndividualPlayStyle.broadcast,
-      title: 'Explain to everybody at once',
-      subtitle: 'Non-competitive mode. '
-          'One player explains, everybody else guesses.',
+      title: tr('explain_to_everybody'),
+      subtitle: tr('explain_to_everybody_comment'),
     ),
   ];
 }
@@ -40,7 +39,7 @@ class IndividualPlayStyleSelector
   IndividualPlayStyleSelector(
       IndividualPlayStyle initialValue, Function changeCallback)
       : super(
-          windowTitle: 'Turn Order',
+          windowTitle: tr('turn_order'),
           allValues: getIndividualPlayStyleOptions(),
           initialValue: initialValue,
           changeCallback: changeCallback,
@@ -60,13 +59,13 @@ getRandomizeTeamsOptions() {
   return [
     OptionDescription(
       value: true,
-      title: 'Random teams',
-      subtitle: 'The app divides players into teams.',
+      title: tr('random_teams'),
+      subtitle: tr('random_teams_comment'),
     ),
     OptionDescription(
       value: false,
-      title: 'Manual teams',
-      subtitle: 'You divide players into teams yourself.',
+      title: tr('manual_teams'),
+      subtitle: tr('manual_teams_comment'),
     ),
   ];
 }
@@ -74,7 +73,7 @@ getRandomizeTeamsOptions() {
 class RandomizeTeamsSelector extends EnumOptionSelector<bool> {
   RandomizeTeamsSelector(bool initialValue, Function changeCallback)
       : super(
-          windowTitle: 'Team Forming',
+          windowTitle: tr('team_forming'),
           allValues: getRandomizeTeamsOptions(),
           initialValue: initialValue,
           changeCallback: changeCallback,
@@ -94,22 +93,22 @@ getDesiredTeamSizeOptions() {
   return [
     OptionDescription(
       value: DesiredTeamSize.teamsOf2,
-      title: 'Teams of 2',
-      subtitle: '(if bigger teams are allowed, some teams may have 3 players)',
+      title: tr('teams_of_2'),
+      subtitle: tr('teams_of_2_comment'),
     ),
     OptionDescription(
       value: DesiredTeamSize.teamsOf3,
-      title: 'Teams of 3',
-      subtitle: '(if bigger teams are allowed, some teams may have 4 players)',
+      title: tr('teams_of_3'),
+      subtitle: tr('teams_of_3_comment'),
     ),
     OptionDescription(
       value: DesiredTeamSize.teamsOf4,
-      title: 'Teams of 4',
-      subtitle: '(if bigger teams are allowed, some teams may have 5 players)',
+      title: tr('teams_of_4'),
+      subtitle: tr('teams_of_4_comment'),
     ),
     OptionDescription(
       value: DesiredTeamSize.twoTeams,
-      title: 'Two teams total',
+      title: tr('two_teams_total'),
     ),
   ];
 }
@@ -117,7 +116,7 @@ getDesiredTeamSizeOptions() {
 class DesiredTeamSizeSelector extends EnumOptionSelector<DesiredTeamSize> {
   DesiredTeamSizeSelector(DesiredTeamSize initialValue, Function changeCallback)
       : super(
-          windowTitle: 'Team Size',
+          windowTitle: tr('team_size'),
           allValues: getDesiredTeamSizeOptions(),
           initialValue: initialValue,
           changeCallback: changeCallback,
@@ -137,23 +136,20 @@ getUnequalTeamSizeOptions() {
   return [
     OptionDescription(
       value: UnequalTeamSize.expandTeams,
-      title: 'Allow bigger teams',
-      subtitle: 'If players cannot be divided into equally sized teams, '
-          'some teams will be bigger.',
+      title: tr('allow_bigger_teams'),
+      subtitle: tr('allow_bigger_teams_comment'),
     ),
     OptionDescription(
       value: UnequalTeamSize.forbid,
-      title: 'Strict team sizes',
-      subtitle: "Game won't start if players cannot be divided "
-          'into teams of specified size.',
+      title: tr('strict_team_sizes'),
+      subtitle: tr('strict_team_sizes_comment'),
     ),
     OptionDescription(
       value: UnequalTeamSize.dropPlayers,
-      title: 'Strict team sizes; drop players',
+      title: tr('drop_players'),
       // TODO: Make the lot fair (don't ban the same person twice in a row)
       // and comment on this.
-      subtitle: "If it's not possible to divide players into "
-          'into teams of specified size, some players will skip the round.',
+      subtitle: tr('drop_players_comment'),
     ),
   ];
 }
@@ -161,7 +157,7 @@ getUnequalTeamSizeOptions() {
 class UnequalTeamSizeSelector extends EnumOptionSelector<UnequalTeamSize> {
   UnequalTeamSizeSelector(UnequalTeamSize initialValue, Function changeCallback)
       : super(
-          windowTitle: 'Unequal Team Sizes',
+          windowTitle: tr('unequal_team_sizes'),
           allValues: getUnequalTeamSizeOptions(),
           initialValue: initialValue,
           changeCallback: changeCallback,
@@ -178,18 +174,17 @@ class UnequalTeamSizeSelectorState
 // GuessingInLargeTeam
 
 getGuessingInLargeTeamOptions() {
+  // TODO: Are subtitles required here?
   return [
     OptionDescription(
       value: IndividualPlayStyle.fluidPairs,
-      title: 'One team member guesses',
-      subtitle: 'Exactly one person guesses every turn. '
-          'Teams of three or more rotate roles.',
+      title: tr('one_team_member_guesses'),
+      subtitle: tr('one_team_member_guesses_comment'),
     ),
     OptionDescription(
       value: IndividualPlayStyle.broadcast,
-      title: 'The whole team guesses',
-      subtitle: 'In teams of three or more '
-          'the whole team guesses together.',
+      title: tr('the_whole_team_guesses'),
+      subtitle: tr('the_whole_team_guesses_comment'),
     ),
   ];
 }
@@ -199,7 +194,7 @@ class GuessingInLargeTeamSelector
   GuessingInLargeTeamSelector(
       IndividualPlayStyle initialValue, Function changeCallback)
       : super(
-          windowTitle: 'Guessing in Large Teams',
+          windowTitle: tr('guessing_in_large_teams'),
           allValues: getGuessingInLargeTeamOptions(),
           initialValue: initialValue,
           changeCallback: changeCallback,
@@ -257,14 +252,15 @@ class TeamingConfigView extends StatelessWidget {
     if (configController.isReadOnly) {
       items.add(
         MultiLineListTile(
-          title: Text(config.teamPlay ? 'Team mode' : 'Individual mode'),
+          title:
+              Text(config.teamPlay ? tr('team_mode') : tr('individual_mode')),
         ),
       );
     } else {
       items.add(
         MultiLineListTile(
           title: SwitchButton(
-            options: ['Team mode', 'Individual mode'],
+            options: [tr('team_mode'), tr('individual_mode')],
             selectedOption: config.teamPlay ? 0 : 1,
             onSelectedOptionChanged: configController.isReadOnly
                 ? null
@@ -292,19 +288,19 @@ class TeamingConfigView extends StatelessWidget {
         case IndividualPlayStyle.chain:
           items.add(
             OptionSelectorHeader(
-                title: Text('Explain in a circle'), onTap: onTap),
+                title: Text(tr('explain_in_a_circle')), onTap: onTap),
           );
           break;
         case IndividualPlayStyle.fluidPairs:
           items.add(
             OptionSelectorHeader(
-                title: Text('Each player explains to each'), onTap: onTap),
+                title: Text(tr('each_explains_to_each')), onTap: onTap),
           );
           break;
         case IndividualPlayStyle.broadcast:
           items.add(
             OptionSelectorHeader(
-                title: Text('Explain to everybody at once'), onTap: onTap),
+                title: Text(tr('explain_to_everybody')), onTap: onTap),
           );
           break;
       }
@@ -324,13 +320,13 @@ class TeamingConfigView extends StatelessWidget {
       switch (config.randomizeTeams) {
         case true:
           items.add(OptionSelectorHeader(
-            title: Text('Random teams'),
+            title: Text(tr('random_teams')),
             onTap: onTap,
           ));
           break;
         case false:
           items.add(OptionSelectorHeader(
-            title: Text('Manual teams'),
+            title: Text(tr('manual_teams')),
             onTap: onTap,
           ));
           break;
@@ -351,25 +347,25 @@ class TeamingConfigView extends StatelessWidget {
       switch (config.desiredTeamSize) {
         case DesiredTeamSize.teamsOf2:
           items.add(OptionSelectorHeader(
-            title: Text('Teams of 2'),
+            title: Text(tr('teams_of_2')),
             onTap: onTap,
           ));
           break;
         case DesiredTeamSize.teamsOf3:
           items.add(OptionSelectorHeader(
-            title: Text('Teams of 3'),
+            title: Text(tr('teams_of_3')),
             onTap: onTap,
           ));
           break;
         case DesiredTeamSize.teamsOf4:
           items.add(OptionSelectorHeader(
-            title: Text('Teams of 4'),
+            title: Text(tr('teams_of_4')),
             onTap: onTap,
           ));
           break;
         case DesiredTeamSize.twoTeams:
           items.add(OptionSelectorHeader(
-            title: Text('Two teams total'),
+            title: Text(tr('two_teams_total')),
             onTap: onTap,
           ));
           break;
@@ -393,17 +389,17 @@ class TeamingConfigView extends StatelessWidget {
           switch (config.desiredTeamSize) {
             case DesiredTeamSize.teamsOf2:
             case DesiredTeamSize.twoTeams:
-              subtitle = '... if the number of players is odd';
+              subtitle = tr('unequal_teams_comment_2');
               break;
             case DesiredTeamSize.teamsOf3:
-              subtitle = '... if the number of players is not divisible by 3';
+              subtitle = tr('unequal_teams_comment_3');
               break;
             case DesiredTeamSize.teamsOf4:
-              subtitle = '... if the number of players is not divisible by 4';
+              subtitle = tr('unequal_teams_comment_4');
               break;
           }
           items.add(OptionSelectorHeader(
-            title: Text('Allow bigger teams'),
+            title: Text(tr('allow_bigger_teams')),
             subtitle: Text(subtitle),
             onTap: onTap,
           ));
@@ -413,17 +409,17 @@ class TeamingConfigView extends StatelessWidget {
           switch (config.desiredTeamSize) {
             case DesiredTeamSize.teamsOf2:
             case DesiredTeamSize.twoTeams:
-              subtitle = 'The number of players must be even';
+              subtitle = tr('number_of_players_must_be_even');
               break;
             case DesiredTeamSize.teamsOf3:
-              subtitle = 'The number of players must be divisible by 3';
+              subtitle = tr('number_of_players_must_div_3');
               break;
             case DesiredTeamSize.teamsOf4:
-              subtitle = 'The number of players must be divisible by 4';
+              subtitle = tr('number_of_players_must_div_4');
               break;
           }
           items.add(OptionSelectorHeader(
-            title: Text('Strict team sizes'),
+            title: Text(tr('strict_team_sizes')),
             subtitle: Text(subtitle),
             onTap: onTap,
           ));
@@ -433,20 +429,17 @@ class TeamingConfigView extends StatelessWidget {
           switch (config.desiredTeamSize) {
             case DesiredTeamSize.teamsOf2:
             case DesiredTeamSize.twoTeams:
-              subtitle = 'One player will skip the round '
-                  'if the total number of players is odd';
+              subtitle = tr('drop_players_comment_2');
               break;
             case DesiredTeamSize.teamsOf3:
-              subtitle = 'Some players will skip the round '
-                  'if the total number of players is not divisible by 3';
+              subtitle = tr('drop_players_comment_3');
               break;
             case DesiredTeamSize.teamsOf4:
-              subtitle = 'Some players will skip the round '
-                  'if the total number of players is not divisible by 4';
+              subtitle = tr('drop_players_comment_4');
               break;
           }
           items.add(OptionSelectorHeader(
-            title: Text('Strict team sizes; drop players'),
+            title: Text(tr('drop_players')),
             subtitle: Text(subtitle),
             onTap: onTap,
           ));
@@ -469,20 +462,20 @@ class TeamingConfigView extends StatelessWidget {
         case IndividualPlayStyle.fluidPairs:
           items.add(
             OptionSelectorHeader(
-                title: Text('One player guesses each turn'),
+                title: Text(tr('one_team_member_guesses')),
                 subtitle: maxPossbleTeamSize == 3
-                    ? Text('Teams of three rotate roles')
-                    : Text('Teams of three or more rotate roles'),
+                    ? Text(tr('one_guesser_comment_3'))
+                    : Text(tr('one_guesser_comment_4')),
                 onTap: onTap),
           );
           break;
         case IndividualPlayStyle.broadcast:
           items.add(
             OptionSelectorHeader(
-                title: Text('The whole team guesses'),
+                title: Text(tr('the_whole_team_guesses')),
                 subtitle: maxPossbleTeamSize == 3
-                    ? Text('Everybody can guess in teams of three')
-                    : Text('Everybody can guess in teams of three or more'),
+                    ? Text(tr('everybody_guesses_comment_3'))
+                    : Text(tr('everybody_guesses_comment_4')),
                 onTap: onTap),
           );
           break;

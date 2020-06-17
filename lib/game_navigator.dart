@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_phase.dart';
 import 'package:hatgame/db/db_document.dart';
@@ -307,13 +308,13 @@ class GameNavigator {
     // possible to continue.
     return multipleChoiceDialog(
       context: context,
-      titleText: 'Leave game?',
+      titleText: tr('leave_game'),
       contentText: localGameData.onlineMode
-          ? 'To re-connect, use this link:\n${localGameData.gameUrl}'
+          ? tr('reconnect_link_hint') + '\n' + localGameData.gameUrl
           : "You wouldn't be able to continue (this is not implemented yet)",
       choices: [
-        DialogChoice(_PopResponse.disabled, 'Stay'),
-        DialogChoice(_PopResponse.exitGame, 'Leave'),
+        DialogChoice(_PopResponse.disabled, tr('stay')),
+        DialogChoice(_PopResponse.exitGame, tr('leave')),
       ],
       defaultChoice: _PopResponse.disabled,
     );
