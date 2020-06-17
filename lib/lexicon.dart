@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/invalid_operation.dart';
@@ -55,7 +56,7 @@ class Lexicon {
     final words = List<String>();
     for (final dict in dictionaries) {
       if (!_dictionaries.containsKey(dict)) {
-        throw InvalidOperation('Cannot find dictionary "$dict"',
+        throw InvalidOperation(tr('cannot_find_dictionary', args: [dict]),
             isInternalError: true);
       }
       words.addAll(_dictionaries[dict]);

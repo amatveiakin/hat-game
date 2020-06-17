@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:built_collection/built_collection.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_phase.dart';
@@ -25,15 +26,15 @@ import 'package:unicode/unicode.dart' as unicode;
 // Note: this is similar to checkPlayerName, should consider syncing changes.
 InvalidOperation checkWord(String word) {
   if (word.isEmpty) {
-    return InvalidOperation('Word is empty');
+    return InvalidOperation(tr('word_is_empty'));
   }
   if (word.length > 50) {
-    return InvalidOperation('Word is too long');
+    return InvalidOperation(tr('word_is_too_long'));
   }
   for (final c in word.codeUnits) {
     if (unicode.isControl(c) || unicode.isFormat(c)) {
-      return InvalidOperation('Word contans invalid character: '
-          '${String.fromCharCode(c)} (code $c)');
+      return InvalidOperation(tr('word_contans_invalid_character',
+          namedArgs: {'char': String.fromCharCode(c), 'code': c.toString()}));
     }
   }
   return null;
@@ -144,7 +145,7 @@ class WriteWordsViewState extends State<WriteWordsView> {
 
   void _showPlayersNotReady(List<String> playersNotReady) async {
     widget.scaffoldKey.currentState.showSnackBar(SnackBar(
-      content: Text('Waiting for: ' + playersNotReady.join(', ')),
+      content: Text(tr('waiting_for') + playersNotReady.join(', ')),
     ));
   }
 
@@ -182,7 +183,7 @@ class WriteWordsViewState extends State<WriteWordsView> {
                   child: CheckedTextField(
                     controller: controller,
                     onEditingComplete: () {
-                      // Hide virtual keyboard when 'done' is pressed.
+                      // Hide virtual keyboard when tr('done') is pressed.
                       FocusScope.of(context).unfocus();
                     },
                   ),
@@ -191,7 +192,7 @@ class WriteWordsViewState extends State<WriteWordsView> {
                   icon: ImageAssetIcon('images/dice.png'),
                   onPressed: () =>
                       _generateRandomWord(controller.textController),
-                  tooltip: 'Generate a random word',
+                  tooltip: tr('generate_a_random_word'),
                 )
               ],
             ),
@@ -203,7 +204,7 @@ class WriteWordsViewState extends State<WriteWordsView> {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         automaticallyImplyLeading: localGameData.isAdmin,
-        title: Text('Write Your Words'),
+        title: Text(tr('write_your_words')),
       ),
       body: Column(
         children: [
@@ -215,7 +216,7 @@ class WriteWordsViewState extends State<WriteWordsView> {
           ),
           WideWidget(
             child: CheckboxButton(
-              title: Text('Ready'),
+              title: Text(tr('ready')),
               value: playerState.wordsReady ?? false,
               onChanged: (value) => _updateState(playerState, ready: value),
             ),
@@ -230,10 +231,12 @@ class WriteWordsViewState extends State<WriteWordsView> {
             color: MyTheme.accent,
             // Note: keep text in sync with game_config_view.dart
             child: everybodyReady
-                ? GoNextButtonCaption('Next')
+                ? GoNextButtonCaption(tr('next'))
                 : Text(
-                    'Ready: '
-                    '${viewData.numPlayersReady}/${viewData.numPlayers}',
+                    tr('player_readiness', namedArgs: {
+                      'ready': viewData.numPlayersReady.toString(),
+                      'total': viewData.numPlayers.toString()
+                    }),
                   ),
             margin: WideButton.bottomButtonMargin,
           ),

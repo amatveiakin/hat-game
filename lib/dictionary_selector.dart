@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/widget/multi_line_list_tile.dart';
 
@@ -43,7 +44,7 @@ class DictionarySelectorState extends State<DictionarySelector> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Dictionaries'),
+        title: Text(tr('dictionaries')),
       ),
       body: ListView(
         children: widget.allValues

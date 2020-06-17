@@ -2,9 +2,108 @@
 app_title: Hat Game
 
 # lib/start_screen.dart
-app_version: "This app is in Beta. Version: {}"
-new_local_game: New Local Game
-new_game_online: New Game Online
-join_game: Join Game
-hat_game_rules: Hat game rules
 about_the_app: About the app
+app_version: "This app is in Beta. Version: {}"
+hat_game_rules: Hat game rules
+join_game: Join Game
+new_game_online: New Game Online
+new_local_game: New Local Game
+
+# lib/game_config_view.dart
+cannot_copy_link_to_clipboard: 'Cannot copy link to clipboard :('
+cannot_copy_to_clipboard: 'Cannot copy to clipboard. Error: {}'
+game_join_link: Game join link
+hat_game: Hat Game
+hat_game_id: 'Hat Game ID: {}'
+link_copied_to_clipboard: Link copied to clipboard
+next: Next
+ok: OK
+write_words: Write Words
+
+# lib/offline_player_config_view.dart
+add_player: Add player
+add_team: Add team
+
+# lib/write_words_view.dart
+done: done
+generate_a_random_word: Generate a random word
+next: Next
+player_readiness: 'Ready: {ready}/{total}'
+waiting_for: 'Waiting for: '
+word_contans_invalid_character: "Word contans invalid character: '{char}' (code {code})"
+word_is_empty: Word is empty
+word_is_too_long: Word is too long
+write_your_words: Write Your Words
+
+# lib/partying_strategy.dart
+at_least_one_player_required: At least one player is required
+at_least_two_players_required: At least two players are required for this mode
+cannot_make_teams: Cannot make teams
+team_has_only_one_player: A team has only one player
+there_are_zero_teams: There are zero teams
+there_is_only_one_team: There is only one team
+
+# lib/lexicon.dart
+cannot_find_dictionary: Cannot find dictionary "{}"
+
+# lib/widget/switch_button.dart
+start_game: Start game
+
+# lib/widget/invalid_operation_dialog.dart
+internal_error: Internal error!
+ok: OK
+
+# lib/online_player_config_view.dart
+cancel: Cancel
+confirm_kick_player: Are you sure you want to kick {}?
+kick: Kick
+
+# lib/team_compositions_view.dart
+new_random_teams_and_turn_order: New random teams and turn order
+new_random_turn_order: New random turn order
+start_game: Start Game!
+team_compositions: Team Compositions
+turn_order: Turn Order
+
+# lib/kicked_screen.dart
+hat_game: Hat Game
+you_have_been_kicked: You have been kicked from this game
+
+# lib/start_game_online_screen.dart
+cancel: Cancel
+create_game: Create Game
+game_id: Game ID
+game_id_is_empty: Game ID is empty
+join_game: Join Game
+join_game_online: Join Game Online
+new_game_online: New Game Online
+player_exists_confirm_reconnect: Player {name} already exists! Reconnect as {name}?
+player_name: Player name
+reconnect: Re-connect
+reconnect_as: Reconnect as {name}?
+reconnect_as_this_player: Reconnect as this player?
+
+# lib/game_controller.dart
+game_doesnt_exist: Game {} doesn't exist
+incompatible_game_version: 'Incompatible game version. Host version: {hostVersion}, local version: {clientVersion}'
+name_already_taken: Name {} is already taken
+no_dictionaries_selected: No dictionaries selected
+
+# lib/dictionary_selector.dart
+dictionaries: Dictionaries
+
+# lib/rules_screen.dart
+hat_game_rules: Hat Game Rules
+
+# lib/rules_config_view.dart
+bonus_time: Bonus time
+dictionaries_many: 'Dictionaries:'
+dictionaries_none: 'Dictionaries:   —'
+dictionary_one: 'Dictionary: '
+random_words: Random words
+s: s
+timer: Timer
+turn_time: Turn time
+words: Words
+words_per_player: Words per player
+write_words: Write words

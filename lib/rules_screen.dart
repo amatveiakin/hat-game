@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hatgame/util/markdown.dart';
@@ -34,7 +35,7 @@ generate words, keep track of time and score.
   Widget build(BuildContext context) {
     return ConstrainedScaffold(
       appBar: AppBar(
-        title: Text('Hat Game Rules'),
+        title: Text(tr('hat_game_rules')),
       ),
       body: Markdown(
         data: MarkdownUtil.joinParagraphs(content),

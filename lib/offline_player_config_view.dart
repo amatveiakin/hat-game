@@ -1,4 +1,5 @@
 import 'package:built_collection/built_collection.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/game_config_controller.dart';
@@ -235,7 +236,7 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
                 children: [
                   Icon(Icons.person_add),
                   SizedBox(width: 8),
-                  Text('Add player'),
+                  Text(tr('add_player')),
                 ],
               ),
             ),
@@ -255,7 +256,7 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
                   children: [
                     Icon(Icons.group_add),
                     SizedBox(width: 8),
-                    Text('Add team'),
+                    Text(tr('add_team')),
                   ],
                 ),
               ),

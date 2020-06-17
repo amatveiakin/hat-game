@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/dictionary_selector.dart';
@@ -174,23 +175,24 @@ class RulesConfigViewState extends State<RulesConfigView> {
           };
     final String dictionariesCaption =
         config.dictionaries == null || config.dictionaries.isEmpty
-            ? 'Dictionaries:   —'
+            ? tr('dictionaries_none')
             : config.dictionaries.length == 1
-                ? 'Dictionary: ${config.dictionaries.first}'
-                : 'Dictionaries:\n' +
+                ? tr('dictionary_one') + config.dictionaries.first
+                : tr('dictionaries_many') +
+                    '\n' +
                     config.dictionaries.map((d) => '        $d').join('\n');
 
     return ListView(
       children: [
         SectionDivider(
-          title: 'Timer',
+          title: tr('timer'),
           firstSection: true,
         ),
         ListTile(
           title: Row(
             children: [
               Expanded(
-                child: Text('Turn time'),
+                child: Text(tr('turn_time')),
               ),
               Padding(
                 padding: _numericFieldPadding,
@@ -198,7 +200,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
                   readOnly: configController.isReadOnly,
                   controller: viewController.turnTimeController,
                   goldenValues: turnTimeGoldenValues,
-                  suffixText: 's',
+                  suffixText: tr('s'),
                 ),
               ),
             ],
@@ -208,7 +210,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
           title: Row(
             children: [
               Expanded(
-                child: Text('Bonus time'),
+                child: Text(tr('bonus_time')),
               ),
               Padding(
                 padding: _numericFieldPadding,
@@ -216,18 +218,18 @@ class RulesConfigViewState extends State<RulesConfigView> {
                   readOnly: configController.isReadOnly,
                   controller: viewController.bonusTimeController,
                   goldenValues: timeGoldenValues,
-                  suffixText: 's',
+                  suffixText: tr('s'),
                 ),
               ),
             ],
           ),
         ),
         SectionDivider(
-          title: 'Words',
+          title: tr('words'),
         ),
         MultiLineListTile(
           title: SwitchButton(
-            options: ['Random words', 'Write words'],
+            options: [tr('random_words'), tr('write_words')],
             selectedOption: config.writeWords ? 1 : 0,
             onSelectedOptionChanged: configController.isReadOnly
                 ? null
@@ -238,7 +240,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
           title: Row(
             children: [
               Expanded(
-                child: Text('Words per player'),
+                child: Text(tr('words_per_player')),
               ),
               Padding(
                 padding: _numericFieldPadding,

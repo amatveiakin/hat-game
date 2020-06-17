@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hatgame/app_info.dart';
@@ -20,7 +21,7 @@ import 'package:hatgame/widget/wide_button.dart';
 // Local checks only
 InvalidOperation checkGameID(String gameID) {
   if (gameID.isEmpty) {
-    return InvalidOperation('Game ID is empty');
+    return InvalidOperation(tr('game_id_is_empty'));
   }
   return null;
 }
@@ -91,7 +92,7 @@ class NewGameOnlineScreenState extends State<NewGameOnlineScreen> {
   Widget build(BuildContext context) {
     return ConstrainedScaffold(
       appBar: AppBar(
-        title: Text('New Game Online'),
+        title: Text(tr('new_game_online')),
       ),
       body: Center(
         child: Column(
@@ -100,7 +101,7 @@ class NewGameOnlineScreenState extends State<NewGameOnlineScreen> {
               padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
               child: CheckedTextField(
                 textInputAction: TextInputAction.go,
-                labelText: 'Player name',
+                labelText: tr('player_name'),
                 controller: playerNameController,
                 // TODO: Uncomment; disable auto-submit on unfocus on web.
                 // onSubmitted: (_) => _createGame(context),
@@ -110,7 +111,7 @@ class NewGameOnlineScreenState extends State<NewGameOnlineScreen> {
             WideButton(
               onPressed: () => _createGame(context),
               color: MyTheme.accent,
-              child: Text('Create Game'),
+              child: Text(tr('create_game')),
               margin: WideButton.bottomButtonMargin,
             ),
           ],
@@ -155,12 +156,12 @@ class JoinGameOnlineScreenState extends State<JoinGameOnlineScreen> {
     return multipleChoiceDialog<bool>(
       context: context,
       contentText: gameStarted
-          ? 'Reconnect as $playerName?'
-          : 'Player $playerName already exists! '
-              'Reconnect as this player?',
+          ? tr('reconnect_as', namedArgs: {'name': playerName})
+          : tr('player_exists_confirm_reconnect',
+              namedArgs: {'name': playerName}),
       choices: [
-        DialogChoice(false, 'Cancel'),
-        DialogChoice(true, 'Re-connect'),
+        DialogChoice(false, tr('cancel')),
+        DialogChoice(true, tr('reconnect')),
       ],
       defaultChoice: false,
     );
@@ -248,7 +249,7 @@ class JoinGameOnlineScreenState extends State<JoinGameOnlineScreen> {
   Widget build(BuildContext context) {
     return ConstrainedScaffold(
       appBar: AppBar(
-        title: Text('Join Game Online'),
+        title: Text(tr('join_game_online')),
       ),
       body: Center(
         child: Column(
@@ -260,7 +261,7 @@ class JoinGameOnlineScreenState extends State<JoinGameOnlineScreen> {
                 children: [
                   CheckedTextField(
                     textInputAction: TextInputAction.next,
-                    labelText: 'Game ID',
+                    labelText: tr('game_id'),
                     keyboardType: TextInputType.number,
                     inputFormatters: [
                       WhitelistingTextInputFormatter(RegExp(r'[.0-9]+'))
@@ -270,7 +271,7 @@ class JoinGameOnlineScreenState extends State<JoinGameOnlineScreen> {
                   ),
                   CheckedTextField(
                     textInputAction: TextInputAction.go,
-                    labelText: 'Player name',
+                    labelText: tr('player_name'),
                     controller: playerNameController,
                     // TODO: Uncomment; disable auto-submit on unfocus on web.
                     // onSubmitted: (_) => _joinGame(context),
@@ -282,7 +283,7 @@ class JoinGameOnlineScreenState extends State<JoinGameOnlineScreen> {
             WideButton(
               onPressed: () => _joinGame(context),
               color: MyTheme.accent,
-              child: Text('Join Game'),
+              child: Text(tr('join_game')),
               margin: WideButton.bottomButtonMargin,
             ),
           ],

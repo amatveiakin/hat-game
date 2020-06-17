@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:built_collection/built_collection.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hatgame/app_version.dart';
 import 'package:hatgame/built_value/game_config.dart';
@@ -236,8 +237,10 @@ class GameController {
       throw InvalidOperation('Unknown client version', isInternalError: true);
     }
     if (!versionsCompatibile(hostVersion, clientVersion)) {
-      throw InvalidOperation('Incompatible game version. '
-          'Host version: $hostVersion, local version: $clientVersion');
+      throw InvalidOperation(tr('incompatible_game_version', namedArgs: {
+        'hostVersion': hostVersion,
+        'clientVersion': clientVersion
+      }));
     }
   }
 
@@ -337,7 +340,7 @@ class GameController {
       // the documents can be deleted (which may be the case), but I don't
       // see what else we can do.
       // TODO: Remove the workaround whe the bug is fixed.
-      throw InvalidOperation("Game $gameID doesn't exist")
+      throw InvalidOperation(tr('game_doesnt_exist', args: [gameID]))
         ..addTag(JoinGameErrorSource.gameID);
     }
 
@@ -360,7 +363,7 @@ class GameController {
     await firestoreInstance.runTransaction((firestore.Transaction tx) async {
       firestore.DocumentSnapshot snapshot = await tx.get(reference);
       if (!snapshot.exists) {
-        error = InvalidOperation("Game $gameID doesn't exist")
+        error = InvalidOperation(tr('game_doesnt_exist', args: [gameID]))
           ..addTag(JoinGameErrorSource.gameID);
         return;
       }
@@ -409,7 +412,7 @@ class GameController {
                   ..name = myName))
               ]));
         } else {
-          error = InvalidOperation("Name $myName is already taken")
+          error = InvalidOperation(tr('name_already_taken', args: [myName]))
             ..addTag(JoinGameErrorSource.playerName);
         }
       }
@@ -476,7 +479,7 @@ class GameController {
     if (config.rules.writeWords == false &&
         (config.rules.dictionaries == null ||
             config.rules.dictionaries.isEmpty)) {
-      throw InvalidOperation('No dictionaries selected')
+      throw InvalidOperation(tr('no_dictionaries_selected'))
         ..addTag(StartGameErrorSource.dictionaries);
     }
 

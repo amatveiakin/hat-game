@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_phase.dart';
@@ -107,8 +108,8 @@ class TeamCompositionsView extends StatelessWidget {
       appBar: AppBar(
         automaticallyImplyLeading: localGameData.isAdmin,
         title: Text(teamCompositionsViewData.gameConfig.teaming.teamPlay
-            ? 'Team Compositions'
-            : 'Turn Order'),
+            ? tr('team_compositions')
+            : tr('turn_order')),
         actions: [
           if (localGameData.isAdmin)
             IconButton(
@@ -116,8 +117,8 @@ class TeamCompositionsView extends StatelessWidget {
               onPressed: () => _regenerateTeamCompositions(
                   teamCompositionsViewData.gameConfig),
               tooltip: teamCompositionsViewData.gameConfig.teaming.teamPlay
-                  ? 'New random teams and turn order'
-                  : 'New random turn order',
+                  ? tr('new_random_teams_and_turn_order')
+                  : tr('new_random_turn_order'),
             )
         ],
       ),
@@ -138,7 +139,7 @@ class TeamCompositionsView extends StatelessWidget {
                 ? () => _startGame(context, snapshot)
                 : null,
             color: MyTheme.accent,
-            child: Text('Start Game!'),
+            child: Text(tr('start_game')),
             margin: WideButton.bottomButtonMargin,
           ),
         ],

@@ -1,4 +1,5 @@
 import 'package:built_collection/built_collection.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value/team_compositions.dart';
@@ -29,13 +30,13 @@ void checkTeamSizes(BuiltList<BuiltList<int>> teams) {
     if (t.length == 0) {
       // TODO: Disallow when the UI allows to delete teams.
     } else if (t.length == 1) {
-      throw InvalidOperation('A team has only one player');
+      throw InvalidOperation(tr('team_has_only_one_player'));
     }
   }
   if (teams.length == 0) {
-    throw InvalidOperation('There are zero teams');
+    throw InvalidOperation(tr('there_are_zero_teams'));
   } else if (teams.length == 1) {
-    throw InvalidOperation('There is only one team');
+    throw InvalidOperation(tr('there_is_only_one_team'));
   }
 }
 
@@ -69,7 +70,8 @@ List<int> generateTeamSizes(
       if (numPlayers % teamSize != 0) {
         // TODO: Discard some players on dropPlayers when we have a UI for it.
         throw InvalidOperation(
-          'Cannot make teams',
+          tr(tr('cannot_make_teams')),
+          // TODO: tr
           comment: 'Players cannot be split into teams of desired size, ' +
               (unequalTeamSize == UnequalTeamSize.forbid
                   ? 'and unequally sized teams are disabled.'
@@ -90,13 +92,12 @@ void checkNumPlayersForIndividualPlay(
     case IndividualPlayStyle.chain:
     case IndividualPlayStyle.fluidPairs:
       if (numPlayers < 2) {
-        throw InvalidOperation(
-            'At least two players are required for this mode');
+        throw InvalidOperation(tr('at_least_two_players_required'));
       }
       return;
     case IndividualPlayStyle.broadcast:
       if (numPlayers < 1) {
-        throw InvalidOperation('At least one player is required');
+        throw InvalidOperation(tr('at_least_one_player_required'));
       }
       return;
   }

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hatgame/built_value/game_config.dart';
@@ -88,7 +89,7 @@ class _GameConfigViewState extends State<GameConfigView>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Game join link'),
+          title: Text(tr('game_join_link')),
           content: Row(
             children: [
               Expanded(
@@ -99,12 +100,12 @@ class _GameConfigViewState extends State<GameConfigView>
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: link)).then((_) {
                     scaffoldKey.currentState.showSnackBar(
-                        SnackBar(content: Text('Link copied to clipboard')));
+                        SnackBar(content: Text(tr('link_copied_to_clipboard'))));
                   }, onError: (error) {
                     // TODO: Log to firebase.
-                    debugPrint('Cannot copy to clipboard. Error: $error');
+                    debugPrint(tr('cannot_copy_to_clipboard', args: [error.toString()]));
                     scaffoldKey.currentState.showSnackBar(SnackBar(
-                        content: Text('Cannot copy link to clipboard :(')));
+                        content: Text(tr('cannot_copy_link_to_clipboard'))));
                   });
                 },
               ),
@@ -112,7 +113,7 @@ class _GameConfigViewState extends State<GameConfigView>
           ),
           actions: [
             FlatButton(
-              child: Text('OK'),
+              child: Text(tr('ok')),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -204,7 +205,7 @@ class _GameConfigViewState extends State<GameConfigView>
       onPressed: isAdmin ? () => _next(gameConfig) : null,
       color: MyTheme.accent,
       child: GoNextButtonCaption(
-          gameConfig.rules.writeWords ? 'Write Words' : 'Next'),
+          gameConfig.rules.writeWords ? tr('write_words') : tr('next')),
       margin: WideButton.bottomButtonMargin,
     );
 
@@ -212,8 +213,8 @@ class _GameConfigViewState extends State<GameConfigView>
       scaffoldKey: widget.scaffoldKey,
       appBarAutomaticallyImplyLeading: false,
       appTitle: localGameData.onlineMode
-          ? 'Hat Game ID: ${localGameData.gameID}'
-          : 'Hat Game',
+          ? tr('hat_game_id', args: [localGameData.gameID.toString()])
+          : tr('hat_game'),
       appTitlePresentInNarrowMode: localGameData.onlineMode,
       actions: localGameData.onlineMode
           ? [

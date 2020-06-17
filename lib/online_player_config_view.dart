@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/game_controller.dart';
@@ -18,10 +19,10 @@ class OnlinePlayersConfigView extends StatelessWidget {
       {@required String playerName}) async {
     return multipleChoiceDialog<bool>(
       context: context,
-      contentText: 'Are you sure you want to kick $playerName?',
+      contentText: tr('confirm_kick_player', args: [playerName]),
       choices: [
-        DialogChoice(false, 'Cancel'),
-        DialogChoice(true, 'Kick'),
+        DialogChoice(false, tr('cancel')),
+        DialogChoice(true, tr('kick')),
       ],
       defaultChoice: false,
     );
