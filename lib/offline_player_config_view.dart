@@ -70,7 +70,7 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
     // Conversion might be required is teaming config changed.
     if (manualTeams) {
       final teams = config.teams ??
-          BuiltList<BuiltList<int>>([BuiltList<int>(config.names.values)]);
+          BuiltList<BuiltList<int>>([BuiltList<int>(config.names.keys)]);
       for (final team in teams) {
         if (_playerItems.isNotEmpty) {
           _addDivider();
