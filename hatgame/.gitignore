@@ -1,0 +1,3 @@
+# Workaround for update_git_version.sh, would be nice to revert.
+/web/index.html
+/lib/git_version.dart

@@ -28,12 +28,12 @@
 .packages
 .pub-cache/
 .pub/
-/build/
+build/
 *.g.dart
 
 # Web related
-lib/generated_plugin_registrant.dart
-/.firebase/hosting.*.cache
+**/lib/generated_plugin_registrant.dart
+**/.firebase/hosting.*.cache
 
 # Symbolication related
 app.*.symbols
@@ -42,8 +42,4 @@ app.*.symbols
 app.*.map.json
 
 # Exceptions to above rules.
-!/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
-
-# Workaround for update_git_version.sh, would be nice to revert.
-/web/index.html
-/lib/git_version.dart
+!packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
