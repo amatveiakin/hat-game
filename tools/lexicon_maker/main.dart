@@ -9,14 +9,17 @@ class Word {
   final double rarityFactor;
   final double specificityFactor;
   final double nastinessFactor;
+  final double lengthFactor;
 
-  double get difficulty => rarityFactor * specificityFactor * nastinessFactor;
+  double get difficulty =>
+      rarityFactor * specificityFactor * nastinessFactor * lengthFactor;
 
   Word(
     this.text, {
     @required this.rarityFactor,
     @required this.specificityFactor,
     @required this.nastinessFactor,
+    @required this.lengthFactor,
   });
 }
 
@@ -58,14 +61,16 @@ Word makeWord(FreqrncRec rec) {
   if (text.endsWith('ик') || text.endsWith('ек') || text.endsWith('ок'))
     nastinessFactor *= 4.0;
   // Nasty diminutive suspected
-  if (text.endsWith('це') || text.endsWith('цо'))
-    nastinessFactor *= 8.0;
+  if (text.endsWith('це') || text.endsWith('цо')) nastinessFactor *= 8.0;
+
+  double lengthFactor = 1.0 + max(0, text.length - 4) / 10.0;
 
   return Word(
     text,
     rarityFactor: rarityFactor,
     specificityFactor: specificityFactor,
     nastinessFactor: nastinessFactor,
+    lengthFactor: lengthFactor,
   );
 }
 
