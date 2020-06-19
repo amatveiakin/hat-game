@@ -173,14 +173,16 @@ class RulesConfigViewState extends State<RulesConfigView> {
                               (b) => b..dictionaries.replace(newValue))),
                     )));
           };
+    final dictionaryNames =
+        config.dictionaries?.map((d) => Lexicon.dictionaryMetadata(d).uiName);
     final String dictionariesCaption =
-        config.dictionaries == null || config.dictionaries.isEmpty
+        dictionaryNames == null || dictionaryNames.isEmpty
             ? tr('dictionaries_none')
-            : config.dictionaries.length == 1
-                ? tr('dictionary_one') + config.dictionaries.first
+            : dictionaryNames.length == 1
+                ? tr('dictionary_one') + dictionaryNames.first
                 : tr('dictionaries_many') +
                     '\n' +
-                    config.dictionaries.map((d) => '        $d').join('\n');
+                    dictionaryNames.map((d) => '        $d').join('\n');
 
     return ListView(
       children: [

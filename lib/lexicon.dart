@@ -1,9 +1,29 @@
 import 'dart:math';
 
+import 'package:built_collection/built_collection.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/invalid_operation.dart';
+import 'package:meta/meta.dart';
+import 'package:yaml/yaml.dart';
+
+class DictionaryMetadata {
+  final String key;
+  final String uiName;
+  final int numWords;
+
+  DictionaryMetadata(
+      {@required this.key, @required this.uiName, @required this.numWords});
+}
+
+class Dictionary {
+  final DictionaryMetadata metadata;
+  final List<String> words;
+
+  Dictionary(this.metadata, this.words);
+}
 
 class WordCollection {
   // TODO: Come up with a balanced strategy somewhere between 'take words
@@ -19,18 +39,24 @@ class WordCollection {
 }
 
 class Lexicon {
-  static final _dictionaries = Map<String, List<String>>();
+  static final _dictionaries = Map<String, Dictionary>();
 
   static Future<void> init() async {
-    for (final dict in [
+    for (final dictKey in [
       'russian_easy',
       'russian_medium',
       'russian_hard',
     ]) {
-      _dictionaries[dict] =
-          (await rootBundle.loadString('lexicon/$dict.txt')).split('\n');
-      Assert.holds(_dictionaries[dict].isNotEmpty);
+      _dictionaries[dictKey] = _parseDictionary(
+        key: dictKey,
+        yaml: await rootBundle.loadString('lexicon/$dictKey.yaml'),
+      );
+      Assert.holds(_dictionaries[dictKey].words.isNotEmpty);
     }
+  }
+
+  static DictionaryMetadata dictionaryMetadata(String dict) {
+    return _dictionaries[dict].metadata;
   }
 
   static List<String> allDictionaries() {
@@ -54,12 +80,12 @@ class Lexicon {
   static WordCollection wordCollection(List<String> dictionaries) {
     Assert.holds(dictionaries.isNotEmpty);
     final words = List<String>();
-    for (final dict in dictionaries) {
-      if (!_dictionaries.containsKey(dict)) {
-        throw InvalidOperation(tr('cannot_find_dictionary', args: [dict]),
+    for (final dictKey in dictionaries) {
+      if (!_dictionaries.containsKey(dictKey)) {
+        throw InvalidOperation(tr('cannot_find_dictionary', args: [dictKey]),
             isInternalError: true);
       }
-      words.addAll(_dictionaries[dict]);
+      words.addAll(_dictionaries[dictKey].words);
     }
     Assert.holds(words.isNotEmpty, lazyMessage: () => dictionaries.toString());
     return WordCollection(words);
@@ -69,5 +95,37 @@ class Lexicon {
   // e.g. obscene words.
   static WordCollection universalCollection() {
     return wordCollection(_dictionaries.keys);
+  }
+
+  static Dictionary _parseDictionary(
+      {@required String key, @required String yaml}) {
+    final List<YamlDocument> docs = loadYamlDocuments(yaml, sourceUrl: key);
+    Assert.holds(docs.isNotEmpty);
+    Assert.le(docs.length, 2);
+
+    final YamlDocument dataDoc = docs.last;
+    Assert.holds(dataDoc.contents is YamlList);
+    final dataList = dataDoc.contents as YamlList;
+    final int numWords = dataList.length;
+
+    DictionaryMetadata metadata;
+    if (docs.length == 2) {
+      final YamlDocument metadataDoc = docs.first;
+      Assert.holds(metadataDoc.contents is YamlMap);
+      final metadataMap = metadataDoc.contents as YamlMap;
+      metadata = DictionaryMetadata(
+        key: key,
+        uiName: metadataMap['name'] ?? key,
+        numWords: numWords,
+      );
+    } else {
+      metadata = DictionaryMetadata(
+        key: key,
+        uiName: key,
+        numWords: numWords,
+      );
+    }
+
+    return Dictionary(metadata, List.from(dataList.value));
   }
 }

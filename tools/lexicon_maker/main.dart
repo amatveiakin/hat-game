@@ -83,8 +83,20 @@ String describeBucket(String name, List<Word> words) {
       '    ...\n';
 }
 
-String dumpBucket(List<Word> words) {
-  return words.map((w) => w.text).join('\n') + '\n';
+String dumpBucket(
+  List<Word> words, {
+  @required String name,
+  @required String lastUpdated,
+}) {
+  final buffer = StringBuffer();
+  // Note. Other possible fields: author (for non-builtin); comment.
+  buffer.writeln("name: '$name'");
+  buffer.writeln("last_updated: $lastUpdated");
+  buffer.writeln("---");
+  for (final w in words) {
+    buffer.writeln('- ${w.text}');
+  }
+  return buffer.toString();
 }
 
 // Parser for http://dict.ruslang.ru/freq.php
@@ -121,9 +133,23 @@ Future<void> main(List<String> arguments) async {
       describeBucket('Hard', buckets[2]) +
       describeBucket('Impossible', buckets[3]));
 
-  await new File('russian_easy.txt').writeAsString(dumpBucket(buckets[0]));
-  await new File('russian_medium.txt').writeAsString(dumpBucket(buckets[1]));
-  await new File('russian_hard.txt').writeAsString(dumpBucket(buckets[2]));
+  // Extract 'yyyy-MM-dd' part from ISO-8601
+  final String lastUpdated = DateTime.now().toIso8601String().substring(0, 10);
+  await new File('russian_easy.yaml').writeAsString(dumpBucket(
+    buckets[0],
+    name: 'Простые слова',
+    lastUpdated: lastUpdated,
+  ));
+  await new File('russian_medium.yaml').writeAsString(dumpBucket(
+    buckets[1],
+    name: 'Средние слова',
+    lastUpdated: lastUpdated,
+  ));
+  await new File('russian_hard.yaml').writeAsString(dumpBucket(
+    buckets[2],
+    name: 'Сложные слова',
+    lastUpdated: lastUpdated,
+  ));
 
   exit(0);
 }
