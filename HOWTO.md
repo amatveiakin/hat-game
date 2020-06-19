@@ -32,7 +32,7 @@ In order to change app icon:
 
 ## Deploy
 
-Before releasing the anywhere, update the version:
+Before releasing the app anywhere, update the version:
 
     $ ./update_git_version.sh
 
