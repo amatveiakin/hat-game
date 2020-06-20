@@ -46,6 +46,9 @@ class Lexicon {
       'russian_easy',
       'russian_medium',
       'russian_hard',
+      'english_easy',
+      'english_medium',
+      'english_hard',
     ]) {
       _dictionaries[dictKey] = _parseDictionary(
         key: dictKey,
