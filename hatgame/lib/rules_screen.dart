@@ -8,6 +8,7 @@ class RulesScreen extends StatelessWidget {
   static const String routeName = '/rules';
 
 // TODO: Finish
+// TODO: tr
   final String content = '''
 *This is a stub.*
 
