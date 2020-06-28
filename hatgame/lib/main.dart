@@ -5,6 +5,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_analytics/observer.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/about_screen.dart';
+import 'package:hatgame/app_settings.dart';
 import 'package:hatgame/lexicon.dart';
 import 'package:hatgame/local_storage.dart';
 import 'package:hatgame/rules_screen.dart';
@@ -34,11 +35,13 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // TODO: Display a splash screen with a loading indicator.
   await _initApp();
+  final String language = LocalStorage.instance.get(LocalColLocale());
   runApp(
     EasyLocalization(
       useOnlyLangCode: true,
       supportedLocales: [Locale('en'), Locale('ru')],
       fallbackLocale: Locale('en'),
+      startLocale: language == null ? null : Locale(language),
       path: 'translations',
       assetLoader: YamlAssetLoader(),
       child: MyApp(),
@@ -74,6 +77,7 @@ class MyApp extends StatelessWidget {
       initialRoute: StartScreen.routeName,
       routes: {
         StartScreen.routeName: (context) => StartScreen(),
+        AppSettingsView.routeName: (context) => AppSettingsView(context),
         AboutScreen.routeName: (context) => AboutScreen(),
         RulesScreen.routeName: (context) => RulesScreen(),
       },

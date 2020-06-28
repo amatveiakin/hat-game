@@ -161,3 +161,9 @@ the_whole_team_guesses: Угадывает вся команда
 the_whole_team_guesses_comment: В командах из трёх и более игроков угадывать могут все
 two_teams_total: Две команды
 unequal_team_sizes: Неравные размеры команд
+
+# lib/app_settings.dart
+app_language: Язык приложения
+app_settings: Настройки приложения
+language: 'Язык: '
+system_default: Задаётся системой

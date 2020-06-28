@@ -64,6 +64,10 @@ class LocalColLastConfig extends DBColumn<GameConfig>
   String get name => 'last_config';
 }
 
+class LocalColLocale extends DBColumn<String> with DBColSerializeString {
+  String get name => 'locale';
+}
+
 // =============================================================================
 // Helpers
 

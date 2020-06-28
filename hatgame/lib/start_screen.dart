@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hatgame/about_screen.dart';
+import 'package:hatgame/app_settings.dart';
 import 'package:hatgame/app_version.dart';
 import 'package:hatgame/game_config_view.dart';
 import 'package:hatgame/game_controller.dart';
@@ -48,7 +49,11 @@ class StartScreenState extends State<StartScreen> {
     ));
   }
 
-  void executeAdditionalAction(_AdditionalAction action) {
+  void _openSettings() {
+    Navigator.of(context).pushNamed(AppSettingsView.routeName);
+  }
+
+  void _executeAdditionalAction(_AdditionalAction action) {
     switch (action) {
       case _AdditionalAction.gameRules:
         Navigator.of(context).pushNamed(RulesScreen.routeName);
@@ -68,6 +73,10 @@ class StartScreenState extends State<StartScreen> {
       appBar: AppBar(
         title: Text(tr('hat_game')),
         actions: [
+          IconButton(
+            icon: Icon(Icons.settings),
+            onPressed: _openSettings,
+          ),
           PopupMenuButton(
             icon: Icon(Icons.more_vert),
             itemBuilder: (BuildContext context) => [
@@ -80,7 +89,7 @@ class StartScreenState extends State<StartScreen> {
                 child: Text(tr('about_the_app')),
               ),
             ],
-            onSelected: executeAdditionalAction,
+            onSelected: _executeAdditionalAction,
           ),
         ],
       ),

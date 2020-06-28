@@ -40,6 +40,11 @@ class OptionDescription<E> {
   });
 }
 
+OptionDescription<E> optionWithValue<E>(
+    List<OptionDescription<E>> options, E value) {
+  return options.firstWhere((o) => o.value == value, orElse: () => null);
+}
+
 abstract class EnumOptionSelector<E> extends StatefulWidget {
   final String windowTitle;
   final List<OptionDescription<E>> allValues;

@@ -130,7 +130,7 @@ class Assert {
         inRelease: inRelease);
   }
 
-  static void isIn<T>(T a, Set<T> b,
+  static void isIn<T>(T a, Iterable<T> b,
       {String message,
       MessageProducer lazyMessage,
       AssertInRelease inRelease = defaultReleaseBehavior}) {

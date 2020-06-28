@@ -161,3 +161,9 @@ the_whole_team_guesses: The whole team guesses
 the_whole_team_guesses_comment: In teams of three or more the whole team guesses together.
 two_teams_total: Two teams total
 unequal_team_sizes: Unequal Team Sizes
+
+# lib/app_settings.dart
+app_language: App Language
+app_settings: App Settings
+language: 'Language: '
+system_default: System default

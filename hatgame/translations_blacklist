@@ -11,6 +11,7 @@ Cannot copy to clipboard. Error: $error
 Cannot generate game ID
 Couldn't get NTP time offset! This means, in online game
 Couldn't initialize local storage!
+English
 Error getting data at $gamePhase:\n
 Game ${firestoreReference.path} doesn't exist
 Host version: $hostVersion, local version: $clientVersion
@@ -60,6 +61,7 @@ findRenderObject
 hostVersion
 if the total number of players is not divisible by 3
 if the total number of players is odd
+interface_language
 internal:
 into teams of specified size, some players will skip the round.
 into teams of specified size.
@@ -82,3 +84,4 @@ translations
 turn_timer
 unknown_built_type
 you wouldn't see the timer when somebody else is explaining
+Русский
