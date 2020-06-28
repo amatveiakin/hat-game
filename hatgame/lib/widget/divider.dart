@@ -16,6 +16,24 @@ class StyledDivider extends StatelessWidget {
   }
 }
 
+class ThinDivider extends StatelessWidget {
+  final double height;
+
+  ThinDivider({
+    Key key,
+    this.height,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Divider(
+      color: Colors.black54,
+      thickness: 0.5,
+      height: height,
+    );
+  }
+}
+
 class SectionDivider extends StatelessWidget {
   final String title;
   final bool firstSection;
@@ -32,11 +50,10 @@ class SectionDivider extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(height: 6.0),
-        if (!firstSection) Divider(
-          color: Colors.black54,
-          thickness: 0.5,
-          height: 20.0,
-        ),
+        if (!firstSection)
+          ThinDivider(
+            height: 20.0,
+          ),
         Row(
           children: [
             SizedBox(width: 6.0),
@@ -44,10 +61,9 @@ class SectionDivider extends StatelessWidget {
               child: Text(
                 title,
                 style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 16.0
-                ),
+                    color: Colors.black,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16.0),
               ),
             ),
           ],
@@ -55,6 +71,5 @@ class SectionDivider extends StatelessWidget {
         SizedBox(height: 6.0),
       ],
     );
-
   }
 }

@@ -12,6 +12,7 @@ List<OptionDescription<String>> languageOptions() {
       value: null,
       title: tr('system_default'),
     ),
+    OptionDescription.divider(),
     OptionDescription(
       value: 'en',
       title: 'English', // no 'tr'

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hatgame/widget/divider.dart';
 import 'package:hatgame/widget/multi_line_list_tile.dart';
 
 // =============================================================================
@@ -29,6 +30,7 @@ class OptionSelectorHeader extends StatelessWidget {
 // Selector page
 
 class OptionDescription<E> {
+  final bool isDivider;
   final E value;
   final String title;
   final String subtitle;
@@ -37,12 +39,19 @@ class OptionDescription<E> {
     @required this.value,
     @required this.title,
     this.subtitle,
-  });
+  }) : isDivider = false;
+
+  OptionDescription.divider()
+      : isDivider = true,
+        value = null,
+        title = null,
+        subtitle = null;
 }
 
 OptionDescription<E> optionWithValue<E>(
     List<OptionDescription<E>> options, E value) {
-  return options.firstWhere((o) => o.value == value, orElse: () => null);
+  return options.firstWhere((o) => !o.isDivider && o.value == value,
+      orElse: () => null);
 }
 
 abstract class EnumOptionSelector<E> extends StatefulWidget {
@@ -85,13 +94,17 @@ class EnumOptionSelectorState<E, W extends EnumOptionSelector>
       body: ListView(
         children: widget.allValues
             .map(
-              (e) => MultiLineRadioListTile<E>(
-                title: Text(e.title),
-                subtitle: e.subtitle == null ? null : Text(e.subtitle),
-                value: e.value,
-                groupValue: currentValue,
-                onChanged: _valueChanged,
-              ),
+              (e) => e.isDivider
+                  ? ThinDivider(
+                      height: 8.0,
+                    )
+                  : MultiLineRadioListTile<E>(
+                      title: Text(e.title),
+                      subtitle: e.subtitle == null ? null : Text(e.subtitle),
+                      value: e.value,
+                      groupValue: currentValue,
+                      onChanged: _valueChanged,
+                    ),
             )
             .toList(),
       ),
