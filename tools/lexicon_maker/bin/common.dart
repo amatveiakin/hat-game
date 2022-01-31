@@ -31,7 +31,7 @@ String dumpBucket(
   buffer.writeln("last_updated: $lastUpdated");
   buffer.writeln("---");
   for (final w in words) {
-    // Add quotes to prevent YAML from interpreting things like "yes" or "null".
+    // Quotes prevent YAML from interpreting strings like "yes" or "null".
     buffer.writeln('- "${w.text}"');
   }
   return buffer.toString();

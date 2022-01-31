@@ -14,7 +14,7 @@ abstract class DBDocumentReference {
   Future<void> setColumns(List<DBColumnData> columns);
 
   // Set new content for each column. Doesn't support nested updates
-  // (in contrast to Firestore).
+  // (in contrast to FirebaseFirestore).
   Future<void> updateColumns(List<DBColumnData> columns,
       {LocalCacheBehavior localCache = LocalCacheBehavior.noCache}) {
     checkNoNestedOverrides(columns);
@@ -40,7 +40,7 @@ abstract class DBDocumentReference {
       if (col.data is firestore.DocumentReference ||
           col.data is List ||
           col.data is Map<dynamic, dynamic>) {
-        // Forbid Firestore-like nested updates, because they are not supported
+        // Forbid FirebaseFirestore-like nested updates, because they are not supported
         // by LocalDB.
         Assert.fail('Nested updates are not allowed. '
             'Document: "$path". Update: "$columns"');

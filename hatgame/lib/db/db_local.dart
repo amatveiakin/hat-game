@@ -66,17 +66,17 @@ class LocalDocumentRawUpdate {
   LocalDocumentRawUpdate(this.path, this.data);
 }
 
-// Firestore has offline mode, so it was tempting to use it instead, but
+// FirebaseFirestore has offline mode, so it was tempting to use it instead, but
 // that seems like a bad design choice:
-//   - Firestore is designed for short periods of offline. It keeps the local
-//     mutations in a queue until they've been committed:
+//   - FirebaseFirestore is designed for short periods of offline. It keeps the
+//     local mutations in a queue until they've been committed:
 //     https://stackoverflow.com/a/48871973/3092679
-//   - Flutter Firestore plugin doesn't support disableNetwork:
+//   - Flutter FirebaseFirestore plugin doesn't support disableNetwork:
 //     https://github.com/FirebaseExtended/flutterfire/issues/211
-//   - Flutter Firestore plugin is in bad shape in general (at the time of
-//     writing, May 2020). Non-trivial features could be broken (e.g. there
+//   - Flutter FirebaseFirestore plugin is in bad shape in general (at the time
+//     of writing, May 2020). Non-trivial features could be broken (e.g. there
 //     are problems with basic transactions). It seems easier to re-implement
-//     something simple than to debug Firestore/Flutter weirdness.
+//     something simple than to debug FirebaseFirestore/Flutter weirdness.
 class LocalDB {
   static final LocalDB _instance = LocalDB();
 

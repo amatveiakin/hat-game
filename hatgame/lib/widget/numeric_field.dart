@@ -148,7 +148,7 @@ class _NumericFieldImplState extends State<NumericFieldImpl> {
                 ),
                 textAlign: TextAlign.center,
                 keyboardType: TextInputType.number,
-                inputFormatters: [WhitelistingTextInputFormatter.digitsOnly],
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               ),
             ),
             SizedBox(

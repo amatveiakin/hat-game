@@ -39,7 +39,7 @@ class Assert {
     if (!condition) {
       final decoratedMessage = _combine(['Assertion failed', combinedMessage]);
       final String stackTrace = StackTrace.current.toString();
-      final firebaseLog = () => FirebaseAnalytics().logEvent(
+      final firebaseLog = () => FirebaseAnalytics.instance.logEvent(
             name: 'assertion_failure',
             parameters: {
               'message': decoratedMessage,

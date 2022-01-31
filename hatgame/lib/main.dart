@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:easy_localization_loader/easy_localization_loader.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_analytics/observer.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/about_screen.dart';
 import 'package:hatgame/app_settings.dart';
@@ -15,15 +16,19 @@ import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/ntp_time.dart';
 import 'package:hatgame/util/sounds.dart';
 
-void _initFirestore() {
+void _initFirestore() async {
+  await Firebase.initializeApp();
+
   // Enable offline mode. This is the default for Android and iOS, but
   // on web it need to be enabled explicitly:
   // https://firebase.google.com/docs/firestore/manage-data/enable-offline
-  Firestore.instance.settings(persistenceEnabled: true);
+  FirebaseFirestore.instance.settings =
+      FirebaseFirestore.instance.settings.copyWith(persistenceEnabled: true);
 }
 
 Future<void> _initApp() async {
-  _initFirestore();
+  await _initFirestore();
+  await EasyLocalization.ensureInitialized();
   await Lexicon.init(); // loading text resource: should never fail
   // TODO: Start all init-s in parallel, with a common timeout.
   await LocalStorage.init();
@@ -68,9 +73,12 @@ class MyApp extends StatelessWidget {
         textTheme: Theme.of(context).textTheme.apply(fontSizeDelta: 2.0),
         primaryColor: MyTheme.primary,
         primaryColorDark: MyTheme.primaryDark,
-        accentColor: MyTheme.accent,
+        accentColor: MyTheme.accent, // TODO: Update to colorScheme.secondary
       ),
       title: tr('hat_game'),
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
       // Use dashes for route names. Route names become urls on web, and Google
       // recommendations suggest to use punctuation and to prefer dashes over
       // underscores: https://support.google.com/webmasters/answer/76329.
@@ -83,7 +91,7 @@ class MyApp extends StatelessWidget {
       },
       onGenerateRoute: _generateRoute,
       navigatorObservers: [
-        FirebaseAnalyticsObserver(analytics: FirebaseAnalytics()),
+        FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance),
       ],
     );
   }

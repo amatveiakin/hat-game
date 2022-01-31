@@ -14,14 +14,14 @@ class FirestoreDocumentReference extends DBDocumentReference {
   String get path => _ref.path;
 
   Future<void> setColumns(List<DBColumnData> columns) =>
-      _ref.setData(dbData(columns));
+      _ref.set(dbData(columns));
 
   Future<void> updateColumnsImpl(
       List<DBColumnData> columns, LocalCacheBehavior localCache) async {
     if (localCache == LocalCacheBehavior.cache) {
       _FirestoreLocalCache.singleton.updateColumns(this, columns);
     }
-    return _ref.updateData(dbData(columns));
+    return _ref.update(dbData(columns));
   }
 
   Future<FirestoreDocumentSnapshot> get() async => FirestoreDocumentSnapshot(
@@ -60,9 +60,9 @@ class FirestoreDocumentSnapshot extends DBDocumentSnapshot {
       FirestoreDocumentReference(_snapshot.reference);
 
   Map<String, dynamic> get rawData =>
-      _snapshot.data == null || _localCacheOverrides?.rawData == null
-          ? _snapshot.data
-          : (Map.from(_snapshot.data)..addAll(_localCacheOverrides.rawData));
+      _snapshot.data() == null || _localCacheOverrides?.rawData == null
+          ? _snapshot.data()
+          : (Map.from(_snapshot.data())..addAll(_localCacheOverrides.rawData));
 }
 
 // =============================================================================
@@ -85,13 +85,14 @@ class FirestoreDocumentSnapshot extends DBDocumentSnapshot {
 // when Flutter web is out of beta.
 
 class _FirestoreLocalCache {
-  final cachePerInstance = Map<firestore.Firestore, LocalDB>();
+  final cachePerInstance = Map<firestore.FirebaseFirestore, LocalDB>();
 
   static final singleton = _FirestoreLocalCache();
 
   void updateColumns(
       FirestoreDocumentReference reference, List<DBColumnData> columns) {
-    final firestore.Firestore instance = reference.firestoreReference.firestore;
+    final firestore.FirebaseFirestore instance =
+        reference.firestoreReference.firestore;
     if (cachePerInstance[instance] == null) {
       cachePerInstance[instance] = LocalDB();
     }
@@ -101,7 +102,8 @@ class _FirestoreLocalCache {
   }
 
   LocalDocumentSnapshot get(FirestoreDocumentReference reference) {
-    final firestore.Firestore instance = reference.firestoreReference.firestore;
+    final firestore.FirebaseFirestore instance =
+        reference.firestoreReference.firestore;
     if (cachePerInstance[instance] == null) {
       return null;
     }
@@ -109,7 +111,8 @@ class _FirestoreLocalCache {
   }
 
   void clearCache(FirestoreDocumentReference reference) {
-    final firestore.Firestore instance = reference.firestoreReference.firestore;
+    final firestore.FirebaseFirestore instance =
+        reference.firestoreReference.firestore;
     if (cachePerInstance[instance] == null) {
       return;
     }

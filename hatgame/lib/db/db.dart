@@ -11,9 +11,9 @@ String newFirestoreGameID(int length, String prefix) {
 }
 
 firestore.DocumentReference firestoreGameReference(
-    {@required firestore.Firestore firestoreInstance,
+    {@required firestore.FirebaseFirestore firestoreInstance,
     @required String gameID}) {
-  return firestoreInstance.collection('games').document(gameID);
+  return firestoreInstance.collection('games').doc(gameID);
 }
 
 String newLocalGameID() {

@@ -254,7 +254,8 @@ class GameController {
   }
 
   // Returns game ID.
-  static Future<String> _createGameOnline(firestore.Firestore firestoreInstance,
+  static Future<String> _createGameOnline(
+      firestore.FirebaseFirestore firestoreInstance,
       List<DBColumnData> initialColumns) async {
     const int minIDLength = 4;
     const int maxIDLength = 8;
@@ -304,7 +305,7 @@ class GameController {
   }
 
   static Future<LocalGameData> newLobby(
-      firestore.Firestore firestoreInstance, String myName) async {
+      firestore.FirebaseFirestore firestoreInstance, String myName) async {
     final int playerID = 0;
     final GameConfig config =
         GameConfigController.initialConfig(onlineMode: true);
@@ -324,8 +325,10 @@ class GameController {
     );
   }
 
-  static Future<JoinGameResult> joinLobby(firestore.Firestore firestoreInstance,
-      String myName, String gameID) async {
+  static Future<JoinGameResult> joinLobby(
+      firestore.FirebaseFirestore firestoreInstance,
+      String myName,
+      String gameID) async {
     // TODO: Check if the game has already started.
     final firestore.DocumentReference reference = firestoreGameReference(
         firestoreInstance: firestoreInstance, gameID: gameID);
@@ -369,11 +372,11 @@ class GameController {
       }
       {
         // [2/2] Workaround flutter/firestore error. Do a dumb write.
-        await tx.set(reference, snapshot.data);
+        await tx.set(reference, snapshot.data());
       }
       try {
         checkVersionCompatibility(
-            dbTryGet(snapshot.data, DBColHostAppVersion()), appVersion);
+            dbTryGet(snapshot.data(), DBColHostAppVersion()), appVersion);
       } on InvalidOperation catch (e) {
         error = e;
         return;
@@ -383,7 +386,7 @@ class GameController {
       final bool userCreationPhase = (gamePhase == GamePhase.configure);
 
       // Note: include kicked players.
-      final playerData = dbGetAll(snapshot.data, DBColPlayerManager(),
+      final playerData = dbGetAll(snapshot.data(), DBColPlayerManager(),
           documentPath: reference.path);
       int existingPlayerID;
       for (final p in playerData.values().where((v) => !(v.kicked ?? false))) {
@@ -439,7 +442,7 @@ class GameController {
       DBDocumentReference firestoreReference, int playerID) async {
     final firestore.DocumentReference reference =
         (firestoreReference as FirestoreDocumentReference).firestoreReference;
-    firestore.Firestore firestoreInstance = reference.firestore;
+    firestore.FirebaseFirestore firestoreInstance = reference.firestore;
     // Same caveats as in joinLobby.
     await firestoreInstance.runTransaction((firestore.Transaction tx) async {
       firestore.DocumentSnapshot snapshot = await tx.get(reference);
@@ -449,9 +452,9 @@ class GameController {
       }
       {
         // Workaround flutter/firestore error. Do a dumb write.
-        await tx.set(reference, snapshot.data);
+        await tx.set(reference, snapshot.data());
       }
-      final playerRecord = dbGet(snapshot.data, DBColPlayer(playerID),
+      final playerRecord = dbGet(snapshot.data(), DBColPlayer(playerID),
           documentPath: reference.path);
       await tx.update(
           reference,
@@ -610,8 +613,9 @@ class GameController {
           : _generateRandomWords(config),
     );
 
-    final InitialGameState initialState = InitialGameState((b) =>
-        b..teamCompositions.replace(teamCompositions)..words.replace(words));
+    final InitialGameState initialState = InitialGameState((b) => b
+      ..teamCompositions.replace(teamCompositions)
+      ..words.replace(words));
     final TurnState turnState = TurnStateTransformer.newTurn(
       config,
       initialState,
@@ -630,7 +634,7 @@ class GameController {
     List<DBColumnData> initialColumns = _newGameRecord();
     String gameID;
     if (localGameData.onlineMode) {
-      final firestore.Firestore firestoreInstance =
+      final firestore.FirebaseFirestore firestoreInstance =
           (localGameData.gameReference as FirestoreDocumentReference)
               .firestoreReference
               .firestore;
@@ -660,7 +664,7 @@ class GameController {
       LocalGameData oldLocalGameData,
       {@required String newGameID}) {
     if (oldLocalGameData.onlineMode) {
-      final firestore.Firestore firestoreInstance =
+      final firestore.FirebaseFirestore firestoreInstance =
           (oldLocalGameData.gameReference as FirestoreDocumentReference)
               .firestoreReference
               .firestore;

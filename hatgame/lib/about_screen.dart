@@ -55,7 +55,8 @@ The app is written in Flutter.
       body: Markdown(
         data: MarkdownUtil.joinParagraphs(content),
         styleSheet: MarkdownUtil.defaultStyle(context),
-        onTapLink: (href) => MarkdownUtil.onLinkTapped(context, href),
+        onTapLink: (text, href, title) =>
+            MarkdownUtil.onLinkTapped(context, href),
       ),
     );
   }

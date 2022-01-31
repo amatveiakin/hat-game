@@ -1,5 +1,5 @@
 import 'package:built_collection/built_collection.dart';
-import 'package:cloud_firestore_mocks/cloud_firestore_mocks.dart';
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hatgame/built_value/game_config.dart';
@@ -120,7 +120,7 @@ Future<void> minimalOfflineGameTest() async {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  final firestoreInstance = MockFirestoreInstance();
+  final firestoreInstance = FakeFirebaseFirestore();
 
   group('e2e offline', () {
     test('minimal game', () async {

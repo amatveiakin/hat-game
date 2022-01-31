@@ -54,7 +54,7 @@ class NewGameOnlineScreenState extends State<NewGameOnlineScreen> {
     LocalGameData localGameData;
     try {
       localGameData = await GameController.newLobby(
-          Firestore.instance, playerNameController.textController.text);
+          FirebaseFirestore.instance, playerNameController.textController.text);
     } on InvalidOperation catch (e) {
       showInvalidOperationDialog(context: context, error: e);
       return;
@@ -181,7 +181,9 @@ class JoinGameOnlineScreenState extends State<JoinGameOnlineScreen> {
     JoinGameResult joinGameResult;
     try {
       joinGameResult = await GameController.joinLobby(
-          Firestore.instance, playerName, gameIDController.textController.text);
+          FirebaseFirestore.instance,
+          playerName,
+          gameIDController.textController.text);
     } on InvalidOperation catch (e) {
       showInvalidOperationDialog(context: context, error: e);
       if (e.tag<JoinGameErrorSource>() == JoinGameErrorSource.playerName) {
@@ -264,7 +266,7 @@ class JoinGameOnlineScreenState extends State<JoinGameOnlineScreen> {
                     labelText: tr('game_id'),
                     keyboardType: TextInputType.number,
                     inputFormatters: [
-                      WhitelistingTextInputFormatter(RegExp(r'[.0-9]+'))
+                      FilteringTextInputFormatter.allow(RegExp(r'[.0-9]+'))
                     ],
                     controller: gameIDController,
                     onSubmitted: (_) => FocusScope.of(context).nextFocus(),

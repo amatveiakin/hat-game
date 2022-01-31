@@ -102,7 +102,8 @@ class Lexicon {
 
   static Dictionary _parseDictionary(
       {@required String key, @required String yaml}) {
-    final List<YamlDocument> docs = loadYamlDocuments(yaml, sourceUrl: key);
+    final List<YamlDocument> docs =
+        loadYamlDocuments(yaml, sourceUrl: Uri.file(key));
     Assert.holds(docs.isNotEmpty);
     Assert.le(docs.length, 2);
 
