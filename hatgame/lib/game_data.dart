@@ -10,15 +10,15 @@ import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/util/assertion.dart';
 
 class NavigationState {
-  GamePhase lastSeenGamePhase;
+  GamePhase? lastSeenGamePhase;
   bool exitingGame = false;
 }
 
 class LocalGameData {
   final bool onlineMode;
-  final String gameID;
+  final String? gameID;
   final DBDocumentReference gameReference;
-  final int myPlayerID;
+  final int? myPlayerID;
   final navigationState = NavigationState();
 
   bool get isAdmin => !onlineMode || myPlayerID == 0;
@@ -27,7 +27,7 @@ class LocalGameData {
   String get gameUrl => webAppPath + gameRoute;
 
   // Returns Game ID
-  static String parseRoute(String route) {
+  static String? parseRoute(String route) {
     final String routePrefix = '/game-';
     if (!route.startsWith(routePrefix)) {
       return null;
@@ -36,9 +36,9 @@ class LocalGameData {
   }
 
   LocalGameData(
-      {@required this.onlineMode,
+      {required this.onlineMode,
       this.gameID,
-      @required this.gameReference,
+      required this.gameReference,
       this.myPlayerID}) {
     Assert.holds(onlineMode != null);
     Assert.holds(gameReference != null);
@@ -60,7 +60,7 @@ class DerivedGameState {
   static int turnIndex(Iterable<TurnRecord> turnLog) => turnLog.length;
 
   static Set<int> wordsInHat(InitialGameState initialState,
-      Iterable<TurnRecord> turnLog, TurnState turnState) {
+      Iterable<TurnRecord> turnLog, TurnState? turnState) {
     final Set<int> wordsInHat = initialState.words.map((w) => w.id).toSet();
     for (final t in turnLog) {
       wordsInHat.removeAll(t.wordsInThisTurn
@@ -88,8 +88,8 @@ class TeamCompositionsViewData {
   final List<List<String>> playerNames;
 
   TeamCompositionsViewData({
-    @required this.gameConfig,
-    @required this.playerNames,
+    required this.gameConfig,
+    required this.playerNames,
   });
 }
 
@@ -100,42 +100,42 @@ class WordWritingViewData {
   final List<String> playersNotReady;
 
   WordWritingViewData({
-    @required this.playerState,
-    @required this.numPlayers,
-    @required this.numPlayersReady,
-    @required this.playersNotReady,
+    required this.playerState,
+    required this.numPlayers,
+    required this.numPlayersReady,
+    required this.playersNotReady,
   });
 }
 
 class PlayerViewData {
   final int id;
-  final String name;
+  final String? name;
 
-  PlayerViewData({@required this.id, @required this.name});
+  PlayerViewData({required this.id, required this.name});
 }
 
 class PartyViewData {
   final PlayerViewData performer;
   final List<PlayerViewData> recipients;
 
-  PartyViewData({@required this.performer, @required this.recipients});
+  PartyViewData({required this.performer, required this.recipients});
 }
 
 class WordViewData {
   final int id;
   final String text;
   final WordStatus status;
-  final WordFeedback feedback;
+  final WordFeedback? feedback;
   final bool flaggedByActivePlayer;
   final bool flaggedByOthers;
 
   WordViewData({
-    @required this.id,
-    @required this.text,
-    @required this.status,
-    @required this.feedback,
-    @required this.flaggedByActivePlayer,
-    @required this.flaggedByOthers,
+    required this.id,
+    required this.text,
+    required this.status,
+    required this.feedback,
+    required this.flaggedByActivePlayer,
+    required this.flaggedByOthers,
   });
 }
 
@@ -145,35 +145,35 @@ class _PlayerPerformance {
 }
 
 class PlayerScoreViewData {
-  final String/*!*/ name;
+  final String name;
   final int wordsExplained;
   final int wordsGuessed;
 
   PlayerScoreViewData(
-      {@required this.name,
-      @required this.wordsExplained,
-      @required this.wordsGuessed});
+      {required this.name,
+      required this.wordsExplained,
+      required this.wordsGuessed});
 }
 
 class TeamScoreViewData {
   final int totalScore;
   final List<PlayerScoreViewData> players;
 
-  TeamScoreViewData({@required this.totalScore, @required this.players});
+  TeamScoreViewData({required this.totalScore, required this.players});
 }
 
 class WordInTurnLogViewData {
   final String text;
   final WordStatus status;
 
-  WordInTurnLogViewData({@required this.text, @required this.status});
+  WordInTurnLogViewData({required this.text, required this.status});
 }
 
 class TurnLogViewData {
   final String party;
   final List<WordInTurnLogViewData> wordsInThisTurn;
 
-  TurnLogViewData({@required this.party, @required this.wordsInThisTurn});
+  TurnLogViewData({required this.party, required this.wordsInThisTurn});
 }
 
 // All information about the game, read-only.
@@ -182,7 +182,7 @@ class GameData {
   final GameConfig config;
   final InitialGameState initialState;
   final BuiltList<TurnRecord> turnLog;
-  final TurnState turnState;
+  final TurnState? turnState;
   final PersonalState personalState;
   final BuiltList<PersonalState> otherPersonalStates; // online-only
 
@@ -197,16 +197,16 @@ class GameData {
       DerivedGameState.wordsInHat(initialState, turnLog, turnState).length;
 
   String currentWordText() {
-    Assert.eq(turnState.turnPhase, TurnPhase.explain);
-    return _wordText(turnState.wordsInThisTurn.last.id);
+    Assert.eq(turnState!.turnPhase, TurnPhase.explain);
+    return _wordText(turnState!.wordsInThisTurn.last.id);
   }
 
-  int currentCombo() => turnState.wordsInThisTurn.length - 1;
+  int currentCombo() => turnState!.wordsInThisTurn.length - 1;
 
   List<WordViewData> wordsInThisTurnData() {
     final wordsFlaggedByOthers =
         DerivedGameState.wordsFlaggedByOthers(otherPersonalStates);
-    return turnState.wordsInThisTurn
+    return turnState!.wordsInThisTurn
         .map((w) => WordViewData(
               id: w.id,
               text: _wordText(w.id),
@@ -221,44 +221,44 @@ class GameData {
   PlayerViewData _playerViewData(int playerID) {
     return PlayerViewData(
       id: playerID,
-      name: config.players.names[playerID],
+      name: config.players!.names[playerID],
     );
   }
 
   PartyViewData currentPartyViewData() {
     return PartyViewData(
-      performer: _playerViewData(turnState.party.performer),
+      performer: _playerViewData(turnState!.party.performer),
       recipients:
-          turnState.party.recipients.map((id) => _playerViewData(id)).toList(),
+          turnState!.party.recipients.map((id) => _playerViewData(id)).toList(),
     );
   }
 
   List<TeamScoreViewData> scoreData() {
-    final Map<int, _PlayerPerformance> playerPerformance = config.players.names
+    final Map<int, _PlayerPerformance> playerPerformance = config.players!.names
         .map((id, name) => MapEntry(id, _PlayerPerformance()))
         .toMap();
     for (final t in turnLog) {
       final int numWordsScored = t.wordsInThisTurn
           .where((w) => w.status == WordStatus.explained)
           .length;
-      playerPerformance[t.party.performer].wordsExplained += numWordsScored;
+      playerPerformance[t.party.performer]!.wordsExplained += numWordsScored;
       for (final p in t.party.recipients) {
-        playerPerformance[p].wordsGuessed += numWordsScored;
+        playerPerformance[p]!.wordsGuessed += numWordsScored;
       }
     }
 
     final scoreItems = List<TeamScoreViewData>();
     if (initialState.teamCompositions.teams != null) {
-      for (final team in initialState.teamCompositions.teams) {
+      for (final team in initialState.teamCompositions.teams!) {
         final players = List<PlayerScoreViewData>();
         int totalWordsExplained = 0;
         int totalWordsGuessed = 0;
         for (final playerID in team) {
-          final performance = playerPerformance[playerID];
+          final performance = playerPerformance[playerID]!;
           totalWordsExplained += performance.wordsExplained;
           totalWordsGuessed += performance.wordsGuessed;
           players.add(PlayerScoreViewData(
-            name: config.players.names[playerID],
+            name: config.players!.names[playerID]!,
             wordsExplained: performance.wordsExplained,
             wordsGuessed: performance.wordsGuessed,
           ));
@@ -273,8 +273,8 @@ class GameData {
         ));
       }
     } else {
-      config.players.names.forEach((playerID, name) {
-        final performance = playerPerformance[playerID];
+      config.players!.names.forEach((playerID, name) {
+        final performance = playerPerformance[playerID]!;
         scoreItems.add(
           TeamScoreViewData(
             totalScore: performance.wordsExplained + performance.wordsGuessed,
@@ -308,9 +308,9 @@ class GameData {
   }
 
   String _partyToString(Party p) {
-    return config.players.names[p.performer] +
+    return config.players!.names[p.performer]! +
         ' → ' +
-        p.recipients.map((r) => config.players.names[r]).join(', ');
+        p.recipients.map((r) => config.players!.names[r]).join(', ');
   }
 
   String _wordText(int wordID) {

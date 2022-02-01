@@ -25,9 +25,9 @@ enum _PopResponse {
 }
 
 class RouteArguments {
-  final GamePhase /*!*/ phase;
+  final GamePhase phase;
 
-  RouteArguments({@required this.phase});
+  RouteArguments({required this.phase});
 }
 
 // OPTIMIZATION POTENTIAL: This class might be simplified when Navigator 2.0
@@ -39,13 +39,13 @@ class GameNavigator {
   final GamePhase currentPhase;
 
   GameNavigator({
-    @required this.currentPhase,
+    required this.currentPhase,
   });
 
   // TODO: Disable bonus turn timer after reconnect.
   static Future<void> navigateToGame({
-    @required BuildContext context,
-    @required LocalGameData localGameData,
+    required BuildContext context,
+    required LocalGameData localGameData,
   }) async {
     final snapshot = await localGameData.gameReference.get();
     final gamePhase = GamePhaseReader.fromSnapshot(localGameData, snapshot);
@@ -59,10 +59,10 @@ class GameNavigator {
   }
 
   Widget buildWrapper({
-    @required BuildContext context,
-    @required LocalGameData localGameData,
-    @required Widget Function(BuildContext, DBDocumentSnapshot /*!*/) buildBody,
-    void Function() onBackPressed,
+    required BuildContext context,
+    required LocalGameData localGameData,
+    required Widget Function(BuildContext, DBDocumentSnapshot) buildBody,
+    void Function()? onBackPressed,
   }) {
     return WillPopScope(
       onWillPop: () => _onWillPop(context,
@@ -77,7 +77,7 @@ class GameNavigator {
           if (!snapshot.hasData) {
             return Center(child: CircularProgressIndicator());
           }
-          final snapshotData = snapshot.data;
+          final snapshotData = snapshot.data!;
           final newPhase =
               GamePhaseReader.fromSnapshot(localGameData, snapshotData);
           if (newPhase != currentPhase) {
@@ -113,11 +113,11 @@ class GameNavigator {
   */
 
   static void _navigateTo({
-    @required BuildContext context,
-    @required LocalGameData localGameData,
-    @required DBDocumentSnapshot /*!*/ snapshot,
-    @required GamePhase oldPhase,
-    @required GamePhase newPhase,
+    required BuildContext context,
+    required LocalGameData localGameData,
+    required DBDocumentSnapshot snapshot,
+    required GamePhase? oldPhase,
+    required GamePhase newPhase,
   }) {
     localGameData.navigationState.lastSeenGamePhase = newPhase;
     localGameData.gameReference.clearLocalCache();
@@ -142,11 +142,11 @@ class GameNavigator {
 
   // TODO: Seems like `snapshot` is not needed from here down.
   static void _navigateToImpl({
-    @required BuildContext context,
-    @required LocalGameData localGameData,
-    @required DBDocumentSnapshot snapshot,
-    @required GamePhase oldPhase,
-    @required GamePhase newPhase,
+    required BuildContext context,
+    required LocalGameData localGameData,
+    required DBDocumentSnapshot snapshot,
+    required GamePhase? oldPhase,
+    required GamePhase newPhase,
   }) {
     // Hide virtual keyboard
     FocusScope.of(context).unfocus();
@@ -155,7 +155,7 @@ class GameNavigator {
       Navigator.of(context).popUntil((route) =>
           (route.settings.arguments as RouteArguments).phase == newPhase);
     } else {
-      GamePhase pushFrom;
+      GamePhase? pushFrom;
       if (_isGrandparentPhase(oldPhase, newPhase)) {
         // TODO: Also `pushAndRemoveUntil` in case there was a subscreen
         pushFrom = oldPhase;
@@ -182,11 +182,11 @@ class GameNavigator {
   }
 
   static void _pushPhases({
-    @required BuildContext context,
-    @required LocalGameData localGameData,
-    @required DBDocumentSnapshot snapshot,
-    @required GamePhase fromPhase, // non-inclusive
-    @required GamePhase toPhase, // inclusive
+    required BuildContext context,
+    required LocalGameData localGameData,
+    required DBDocumentSnapshot snapshot,
+    required GamePhase? fromPhase, // non-inclusive
+    required GamePhase toPhase, // inclusive
   }) {
     Assert.holds(fromPhase != null);
     Assert.holds(toPhase != null);
@@ -196,7 +196,7 @@ class GameNavigator {
         localGameData: localGameData,
         snapshot: snapshot,
         fromPhase: fromPhase,
-        toPhase: _parentPhase(toPhase),
+        toPhase: _parentPhase(toPhase)!,
       );
     }
     _pushPhase(
@@ -208,10 +208,10 @@ class GameNavigator {
   }
 
   static void _pushPhase({
-    @required BuildContext context,
-    @required LocalGameData localGameData,
-    @required DBDocumentSnapshot snapshot,
-    @required GamePhase phase,
+    required BuildContext context,
+    required LocalGameData localGameData,
+    required DBDocumentSnapshot snapshot,
+    required GamePhase phase,
   }) {
     final route = _route(
       localGameData: localGameData,
@@ -222,9 +222,9 @@ class GameNavigator {
   }
 
   static MaterialPageRoute _route({
-    @required LocalGameData localGameData,
-    @required DBDocumentSnapshot snapshot,
-    @required GamePhase phase,
+    required LocalGameData localGameData,
+    required DBDocumentSnapshot snapshot,
+    required GamePhase phase,
   }) {
     final routeSettings = RouteSettings(
       name: localGameData.gameRoute,
@@ -273,7 +273,7 @@ class GameNavigator {
     return parent != null ? _firstGrandparentPhase(parent) : phase;
   }
 
-  static bool _isGrandparentPhase(GamePhase phaseA, GamePhase phaseB) {
+  static bool _isGrandparentPhase(GamePhase? phaseA, GamePhase? phaseB) {
     if (phaseA == null || phaseB == null) {
       return false;
     }
@@ -281,7 +281,7 @@ class GameNavigator {
     return phaseBParent == phaseA ?? _isGrandparentPhase(phaseA, phaseBParent);
   }
 
-  static GamePhase _parentPhase(GamePhase phase) {
+  static GamePhase? _parentPhase(GamePhase phase) {
     switch (phase) {
       case GamePhase.configure:
         return null;
@@ -301,7 +301,7 @@ class GameNavigator {
 
   static Future<_PopResponse> _confimLeaveGame(
     BuildContext context, {
-    @required LocalGameData localGameData,
+    required LocalGameData localGameData,
   }) {
     // TODO: Replace with a description of how to continue when it's
     // possible to continue.
@@ -321,8 +321,8 @@ class GameNavigator {
 
   Future<bool> _onWillPop(
     BuildContext context, {
-    @required LocalGameData localGameData,
-    void Function() onBackPressed,
+    required LocalGameData localGameData,
+    void Function()? onBackPressed,
   }) async {
     final popResponse =
         await _popResponse(context, localGameData: localGameData);
@@ -330,7 +330,7 @@ class GameNavigator {
       case _PopResponse.disabled:
         break;
       case _PopResponse.custom:
-        onBackPressed();
+        onBackPressed!();
         break;
       case _PopResponse.exitGame:
         localGameData.navigationState.exitingGame = true;
@@ -342,7 +342,7 @@ class GameNavigator {
 
   Future<_PopResponse> _popResponse(
     BuildContext context, {
-    @required LocalGameData localGameData,
+    required LocalGameData localGameData,
   }) async {
     switch (currentPhase) {
       case GamePhase.configure:

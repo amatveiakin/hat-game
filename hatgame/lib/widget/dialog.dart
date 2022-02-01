@@ -8,16 +8,16 @@ class DialogChoice<T> {
   DialogChoice(this.value, this.text);
 }
 
-Text _textWidget(String text) {
+Text? _textWidget(String? text) {
   return text == null ? null : Text(text);
 }
 
-Future<T /*!*/ > multipleChoiceDialog<T>({
-  @required BuildContext context,
-  String titleText,
-  String contentText,
-  @required List<DialogChoice> choices,
-  @required T defaultChoice, // returned when the dialog is dismissed
+Future<T > multipleChoiceDialog<T>({
+  required BuildContext context,
+  String? titleText,
+  String? contentText,
+  required List<DialogChoice> choices,
+  required T defaultChoice, // returned when the dialog is dismissed
 }) {
   return showDialog(
     context: context,
@@ -37,10 +37,10 @@ Future<T /*!*/ > multipleChoiceDialog<T>({
 }
 
 Future<void> simpleDialog(
-    {@required BuildContext context,
-    String titleText,
-    String contentText,
-    @required String closeButtonText}) {
+    {required BuildContext context,
+    String? titleText,
+    String? contentText,
+    required String closeButtonText}) {
   // TODO: Close on enter (try using RawKeyEvent).
   return showDialog(
     context: context,

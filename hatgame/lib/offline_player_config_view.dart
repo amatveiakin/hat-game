@@ -15,13 +15,13 @@ bool _manualTeams(TeamingConfig teamingConfig) {
 
 class OfflinePlayersConfigView extends StatefulWidget {
   final bool manualTeams;
-  final PlayersConfig initialPlayersConfig;
+  final PlayersConfig? initialPlayersConfig;
   final GameConfigController configController;
 
   OfflinePlayersConfigView(
-      {@required teamingConfig,
-      @required this.initialPlayersConfig,
-      @required this.configController})
+      {required teamingConfig,
+      required this.initialPlayersConfig,
+      required this.configController})
       : this.manualTeams = _manualTeams(teamingConfig);
 
   @override
@@ -30,10 +30,10 @@ class OfflinePlayersConfigView extends StatefulWidget {
 
 class _PlayerData {
   final bool isTeamDivider; // if true, other fields are meaningless
-  String name;
-  final Key key;
-  final TextEditingController controller;
-  final FocusNode focusNode;
+  String? name;
+  final Key? key;
+  final TextEditingController? controller;
+  final FocusNode? focusNode;
 
   _PlayerData(this.name)
       : this.isTeamDivider = false,
@@ -65,7 +65,7 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
   GameConfigController get configController => widget.configController;
 
   void _generateInitialPlayerItems() {
-    final PlayersConfig config = widget.initialPlayersConfig;
+    final PlayersConfig config = widget.initialPlayersConfig!;
     config.checkInvariant();
     // Conversion might be required is teaming config changed.
     if (manualTeams) {
@@ -91,7 +91,7 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
       return;
     }
 
-    final Map<int, String> names = {};
+    final Map<int, String?> names = {};
     final List<List<int>> teams = [[]];
     int playerID = 0;
     for (final p in _playerItems) {
@@ -118,13 +118,13 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
     }
   }
 
-  void _addPlayer(String name, {@required bool focus}) {
+  void _addPlayer(String? name, {required bool focus}) {
     setState(() {
       final playerData = _PlayerData(name);
-      playerData.controller.text = name;
-      playerData.controller.addListener(() {
+      playerData.controller!.text = name!;
+      playerData.controller!.addListener(() {
         // Don't call setState, because TextField updates itself.
-        playerData.name = playerData.controller.text;
+        playerData.name = playerData.controller!.text;
         _notifyPlayersUpdate();
       });
       if (focus) {
@@ -132,7 +132,7 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
         // (not on emulator)?
         _autoscrollStopwatch.reset();
         _autoscrollStopwatch.start();
-        void Function() scrollCallback;
+        void Function()? scrollCallback;
         scrollCallback = () {
           if (!_autoscrollStopwatch.isRunning ||
               _autoscrollStopwatch.elapsedMilliseconds > 1000) {
@@ -148,8 +148,8 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
           // TODO: Find a better way to do this.
           Future.delayed(Duration(milliseconds: 50), scrollCallback);
         };
-        WidgetsBinding.instance.addPostFrameCallback((_) => scrollCallback());
-        playerData.focusNode.requestFocus();
+        WidgetsBinding.instance!.addPostFrameCallback((_) => scrollCallback!());
+        playerData.focusNode!.requestFocus();
       }
       _playerItems.add(playerData);
     });

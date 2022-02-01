@@ -7,7 +7,7 @@ class AsyncSnapshotError extends StatelessWidget {
 
   AsyncSnapshotError(
     AsyncSnapshot<dynamic> snapshot, {
-    @required this.gamePhase,
+    required this.gamePhase,
   }) : errorMessage = snapshot.error.toString() {
     // TODO: Log to firebase.
   }

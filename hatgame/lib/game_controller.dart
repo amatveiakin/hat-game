@@ -38,7 +38,7 @@ class JoinGameResult {
   final LocalGameData localGameData;
   final Reconnection reconnection;
 
-  JoinGameResult({@required this.localGameData, @required this.reconnection});
+  JoinGameResult({required this.localGameData, required this.reconnection});
 }
 
 enum JoinGameErrorSource {
@@ -55,12 +55,12 @@ class TurnStateTransformer {
   final GameConfig config;
   final InitialGameState initialState;
   final BuiltList<TurnRecord> turnLog;
-  TurnState /*!*/ turnState;
+  TurnState turnState;
 
   TurnStateTransformer(
       this.config, this.initialState, this.turnLog, this.turnState);
 
-  static TurnRecord turnRecord(TurnState /*!*/ turnState) {
+  static TurnRecord turnRecord(TurnState turnState) {
     return TurnRecord(
       (b) => b
         ..party.replace(turnState.party)
@@ -68,11 +68,11 @@ class TurnStateTransformer {
     );
   }
 
-  static TurnState newTurn(
+  static TurnState? newTurn(
     GameConfig config,
     InitialGameState initialState, {
-    @required bool timeToEndGame,
-    @required int turnIndex,
+    required bool timeToEndGame,
+    required int turnIndex,
   }) {
     return timeToEndGame
         ? null
@@ -97,16 +97,16 @@ class TurnStateTransformer {
 
   void pauseExplaning() {
     Assert.eq(turnState.turnPhase, TurnPhase.explain);
-    Assert.holds(!turnState.turnPaused);
+    Assert.holds(!turnState.turnPaused!);
     turnState = turnState.rebuild((b) => b
       ..turnPaused = true
-      ..turnTimeBeforePause = turnState.turnTimeBeforePause +
-          (NtpTime.nowUtcOrNull()?.difference(turnState.turnTimeStart)));
+      ..turnTimeBeforePause = turnState.turnTimeBeforePause! +
+          NtpTime.nowUtcOrNull()?.difference(turnState.turnTimeStart!)!);
   }
 
   void resumeExplaning() {
     Assert.eq(turnState.turnPhase, TurnPhase.explain);
-    Assert.holds(turnState.turnPaused);
+    Assert.holds(turnState.turnPaused!);
     turnState = turnState.rebuild(
       (b) => b
         ..turnPaused = false
@@ -197,24 +197,24 @@ class PersonalStateTransformer {
 
 class GameController {
   final LocalGameData localGameData;
-  final GameConfig /*!*/ config;
-  final InitialGameState /*!*/ initialState;
+  final GameConfig config;
+  final InitialGameState initialState;
   final BuiltList<TurnRecord> turnLog;
-  final TurnState turnState;
+  final TurnState? turnState;
   final PersonalState personalState;
   final BuiltList<PersonalState> otherPersonalStates; // online-only
 
   GameData get gameData => GameData(config, initialState, turnLog, turnState,
       personalState, otherPersonalStates);
   TurnStateTransformer get _transformer =>
-      TurnStateTransformer(config, initialState, turnLog, turnState);
+      TurnStateTransformer(config, initialState, turnLog, turnState!);
   PersonalStateTransformer get _personalTransformer =>
       PersonalStateTransformer(personalState);
 
   bool isActivePlayer() => turnState == null
       ? false
       : (localGameData.onlineMode
-          ? activePlayer(turnState) == localGameData.myPlayerID
+          ? activePlayer(turnState!) == localGameData.myPlayerID
           : true);
 
   static List<DBColumnData> _newGameRecord() {
@@ -254,14 +254,14 @@ class GameController {
   }
 
   // Returns game ID.
-  static Future<String /*!*/ > _createGameOnline(
+  static Future<String > _createGameOnline(
       firestore.FirebaseFirestore firestoreInstance,
       List<DBColumnData> initialColumns) async {
     const int minIDLength = 4;
     const int maxIDLength = 8;
     const int attemptsPerTransaction = 100;
     final String idPrefix = kReleaseMode ? '' : '.';
-    String gameID;
+    String? gameID;
     for (int idLength = minIDLength;
         idLength <= maxIDLength && gameID == null;
         idLength++) {
@@ -269,7 +269,7 @@ class GameController {
         for (int iter = 0; iter < attemptsPerTransaction; iter++) {
           gameID = newFirestoreGameID(idLength, idPrefix);
           final reference = firestoreGameReference(
-              firestoreInstance: firestoreInstance, gameID: gameID);
+              firestoreInstance: firestoreInstance, gameID: gameID!);
           firestore.DocumentSnapshot snapshot = await tx.get(reference);
           if (!snapshot.exists) {
             await tx.set(reference, dbData(initialColumns));
@@ -282,7 +282,7 @@ class GameController {
     if (gameID == null) {
       throw InvalidOperation('Cannot generate game ID', isInternalError: true);
     }
-    return gameID;
+    return gameID!;
   }
 
   static Future<LocalGameData> newGameOffine() async {
@@ -354,14 +354,14 @@ class GameController {
     //     Unhandled Exception: PlatformException(Error performing transaction,
     //         java.lang.Exception: DoTransaction failed: Invalid argument:
     //         Instance of '_CompactLinkedHashSet<Object>', null)
-    int playerID;
-    /*late*/ Reconnection /*!*/ reconnection;
+    int? playerID;
+    late Reconnection reconnection;
     // For some reason, throwing or returning Future.error from `runTransaction`
     // doesn't work. Got:
     //     Unhandled Exception: PlatformException(Error performing transaction,
     //         java.lang.Exception: DoTransaction failed: Instance of
     //         'InvalidOperation', null)
-    InvalidOperation error;
+    InvalidOperation? error;
 
     await firestoreInstance.runTransaction((firestore.Transaction tx) async {
       firestore.DocumentSnapshot snapshot = await tx.get(reference);
@@ -376,7 +376,7 @@ class GameController {
       }
       try {
         checkVersionCompatibility(
-            dbTryGet(snapshot.data(), DBColHostAppVersion()), appVersion);
+            dbTryGet(snapshot.data() as Map<String, dynamic>, DBColHostAppVersion())!, appVersion);
       } on InvalidOperation catch (e) {
         error = e;
         return;
@@ -386,9 +386,9 @@ class GameController {
       final bool userCreationPhase = (gamePhase == GamePhase.configure);
 
       // Note: include kicked players.
-      final playerData = dbGetAll(snapshot.data(), DBColPlayerManager(),
+      final playerData = dbGetAll(snapshot.data() as Map<String, dynamic>, DBColPlayerManager(),
           documentPath: reference.path);
-      int existingPlayerID;
+      int? existingPlayerID;
       for (final p in playerData.values().where((v) => !(v.kicked ?? false))) {
         if (myName == p.name) {
           existingPlayerID = p.id;
@@ -410,7 +410,7 @@ class GameController {
           await tx.update(
               reference,
               dbData([
-                DBColPlayer(playerID).withData(PersonalState((b) => b
+                DBColPlayer(playerID!).withData(PersonalState((b) => b
                   ..id = playerID
                   ..name = myName))
               ]));
@@ -424,7 +424,7 @@ class GameController {
     });
 
     if (error != null) {
-      throw error;
+      throw error!;
     }
 
     return JoinGameResult(
@@ -454,7 +454,7 @@ class GameController {
         // Workaround flutter/firestore error. Do a dumb write.
         await tx.set(reference, snapshot.data());
       }
-      final playerRecord = dbGet(snapshot.data(), DBColPlayer(playerID),
+      final playerRecord = dbGet(snapshot.data() as Map<String, dynamic>, DBColPlayer(playerID),
           documentPath: reference.path);
       await tx.update(
           reference,
@@ -483,7 +483,7 @@ class GameController {
   static void preGameCheck(GameConfig config) {
     if (config.rules.writeWords == false &&
         (config.rules.dictionaries == null ||
-            config.rules.dictionaries.isEmpty)) {
+            config.rules.dictionaries!.isEmpty)) {
       throw InvalidOperation(tr('no_dictionaries_selected'))
         ..addTag(StartGameErrorSource.dictionaries);
     }
@@ -497,12 +497,12 @@ class GameController {
   }
 
   static TeamCompositions generateTeamCompositions(GameConfig config) {
-    final numPlayers = config.players.names.length;
-    final playerIDs = config.players.names.keys.toList();
+    final numPlayers = config.players!.names.length;
+    final playerIDs = config.players!.names.keys.toList();
     if (config.teaming.teamPlay) {
       BuiltList<BuiltList<int>> teams;
-      if (config.players.teams != null) {
-        teams = BuiltList<BuiltList<int>>.from(config.players.teams
+      if (config.players!.teams != null) {
+        teams = BuiltList<BuiltList<int>>.from(config.players!.teams!
             .map((team) => BuiltList<int>(team.toList().shuffled()))
             .toList()
             .shuffled());
@@ -517,7 +517,7 @@ class GameController {
       checkTeamSizes(teams);
       return TeamCompositions((b) => b..teams.replace(teams));
     } else {
-      Assert.holds(config.players.teams == null);
+      Assert.holds(config.players!.teams == null);
       checkNumPlayersForIndividualPlay(
           numPlayers, config.teaming.individualPlayStyle);
       return TeamCompositions((b) => b
@@ -544,10 +544,10 @@ class GameController {
     ]);
   }
 
-  static TeamCompositionsViewData getTeamCompositions(
+  static TeamCompositionsViewData? getTeamCompositions(
       LocalGameData localGameData, DBDocumentSnapshot snapshot) {
     List<String> _playerNames(GameConfig config, Iterable<int> playerIDs) {
-      return playerIDs.map((id) => config.players.names[id] /*!*/).toList();
+      return playerIDs.map((id) => config.players!.names[id]!).toList();
     }
 
     if (GamePhaseReader.fromSnapshot(localGameData, snapshot) !=
@@ -560,10 +560,10 @@ class GameController {
     final TeamCompositions teamCompositions =
         snapshot.get(DBColTeamCompositions());
     final List<List<String>> playerNames = teamCompositions.teams != null
-        ? teamCompositions.teams
+        ? teamCompositions.teams!
             .map((t) => _playerNames(gameConfig, t))
             .toList()
-        : teamCompositions.individualOrder
+        : teamCompositions.individualOrder!
             .map((p) => _playerNames(gameConfig, [p]))
             .toList();
     Assert.eq(teamCompositions.teams != null, gameConfig.teaming.teamPlay);
@@ -572,21 +572,21 @@ class GameController {
   }
 
   static List<String> _generateRandomWords(GameConfig config) {
-    final int numPlayers = config.players.names.length;
+    final int numPlayers = config.players!.names.length;
     final int totalWords = config.rules.wordsPerPlayer * numPlayers;
     Assert.holds(
         config.rules.dictionaries != null &&
-            config.rules.dictionaries.isNotEmpty,
+            config.rules.dictionaries!.isNotEmpty,
         lazyMessage: () => config.rules.toString());
     final wordCollection =
-        Lexicon.wordCollection(config.rules.dictionaries.toList());
+        Lexicon.wordCollection(config.rules.dictionaries!.toList());
     return List.generate(totalWords, (_) => wordCollection.randomWord());
   }
 
   static List<String> _collectWordsFromPlayers(DBDocumentSnapshot snapshot) {
     final personalStates = _parsePersonalStates(snapshot);
     return personalStates.values
-        .fold([], (total, state) => total + state.words.asList());
+        .fold([], (total, state) => total + state.words!.asList());
   }
 
   static List<Word> _wordsFromWordTexts(List<String> wordTexts) {
@@ -604,7 +604,7 @@ class GameController {
     final GameConfig config =
         GameConfigController.fromSnapshot(localGameData, snapshot)
             .configWithOverrides();
-    final TeamCompositions teamCompositions =
+    final TeamCompositions? teamCompositions =
         snapshot.get(DBColTeamCompositions());
 
     final List<Word> words = _wordsFromWordTexts(
@@ -614,9 +614,9 @@ class GameController {
     );
 
     final InitialGameState initialState = InitialGameState((b) => b
-      ..teamCompositions.replace(teamCompositions)
+      ..teamCompositions.replace(teamCompositions!)
       ..words.replace(words));
-    final TurnState turnState = TurnStateTransformer.newTurn(
+    final TurnState? turnState = TurnStateTransformer.newTurn(
       config,
       initialState,
       timeToEndGame: false,
@@ -630,7 +630,7 @@ class GameController {
   }
 
   static Future<void> rematch(
-      LocalGameData localGameData, DBDocumentSnapshot/*!*/ snapshot) async {
+      LocalGameData localGameData, DBDocumentSnapshot snapshot) async {
     List<DBColumnData> initialColumns = _newGameRecord();
     String gameID;
     if (localGameData.onlineMode) {
@@ -662,7 +662,7 @@ class GameController {
 
   static DBDocumentReference _rematchGameReference(
       LocalGameData oldLocalGameData,
-      {@required String newGameID}) {
+      {required String newGameID}) {
     if (oldLocalGameData.onlineMode) {
       final firestore.FirebaseFirestore firestoreInstance =
           (oldLocalGameData.gameReference as FirestoreDocumentReference)
@@ -692,7 +692,7 @@ class GameController {
     final Iterable<PersonalState> playerStates =
         _parsePersonalStates(snapshot).values;
     return WordWritingViewData(
-      playerState: snapshot.get(DBColPlayer(localGameData.myPlayerID)),
+      playerState: snapshot.get(DBColPlayer(localGameData.myPlayerID!)),
       numPlayers: playerStates.length,
       numPlayersReady:
           playerStates.where((p) => (p.wordsReady ?? false)).length,
@@ -706,7 +706,7 @@ class GameController {
   static Future<void> updatePersonalState(
       LocalGameData localGameData, PersonalState newState) {
     final DBColumn column = localGameData.onlineMode
-        ? DBColPlayer(localGameData.myPlayerID)
+        ? DBColPlayer(localGameData.myPlayerID!)
         : DBColLocalPlayer();
     return localGameData.gameReference.updateColumns([
       column.withData(newState),
@@ -743,14 +743,14 @@ class GameController {
     final InitialGameState initialState = snapshot.get(DBColInitialState());
     final BuiltList<TurnRecord> turnLog =
         BuiltList.from(snapshot.getAll(DBColTurnRecordManager()).values());
-    final TurnState turnState = snapshot.tryGet(DBColCurrentTurn());
+    final TurnState? turnState = snapshot.tryGet(DBColCurrentTurn());
 
-    PersonalState personalState;
+    PersonalState? personalState;
     BuiltList<PersonalState> otherPersonalStates;
     if (localGameData.onlineMode) {
       final allPersonalStates = _parsePersonalStates(snapshot);
       Assert.holds(allPersonalStates.containsKey(localGameData.myPlayerID));
-      personalState = allPersonalStates[localGameData.myPlayerID];
+      personalState = allPersonalStates[localGameData.myPlayerID!];
       allPersonalStates
           .removeWhere((playerID, _) => playerID == localGameData.myPlayerID);
       otherPersonalStates =
@@ -761,14 +761,14 @@ class GameController {
     }
 
     return GameController._(localGameData, config, initialState, turnLog,
-        turnState, personalState, otherPersonalStates);
+        turnState, personalState!, otherPersonalStates);
   }
 
   static Future<void> _writeInitialState(
       DBDocumentReference reference,
       GameConfig config,
       InitialGameState initialState,
-      TurnState turnState) async {
+      TurnState? turnState) async {
     reference.clearLocalCache();
     return reference.updateColumns([
       DBColGamePhase().withData(GamePhase.play),
@@ -795,12 +795,12 @@ class GameController {
     Assert.holds(isActivePlayer(),
         message: 'Only the active player can change game state');
     final int turnIndex = DerivedGameState.turnIndex(turnLog);
-    final TurnRecord newTurnRecord = TurnStateTransformer.turnRecord(turnState);
+    final TurnRecord newTurnRecord = TurnStateTransformer.turnRecord(turnState!);
     final BuiltList<TurnRecord> newTurnLog =
         turnLog.rebuild((b) => b..add(newTurnRecord));
     final bool timeToEndGame =
         DerivedGameState.wordsInHat(initialState, newTurnLog, null).isEmpty;
-    final TurnState newTurnState = TurnStateTransformer.newTurn(
+    final TurnState? newTurnState = TurnStateTransformer.newTurn(
       config,
       initialState,
       // pass (turnState == null) to `wordsInHat`, because words from the

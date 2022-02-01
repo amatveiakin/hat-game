@@ -216,9 +216,9 @@ class TeamingConfigView extends StatelessWidget {
   final GameConfigController configController;
 
   TeamingConfigView(
-      {@required this.onlineMode,
-      @required this.config,
-      @required this.configController});
+      {required this.onlineMode,
+      required this.config,
+      required this.configController});
 
   static int _maxPossbleTeamSize(TeamingConfig config) {
     const int infinity = 1000;

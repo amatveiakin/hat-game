@@ -21,11 +21,11 @@ bool checkTextFields(List<CheckedTextFieldController> controllers) {
 
 // TODO: Trim name before using or checking.
 class CheckedTextFieldController {
-  final InvalidOperation Function(String) checker;
+  final InvalidOperation? Function(String)? checker;
   final textController = TextEditingController();
   final focusNode = FocusNode();
-  void Function() _displayErrorListener;
-  InvalidOperation _error;
+  void Function()? _displayErrorListener;
+  InvalidOperation? _error;
   bool _showErrorOnEmpty = false;
 
   CheckedTextFieldController({this.checker}) {
@@ -34,18 +34,18 @@ class CheckedTextFieldController {
         if (textController.text.isNotEmpty) {
           _showErrorOnEmpty = false;
         }
-        _setError(checker(textController.text));
+        _setError(checker!(textController.text));
         _notifyDisplayErrorChanged();
       });
-      _setError(checker(textController.text));
+      _setError(checker!(textController.text));
     }
   }
 
   bool get _shouldDisplayError =>
       _showErrorOnEmpty || textController.text.isNotEmpty;
 
-  InvalidOperation get error => _error;
-  InvalidOperation get displayError => _shouldDisplayError ? error : null;
+  InvalidOperation? get error => _error;
+  InvalidOperation? get displayError => _shouldDisplayError ? error : null;
 
   void setDisplayErrorListener(void Function() newListener) {
     _displayErrorListener = newListener;
@@ -56,14 +56,14 @@ class CheckedTextFieldController {
     _notifyDisplayErrorChanged();
   }
 
-  void _setError(InvalidOperation value) {
+  void _setError(InvalidOperation? value) {
     _error = value;
     _notifyDisplayErrorChanged();
   }
 
   void _notifyDisplayErrorChanged() {
     if (_displayErrorListener != null) {
-      _displayErrorListener();
+      _displayErrorListener!();
     }
   }
 
@@ -75,15 +75,15 @@ class CheckedTextFieldController {
 
 class CheckedTextField extends StatefulWidget {
   final CheckedTextFieldController controller;
-  final String labelText;
-  final TextInputAction textInputAction;
-  final TextInputType keyboardType;
-  final List<TextInputFormatter> inputFormatters;
-  final ValueChanged<String> onSubmitted;
-  final VoidCallback onEditingComplete;
+  final String? labelText;
+  final TextInputAction? textInputAction;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final ValueChanged<String>? onSubmitted;
+  final VoidCallback? onEditingComplete;
 
   CheckedTextField({
-    @required this.controller,
+    required this.controller,
     this.labelText,
     this.textInputAction,
     this.keyboardType,

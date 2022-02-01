@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 class HighlightableController {
   final _animationController;
 
-  HighlightableController({@required TickerProvider vsync})
+  HighlightableController({required TickerProvider vsync})
       : _animationController = AnimationController(
           duration: Duration(milliseconds: 700),
           vsync: vsync,
@@ -26,8 +26,8 @@ class Highlightable extends StatefulWidget {
   final HighlightableController controller;
 
   Highlightable({
-    @required this.child,
-    @required this.controller,
+    required this.child,
+    required this.controller,
   });
 
   @override
@@ -37,7 +37,7 @@ class Highlightable extends StatefulWidget {
 class _HighlightableState extends State<Highlightable> {
   static const double animationRepetitions = 2;
   double _animationProgress = 0.0;
-  Animation<double> _animation;
+  late Animation<double> _animation;
   double _highlightStrength = 0.0;
 
   @override

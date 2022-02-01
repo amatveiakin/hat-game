@@ -8,9 +8,9 @@ class Collapsible extends StatelessWidget {
   final Widget child;
 
   Collapsible({
-    @required this.collapsed,
-    @required this.onCollapsedChanged,
-    @required this.child,
+    required this.collapsed,
+    required this.onCollapsedChanged,
+    required this.child,
   });
 
   // TODO: Consider adding AnimatedSize.

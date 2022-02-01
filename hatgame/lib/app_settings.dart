@@ -24,8 +24,8 @@ List<OptionDescription<String>> languageOptions() {
   ];
 }
 
-class LanguageSelector extends EnumOptionSelector<String> {
-  LanguageSelector(String initialValue, Function changeCallback)
+class LanguageSelector extends EnumOptionSelector<String?> {
+  LanguageSelector(String? initialValue, Function changeCallback)
       : super(
           windowTitle: tr('app_language'),
           allValues: languageOptions(),
@@ -52,7 +52,7 @@ class AppSettingsView extends StatefulWidget {
 }
 
 class AppSettingsViewState extends State<AppSettingsView> {
-  String language;
+  String? language;
 
   void updateLanguage(String newValue) {
     setState(() {
@@ -61,7 +61,7 @@ class AppSettingsViewState extends State<AppSettingsView> {
     LocalStorage.instance.set(LocalColLocale(), language);
     final BuildContext context = widget.parentContext;
     if (language != null) {
-      final locale = Locale(language);
+      final locale = Locale(language!);
       Assert.isIn(locale, context.supportedLocales);
       context.locale = locale;
     } else {
@@ -88,7 +88,7 @@ class AppSettingsViewState extends State<AppSettingsView> {
           children: [
             OptionSelectorHeader(
                 title: Text(tr('language') +
-                    optionWithValue(languageOptions(), language).title),
+                    optionWithValue(languageOptions(), language)!.title!),
                 onTap: () {
                   Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => LanguageSelector(

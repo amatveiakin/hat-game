@@ -9,7 +9,7 @@ import 'package:ntp/ntp.dart';
 // but it hanged during TrueTime.init(), at least in debug web version.
 //
 class NtpTime {
-  static Duration _ntpOffset;
+  static Duration? _ntpOffset;
 
   static init() async {
     try {
@@ -34,10 +34,10 @@ class NtpTime {
 
   static bool get initialized => _ntpOffset != null;
 
-  static DateTime nowUtcOrNull() =>
-      _ntpOffset == null ? null : DateTime.now().toUtc().add(_ntpOffset);
+  static DateTime? nowUtcOrNull() =>
+      _ntpOffset == null ? null : DateTime.now().toUtc().add(_ntpOffset!);
 
-  static DateTime nowUtcOrThrow() => DateTime.now().toUtc().add(_ntpOffset);
+  static DateTime nowUtcOrThrow() => DateTime.now().toUtc().add(_ntpOffset!);
 
   static DateTime nowUtcNoPrecisionGuarantee() =>
       DateTime.now().toUtc().add(_ntpOffset ?? Duration.zero);

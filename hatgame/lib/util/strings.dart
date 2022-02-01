@@ -1,3 +1,3 @@
-bool isNullOrEmpty(String s) {
+bool isNullOrEmpty(String? s) {
   return s == null || s.isEmpty;
 }

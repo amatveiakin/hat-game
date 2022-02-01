@@ -3,11 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:soundpool/soundpool.dart';
 
 class Sounds {
-  static Soundpool _soundpool;
+  static late Soundpool _soundpool;
 
-  static int timeOver;
-  static int bonusTimeOver;
-  static List<int> wordGuessedCombo;
+  static late int timeOver;
+  static late int bonusTimeOver;
+  static late List<int> wordGuessedCombo;
 
   static Future<void> init() async {
     try {

@@ -37,7 +37,7 @@ class FirestoreDocumentReference extends DBDocumentReference {
     final localCache = _FirestoreLocalCache.singleton.get(this);
     if (localCache?.rawData != null) {
       Assert.failDebug(
-          'Local cache should be empty, but found: ${localCache.rawData}',
+          'Local cache should be empty, but found: ${localCache!.rawData}',
           inRelease: AssertInRelease.log);
       clearLocalCache();
     }
@@ -49,7 +49,7 @@ class FirestoreDocumentReference extends DBDocumentReference {
 
 class FirestoreDocumentSnapshot extends DBDocumentSnapshot {
   final firestore.DocumentSnapshot _snapshot;
-  final LocalDocumentSnapshot _localCacheOverrides;
+  final LocalDocumentSnapshot? _localCacheOverrides;
 
   FirestoreDocumentSnapshot(this._snapshot, this._localCacheOverrides);
 
@@ -59,11 +59,11 @@ class FirestoreDocumentSnapshot extends DBDocumentSnapshot {
   FirestoreDocumentReference get reference =>
       FirestoreDocumentReference(_snapshot.reference);
 
-  Map<String, dynamic> get rawData {
-    final snapshowData = _snapshot.data() as Map<String, dynamic> /*?*/;
+  Map<String, dynamic>? get rawData {
+    final snapshowData = _snapshot.data() as Map<String, dynamic>?;
     return snapshowData == null || _localCacheOverrides?.rawData == null
         ? snapshowData
-        : (Map.from(snapshowData)..addAll(_localCacheOverrides.rawData));
+        : (Map.from(snapshowData)..addAll(_localCacheOverrides!.rawData!));
   }
 }
 
@@ -98,18 +98,18 @@ class _FirestoreLocalCache {
     if (cachePerInstance[instance] == null) {
       cachePerInstance[instance] = LocalDB();
     }
-    final document = cachePerInstance[instance].document(reference.path);
+    final document = cachePerInstance[instance]!.document(reference.path);
     document.syncGetColumns([]);
     return document.syncUpdateColumnsImpl(columns, LocalCacheBehavior.noCache);
   }
 
-  LocalDocumentSnapshot get(FirestoreDocumentReference reference) {
+  LocalDocumentSnapshot? get(FirestoreDocumentReference reference) {
     final firestore.FirebaseFirestore instance =
         reference.firestoreReference.firestore;
     if (cachePerInstance[instance] == null) {
       return null;
     }
-    return cachePerInstance[instance].document(reference.path).syncGet();
+    return cachePerInstance[instance]!.document(reference.path).syncGet();
   }
 
   void clearCache(FirestoreDocumentReference reference) {
@@ -118,6 +118,6 @@ class _FirestoreLocalCache {
     if (cachePerInstance[instance] == null) {
       return;
     }
-    return cachePerInstance[instance].document(reference.path).syncDelete();
+    return cachePerInstance[instance]!.document(reference.path).syncDelete();
   }
 }

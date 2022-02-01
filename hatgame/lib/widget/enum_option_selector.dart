@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:hatgame/widget/divider.dart';
 import 'package:hatgame/widget/multi_line_list_tile.dart';
@@ -7,13 +8,13 @@ import 'package:hatgame/widget/multi_line_list_tile.dart';
 
 class OptionSelectorHeader extends StatelessWidget {
   final Widget title;
-  final Widget subtitle;
-  final GestureTapCallback onTap;
+  final Widget? subtitle;
+  final GestureTapCallback? onTap;
 
   OptionSelectorHeader({
-    @required this.title,
+    required this.title,
     this.subtitle,
-    @required this.onTap,
+    required this.onTap,
   });
 
   @override
@@ -31,13 +32,13 @@ class OptionSelectorHeader extends StatelessWidget {
 
 class OptionDescription<E> {
   final bool isDivider;
-  final E value;
-  final String title;
-  final String subtitle;
+  final E? value;
+  final String? title;
+  final String? subtitle;
 
   OptionDescription({
-    @required this.value,
-    @required this.title,
+    required this.value,
+    required this.title,
     this.subtitle,
   }) : isDivider = false;
 
@@ -48,10 +49,9 @@ class OptionDescription<E> {
         subtitle = null;
 }
 
-OptionDescription<E> optionWithValue<E>(
+OptionDescription<E>? optionWithValue<E>(
     List<OptionDescription<E>> options, E value) {
-  return options.firstWhere((o) => !o.isDivider && o.value == value,
-      orElse: () => null);
+  return options.firstWhereOrNull((o) => !o.isDivider && o.value == value);
 }
 
 abstract class EnumOptionSelector<E> extends StatefulWidget {
@@ -61,16 +61,16 @@ abstract class EnumOptionSelector<E> extends StatefulWidget {
   final Function changeCallback;
 
   EnumOptionSelector({
-    @required this.windowTitle,
-    @required this.allValues,
-    @required this.initialValue,
-    @required this.changeCallback,
+    required this.windowTitle,
+    required this.allValues,
+    required this.initialValue,
+    required this.changeCallback,
   });
 }
 
 class EnumOptionSelectorState<E, W extends EnumOptionSelector>
     extends State<W> {
-  E currentValue;
+  E? currentValue;
 
   @override
   void initState() {
@@ -78,7 +78,7 @@ class EnumOptionSelectorState<E, W extends EnumOptionSelector>
     currentValue = widget.initialValue;
   }
 
-  void _valueChanged(E newValue) {
+  void _valueChanged(E? newValue) {
     setState(() {
       currentValue = newValue;
     });
@@ -98,9 +98,9 @@ class EnumOptionSelectorState<E, W extends EnumOptionSelector>
                   ? ThinDivider(
                       height: 8.0,
                     )
-                  : MultiLineRadioListTile<E>(
-                      title: Text(e.title),
-                      subtitle: e.subtitle == null ? null : Text(e.subtitle),
+                  : MultiLineRadioListTile<E?>(
+                      title: Text(e.title!),
+                      subtitle: e.subtitle == null ? null : Text(e.subtitle!),
                       value: e.value,
                       groupValue: currentValue,
                       onChanged: _valueChanged,

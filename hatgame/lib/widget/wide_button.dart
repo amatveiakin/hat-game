@@ -22,7 +22,7 @@ class WideWidget extends StatelessWidget {
   final Widget child;
 
   WideWidget({
-    @required this.child,
+    required this.child,
   });
 
   @override
@@ -39,15 +39,15 @@ class WideButton extends StatelessWidget {
       EdgeInsets.symmetric(vertical: 20.0);
 
   final Widget child;
-  final Color color;
-  final VoidCallback onPressed;
-  final VoidCallback onPressedDisabled; // executed if onPressed is null
+  final Color? color;
+  final VoidCallback? onPressed;
+  final VoidCallback? onPressedDisabled; // executed if onPressed is null
   final EdgeInsets margin;
 
   WideButton({
-    @required this.child,
+    required this.child,
     this.color,
-    @required this.onPressed,
+    required this.onPressed,
     this.onPressedDisabled,
     this.margin = EdgeInsets.zero,
   });

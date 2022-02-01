@@ -31,7 +31,7 @@ Future<void> setupApp(AppConfig config) async {
 const awaitPhaseTimeout = Duration(seconds: 3);
 
 class Client {
-  LocalGameData localGameData;
+  late LocalGameData localGameData;
 
   Future<GamePhase> gamePhase() async {
     final snapshot = await localGameData.gameReference.get();
@@ -49,7 +49,7 @@ class Client {
   }
 
   Future<void> startGame(
-      {GameConfig config, TeamCompositions teamCompositions}) async {
+      {GameConfig? config, TeamCompositions? teamCompositions}) async {
     if (config != null) {
       await localGameData.gameReference.updateColumns([
         DBColConfig().withData(config),
@@ -87,7 +87,7 @@ TeamCompositions twoVsTwoSimpleComposition() {
   );
 }
 
-TeamCompositions ascendingIndividualTurnOrder({@required int numPlayers}) {
+TeamCompositions ascendingIndividualTurnOrder({required int numPlayers}) {
   return TeamCompositions(
     (b) => b..individualOrder.replace(List<int>.generate(numPlayers, (i) => i)),
   );
@@ -138,10 +138,10 @@ void main() {
 
       await (await client.controller()).startExplaning();
       final int w0 =
-          (await client.controller()).turnState.wordsInThisTurn.last.id;
+          (await client.controller()).turnState!.wordsInThisTurn.last.id;
       await (await client.controller()).wordGuessed();
       final int w1 =
-          (await client.controller()).turnState.wordsInThisTurn.last.id;
+          (await client.controller()).turnState!.wordsInThisTurn.last.id;
       await (await client.controller()).wordGuessed();
       await (await client.controller()).wordGuessed();
       // Last word is already pulled from the hat, although not guessed.
@@ -154,16 +154,16 @@ void main() {
       // One word wasn't guessed to begin with and one was returned to the hat.
       expect((await client.controller()).gameData.numWordsInHat(), equals(2));
 
-      expect((await client.controller()).turnState.turnPhase,
+      expect((await client.controller()).turnState!.turnPhase,
           equals(TurnPhase.prepare));
       await (await client.controller()).startExplaning();
-      expect((await client.controller()).turnState.turnPhase,
+      expect((await client.controller()).turnState!.turnPhase,
           equals(TurnPhase.explain));
       await (await client.controller()).wordGuessed();
-      expect((await client.controller()).turnState.turnPhase,
+      expect((await client.controller()).turnState!.turnPhase,
           equals(TurnPhase.explain));
       await (await client.controller()).wordGuessed();
-      expect((await client.controller()).turnState.turnPhase,
+      expect((await client.controller()).turnState!.turnPhase,
           equals(TurnPhase.review));
       await (await client.controller()).nextTurn();
       expect((await client.controller()).gameData.gameFinished(), isTrue);
@@ -188,7 +188,7 @@ void main() {
       host.localGameData =
           await GameController.newLobby(firestoreInstance, 'user_host');
       guest.localGameData = (await GameController.joinLobby(
-              firestoreInstance, 'user_guest', host.localGameData.gameID))
+              firestoreInstance, 'user_guest', host.localGameData.gameID!))
           .localGameData;
 
       await (await host.configController()).update((config) => config.rebuild(
@@ -229,14 +229,14 @@ void main() {
           await GameController.newLobby(firestoreInstance, 'user_0');
 
       user1.localGameData = (await GameController.joinLobby(
-              firestoreInstance, 'user_1', host.localGameData.gameID))
+              firestoreInstance, 'user_1', host.localGameData.gameID!))
           .localGameData;
       expect(user1.localGameData.myPlayerID, equals(1));
 
       await GameController.kickPlayer(host.localGameData.gameReference, 1);
 
       user2.localGameData = (await GameController.joinLobby(
-              firestoreInstance, 'user_2', host.localGameData.gameID))
+              firestoreInstance, 'user_2', host.localGameData.gameID!))
           .localGameData;
       expect(user2.localGameData.myPlayerID, equals(2));
 
@@ -256,7 +256,7 @@ void main() {
 
       await host.startGame();
 
-      final party = (await host.controller()).turnState.party;
+      final party = (await host.controller()).turnState!.party;
       expect([party.performer] + party.recipients.toList(),
           unorderedEquals([0, 2]));
     });
@@ -272,7 +272,7 @@ void main() {
           await getGamePhase(host.localGameData), equals(GamePhase.configure));
 
       guest.localGameData = (await GameController.joinLobby(
-              firestoreInstance, 'user_guest', host.localGameData.gameID))
+              firestoreInstance, 'user_guest', host.localGameData.gameID!))
           .localGameData;
       expect(
           await getGamePhase(host.localGameData), equals(GamePhase.configure));
@@ -312,7 +312,7 @@ void main() {
       host.localGameData =
           await GameController.newLobby(firestoreInstance, 'user_host');
       guest.localGameData = (await GameController.joinLobby(
-              firestoreInstance, 'user_guest', host.localGameData.gameID))
+              firestoreInstance, 'user_guest', host.localGameData.gameID!))
           .localGameData;
 
       await (await host.configController()).update((config) => config.rebuild(

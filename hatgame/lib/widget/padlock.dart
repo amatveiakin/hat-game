@@ -7,7 +7,7 @@ import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/colors.dart';
 
 List<BoxShadow> _elevationToShadow(int elevation, Color color) {
-  return kElevationToShadow[elevation]
+  return kElevationToShadow[elevation]!
       .map((s) => BoxShadow(
             color: color.withOpacity(s.color.opacity),
             offset: s.offset,
@@ -28,7 +28,7 @@ class _PadlockPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
     var borderPaint = Paint()
-      ..color = Color.lerp(MyTheme.accent, MyColors.black(180), 0.5)
+      ..color = Color.lerp(MyTheme.accent, MyColors.black(180), 0.5)!
       ..style = PaintingStyle.stroke
       ..strokeWidth = 5.0
       ..strokeCap = StrokeCap.butt
@@ -77,10 +77,10 @@ class _PadlockPainter extends CustomPainter {
 }
 
 class Padlock extends StatefulWidget {
-  final AnimationController animationController;
+  final AnimationController? animationController;
   final void Function() onUnlocked;
 
-  Padlock({@required this.onUnlocked, @required this.animationController});
+  Padlock({required this.onUnlocked, required this.animationController});
 
   @override
   createState() => PadlockState();
@@ -91,16 +91,16 @@ class PadlockState extends State<Padlock> with SingleTickerProviderStateMixin {
   bool _panActive = false;
   bool _padlockOpen = false;
   bool _padlockHidden = false;
-  /*late*/ Size /*!*/ _size;
-  /*late*/ Offset /*!*/ _padlockPos;
+  late Size _size;
+  late Offset _padlockPos;
 
   var _animationProgress = 0.0;
-  Animation<double> _animation;
+  late Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
-    _animation = Tween(begin: 0.0, end: 1.0).animate(widget.animationController)
+    _animation = Tween(begin: 0.0, end: 1.0).animate(widget.animationController!)
       ..addListener(() {
         setState(() {
           _animationProgress = _animation.value;

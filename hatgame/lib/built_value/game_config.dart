@@ -15,8 +15,7 @@ abstract class RulesConfig implements Built<RulesConfig, RulesConfigBuilder> {
   int get bonusSeconds;
   int get wordsPerPlayer;
   bool get writeWords;
-  @nullable
-  BuiltList<String> get dictionaries; // only if writeWords == false
+  BuiltList<String>? get dictionaries; // only if writeWords == false
 
   RulesConfig._();
   factory RulesConfig([void Function(RulesConfigBuilder) updates]) =
@@ -90,8 +89,7 @@ abstract class PlayersConfig
   // Maps to player ID to player name.
   BuiltMap<int, String> get names;
   // Set only if manual teaming.
-  @nullable
-  BuiltList<BuiltList<int>> get teams;
+  BuiltList<BuiltList<int>>? get teams;
 
   PlayersConfig._();
   factory PlayersConfig([void Function(PlayersConfigBuilder) updates]) =
@@ -100,7 +98,7 @@ abstract class PlayersConfig
 
   void checkInvariant() {
     if (teams != null) {
-      for (final t in teams) {
+      for (final t in teams!) {
         for (final p in t) {
           Assert.holds(names.containsKey(p), lazyMessage: () => toString());
         }
@@ -115,8 +113,7 @@ abstract class PlayersConfig
 abstract class GameConfig implements Built<GameConfig, GameConfigBuilder> {
   RulesConfig get rules;
   TeamingConfig get teaming;
-  @nullable
-  PlayersConfig get players;
+  PlayersConfig? get players;
 
   GameConfig._();
   factory GameConfig([void Function(GameConfigBuilder) updates]) = _$GameConfig;

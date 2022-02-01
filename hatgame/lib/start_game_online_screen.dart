@@ -19,7 +19,7 @@ import 'package:hatgame/widget/wide_button.dart';
 // TODO: Consider using Form + TextFormField instead.
 
 // Local checks only
-InvalidOperation checkGameID(String gameID) {
+InvalidOperation? checkGameID(String gameID) {
   if (gameID.isEmpty) {
     return InvalidOperation(tr('game_id_is_empty'));
   }
@@ -68,7 +68,7 @@ class NewGameOnlineScreenState extends State<NewGameOnlineScreen> {
   @override
   void initState() {
     playerNameController.textController.text =
-        localStorage.get(LocalColPlayerName());
+        localStorage.get(LocalColPlayerName())!;
     playerNameController.textController.addListener(() {
       localStorage.set(
           LocalColPlayerName(), playerNameController.textController.text);
@@ -131,7 +131,7 @@ class JoinGameOnlineScreen extends StatefulWidget {
   JoinGameOnlineScreen();
 
   factory JoinGameOnlineScreen.fromRoute(RouteSettings settings) {
-    final String gameID = LocalGameData.parseRoute(settings.name);
+    final String? gameID = LocalGameData.parseRoute(settings.name!);
     if (gameID == null) {
       return null;
     }
@@ -152,7 +152,7 @@ class JoinGameOnlineScreenState extends State<JoinGameOnlineScreen> {
   bool navigatedToGame = false;
 
   Future<bool> confirmReconnect(
-      {@required String playerName, @required bool gameStarted}) {
+      {required String playerName, required bool gameStarted}) {
     return multipleChoiceDialog<bool>(
       context: context,
       contentText: gameStarted
@@ -223,7 +223,7 @@ class JoinGameOnlineScreenState extends State<JoinGameOnlineScreen> {
   @override
   void initState() {
     playerNameController.textController.text =
-        localStorage.get(LocalColPlayerName());
+        localStorage.get(LocalColPlayerName())!;
     playerNameController.textController.addListener(() {
       localStorage.set(
           LocalColPlayerName(), playerNameController.textController.text);

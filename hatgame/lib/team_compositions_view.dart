@@ -29,7 +29,7 @@ enum NavigationState {
 class _TeamView extends StatelessWidget {
   final List<String> playerNames;
 
-  _TeamView({@required this.playerNames});
+  _TeamView({required this.playerNames});
 
   Widget _playerView(String name) {
     return Text(
@@ -68,7 +68,7 @@ class TeamCompositionsView extends StatelessWidget {
   final GameNavigator navigator =
       GameNavigator(currentPhase: GamePhase.composeTeams);
 
-  TeamCompositionsView({@required this.localGameData});
+  TeamCompositionsView({required this.localGameData});
 
   void _onBackPressed() {
     GameController.discardTeamCompositions(localGameData.gameReference);
@@ -99,9 +99,9 @@ class TeamCompositionsView extends StatelessWidget {
     );
   }
 
-  Widget buildBody(BuildContext context, DBDocumentSnapshot/*!*/ snapshot) {
+  Widget buildBody(BuildContext context, DBDocumentSnapshot snapshot) {
     final TeamCompositionsViewData teamCompositionsViewData =
-        GameController.getTeamCompositions(localGameData, snapshot);
+        GameController.getTeamCompositions(localGameData, snapshot)!;
     Assert.holds(teamCompositionsViewData != null);
 
     return ConstrainedScaffold(

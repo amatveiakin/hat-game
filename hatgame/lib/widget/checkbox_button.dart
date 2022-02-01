@@ -9,9 +9,9 @@ class CheckboxButton extends StatelessWidget {
   final Widget title;
 
   CheckboxButton({
-    @required this.value,
-    @required this.onChanged,
-    @required this.title,
+    required this.value,
+    required this.onChanged,
+    required this.title,
   });
 
   @override
@@ -23,7 +23,7 @@ class CheckboxButton extends StatelessWidget {
     return DecoratedBox(
       decoration: ShapeDecoration(shape: borderShape),
       child: DefaultTextStyle(
-        style: Theme.of(context).textTheme.button,
+        style: Theme.of(context).textTheme.button!,
         child: LabeledCheckbox(
           value: value,
           onChanged: onChanged,

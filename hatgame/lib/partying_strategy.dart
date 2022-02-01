@@ -11,7 +11,7 @@ import 'package:meta/meta.dart';
 // Team Generators
 
 List<List<int>> generateTeamPlayers(
-    {@required List<int> playerIDs, @required List<int> teamSizes}) {
+    {required List<int> playerIDs, required List<int> teamSizes}) {
   final List<List<int>> teams = [];
   int playerIdx = 0;
   for (final s in teamSizes) {
@@ -45,7 +45,7 @@ List<int> generateTeamSizes(
   DesiredTeamSize desiredTeamSize,
   UnequalTeamSize unequalTeamSize,
 ) {
-  /*late final*/ int teamSize;
+  late final int teamSize;
   switch (desiredTeamSize) {
     case DesiredTeamSize.teamsOf2:
       teamSize = 2;
@@ -115,10 +115,10 @@ abstract class PartyingStrategy {
       GameConfig config, TeamCompositions teamCompositions) {
     if (teamCompositions.teams != null) {
       return FixedTeamsStrategy(
-          teamCompositions.teams, config.teaming.guessingInLargeTeam);
+          teamCompositions.teams!, config.teaming.guessingInLargeTeam);
     } else {
       return IndividualStrategy(
-          teamCompositions.individualOrder, config.teaming.individualPlayStyle);
+          teamCompositions.individualOrder!, config.teaming.individualPlayStyle);
     }
   }
 }
@@ -215,7 +215,7 @@ class BroadcastIndividualStrategy extends IndividualStrategyImpl {
 // FixedTeamsStrategy
 
 class FixedTeamsStrategy extends PartyingStrategy {
-  final BuiltList<BuiltList<int>>/*!*/ teamPlayers;
+  final BuiltList<BuiltList<int>> teamPlayers;
   final IndividualPlayStyle individualPlayStyle;
 
   FixedTeamsStrategy(this.teamPlayers, this.individualPlayStyle);

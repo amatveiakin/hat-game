@@ -13,13 +13,13 @@ class PrimarySecondaryScaffold extends StatefulWidget {
   final Widget secondaryIcon;
 
   PrimarySecondaryScaffold({
-    @required this.primaryAutomaticallyImplyLeading,
-    @required this.primary,
-    @required this.primaryTitle,
-    @required this.secondaryRouteName,
-    @required this.secondary,
-    @required this.secondaryTitle,
-    @required this.secondaryIcon,
+    required this.primaryAutomaticallyImplyLeading,
+    required this.primary,
+    required this.primaryTitle,
+    required this.secondaryRouteName,
+    required this.secondary,
+    required this.secondaryTitle,
+    required this.secondaryIcon,
   });
 
   @override
@@ -31,8 +31,8 @@ class _SecondaryView extends StatelessWidget {
   final String title;
 
   _SecondaryView({
-    @required this.body,
-    @required this.title,
+    required this.body,
+    required this.title,
   });
 
   @override

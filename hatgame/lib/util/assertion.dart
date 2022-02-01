@@ -17,7 +17,7 @@ class Assert {
   static const defaultReleaseBehavior = AssertInRelease.fail;
 
   static withContext(
-      {@required MessageProducer context, @required VoidCallback body}) {
+      {required MessageProducer context, required VoidCallback body}) {
     _AssertContext.push(context);
     try {
       body();
@@ -27,8 +27,8 @@ class Assert {
   }
 
   static void holds(bool condition,
-      {String message,
-      MessageProducer lazyMessage,
+      {String? message,
+      MessageProducer? lazyMessage,
       AssertInRelease inRelease = defaultReleaseBehavior}) {
     final String combinedMessage = _combine([
       message,
@@ -66,13 +66,13 @@ class Assert {
     holds(false, message: message, inRelease: AssertInRelease.fail);
   }
 
-  static void failDebug(String message, {@required AssertInRelease inRelease}) {
+  static void failDebug(String message, {required AssertInRelease inRelease}) {
     holds(false, message: message, inRelease: inRelease);
   }
 
   static void eq<T>(T a, T b,
-      {String message,
-      MessageProducer lazyMessage,
+      {String? message,
+      MessageProducer? lazyMessage,
       AssertInRelease inRelease = defaultReleaseBehavior}) {
     holds(a == b,
         message: _combine([a.toString() + ' == ' + b.toString(), message]),
@@ -81,8 +81,8 @@ class Assert {
   }
 
   static void ne<T>(T a, T b,
-      {String message,
-      MessageProducer lazyMessage,
+      {String? message,
+      MessageProducer? lazyMessage,
       AssertInRelease inRelease = defaultReleaseBehavior}) {
     holds(a != b,
         message: _combine([a.toString() + ' != ' + b.toString(), message]),
@@ -91,8 +91,8 @@ class Assert {
   }
 
   static void lt<T extends Comparable>(T a, T b,
-      {String message,
-      MessageProducer lazyMessage,
+      {String? message,
+      MessageProducer? lazyMessage,
       AssertInRelease inRelease = defaultReleaseBehavior}) {
     holds(a.compareTo(b) < 0,
         message: _combine([a.toString() + ' < ' + b.toString(), message]),
@@ -101,8 +101,8 @@ class Assert {
   }
 
   static void le<T extends Comparable>(T a, T b,
-      {String message,
-      MessageProducer lazyMessage,
+      {String? message,
+      MessageProducer? lazyMessage,
       AssertInRelease inRelease = defaultReleaseBehavior}) {
     holds(a.compareTo(b) <= 0,
         message: _combine([a.toString() + ' <= ' + b.toString(), message]),
@@ -111,8 +111,8 @@ class Assert {
   }
 
   static void gt<T extends Comparable>(T a, T b,
-      {String message,
-      MessageProducer lazyMessage,
+      {String? message,
+      MessageProducer? lazyMessage,
       AssertInRelease inRelease = defaultReleaseBehavior}) {
     holds(a.compareTo(b) > 0,
         message: _combine([a.toString() + ' > ' + b.toString(), message]),
@@ -121,8 +121,8 @@ class Assert {
   }
 
   static void ge<T extends Comparable>(T a, T b,
-      {String message,
-      MessageProducer lazyMessage,
+      {String? message,
+      MessageProducer? lazyMessage,
       AssertInRelease inRelease = defaultReleaseBehavior}) {
     holds(a.compareTo(b) >= 0,
         message: _combine([a.toString() + ' >= ' + b.toString(), message]),
@@ -131,8 +131,8 @@ class Assert {
   }
 
   static void isIn<T>(T a, Iterable<T> b,
-      {String message,
-      MessageProducer lazyMessage,
+      {String? message,
+      MessageProducer? lazyMessage,
       AssertInRelease inRelease = defaultReleaseBehavior}) {
     holds(b.contains(a),
         message: _combine([a.toString() + ' in ' + b.toString(), message]),
@@ -141,8 +141,8 @@ class Assert {
   }
 
   static void subset<T>(Iterable<T> a, Set<T> b,
-      {String message,
-      MessageProducer lazyMessage,
+      {String? message,
+      MessageProducer? lazyMessage,
       AssertInRelease inRelease = defaultReleaseBehavior}) {
     holds(b.containsAll(a),
         message: _combine([a.toString() + ' in ' + b.toString(), message]),
@@ -150,7 +150,7 @@ class Assert {
         inRelease: inRelease);
   }
 
-  static _combine(List<String> messages) {
+  static _combine(List<String?> messages) {
     return messages.joinNonEmpty(': ');
   }
 }

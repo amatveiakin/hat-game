@@ -19,7 +19,7 @@ import 'package:hatgame/widget/wide_button.dart';
 class _TeamScoreView extends StatelessWidget {
   final TeamScoreViewData data;
 
-  _TeamScoreView({@required this.data});
+  _TeamScoreView({required this.data});
 
   Widget _playerView(PlayerScoreViewData player) {
     return Row(
@@ -92,7 +92,7 @@ class _TeamScoreView extends StatelessWidget {
 class _WordView extends StatelessWidget {
   final WordInTurnLogViewData data;
 
-  _WordView({@required this.data});
+  _WordView({required this.data});
 
   Icon _icon(WordStatus status) {
     switch (status) {
@@ -140,7 +140,7 @@ class _WordView extends StatelessWidget {
 class _TurnView extends StatelessWidget {
   final TurnLogViewData data;
 
-  _TurnView({@required this.data});
+  _TurnView({required this.data});
 
   @override
   Widget build(BuildContext context) {
@@ -183,7 +183,7 @@ class ScoreView extends StatelessWidget {
   final GameNavigator navigator =
       GameNavigator(currentPhase: GamePhase.gameOver);
 
-  ScoreView({@required this.localGameData});
+  ScoreView({required this.localGameData});
 
   void _rematch(BuildContext context, DBDocumentSnapshot snapshot) async {
     try {
@@ -202,7 +202,7 @@ class ScoreView extends StatelessWidget {
     );
   }
 
-  Widget buildBody(BuildContext context, DBDocumentSnapshot/*!*/ snapshot) {
+  Widget buildBody(BuildContext context, DBDocumentSnapshot snapshot) {
     final gameController = GameController.fromSnapshot(localGameData, snapshot);
     final gameData = gameController.gameData;
     return PrimarySecondaryScaffold(

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class ImageAssetIcon extends StatelessWidget {
   final String name;
-  final Color color;
+  final Color? color;
 
   ImageAssetIcon(
     this.name, {
@@ -13,7 +13,7 @@ class ImageAssetIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final iconTheme = IconTheme.of(context);
     return SizedBox.fromSize(
-      size: Size.square(iconTheme.size),
+      size: Size.square(iconTheme.size!),
       child: Image.asset(
         name,
         color: color ?? iconTheme.color,

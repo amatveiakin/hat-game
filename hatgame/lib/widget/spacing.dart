@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 List<Widget> addSpacing(
-    {@required List<Widget> tiles, double horizontal, double vertical}) {
+    {required List<Widget> tiles, double? horizontal, double? vertical}) {
   return tiles.isEmpty
       ? tiles
       : tiles.skip(1).fold(

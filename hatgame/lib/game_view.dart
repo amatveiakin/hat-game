@@ -28,12 +28,12 @@ import 'package:hatgame/widget/wide_button.dart';
 class PartyView extends StatelessWidget {
   final PartyViewData party;
   final TurnPhase turnPhase;
-  final int myPlayerID;
+  final int? myPlayerID;
 
   PartyView(this.party, this.turnPhase, this.myPlayerID);
 
   Widget _playerView(PlayerViewData playerData) {
-    Widget textWidget = Text(playerData.name);
+    Widget textWidget = Text(playerData.name!);
     final animationDuration = turnPhase == TurnPhase.prepare
         ? Duration.zero
         : Duration(milliseconds: 300);
@@ -91,7 +91,7 @@ class PartyView extends StatelessWidget {
 }
 
 Widget _getWordFeedbackIcon(
-    WordFeedback feedback, bool menuButton, bool active) {
+    WordFeedback? feedback, bool menuButton, bool active) {
   if (feedback == null) {
     return menuButton
         ? Icon(Icons.thumbs_up_down_outlined)
@@ -136,22 +136,22 @@ String _getWordFeedbackText(WordFeedback feedback) {
 }
 
 class WordReviewItem extends StatelessWidget {
-  final String text;
+  final String? text;
   final WordStatus status;
-  final WordFeedback feedback;
-  final bool/*!*/ hasFlag;
-  final void Function(WordStatus) setStatus;
-  final void Function(WordFeedback) setFeedback;
-  final void Function(bool) setFlag;
+  final WordFeedback? feedback;
+  final bool hasFlag;
+  final void Function(WordStatus)? setStatus;
+  final void Function(WordFeedback?)? setFeedback;
+  final void Function(bool)? setFlag;
 
   WordReviewItem(
-      {@required this.text,
-      @required this.status,
-      @required this.feedback,
+      {required this.text,
+      required this.status,
+      required this.feedback,
       this.hasFlag = false,
-      @required this.setStatus,
-      @required this.setFeedback,
-      @required this.setFlag});
+      required this.setStatus,
+      required this.setFeedback,
+      required this.setFlag});
 
   @override
   Widget build(BuildContext context) {
@@ -166,7 +166,7 @@ class WordReviewItem extends StatelessWidget {
     // TODO: Consider using LabeledCheckbox.
     return InkWell(
       onTap: () {
-        setStatus(_checkedToStatus(!_statusToChecked(status)));
+        setStatus!(_checkedToStatus(!_statusToChecked(status)));
       },
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 2.0, vertical: 4.0),
@@ -175,7 +175,7 @@ class WordReviewItem extends StatelessWidget {
             Checkbox(
               value: _statusToChecked(status),
               onChanged: setStatus != null
-                  ? (bool newValue) => setStatus(_checkedToStatus(newValue))
+                  ? (bool? newValue) => setStatus!(_checkedToStatus(newValue!))
                   : null,
             ),
             Expanded(
@@ -192,7 +192,7 @@ class WordReviewItem extends StatelessWidget {
                       ],
                     )
                   : Text(
-                      text,
+                      text!,
                       style: TextStyle(
                           decoration: status == WordStatus.discarded
                               ? TextDecoration.lineThrough
@@ -214,7 +214,7 @@ class WordReviewItem extends StatelessWidget {
                     ? Icon(Icons.error, color: MyTheme.accent)
                     : Icon(Icons.error_outline),
                 tooltip: tr('flag_the_word'),
-                onPressed: () => setFlag(!hasFlag),
+                onPressed: () => setFlag!(!hasFlag),
               ),
             if (setStatus != null)
               IconButton(
@@ -225,7 +225,7 @@ class WordReviewItem extends StatelessWidget {
                     ? tr('restore_word')
                     : tr('discard_word'),
                 onPressed: () {
-                  setStatus(status == WordStatus.discarded
+                  setStatus!(status == WordStatus.discarded
                       ? WordStatus.notExplained
                       : WordStatus.discarded);
                 },
@@ -248,7 +248,7 @@ class WordReviewItem extends StatelessWidget {
                   return result;
                 },
                 onSelected: (WordFeedback newFeedback) {
-                  setFeedback(newFeedback == feedback ? null : newFeedback);
+                  setFeedback!(newFeedback == feedback ? null : newFeedback);
                 },
               )
           ],
@@ -266,10 +266,10 @@ class PlayArea extends StatefulWidget {
   final LocalGameState localGameState;
 
   PlayArea({
-    @required this.localGameData,
-    @required this.gameController,
-    @required this.gameData,
-    @required this.localGameState,
+    required this.localGameData,
+    required this.gameController,
+    required this.gameData,
+    required this.localGameState,
   });
 
   @override
@@ -282,10 +282,10 @@ class PlayAreaState extends State<PlayArea>
   GameController get gameController => widget.gameController;
   GameConfig get gameConfig => gameData.config;
   GameData get gameData => widget.gameData;
-  TurnState get turnState => gameData.turnState;
+  TurnState? get turnState => gameData.turnState;
   LocalGameState get localGameState => widget.localGameState;
 
-  AnimationController _padlockAnimationController;
+  AnimationController? _padlockAnimationController;
   bool _turnActive = false;
 
   void _unlockStartExplaning() {
@@ -323,7 +323,7 @@ class PlayAreaState extends State<PlayArea>
 
   void _endTurn(int turnRestriction) {
     if (gameData.turnIndex() == turnRestriction &&
-        turnState.turnPhase == TurnPhase.explain) {
+        turnState!.turnPhase == TurnPhase.explain) {
       Sounds.play(Sounds.timeOver);
       MyVibration.heavyVibration();
       gameController.finishExplanation();
@@ -332,7 +332,7 @@ class PlayAreaState extends State<PlayArea>
 
   void _endBonusTime(int turnRestriction) {
     if (gameData.turnIndex() == turnRestriction &&
-        turnState.turnPhase == TurnPhase.review) {
+        turnState!.turnPhase == TurnPhase.review) {
       Sounds.play(Sounds.bonusTimeOver);
       MyVibration.mediumVibration();
     }
@@ -363,7 +363,7 @@ class PlayAreaState extends State<PlayArea>
 
   @override
   void dispose() {
-    _padlockAnimationController.dispose();
+    _padlockAnimationController!.dispose();
     super.dispose();
   }
 
@@ -404,7 +404,7 @@ class PlayAreaState extends State<PlayArea>
       children: wordReviewItems,
     );
 
-    switch (turnState.turnPhase) {
+    switch (turnState!.turnPhase) {
       case TurnPhase.prepare:
         return Container();
       case TurnPhase.explain:
@@ -418,24 +418,24 @@ class PlayAreaState extends State<PlayArea>
           // OPTIMIZATION POTENTIAL: The cost of recreating animation
           // controller (inside the timer) may turn out to be non-zero, in
           // which case Flutter approach would be faster.
-          if (NtpTime.initialized && turnState.turnTimeStart != null)
-            turnState.turnPaused
+          if (NtpTime.initialized && turnState!.turnTimeStart != null)
+            turnState!.turnPaused!
                 ? TimerView(
                     key: UniqueKey(),
                     style: TimerViewStyle.turnTime,
                     duration: Duration(seconds: gameConfig.rules.turnSeconds),
-                    startTime: turnState.turnTimeBeforePause,
+                    startTime: turnState!.turnTimeBeforePause,
                     startPaused: true,
                   )
                 : TimerView(
                     key: UniqueKey(),
                     style: TimerViewStyle.turnTime,
                     duration: Duration(seconds: gameConfig.rules.turnSeconds),
-                    startTime: turnState.turnTimeBeforePause +
+                    startTime: turnState!.turnTimeBeforePause! +
                         anyMax(
                             Duration.zero,
                             NtpTime.nowUtcOrThrow()
-                                .difference(turnState.turnTimeStart)),
+                                .difference(turnState!.turnTimeStart!)),
                   ),
           SizedBox(height: 12.0),
         ]);
@@ -444,13 +444,13 @@ class PlayAreaState extends State<PlayArea>
           Expanded(
             child: wordReviewView,
           ),
-          if (NtpTime.initialized && turnState.bonusTimeStart != null)
+          if (NtpTime.initialized && turnState!.bonusTimeStart != null)
             TimerView(
               key: UniqueKey(),
               style: TimerViewStyle.bonusTime,
               duration: Duration(seconds: gameConfig.rules.bonusSeconds),
               startTime: anyMax(Duration.zero,
-                  NtpTime.nowUtcOrThrow().difference(turnState.bonusTimeStart)),
+                  NtpTime.nowUtcOrThrow().difference(turnState!.bonusTimeStart!)),
               hideOnTimeEnded: true,
             ),
           SizedBox(height: 12.0),
@@ -466,7 +466,7 @@ class PlayAreaState extends State<PlayArea>
       child:
           Text(tr('words_in_hat', args: [gameData.numWordsInHat().toString()])),
     );
-    switch (turnState.turnPhase) {
+    switch (turnState!.turnPhase) {
       case TurnPhase.prepare:
         return Column(
           children: [
@@ -478,7 +478,7 @@ class PlayAreaState extends State<PlayArea>
                         ? _startExplaning
                         : null,
                     onPressedDisabled: () =>
-                        _padlockAnimationController.forward(from: 0.0),
+                        _padlockAnimationController!.forward(from: 0.0),
                     color: MyTheme.accent,
                     child: Text(
                       tr('start'),
@@ -580,7 +580,7 @@ class PlayAreaState extends State<PlayArea>
 class GameView extends StatefulWidget {
   final LocalGameData localGameData;
 
-  GameView({@required this.localGameData});
+  GameView({required this.localGameData});
 
   @override
   State<StatefulWidget> createState() => GameViewState();
@@ -601,7 +601,7 @@ class GameViewState extends State<GameView> {
     );
   }
 
-  Widget buildBody(BuildContext context, DBDocumentSnapshot /*!*/ snapshot) {
+  Widget buildBody(BuildContext context, DBDocumentSnapshot snapshot) {
     final gameController = GameController.fromSnapshot(localGameData, snapshot);
     final gameData = gameController.gameData;
     Assert.holds(gameData != null);
@@ -615,7 +615,7 @@ class GameViewState extends State<GameView> {
           children: [
             PartyView(
               gameData.currentPartyViewData(),
-              gameData.turnState.turnPhase,
+              gameData.turnState!.turnPhase,
               localGameData.myPlayerID,
             ),
             Expanded(

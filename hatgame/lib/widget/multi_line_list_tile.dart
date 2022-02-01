@@ -16,19 +16,19 @@ import 'package:flutter/material.dart';
 const double _padding = 8;
 
 class MultiLineListTile extends StatelessWidget {
-  final Widget leading;
-  final Widget title;
-  final Widget subtitle;
-  final Widget trailing;
-  final bool dense;
-  final EdgeInsetsGeometry contentPadding;
+  final Widget? leading;
+  final Widget? title;
+  final Widget? subtitle;
+  final Widget? trailing;
+  final bool? dense;
+  final EdgeInsetsGeometry? contentPadding;
   final bool enabled;
-  final GestureTapCallback onTap;
-  final GestureLongPressCallback onLongPress;
+  final GestureTapCallback? onTap;
+  final GestureLongPressCallback? onLongPress;
   final bool selected;
 
   const MultiLineListTile({
-    Key key,
+    Key? key,
     this.leading,
     this.title,
     this.subtitle,
@@ -87,23 +87,23 @@ class MultiLineListTile extends StatelessWidget {
 class MultiLineSwitchListTile extends StatelessWidget {
   final bool value;
   final ValueChanged<bool> onChanged;
-  final Color activeColor;
-  final Color activeTrackColor;
-  final Color inactiveThumbColor;
-  final Color inactiveTrackColor;
-  final ImageProvider activeThumbImage;
-  final ImageProvider inactiveThumbImage;
-  final Widget title;
-  final Widget subtitle;
-  final Widget secondary;
-  final bool dense;
-  final EdgeInsetsGeometry contentPadding;
+  final Color? activeColor;
+  final Color? activeTrackColor;
+  final Color? inactiveThumbColor;
+  final Color? inactiveTrackColor;
+  final ImageProvider? activeThumbImage;
+  final ImageProvider? inactiveThumbImage;
+  final Widget? title;
+  final Widget? subtitle;
+  final Widget? secondary;
+  final bool? dense;
+  final EdgeInsetsGeometry? contentPadding;
   final bool selected;
 
   const MultiLineSwitchListTile({
-    Key key,
-    @required this.value,
-    @required this.onChanged,
+    Key? key,
+    required this.value,
+    required this.onChanged,
     this.activeColor,
     this.activeTrackColor,
     this.inactiveThumbColor,
@@ -169,24 +169,24 @@ class MultiLineSwitchListTile extends StatelessWidget {
 
 class MultiLineCheckboxListTile extends StatelessWidget {
   final bool value;
-  final ValueChanged<bool> onChanged;
-  final Color activeColor;
-  final Color checkColor;
-  final Widget title;
-  final Widget subtitle;
-  final Widget secondary;
-  final bool dense;
+  final ValueChanged<bool?> onChanged;
+  final Color? activeColor;
+  final Color? checkColor;
+  final Widget? title;
+  final Widget? subtitle;
+  final Widget? secondary;
+  final bool? dense;
   final bool selected;
   final ListTileControlAffinity controlAffinity;
   final bool autofocus;
-  final EdgeInsetsGeometry contentPadding;
+  final EdgeInsetsGeometry? contentPadding;
   final bool tristate;
 
 
   const MultiLineCheckboxListTile({
-    Key key,
-    @required this.value,
-    @required this.onChanged,
+    Key? key,
+    required this.value,
+    required this.onChanged,
     this.activeColor,
     this.checkColor,
     this.title,
@@ -252,20 +252,20 @@ class MultiLineCheckboxListTile extends StatelessWidget {
 class MultiLineRadioListTile<T> extends StatelessWidget {
   final T value;
   final T groupValue;
-  final ValueChanged<T> onChanged;
-  final Color activeColor;
-  final Widget title;
-  final Widget subtitle;
-  final Widget secondary;
-  final bool dense;
+  final ValueChanged<T?> onChanged;
+  final Color? activeColor;
+  final Widget? title;
+  final Widget? subtitle;
+  final Widget? secondary;
+  final bool? dense;
   final bool selected;
   final ListTileControlAffinity controlAffinity;
 
   const MultiLineRadioListTile({
-    Key key,
-    @required this.value,
-    @required this.groupValue,
-    @required this.onChanged,
+    Key? key,
+    required this.value,
+    required this.groupValue,
+    required this.onChanged,
     this.activeColor,
     this.title,
     this.subtitle,

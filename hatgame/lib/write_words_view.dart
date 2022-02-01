@@ -24,7 +24,7 @@ import 'package:hatgame/widget/wide_button.dart';
 import 'package:unicode/unicode.dart' as unicode;
 
 // Note: this is similar to checkPlayerName, should consider syncing changes.
-InvalidOperation checkWord(String word) {
+InvalidOperation? checkWord(String word) {
   if (word.isEmpty) {
     return InvalidOperation(tr('word_is_empty'));
   }
@@ -42,9 +42,9 @@ InvalidOperation checkWord(String word) {
 
 class WriteWordsViewController {
   final List<CheckedTextFieldController> controllers;
-  BuiltList<String> latestWords;
+  BuiltList<String>? latestWords;
 
-  WriteWordsViewController({@required int numWords})
+  WriteWordsViewController({required int numWords})
       : controllers = List<CheckedTextFieldController>.generate(
           numWords,
           (index) => CheckedTextFieldController(checker: checkWord),
@@ -82,7 +82,7 @@ class WriteWordsView extends StatefulWidget {
   final LocalGameData localGameData;
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  WriteWordsView({@required this.localGameData});
+  WriteWordsView({required this.localGameData});
 
   @override
   createState() => WriteWordsViewState();
@@ -91,7 +91,7 @@ class WriteWordsView extends StatefulWidget {
 class WriteWordsViewState extends State<WriteWordsView> {
   final GameNavigator navigator =
       GameNavigator(currentPhase: GamePhase.writeWords);
-  WriteWordsViewController _viewController;
+  WriteWordsViewController? _viewController;
 
   LocalGameData get localGameData => widget.localGameData;
 
@@ -112,19 +112,19 @@ class WriteWordsViewState extends State<WriteWordsView> {
 
   @override
   void dispose() {
-    _viewController.dispose();
+    _viewController!.dispose();
     super.dispose();
   }
 
-  void _updateState(PersonalState oldPersonalState, {@required bool ready}) {
+  void _updateState(PersonalState oldPersonalState, {required bool ready}) {
     if (ready) {
-      ready = checkTextFields(_viewController.controllers);
+      ready = checkTextFields(_viewController!.controllers);
     }
     GameController.updatePersonalState(
       localGameData,
       oldPersonalState.rebuild(
         (b) => b
-          ..words.replace(_viewController.getWords())
+          ..words.replace(_viewController!.getWords())
           ..wordsReady = ready,
       ),
     );
@@ -144,7 +144,7 @@ class WriteWordsViewState extends State<WriteWordsView> {
   }
 
   void _showPlayersNotReady(List<String> playersNotReady) async {
-    widget.scaffoldKey.currentState.showSnackBar(SnackBar(
+    widget.scaffoldKey.currentState!.showSnackBar(SnackBar(
       content: Text(tr('waiting_for') + playersNotReady.join(', ')),
     ));
   }
@@ -161,17 +161,17 @@ class WriteWordsViewState extends State<WriteWordsView> {
     if (_viewController == null) {
       _viewController =
           WriteWordsViewController(numWords: gameConfig.rules.wordsPerPlayer);
-      _viewController.addTextChangedListener(
+      _viewController!.addTextChangedListener(
           () => _updateState(playerState, ready: false));
       if (playerState.words != null) {
-        _viewController.updateWords(playerState.words);
+        _viewController!.updateWords(playerState.words!);
       }
     }
     final bool everybodyReady = viewData.numPlayersReady == viewData.numPlayers;
 
     // Note: keep in sync with offline_player_config_view.dart
     final listItemPaddingSmallRight = EdgeInsets.fromLTRB(10, 1, 5, 1);
-    final tiles = _viewController.controllers
+    final tiles = _viewController!.controllers
         .map(
           (controller) => ListTile(
             contentPadding: listItemPaddingSmallRight,

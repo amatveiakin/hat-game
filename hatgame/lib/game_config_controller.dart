@@ -14,15 +14,15 @@ import 'package:hatgame/util/assertion.dart';
 import 'package:meta/meta.dart';
 
 class GameConfigController {
-  final LocalGameData/*!*/ localGameData;
+  final LocalGameData localGameData;
   final GameConfig rawConfig;
-  final BuiltList<PersonalState> playerStates; // online-only
+  final BuiltList<PersonalState>? playerStates; // online-only
 
   bool get isReadOnly => !localGameData.isAdmin;
 
   bool get isInitialized =>
       rawConfig != null &&
-      (playerStates == null || playerStates.length > localGameData.myPlayerID);
+      (playerStates == null || playerStates!.length > localGameData.myPlayerID!);
 
   static GameConfig defaultConfig() {
     return GameConfig(
@@ -58,7 +58,7 @@ class GameConfigController {
     );
   }
 
-  static GameConfig initialConfig({@required bool onlineMode}) {
+  static GameConfig initialConfig({required bool onlineMode}) {
     final GameConfig config =
         LocalStorage.instance.get(LocalColLastConfig()) ?? defaultConfig();
     // TODO: Do something to avoid breaking online-only and offline-only
@@ -74,7 +74,7 @@ class GameConfigController {
         : rawConfig.rebuild((b) => b
           ..players.replace(PlayersConfig(
             (b) => b
-              ..names.replace(Map.fromEntries(playerStates
+              ..names.replace(Map.fromEntries(playerStates!
                   .where((e) => !(e.kicked ?? false))
                   .map((p) => MapEntry(p.id, p.name)))),
           )));
@@ -100,7 +100,7 @@ class GameConfigController {
         {GamePhase.configure, GamePhase.composeTeams, GamePhase.writeWords});
 
     GameConfig rawConfig = snapshot.get(DBColConfig());
-    BuiltList<PersonalState> playerStates;
+    BuiltList<PersonalState>? playerStates;
     if (rawConfig.players == null && localGameData.onlineMode) {
       // This happens in online mode before the game has started.
       playerStates = BuiltList<PersonalState>.from(
@@ -143,7 +143,7 @@ class GameConfigController {
         ));
   }
 
-  void updatePlayers(PlayersConfig Function(PlayersConfig) updater) {
+  void updatePlayers(PlayersConfig Function(PlayersConfig?) updater) {
     update((config) => config.rebuild(
           (b) => b..players.replace(updater(config.players)),
         ));

@@ -18,9 +18,8 @@ import 'package:hatgame/util/list_ext.dart';
 abstract class DBColumn<T> {
   String get name;
 
-  String serialize(T /*?*/ value) =>
-      value == null ? null : serializeImpl(value);
-  T deserialize(String serialized) =>
+  String? serialize(T? value) => value == null ? null : serializeImpl(value);
+  T? deserialize(String? serialized) =>
       serialized == null ? null : deserializeImpl(serialized);
 
   @protected
@@ -47,15 +46,14 @@ class DBColumnData<T> {
 }
 
 abstract class DBColumnFamily<T> extends DBColumn<T> {
-  final int /*!*/ id;
+  final int id;
   DBColumnFamily(this.id);
 }
 
-abstract class DBColumnFamilyManager<T,
-    ColumnT extends DBColumnFamily<T> /*!*/ > {
-  ColumnT /*?*/ fromColumnName(String columnName);
+abstract class DBColumnFamilyManager<T, ColumnT extends DBColumnFamily<T>> {
+  ColumnT? fromColumnName(String columnName);
   // TODO: Either remove or add ID to all such columns.
-  int idFromData(T data);
+  int? idFromData(T data);
 }
 
 class DBIndexedColumnData<T> {
@@ -81,33 +79,32 @@ bool dbContainsNonNull<T>(Map<String, dynamic> data, DBColumn<T> column) {
   return dbTryGet(data, column) != null;
 }
 
-T /*!*/ dbGet<T>(Map<String, dynamic> data, DBColumn<T> column,
-    {@required String documentPath}) {
+T dbGet<T>(Map<String, dynamic> data, DBColumn<T> column,
+    {required String? documentPath}) {
   Assert.holds(dbContains(data, column),
       lazyMessage: () => documentPath != null
           ? 'Column "${column.name}" not found in "$documentPath". '
               'Content: "$data"'
           : 'Column "${column.name}" not found. Content: "$data"');
-  return column.deserialize(data[column.name]);
+  return column.deserialize(data[column.name])!;
 }
 
-T dbTryGet<T>(Map<String, dynamic> data, DBColumn<T> column) {
+T? dbTryGet<T>(Map<String, dynamic> data, DBColumn<T> column) {
   return dbContains(data, column)
       ? dbGet(data, column, documentPath: null)
       : null;
 }
 
 List<DBIndexedColumnData<T>> dbGetAll<T, ColumnT extends DBColumnFamily<T>>(
-    Map<String, dynamic> data,
-    DBColumnFamilyManager<T /*!*/, ColumnT> columnManager,
-    {@required String documentPath}) {
+    Map<String, dynamic> data, DBColumnFamilyManager<T, ColumnT> columnManager,
+    {required String documentPath}) {
   final columns = List<DBIndexedColumnData<T>>();
   data.forEach((key, valueSerialized) {
-    final ColumnT c = columnManager.fromColumnName(key);
+    final ColumnT? c = columnManager.fromColumnName(key);
     if (c != null) {
-      final value = c.deserialize(valueSerialized) /*!*/;
+      final T value = c.deserialize(valueSerialized)!;
       columns.add(DBIndexedColumnData(c.id, value));
-      final int idFromValue = columnManager.idFromData(value);
+      final int? idFromValue = columnManager.idFromData(value);
       if (idFromValue != null) {
         Assert.eq(idFromValue, c.id,
             lazyMessage: () =>
@@ -164,7 +161,7 @@ class DBColConfig extends DBColumn<GameConfig> with DBColSerializeBuiltValue {
 }
 
 // Owned by the host during team compositions phase. Deleted afterwards.
-class DBColTeamCompositions extends DBColumn<TeamCompositions>
+class DBColTeamCompositions extends DBColumn<TeamCompositions?>
     with DBColSerializeBuiltValue {
   String get name => 'team_compositions';
 }
@@ -187,7 +184,7 @@ class DBColTurnRecord extends DBColumnFamily<TurnRecord>
 // Owned by the active player (the performer). For a new player to become
 // active, the previous active player must write an update handing over
 // the active player status.
-class DBColCurrentTurn extends DBColumn<TurnState>
+class DBColCurrentTurn extends DBColumn<TurnState?>
     with DBColSerializeBuiltValue {
   String get name => 'turn_current';
 }
@@ -231,20 +228,20 @@ class DBColRematchPrev extends DBColumn<RematchSource>
 class DBColTurnRecordManager
     extends DBColumnFamilyManager<TurnRecord, DBColTurnRecord> {
   @override
-  DBColTurnRecord fromColumnName(String columnName) {
-    final int id = _getColumnID(columnName, prefix: DBColTurnRecord.prefix);
+  DBColTurnRecord? fromColumnName(String columnName) {
+    final int? id = _getColumnID(columnName, prefix: DBColTurnRecord.prefix);
     return id == null ? null : DBColTurnRecord(id);
   }
 
   @override
-  int idFromData(TurnRecord data) => null;
+  int? idFromData(TurnRecord data) => null;
 }
 
 class DBColPlayerManager
     extends DBColumnFamilyManager<PersonalState, DBColPlayer> {
   @override
-  DBColPlayer fromColumnName(String columnName) {
-    final int id = _getColumnID(columnName, prefix: DBColPlayer.prefix);
+  DBColPlayer? fromColumnName(String columnName) {
+    final int? id = _getColumnID(columnName, prefix: DBColPlayer.prefix);
     return id == null ? null : DBColPlayer(id);
   }
 
@@ -255,11 +252,11 @@ class DBColPlayerManager
 // =============================================================================
 // Implementation
 
-mixin DBColSerializeBuiltValue<T> on DBColumn<T/*!*/> {
-  Serializer/*!*/ _serializer() => serializers.serializerForType(T);
+mixin DBColSerializeBuiltValue<T> on DBColumn<T> {
+  Serializer _serializer() => serializers.serializerForType(T)!;
   String serializeImpl(T value) =>
       json.encode(serializers.serializeWith(_serializer(), value));
-  T/*!*/ deserializeImpl(String serialized) =>
+  T deserializeImpl(String serialized) =>
       serializers.deserializeWith(_serializer(), json.decode(serialized));
 }
 
@@ -268,10 +265,10 @@ mixin DBColSerializeString on DBColumn<String> {
   String deserializeImpl(String serialized) => serialized;
 }
 
-int _getColumnID(String columnName, {@required String prefix}) {
+int? _getColumnID(String columnName, {required String prefix}) {
   final columnRegexp = RegExp('^$prefix([0-9]+)\$');
   final match = columnRegexp.firstMatch(columnName);
-  return match == null ? null : int.tryParse(match.group(1));
+  return match == null ? null : int.tryParse(match.group(1)!);
 }
 
 void _dbCheckContinuity(List<int> ids) {

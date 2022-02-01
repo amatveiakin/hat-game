@@ -8,9 +8,9 @@ import 'package:quiver/async.dart' as quiver_async;
 
 class LocalDocumentReference extends DBDocumentReference {
   final LocalDB localDB;
-  final String/*!*/ path;
+  final String path;
 
-  LocalDocumentReference({@required this.localDB, @required this.path});
+  LocalDocumentReference({required this.localDB, required this.path});
 
   void syncGetColumns(List<DBColumnData> columns) =>
       localDB.setRow(path, dbData(columns));
@@ -21,7 +21,7 @@ class LocalDocumentReference extends DBDocumentReference {
   void syncUpdateColumnsImpl(
           List<DBColumnData> columns, LocalCacheBehavior _) =>
       localDB.setRow(
-          path, Map.from(localDB.getRow(path))..addAll(dbData(columns)));
+          path, Map.from(localDB.getRow(path)!)..addAll(dbData(columns)));
   Future<void> updateColumnsImpl(
           List<DBColumnData> columns, LocalCacheBehavior _) async =>
       syncUpdateColumnsImpl(columns, _);
@@ -50,18 +50,18 @@ class LocalDocumentReference extends DBDocumentReference {
 
 class LocalDocumentSnapshot extends DBDocumentSnapshot {
   final LocalDocumentReference _ref;
-  final Map<String, dynamic> _data;
+  final Map<String, dynamic>? _data;
 
   LocalDocumentSnapshot(this._ref, this._data);
 
   LocalDocumentReference get reference => _ref;
 
-  Map<String, dynamic> get rawData => _data;
+  Map<String, dynamic>? get rawData => _data;
 }
 
 class LocalDocumentRawUpdate {
   String path;
-  Map<String, dynamic> data;
+  Map<String, dynamic>? data;
 
   LocalDocumentRawUpdate(this.path, this.data);
 }
@@ -81,14 +81,14 @@ class LocalDB {
   static final LocalDB _instance = LocalDB();
 
   // TODO: Back up to some persistent local storage.
-  final _rows = Map<String, Map<String, dynamic>>();
+  final _rows = Map<String, Map<String, dynamic>?>();
   int _newRowId = 0;
   final _streamController =
       StreamController<LocalDocumentRawUpdate>.broadcast();
 
   static LocalDB get instance => _instance;
 
-  Map<String, dynamic> getRow(String path) {
+  Map<String, dynamic>? getRow(String path) {
     return _rows[path];
   }
 

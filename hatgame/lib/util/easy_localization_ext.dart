@@ -33,7 +33,7 @@ bool _checkInitLocale(Locale locale, Locale _osLocale) {
 
 //Get fallback Locale
 Locale _getFallbackLocale(
-    List<Locale> supportedLocales, Locale fallbackLocale) {
+    List<Locale> supportedLocales, Locale? fallbackLocale) {
   //If fallbackLocale not set then return first from supportedLocales
   if (fallbackLocale != null) {
     return fallbackLocale;

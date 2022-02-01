@@ -6,32 +6,32 @@ import 'package:hatgame/widget/constrained_scaffold.dart';
 class SectionTitleData {
   final Widget icon;
 
-  SectionTitleData({@required this.icon});
+  SectionTitleData({required this.icon});
 }
 
 class SectionData {
   final SectionTitleData title;
   final Widget body;
 
-  SectionData({@required this.title, @required this.body});
+  SectionData({required this.title, required this.body});
 }
 
 class SectionsScaffold extends StatelessWidget {
-  final Key scaffoldKey;
+  final Key? scaffoldKey;
   final bool appBarAutomaticallyImplyLeading;
   final String appTitle;
   final bool appTitlePresentInNarrowMode;
   final List<SectionData> sections;
-  final List<Widget> actions;
-  final TabController tabController;
-  final Widget bottomWidget;
+  final List<Widget>? actions;
+  final TabController? tabController;
+  final Widget? bottomWidget;
 
   SectionsScaffold({
     this.scaffoldKey,
-    @required this.appBarAutomaticallyImplyLeading,
-    @required this.appTitle,
-    @required this.appTitlePresentInNarrowMode,
-    @required this.sections,
+    required this.appBarAutomaticallyImplyLeading,
+    required this.appTitle,
+    required this.appTitlePresentInNarrowMode,
+    required this.sections,
     this.actions,
     this.tabController,
     this.bottomWidget,
@@ -97,7 +97,7 @@ class SectionsScaffold extends StatelessWidget {
                 children: sections.map((s) => s.body).toList(),
               ),
             ),
-            if (bottomWidget != null) bottomWidget,
+            if (bottomWidget != null) bottomWidget!,
           ],
         ),
       );

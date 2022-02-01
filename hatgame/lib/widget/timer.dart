@@ -51,16 +51,16 @@ class _TimerPainter extends CustomPainter {
 class TimerView extends StatefulWidget {
   final TimerViewStyle style;
   final Duration duration;
-  final Duration startTime;
+  final Duration? startTime;
   final bool startPaused;
   final bool hideOnTimeEnded;
-  final void Function() onTimeEnded;
-  final void Function(bool) onRunningChanged;
+  final void Function()? onTimeEnded;
+  final void Function(bool)? onRunningChanged;
 
   TimerView(
-      {Key key,
-      @required this.style,
-      @required this.duration,
+      {Key? key,
+      required this.style,
+      required this.duration,
       this.startTime = Duration.zero,
       this.startPaused = false,
       this.hideOnTimeEnded = false,
@@ -76,13 +76,13 @@ class _TimerViewState extends State<TimerView>
     with SingleTickerProviderStateMixin {
   TimerViewStyle get style => widget.style;
   Duration get duration => widget.duration;
-  Duration get startTime => widget.startTime;
+  Duration? get startTime => widget.startTime;
 
   double _progress = 0.0;
   int _seconds = 0;
   bool _timeEnded = false;
-  Animation<double> _animation;
-  AnimationController _animationController;
+  late Animation<double> _animation;
+  late AnimationController _animationController;
 
   bool _canPause() {
     return widget.onRunningChanged != null && !_timeEnded;
@@ -93,7 +93,7 @@ class _TimerViewState extends State<TimerView>
     super.initState();
 
     _animationController = AnimationController(duration: duration, vsync: this);
-    _animationController.value = durationDiv(startTime, duration);
+    _animationController.value = durationDiv(startTime!, duration);
     _animation = Tween(begin: 0.0, end: 1.0).animate(_animationController)
       ..addListener(() {
         setState(_updateProgress);
@@ -135,7 +135,7 @@ class _TimerViewState extends State<TimerView>
         _animationController.forward();
       }
     });
-    widget.onRunningChanged(_isRunning());
+    widget.onRunningChanged!(_isRunning());
   }
 
   @override

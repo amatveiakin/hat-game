@@ -7,12 +7,12 @@ class NumericField extends StatelessWidget {
   final bool readOnly;
   final TextEditingController controller;
   final List<int> goldenValues;
-  final String suffixText;
+  final String? suffixText;
 
   NumericField({
-    @required this.readOnly,
-    @required this.controller,
-    @required this.goldenValues,
+    required this.readOnly,
+    required this.controller,
+    required this.goldenValues,
     this.suffixText,
   }) {
     Assert.holds(goldenValues.isNotEmpty);
@@ -56,11 +56,11 @@ class NumericField extends StatelessWidget {
 class NumericFieldImpl extends StatefulWidget {
   final TextEditingController controller;
   final List<int> goldenValues;
-  final String suffixText;
+  final String? suffixText;
 
   NumericFieldImpl({
-    @required this.controller,
-    @required this.goldenValues,
+    required this.controller,
+    required this.goldenValues,
     this.suffixText,
   }) {
     Assert.holds(goldenValues.isNotEmpty);
@@ -77,7 +77,7 @@ class _NumericFieldImplState extends State<NumericFieldImpl> {
   final _focusNode = FocusNode();
 
   void _incValue() {
-    final int currentValue = int.tryParse(widget.controller.text);
+    final int? currentValue = int.tryParse(widget.controller.text);
     final int newValue = (currentValue != null)
         ? widget.goldenValues
             .firstWhere((v) => v > currentValue, orElse: () => currentValue)
@@ -87,7 +87,7 @@ class _NumericFieldImplState extends State<NumericFieldImpl> {
   }
 
   void _decValue() {
-    final int currentValue = int.tryParse(widget.controller.text);
+    final int? currentValue = int.tryParse(widget.controller.text);
     final int newValue = (currentValue != null)
         ? widget.goldenValues
             .lastWhere((v) => v < currentValue, orElse: () => currentValue)

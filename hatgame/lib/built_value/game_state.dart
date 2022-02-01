@@ -92,14 +92,10 @@ abstract class TurnState implements Built<TurnState, TurnStateBuilder> {
 
   TurnPhase get turnPhase;
 
-  @nullable
-  bool get turnPaused;
-  @nullable
-  Duration get turnTimeBeforePause;
-  @nullable
-  DateTime get turnTimeStart;
-  @nullable
-  DateTime get bonusTimeStart;
+  bool? get turnPaused;
+  Duration? get turnTimeBeforePause;
+  DateTime? get turnTimeStart;
+  DateTime? get bonusTimeStart;
 
   TurnState._();
   factory TurnState([void Function(TurnStateBuilder) updates]) = _$TurnState;

@@ -21,7 +21,7 @@ class RulesConfigViewController {
   bool _updatingFromConfig = false;
   bool get updatingFromConfig => _updatingFromConfig;
 
-  RulesConfigViewController({@required TickerProvider vsync})
+  RulesConfigViewController({required TickerProvider vsync})
       : dictionariesHighlightController = HighlightableController(vsync: vsync);
 
   static void _updateText(TextEditingController controller, String text) {
@@ -54,10 +54,10 @@ class RulesConfigView extends StatefulWidget {
   final GameConfigController configController;
 
   RulesConfigView({
-    @required this.onlineMode,
-    @required this.viewController,
-    @required this.config,
-    @required this.configController,
+    required this.onlineMode,
+    required this.viewController,
+    required this.config,
+    required this.configController,
   });
 
   @override
@@ -133,7 +133,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
     super.initState();
 
     viewController.turnTimeController.addListener(() {
-      final int newValue = int.tryParse(viewController.turnTimeController.text);
+      final int? newValue = int.tryParse(viewController.turnTimeController.text);
       if (newValue != null && !viewController.updatingFromConfig) {
         configController.updateRules(
             (config) => config.rebuild((b) => b..turnSeconds = newValue));
@@ -141,7 +141,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
     });
 
     viewController.bonusTimeController.addListener(() {
-      final int newValue =
+      final int? newValue =
           int.tryParse(viewController.bonusTimeController.text);
       if (newValue != null && !viewController.updatingFromConfig) {
         configController.updateRules(
@@ -150,7 +150,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
     });
 
     viewController.wordsPerPlayerController.addListener(() {
-      final int newValue =
+      final int? newValue =
           int.tryParse(viewController.wordsPerPlayerController.text);
       if (newValue != null && !viewController.updatingFromConfig) {
         configController.updateRules(
@@ -167,7 +167,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
             Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) => DictionarySelector(
                       allValues: Lexicon.allDictionaries(),
-                      initialValues: config.dictionaries.toList(),
+                      initialValues: config.dictionaries!.toList(),
                       onChanged: (List<String> newValue) => configController
                           .updateRules((config) => config.rebuild(
                               (b) => b..dictionaries.replace(newValue))),

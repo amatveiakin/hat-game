@@ -4,7 +4,7 @@ import 'package:hatgame/util/list_ext.dart';
 
 class InvalidOperation implements Exception {
   final String message;
-  final String comment;
+  final String? comment;
   final bool isInternalError;
   final _tags = Map<Type, dynamic>();
 
@@ -19,7 +19,7 @@ class InvalidOperation implements Exception {
     _tags[T] = value;
   }
 
-  T tag<T>() => _tags[T];
+  T? tag<T>() => _tags[T];
 
   @override
   String toString() {

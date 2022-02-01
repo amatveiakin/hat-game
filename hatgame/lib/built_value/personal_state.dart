@@ -41,14 +41,11 @@ abstract class PersonalState
   int get id;
   String get name;
 
-  @nullable
-  bool get kicked;
+  bool? get kicked;
 
   // only with manual word-writing
-  @nullable
-  BuiltList<String> get words;
-  @nullable
-  bool get wordsReady;
+  BuiltList<String>? get words;
+  bool? get wordsReady;
 
   BuiltMap<int, WordFeedback> get wordFeedback;
   BuiltSet<int> get wordFlags;

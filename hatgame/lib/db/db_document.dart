@@ -9,7 +9,7 @@ enum LocalCacheBehavior {
 }
 
 abstract class DBDocumentReference {
-  String /*!*/ get path;
+  String get path;
 
   Future<void> setColumns(List<DBColumnData> columns);
 
@@ -54,22 +54,22 @@ abstract class DBDocumentSnapshot {
 
   bool get exists => rawData != null;
 
-  bool contains(DBColumn col) => dbContains(rawData, col);
+  bool contains(DBColumn col) => dbContains(rawData!, col);
 
-  bool containsNonNull(DBColumn col) => dbContainsNonNull(rawData, col);
+  bool containsNonNull(DBColumn col) => dbContainsNonNull(rawData!, col);
 
   T get<T>(DBColumn<T> col) =>
-      dbGet(rawData, col, documentPath: reference.path);
+      dbGet(rawData!, col, documentPath: reference.path);
 
-  T tryGet<T>(DBColumn<T> col) => dbTryGet(rawData, col);
+  T? tryGet<T>(DBColumn<T> col) => dbTryGet(rawData!, col);
 
   List<DBIndexedColumnData<T>> getAll<T, ColumnT extends DBColumnFamily<T>>(
           DBColumnFamilyManager<T, ColumnT> columnFactory) =>
-      dbGetAll(rawData, columnFactory, documentPath: reference.path);
+      dbGetAll(rawData!, columnFactory, documentPath: reference.path);
 
   @override
   String toString() => rawData.toString();
 
   @protected
-  Map<String, dynamic> get rawData;
+  Map<String, dynamic>? get rawData;
 }

@@ -10,5 +10,5 @@ extension BuiltValueListBuilderExtension<V extends Built<V, B>,
 extension BuiltValueMapBuilderExtension<K, V extends Built<V, B>,
     B extends Builder<V, B>> on MapBuilder<K, Built<V, B>> {
   void rebuildAt(K key, void Function(B) updates) =>
-      this[key] = this[key].rebuild(updates);
+      this[key] = this[key]!.rebuild(updates);
 }

@@ -29,7 +29,7 @@ class GameConfigView extends StatefulWidget {
   final LocalGameData localGameData;
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  GameConfigView({@required this.localGameData});
+  GameConfigView({required this.localGameData});
 
   @override
   createState() => _GameConfigViewState();
@@ -58,8 +58,8 @@ class _GameConfigViewState extends State<GameConfigView>
   LocalGameData get localGameData => widget.localGameData;
   bool get isAdmin => localGameData.isAdmin;
 
-  /*late*/ TabController /*!*/ _tabController;
-  /*late*/ RulesConfigViewController /*!*/ _rulesConfigViewController;
+  late TabController _tabController;
+  late RulesConfigViewController _rulesConfigViewController;
 
   @override
   void initState() {
@@ -98,12 +98,12 @@ class _GameConfigViewState extends State<GameConfigView>
                 icon: Icon(Icons.content_copy),
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: link)).then((_) {
-                    scaffoldKey.currentState.showSnackBar(SnackBar(
+                    scaffoldKey.currentState!.showSnackBar(SnackBar(
                         content: Text(tr('link_copied_to_clipboard'))));
                   }, onError: (error) {
                     // TODO: Log to firebase.
                     debugPrint('Cannot copy to clipboard. Error: $error');
-                    scaffoldKey.currentState.showSnackBar(SnackBar(
+                    scaffoldKey.currentState!.showSnackBar(SnackBar(
                         content: Text(tr('cannot_copy_link_to_clipboard'))));
                   });
                 },
@@ -161,7 +161,7 @@ class _GameConfigViewState extends State<GameConfigView>
     );
   }
 
-  Widget buildBody(BuildContext context, DBDocumentSnapshot/*!*/ snapshot) {
+  Widget buildBody(BuildContext context, DBDocumentSnapshot snapshot) {
     final configController =
         GameConfigController.fromSnapshot(localGameData, snapshot);
     final GameConfig gameConfig = configController.configWithOverrides();
@@ -187,7 +187,7 @@ class _GameConfigViewState extends State<GameConfigView>
         ),
       ),
       SectionData(
-        title: playersSectionTitle(gameConfig.players.names.length),
+        title: playersSectionTitle(gameConfig.players!.names.length),
         body: localGameData.onlineMode
             ? OnlinePlayersConfigView(
                 localGameData: localGameData,

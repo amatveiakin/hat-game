@@ -20,13 +20,13 @@ String _buildModeSuffix() {
   return kReleaseMode ? '' : ':' + buildMode();
 }
 
-String _extractMainVersionPart(String v) {
+String? _extractMainVersionPart(String v) {
   final re = RegExp(r'(v[0-9]+\.[0-9]+)');
   return re.matchAsPrefix(v)?.group(0);
 }
 
 versionsCompatibile(String v1, String v2) {
-  final String v1Main = _extractMainVersionPart(v1);
-  final String v2Main = _extractMainVersionPart(v2);
+  final String? v1Main = _extractMainVersionPart(v1);
+  final String? v2Main = _extractMainVersionPart(v2);
   return !isNullOrEmpty(v1Main) && !isNullOrEmpty(v2Main) && v1Main == v2Main;
 }

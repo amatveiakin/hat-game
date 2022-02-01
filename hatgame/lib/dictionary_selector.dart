@@ -10,9 +10,9 @@ class DictionarySelector extends StatefulWidget {
   final ValueChanged<List<String>> onChanged;
 
   DictionarySelector({
-    @required this.allValues,
-    @required this.initialValues,
-    @required this.onChanged,
+    required this.allValues,
+    required this.initialValues,
+    required this.onChanged,
   });
 
   @override
@@ -20,7 +20,7 @@ class DictionarySelector extends StatefulWidget {
 }
 
 class DictionarySelectorState extends State<DictionarySelector> {
-  Set<String> currentValues;
+  late Set<String> currentValues;
 
   @override
   void initState() {

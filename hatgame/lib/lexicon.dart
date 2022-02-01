@@ -15,7 +15,7 @@ class DictionaryMetadata {
   final int numWords;
 
   DictionaryMetadata(
-      {@required this.key, @required this.uiName, @required this.numWords});
+      {required this.key, required this.uiName, required this.numWords});
 }
 
 class Dictionary {
@@ -54,12 +54,12 @@ class Lexicon {
         key: dictKey,
         yaml: await rootBundle.loadString('lexicon/$dictKey.yaml'),
       );
-      Assert.holds(_dictionaries[dictKey].words.isNotEmpty);
+      Assert.holds(_dictionaries[dictKey]!.words.isNotEmpty);
     }
   }
 
   static DictionaryMetadata dictionaryMetadata(String dict) {
-    return _dictionaries[dict].metadata;
+    return _dictionaries[dict]!.metadata;
   }
 
   static List<String> allDictionaries() {
@@ -72,7 +72,7 @@ class Lexicon {
     return result;
   }
 
-  static List<String> fixDictionaries(List<String> dicts) {
+  static List<String> fixDictionaries(List<String>? dicts) {
     final existingDicts =
         (dicts ?? []).toSet().intersection(allDictionaries().toSet());
     return existingDicts.isEmpty
@@ -88,7 +88,7 @@ class Lexicon {
         throw InvalidOperation(tr('cannot_find_dictionary', args: [dictKey]),
             isInternalError: true);
       }
-      words.addAll(_dictionaries[dictKey].words);
+      words.addAll(_dictionaries[dictKey]!.words);
     }
     Assert.holds(words.isNotEmpty, lazyMessage: () => dictionaries.toString());
     return WordCollection(words);
@@ -97,11 +97,11 @@ class Lexicon {
   // Collection that contains most words. May blacklist some categories,
   // e.g. obscene words.
   static WordCollection universalCollection() {
-    return wordCollection(_dictionaries.keys);
+    return wordCollection(_dictionaries.keys as List<String>);
   }
 
   static Dictionary _parseDictionary(
-      {@required String key, @required String yaml}) {
+      {required String key, required String yaml}) {
     final List<YamlDocument> docs =
         loadYamlDocuments(yaml, sourceUrl: Uri.file(key));
     Assert.holds(docs.isNotEmpty);

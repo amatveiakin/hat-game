@@ -5,12 +5,12 @@ class LabeledCheckbox extends StatelessWidget {
   final Function onChanged;
   final Widget title;
   final EdgeInsets padding;
-  final ShapeBorder customInkWellBorder;
+  final ShapeBorder? customInkWellBorder;
 
   const LabeledCheckbox({
-    @required this.value,
-    @required this.onChanged,
-    @required this.title,
+    required this.value,
+    required this.onChanged,
+    required this.title,
     this.padding = EdgeInsets.zero,
     this.customInkWellBorder,
   });
@@ -26,7 +26,7 @@ class LabeledCheckbox extends StatelessWidget {
           children: [
             Checkbox(
               value: value,
-              onChanged: (bool newValue) => onChanged(newValue),
+              onChanged: (bool? newValue) => onChanged(newValue),
             ),
             Expanded(child: title),
           ],

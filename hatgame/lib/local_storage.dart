@@ -12,7 +12,7 @@ import 'package:unicode/unicode.dart' as unicode;
 
 // TODO: Also sync to personal account when it exists.
 abstract class LocalStorage {
-  static /*late*/ LocalStorage /*!*/ instance;
+  static late LocalStorage instance;
 
   static Future<void> init() async {
     Assert.holds(instance == null);
@@ -32,7 +32,7 @@ abstract class LocalStorage {
     instance = LocalStorageInMemory();
   }
 
-  T get<T>(DBColumn<T> column) {
+  T? get<T>(DBColumn<T> column) {
     try {
       return getImpl(column);
     } catch (e) {
@@ -46,7 +46,7 @@ abstract class LocalStorage {
   Future<void> set<T>(DBColumn<T> column, T data);
 
   @protected
-  T getImpl<T>(DBColumn<T> column);
+  T? getImpl<T>(DBColumn<T> column);
 }
 
 // =============================================================================
@@ -68,7 +68,7 @@ class LocalColLocale extends DBColumn<String> with DBColSerializeString {
 // =============================================================================
 // Helpers
 
-InvalidOperation checkPlayerName(String name) {
+InvalidOperation? checkPlayerName(String name) {
   if (name.isEmpty) {
     return InvalidOperation(tr('player_name_is_empty'));
   }
@@ -98,19 +98,19 @@ class LocalStorageFromSharedPreferences extends LocalStorage {
 
   LocalStorageFromSharedPreferences._(this.prefs);
 
-  T getImpl<T>(DBColumn<T> column) {
+  T? getImpl<T>(DBColumn<T> column) {
     return column.deserialize(prefs.getString(column.name));
   }
 
   Future<void> set<T>(DBColumn<T> column, T data) async {
-    await prefs.setString(column.name, column.serialize(data));
+    await prefs.setString(column.name, column.serialize(data)!);
   }
 }
 
 class LocalStorageInMemory extends LocalStorage {
-  final _data = Map<String, String>();
+  final _data = Map<String, String?>();
 
-  T getImpl<T>(DBColumn<T> column) {
+  T? getImpl<T>(DBColumn<T> column) {
     return column.deserialize(_data[column.name]);
   }
 

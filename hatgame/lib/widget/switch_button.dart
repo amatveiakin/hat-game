@@ -11,12 +11,12 @@ import 'package:hatgame/util/list_ext.dart';
 class SwitchButton extends StatelessWidget {
   final List<String> options;
   final int selectedOption;
-  final void Function(int) onSelectedOptionChanged;
+  final void Function(int)? onSelectedOptionChanged;
 
   SwitchButton({
-    @required this.options,
-    @required this.selectedOption,
-    @required this.onSelectedOptionChanged,
+    required this.options,
+    required this.selectedOption,
+    required this.onSelectedOptionChanged,
   });
 
   static const _height = 48.0;
@@ -67,7 +67,7 @@ class SwitchButton extends StatelessWidget {
                 child: Text(
                   text,
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.subtitle1.copyWith(
+                  style: Theme.of(context).textTheme.subtitle1!.copyWith(
                         fontWeight: FontWeight.w400, // normal font weight
                       ),
                 ),
@@ -78,7 +78,7 @@ class SwitchButton extends StatelessWidget {
               child: Text(
                 text,
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.subtitle1.copyWith(
+                style: Theme.of(context).textTheme.subtitle1!.copyWith(
                       fontWeight: FontWeight.w300,
                       color: Colors.black54,
                     ),
@@ -105,7 +105,7 @@ class SwitchButton extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: Theme.of(context)
                       .textTheme
-                      .subtitle1
+                      .subtitle1!
                       .copyWith(fontWeight: FontWeight.w400),
                 ),
               ),
@@ -116,7 +116,7 @@ class SwitchButton extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: Theme.of(context)
                     .textTheme
-                    .subtitle1
+                    .subtitle1!
                     .copyWith(fontWeight: FontWeight.w300),
               ),
             ),

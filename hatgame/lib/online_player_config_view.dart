@@ -8,15 +8,15 @@ import 'package:hatgame/widget/dialog.dart';
 
 class OnlinePlayersConfigView extends StatelessWidget {
   final LocalGameData localGameData;
-  final PlayersConfig playersConfig;
+  final PlayersConfig? playersConfig;
 
   OnlinePlayersConfigView({
-    @required this.localGameData,
-    @required this.playersConfig,
+    required this.localGameData,
+    required this.playersConfig,
   });
 
   static Future<bool> _kickConfimationDialog(BuildContext context,
-      {@required String playerName}) async {
+      {required String playerName}) async {
     return multipleChoiceDialog<bool>(
       context: context,
       contentText: tr('confirm_kick_player', args: [playerName]),
@@ -32,7 +32,7 @@ class OnlinePlayersConfigView extends StatelessWidget {
       localGameData.isAdmin && localGameData.myPlayerID != playerID;
 
   void _kickPlayer(BuildContext context,
-      {@required int playerID, @required String playerName}) async {
+      {required int playerID, required String playerName}) async {
     final bool kick =
         await _kickConfimationDialog(context, playerName: playerName) ?? false;
     if (kick) {
@@ -42,9 +42,9 @@ class OnlinePlayersConfigView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Assert.holds(playersConfig.names != null);
+    Assert.holds(playersConfig!.names != null);
     final List<MapEntry<int, String>> entries =
-        playersConfig.names.entries.toList();
+        playersConfig!.names.entries.toList();
     // BuiltMap does not sort by key.
     entries.sort((a, b) => a.key.compareTo(b.key));
 
