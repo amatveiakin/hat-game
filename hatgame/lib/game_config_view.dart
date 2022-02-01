@@ -20,7 +20,6 @@ import 'package:hatgame/widget/image_assert_icon.dart';
 import 'package:hatgame/widget/invalid_operation_dialog.dart';
 import 'package:hatgame/widget/sections_scaffold.dart';
 import 'package:hatgame/widget/wide_button.dart';
-import 'package:outline_material_icons/outline_material_icons.dart';
 
 // TODO: 'Revert to default' button.
 

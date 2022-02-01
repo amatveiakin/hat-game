@@ -24,7 +24,6 @@ import 'package:hatgame/widget/image_assert_icon.dart';
 import 'package:hatgame/widget/padlock.dart';
 import 'package:hatgame/widget/timer.dart';
 import 'package:hatgame/widget/wide_button.dart';
-import 'package:outline_material_icons/outline_material_icons.dart';
 
 class PartyView extends StatelessWidget {
   final PartyViewData party;
@@ -94,17 +93,19 @@ class PartyView extends StatelessWidget {
 Widget _getWordFeedbackIcon(
     WordFeedback feedback, bool menuButton, bool active) {
   if (feedback == null) {
-    return menuButton ? Icon(OMIcons.thumbsUpDown) : Icon(OMIcons.clear);
+    return menuButton
+        ? Icon(Icons.thumbs_up_down_outlined)
+        : Icon(Icons.clear_outlined);
   }
   switch (feedback) {
     case WordFeedback.good:
       return active
           ? Icon(Icons.thumb_up, color: MyTheme.accent)
-          : Icon(OMIcons.thumbUp);
+          : Icon(Icons.thumb_up_outlined);
     case WordFeedback.bad:
       return active
           ? Icon(Icons.thumb_down, color: MyTheme.accent)
-          : Icon(OMIcons.thumbDown);
+          : Icon(Icons.thumb_down_outlined);
     case WordFeedback.tooEasy:
       return active
           ? ImageAssetIcon('images/too_easy_filled.png', color: MyTheme.accent)
