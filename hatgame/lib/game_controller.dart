@@ -101,7 +101,8 @@ class TurnStateTransformer {
     turnState = turnState.rebuild((b) => b
       ..turnPaused = true
       ..turnTimeBeforePause = turnState.turnTimeBeforePause! +
-          NtpTime.nowUtcOrNull()?.difference(turnState.turnTimeStart!)!);
+          (NtpTime.nowUtcOrNull()?.difference(turnState.turnTimeStart!) ??
+              Duration.zero));
   }
 
   void resumeExplaning() {
@@ -172,7 +173,7 @@ class PersonalStateTransformer {
 
   PersonalStateTransformer(this.personalState);
 
-  void setWordFeedback(int wordId, WordFeedback newFeedback) {
+  void setWordFeedback(int wordId, WordFeedback? newFeedback) {
     final wordFeedback = personalState.wordFeedback.toMap();
     if (newFeedback != null) {
       wordFeedback[wordId] = newFeedback;
@@ -254,7 +255,7 @@ class GameController {
   }
 
   // Returns game ID.
-  static Future<String > _createGameOnline(
+  static Future<String> _createGameOnline(
       firestore.FirebaseFirestore firestoreInstance,
       List<DBColumnData> initialColumns) async {
     const int minIDLength = 4;
@@ -376,7 +377,9 @@ class GameController {
       }
       try {
         checkVersionCompatibility(
-            dbTryGet(snapshot.data() as Map<String, dynamic>, DBColHostAppVersion())!, appVersion);
+            dbTryGet(snapshot.data() as Map<String, dynamic>,
+                DBColHostAppVersion())!,
+            appVersion);
       } on InvalidOperation catch (e) {
         error = e;
         return;
@@ -386,7 +389,8 @@ class GameController {
       final bool userCreationPhase = (gamePhase == GamePhase.configure);
 
       // Note: include kicked players.
-      final playerData = dbGetAll(snapshot.data() as Map<String, dynamic>, DBColPlayerManager(),
+      final playerData = dbGetAll(
+          snapshot.data() as Map<String, dynamic>, DBColPlayerManager(),
           documentPath: reference.path);
       int? existingPlayerID;
       for (final p in playerData.values().where((v) => !(v.kicked ?? false))) {
@@ -454,7 +458,8 @@ class GameController {
         // Workaround flutter/firestore error. Do a dumb write.
         await tx.set(reference, snapshot.data());
       }
-      final playerRecord = dbGet(snapshot.data() as Map<String, dynamic>, DBColPlayer(playerID),
+      final playerRecord = dbGet(
+          snapshot.data() as Map<String, dynamic>, DBColPlayer(playerID),
           documentPath: reference.path);
       await tx.update(
           reference,
@@ -558,7 +563,7 @@ class GameController {
         GameConfigController.fromSnapshot(localGameData, snapshot)
             .configWithOverrides();
     final TeamCompositions teamCompositions =
-        snapshot.get(DBColTeamCompositions());
+        snapshot.get<TeamCompositions?>(DBColTeamCompositions())!;
     final List<List<String>> playerNames = teamCompositions.teams != null
         ? teamCompositions.teams!
             .map((t) => _playerNames(gameConfig, t))
@@ -743,7 +748,8 @@ class GameController {
     final InitialGameState initialState = snapshot.get(DBColInitialState());
     final BuiltList<TurnRecord> turnLog =
         BuiltList.from(snapshot.getAll(DBColTurnRecordManager()).values());
-    final TurnState? turnState = snapshot.tryGet(DBColCurrentTurn());
+    final TurnState? turnState =
+        snapshot.tryGet<TurnState?>(DBColCurrentTurn());
 
     PersonalState? personalState;
     BuiltList<PersonalState> otherPersonalStates;
@@ -795,7 +801,8 @@ class GameController {
     Assert.holds(isActivePlayer(),
         message: 'Only the active player can change game state');
     final int turnIndex = DerivedGameState.turnIndex(turnLog);
-    final TurnRecord newTurnRecord = TurnStateTransformer.turnRecord(turnState!);
+    final TurnRecord newTurnRecord =
+        TurnStateTransformer.turnRecord(turnState!);
     final BuiltList<TurnRecord> newTurnLog =
         turnLog.rebuild((b) => b..add(newTurnRecord));
     final bool timeToEndGame =
@@ -841,7 +848,7 @@ class GameController {
         (_transformer..setWordStatus(wordId, newStatus)).turnState);
   }
 
-  Future<void> setWordFeedback(int wordId, WordFeedback newFeedback) {
+  Future<void> setWordFeedback(int wordId, WordFeedback? newFeedback) {
     return _updatePersonalState((_personalTransformer
           ..setWordFeedback(wordId, newFeedback))
         .personalState);

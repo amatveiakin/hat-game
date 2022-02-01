@@ -7,6 +7,7 @@ import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/game_navigator.dart';
 import 'package:hatgame/theme.dart';
+import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/widget/invalid_operation_dialog.dart';
 import 'package:hatgame/widget/primary_secondary_scaffold.dart';
@@ -104,6 +105,7 @@ class _WordView extends StatelessWidget {
       case WordStatus.discarded:
         return Icon(Icons.delete);
     }
+    Assert.fail('Unknown WordStatus: $status');
   }
 
   TextStyle _style(WordStatus status) {
@@ -116,6 +118,7 @@ class _WordView extends StatelessWidget {
       case WordStatus.discarded:
         return TextStyle(decoration: TextDecoration.lineThrough);
     }
+    Assert.fail('Unknown WordStatus: $status');
   }
 
   @override

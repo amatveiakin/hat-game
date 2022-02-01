@@ -278,7 +278,9 @@ class GameNavigator {
       return false;
     }
     final phaseBParent = _parentPhase(phaseB);
-    return phaseBParent == phaseA ?? _isGrandparentPhase(phaseA, phaseBParent);
+    return phaseBParent == phaseA
+        ? true
+        : _isGrandparentPhase(phaseA, phaseBParent);
   }
 
   static GamePhase? _parentPhase(GamePhase phase) {

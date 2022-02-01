@@ -342,7 +342,7 @@ class PlayAreaState extends State<PlayArea>
     gameController.setWordStatus(wordId, status);
   }
 
-  void _setWordFeedback(int wordId, WordFeedback feedback) {
+  void _setWordFeedback(int wordId, WordFeedback? feedback) {
     gameController.setWordFeedback(wordId, feedback);
   }
 
@@ -386,7 +386,7 @@ class PlayAreaState extends State<PlayArea>
                 feedback: w.feedback,
                 hasFlag: w.flaggedByActivePlayer,
                 setStatus: null,
-                setFeedback: (WordFeedback feedback) =>
+                setFeedback: (WordFeedback? feedback) =>
                     _setWordFeedback(w.id, feedback),
                 setFlag: (bool hasFlag) => _setWordFlag(w.id, hasFlag),
               )
@@ -394,7 +394,7 @@ class PlayAreaState extends State<PlayArea>
                 text: null,
                 status: w.status,
                 feedback: null,
-                hasFlag: null,
+                hasFlag: false,
                 setStatus: null,
                 setFeedback: null,
                 setFlag: null,
@@ -449,8 +449,10 @@ class PlayAreaState extends State<PlayArea>
               key: UniqueKey(),
               style: TimerViewStyle.bonusTime,
               duration: Duration(seconds: gameConfig.rules.bonusSeconds),
-              startTime: anyMax(Duration.zero,
-                  NtpTime.nowUtcOrThrow().difference(turnState!.bonusTimeStart!)),
+              startTime: anyMax(
+                  Duration.zero,
+                  NtpTime.nowUtcOrThrow()
+                      .difference(turnState!.bonusTimeStart!)),
               hideOnTimeEnded: true,
             ),
           SizedBox(height: 12.0),
@@ -543,7 +545,7 @@ class PlayAreaState extends State<PlayArea>
                     setStatus: (WordStatus status) =>
                         _setWordStatus(w.id, status),
                     setFeedback: localGameData.onlineMode
-                        ? (WordFeedback feedback) =>
+                        ? (WordFeedback? feedback) =>
                             _setWordFeedback(w.id, feedback)
                         : null,
                     setFlag: null,

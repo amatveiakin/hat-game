@@ -16,7 +16,7 @@ import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/ntp_time.dart';
 import 'package:hatgame/util/sounds.dart';
 
-void _initFirestore() async {
+Future<void> _initFirestore() async {
   await Firebase.initializeApp();
 
   // Enable offline mode. This is the default for Android and iOS, but
@@ -55,7 +55,7 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
-  Route<dynamic> _generateRoute(RouteSettings settings) {
+  Route<dynamic>? _generateRoute(RouteSettings settings) {
     final joinGameScreen = JoinGameOnlineScreen.fromRoute(settings);
     return joinGameScreen == null
         ? null

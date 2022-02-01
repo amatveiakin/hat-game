@@ -12,7 +12,7 @@ Text? _textWidget(String? text) {
   return text == null ? null : Text(text);
 }
 
-Future<T > multipleChoiceDialog<T>({
+Future<T> multipleChoiceDialog<T>({
   required BuildContext context,
   String? titleText,
   String? contentText,

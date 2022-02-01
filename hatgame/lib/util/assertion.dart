@@ -60,10 +60,9 @@ class Assert {
     }
   }
 
-  // TODO: Replace `@alwaysThrows` with `Never` return type when it's ready.
-  @alwaysThrows
-  static void fail(String message) {
+  static Never fail(String message) {
     holds(false, message: message, inRelease: AssertInRelease.fail);
+    throw AssertionError("Should've thrown earlier!");
   }
 
   static void failDebug(String message, {required AssertInRelease inRelease}) {

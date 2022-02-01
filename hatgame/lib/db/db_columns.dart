@@ -98,7 +98,7 @@ T? dbTryGet<T>(Map<String, dynamic> data, DBColumn<T> column) {
 List<DBIndexedColumnData<T>> dbGetAll<T, ColumnT extends DBColumnFamily<T>>(
     Map<String, dynamic> data, DBColumnFamilyManager<T, ColumnT> columnManager,
     {required String documentPath}) {
-  final columns = List<DBIndexedColumnData<T>>();
+  final List<DBIndexedColumnData<T>> columns = [];
   data.forEach((key, valueSerialized) {
     final ColumnT? c = columnManager.fromColumnName(key);
     if (c != null) {

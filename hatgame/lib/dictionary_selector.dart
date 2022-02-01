@@ -55,7 +55,7 @@ class DictionarySelectorState extends State<DictionarySelector> {
             subtitle: Text('Words: ${metadata.numWords}'),
             controlAffinity: ListTileControlAffinity.leading,
             value: currentValues.contains(d),
-            onChanged: (enabled) => _valueChanged(d, enabled),
+            onChanged: (enabled) => _valueChanged(d, enabled!),
           );
         }).toList(),
       ),

@@ -247,10 +247,10 @@ class GameData {
       }
     }
 
-    final scoreItems = List<TeamScoreViewData>();
+    final List<TeamScoreViewData> scoreItems = [];
     if (initialState.teamCompositions.teams != null) {
       for (final team in initialState.teamCompositions.teams!) {
-        final players = List<PlayerScoreViewData>();
+        final List<PlayerScoreViewData> players = [];
         int totalWordsExplained = 0;
         int totalWordsGuessed = 0;
         for (final playerID in team) {

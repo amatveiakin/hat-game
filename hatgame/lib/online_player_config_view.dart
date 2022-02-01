@@ -34,7 +34,7 @@ class OnlinePlayersConfigView extends StatelessWidget {
   void _kickPlayer(BuildContext context,
       {required int playerID, required String playerName}) async {
     final bool kick =
-        await _kickConfimationDialog(context, playerName: playerName) ?? false;
+        await _kickConfimationDialog(context, playerName: playerName);
     if (kick) {
       GameController.kickPlayer(localGameData.gameReference, playerID);
     }

@@ -130,7 +130,7 @@ class JoinGameOnlineScreen extends StatefulWidget {
 
   JoinGameOnlineScreen();
 
-  factory JoinGameOnlineScreen.fromRoute(RouteSettings settings) {
+  static JoinGameOnlineScreen? fromRoute(RouteSettings settings) {
     final String? gameID = LocalGameData.parseRoute(settings.name!);
     if (gameID == null) {
       return null;

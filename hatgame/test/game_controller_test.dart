@@ -252,7 +252,7 @@ void main() {
           host.localGameData.gameReference, config);
       final teamCompositions = (await host.localGameData.gameReference.get())
           .get(DBColTeamCompositions());
-      expect(teamCompositions.individualOrder, unorderedEquals([0, 2]));
+      expect(teamCompositions!.individualOrder, unorderedEquals([0, 2]));
 
       await host.startGame();
 

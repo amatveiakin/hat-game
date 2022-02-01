@@ -109,7 +109,7 @@ class SectionsScaffold extends StatelessWidget {
             );
     } else {
       // Multi-column view for tablets in landscape mode and desktops.
-      final boxes = List<Widget>();
+      final List<Widget> boxes = [];
       for (int i = 0; i < sections.length; i++) {
         boxes.add(
           Expanded(

@@ -82,7 +82,7 @@ class Lexicon {
 
   static WordCollection wordCollection(List<String> dictionaries) {
     Assert.holds(dictionaries.isNotEmpty);
-    final words = List<String>();
+    final List<String> words = [];
     for (final dictKey in dictionaries) {
       if (!_dictionaries.containsKey(dictKey)) {
         throw InvalidOperation(tr('cannot_find_dictionary', args: [dictKey]),
