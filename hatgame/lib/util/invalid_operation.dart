@@ -26,7 +26,7 @@ class InvalidOperation implements Exception {
     return [
       'InvalidOperation (internal = $isInternalError): $message',
       comment,
-      _tags == null ? null : 'tags ${_tags.toString()}',
+      _tags.isEmpty ? null : 'tags ${_tags.toString()}',
     ].joinNonEmpty('; ');
   }
 }

@@ -6,7 +6,7 @@ import 'package:hatgame/util/assertion.dart';
 
 class GamePhaseReader {
   static GamePhase fromSnapshot(
-      LocalGameData localGameData, DBDocumentSnapshot snapshot) {
+      LocalGameData/*!*/ localGameData, DBDocumentSnapshot/*!*/ snapshot) {
     final gamePhase = _getPhase(snapshot, localGameData: localGameData);
     _checkDB(snapshot, gamePhase);
     return gamePhase;
@@ -18,7 +18,7 @@ class GamePhaseReader {
     return gamePhase;
   }
 
-  static GamePhase _getPhase(DBDocumentSnapshot snapshot,
+  static GamePhase _getPhase(DBDocumentSnapshot/*!*/ snapshot,
       {LocalGameData localGameData}) {
     if (localGameData != null) {
       final personalState =
@@ -33,7 +33,7 @@ class GamePhaseReader {
     return snapshot.get(DBColGamePhase());
   }
 
-  static _checkDB(DBDocumentSnapshot snapshot, GamePhase phase) {
+  static _checkDB(DBDocumentSnapshot/*!*/ snapshot, GamePhase phase) {
     Assert.withContext(
       context: () => snapshot.toString(),
       body: () {

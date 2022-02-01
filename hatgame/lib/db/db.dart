@@ -12,7 +12,7 @@ String newFirestoreGameID(int length, String prefix) {
 
 firestore.DocumentReference firestoreGameReference(
     {@required firestore.FirebaseFirestore firestoreInstance,
-    @required String gameID}) {
+    @required String/*!*/ gameID}) {
   return firestoreInstance.collection('games').doc(gameID);
 }
 
@@ -20,6 +20,6 @@ String newLocalGameID() {
   return LocalDB.instance.newRowPath();
 }
 
-LocalDocumentReference localGameReference({@required String gameID}) {
+LocalDocumentReference localGameReference({@required String/*!*/ gameID}) {
   return LocalDB.instance.document(gameID);
 }

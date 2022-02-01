@@ -59,10 +59,12 @@ class FirestoreDocumentSnapshot extends DBDocumentSnapshot {
   FirestoreDocumentReference get reference =>
       FirestoreDocumentReference(_snapshot.reference);
 
-  Map<String, dynamic> get rawData =>
-      _snapshot.data() == null || _localCacheOverrides?.rawData == null
-          ? _snapshot.data()
-          : (Map.from(_snapshot.data())..addAll(_localCacheOverrides.rawData));
+  Map<String, dynamic> get rawData {
+    final snapshowData = _snapshot.data() as Map<String, dynamic> /*?*/;
+    return snapshowData == null || _localCacheOverrides?.rawData == null
+        ? snapshowData
+        : (Map.from(snapshowData)..addAll(_localCacheOverrides.rawData));
+  }
 }
 
 // =============================================================================

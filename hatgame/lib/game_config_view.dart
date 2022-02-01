@@ -58,8 +58,8 @@ class _GameConfigViewState extends State<GameConfigView>
   LocalGameData get localGameData => widget.localGameData;
   bool get isAdmin => localGameData.isAdmin;
 
-  TabController _tabController;
-  RulesConfigViewController _rulesConfigViewController;
+  /*late*/ TabController /*!*/ _tabController;
+  /*late*/ RulesConfigViewController /*!*/ _rulesConfigViewController;
 
   @override
   void initState() {
@@ -161,7 +161,7 @@ class _GameConfigViewState extends State<GameConfigView>
     );
   }
 
-  Widget buildBody(BuildContext context, DBDocumentSnapshot snapshot) {
+  Widget buildBody(BuildContext context, DBDocumentSnapshot/*!*/ snapshot) {
     final configController =
         GameConfigController.fromSnapshot(localGameData, snapshot);
     final GameConfig gameConfig = configController.configWithOverrides();

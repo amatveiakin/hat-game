@@ -39,7 +39,7 @@ class SectionsScaffold extends StatelessWidget {
     if (appBarAutomaticallyImplyLeading) {
       Assert.holds(appTitlePresentInNarrowMode);
     }
-    if (actions.isNotEmpty) {
+    if (actions?.isNotEmpty ?? false) {
       Assert.holds(appTitlePresentInNarrowMode);
     }
   }

@@ -9,7 +9,7 @@ enum LocalCacheBehavior {
 }
 
 abstract class DBDocumentReference {
-  String get path;
+  String /*!*/ get path;
 
   Future<void> setColumns(List<DBColumnData> columns);
 

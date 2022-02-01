@@ -145,7 +145,7 @@ class _PlayerPerformance {
 }
 
 class PlayerScoreViewData {
-  final String name;
+  final String/*!*/ name;
   final int wordsExplained;
   final int wordsGuessed;
 

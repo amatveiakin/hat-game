@@ -22,7 +22,7 @@ extension IterableUtil<E> on Iterable<E> {
     return forEach((element) => f(index++, element));
   }
 
-  String joinNonEmpty([String separator = '']) {
+  String joinNonEmpty([String/*?*/ separator = '']) {
     return where((e) => e != null && e.toString().isNotEmpty).join(separator);
   }
 }

@@ -25,7 +25,7 @@ enum _PopResponse {
 }
 
 class RouteArguments {
-  final GamePhase phase;
+  final GamePhase /*!*/ phase;
 
   RouteArguments({@required this.phase});
 }
@@ -61,7 +61,7 @@ class GameNavigator {
   Widget buildWrapper({
     @required BuildContext context,
     @required LocalGameData localGameData,
-    @required Widget Function(BuildContext, DBDocumentSnapshot) buildBody,
+    @required Widget Function(BuildContext, DBDocumentSnapshot /*!*/) buildBody,
     void Function() onBackPressed,
   }) {
     return WillPopScope(
@@ -77,15 +77,16 @@ class GameNavigator {
           if (!snapshot.hasData) {
             return Center(child: CircularProgressIndicator());
           }
+          final snapshotData = snapshot.data;
           final newPhase =
-              GamePhaseReader.fromSnapshot(localGameData, snapshot.data);
+              GamePhaseReader.fromSnapshot(localGameData, snapshotData);
           if (newPhase != currentPhase) {
             if (newPhase != localGameData.navigationState.lastSeenGamePhase &&
                 !localGameData.navigationState.exitingGame) {
               _navigateTo(
                 context: context,
                 localGameData: localGameData,
-                snapshot: snapshot.data,
+                snapshot: snapshotData,
                 oldPhase: currentPhase,
                 newPhase: newPhase,
               );
@@ -93,7 +94,7 @@ class GameNavigator {
             return Center(child: CircularProgressIndicator());
           }
           Assert.eq(newPhase, currentPhase);
-          return buildBody(context, snapshot.data);
+          return buildBody(context, snapshotData);
         },
       ),
     );
@@ -114,7 +115,7 @@ class GameNavigator {
   static void _navigateTo({
     @required BuildContext context,
     @required LocalGameData localGameData,
-    @required DBDocumentSnapshot snapshot,
+    @required DBDocumentSnapshot /*!*/ snapshot,
     @required GamePhase oldPhase,
     @required GamePhase newPhase,
   }) {
@@ -139,6 +140,7 @@ class GameNavigator {
         ));
   }
 
+  // TODO: Seems like `snapshot` is not needed from here down.
   static void _navigateToImpl({
     @required BuildContext context,
     @required LocalGameData localGameData,
@@ -280,9 +282,6 @@ class GameNavigator {
   }
 
   static GamePhase _parentPhase(GamePhase phase) {
-    if (phase == null) {
-      return null;
-    }
     switch (phase) {
       case GamePhase.configure:
         return null;
@@ -348,19 +347,19 @@ class GameNavigator {
     switch (currentPhase) {
       case GamePhase.configure:
         return localGameData.isAdmin
-            ? _PopResponse.exitGame
+            ? Future.value(_PopResponse.exitGame)
             : _confimLeaveGame(context, localGameData: localGameData);
       case GamePhase.composeTeams:
       case GamePhase.writeWords:
         return localGameData.isAdmin
-            ? _PopResponse.custom
+            ? Future.value(_PopResponse.custom)
             : _confimLeaveGame(context, localGameData: localGameData);
       case GamePhase.play:
         return _confimLeaveGame(context, localGameData: localGameData);
       case GamePhase.gameOver:
       case GamePhase.kicked:
       case GamePhase.rematch:
-        return _PopResponse.exitGame;
+        return Future.value(_PopResponse.exitGame);
     }
     Assert.fail('Unexpected game phase: $currentPhase');
   }

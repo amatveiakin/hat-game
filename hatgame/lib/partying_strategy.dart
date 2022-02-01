@@ -45,7 +45,7 @@ List<int> generateTeamSizes(
   DesiredTeamSize desiredTeamSize,
   UnequalTeamSize unequalTeamSize,
 ) {
-  int teamSize;
+  /*late final*/ int teamSize;
   switch (desiredTeamSize) {
     case DesiredTeamSize.teamsOf2:
       teamSize = 2;
@@ -60,7 +60,6 @@ List<int> generateTeamSizes(
       teamSize = numPlayers ~/ 2;
       break;
   }
-  Assert.holds(teamSize != null);
 
   switch (unequalTeamSize) {
     case UnequalTeamSize.expandTeams:
@@ -216,7 +215,7 @@ class BroadcastIndividualStrategy extends IndividualStrategyImpl {
 // FixedTeamsStrategy
 
 class FixedTeamsStrategy extends PartyingStrategy {
-  final BuiltList<BuiltList<int>> teamPlayers;
+  final BuiltList<BuiltList<int>>/*!*/ teamPlayers;
   final IndividualPlayStyle individualPlayStyle;
 
   FixedTeamsStrategy(this.teamPlayers, this.individualPlayStyle);

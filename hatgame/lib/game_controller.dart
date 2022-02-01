@@ -55,12 +55,12 @@ class TurnStateTransformer {
   final GameConfig config;
   final InitialGameState initialState;
   final BuiltList<TurnRecord> turnLog;
-  TurnState turnState;
+  TurnState /*!*/ turnState;
 
   TurnStateTransformer(
       this.config, this.initialState, this.turnLog, this.turnState);
 
-  static TurnRecord turnRecord(TurnState turnState) {
+  static TurnRecord turnRecord(TurnState /*!*/ turnState) {
     return TurnRecord(
       (b) => b
         ..party.replace(turnState.party)
@@ -197,8 +197,8 @@ class PersonalStateTransformer {
 
 class GameController {
   final LocalGameData localGameData;
-  final GameConfig config;
-  final InitialGameState initialState;
+  final GameConfig /*!*/ config;
+  final InitialGameState /*!*/ initialState;
   final BuiltList<TurnRecord> turnLog;
   final TurnState turnState;
   final PersonalState personalState;
@@ -254,7 +254,7 @@ class GameController {
   }
 
   // Returns game ID.
-  static Future<String> _createGameOnline(
+  static Future<String /*!*/ > _createGameOnline(
       firestore.FirebaseFirestore firestoreInstance,
       List<DBColumnData> initialColumns) async {
     const int minIDLength = 4;
@@ -355,7 +355,7 @@ class GameController {
     //         java.lang.Exception: DoTransaction failed: Invalid argument:
     //         Instance of '_CompactLinkedHashSet<Object>', null)
     int playerID;
-    Reconnection reconnection;
+    /*late*/ Reconnection /*!*/ reconnection;
     // For some reason, throwing or returning Future.error from `runTransaction`
     // doesn't work. Got:
     //     Unhandled Exception: PlatformException(Error performing transaction,
@@ -547,7 +547,7 @@ class GameController {
   static TeamCompositionsViewData getTeamCompositions(
       LocalGameData localGameData, DBDocumentSnapshot snapshot) {
     List<String> _playerNames(GameConfig config, Iterable<int> playerIDs) {
-      return playerIDs.map((id) => config.players.names[id]).toList();
+      return playerIDs.map((id) => config.players.names[id] /*!*/).toList();
     }
 
     if (GamePhaseReader.fromSnapshot(localGameData, snapshot) !=
@@ -630,7 +630,7 @@ class GameController {
   }
 
   static Future<void> rematch(
-      LocalGameData localGameData, DBDocumentSnapshot snapshot) async {
+      LocalGameData localGameData, DBDocumentSnapshot/*!*/ snapshot) async {
     List<DBColumnData> initialColumns = _newGameRecord();
     String gameID;
     if (localGameData.onlineMode) {

@@ -202,7 +202,7 @@ class ScoreView extends StatelessWidget {
     );
   }
 
-  Widget buildBody(BuildContext context, DBDocumentSnapshot snapshot) {
+  Widget buildBody(BuildContext context, DBDocumentSnapshot/*!*/ snapshot) {
     final gameController = GameController.fromSnapshot(localGameData, snapshot);
     final gameData = gameController.gameData;
     return PrimarySecondaryScaffold(

@@ -139,7 +139,7 @@ class WordReviewItem extends StatelessWidget {
   final String text;
   final WordStatus status;
   final WordFeedback feedback;
-  final bool hasFlag;
+  final bool/*!*/ hasFlag;
   final void Function(WordStatus) setStatus;
   final void Function(WordFeedback) setFeedback;
   final void Function(bool) setFlag;
@@ -148,11 +148,10 @@ class WordReviewItem extends StatelessWidget {
       {@required this.text,
       @required this.status,
       @required this.feedback,
-      bool hasFlag,
+      this.hasFlag = false,
       @required this.setStatus,
       @required this.setFeedback,
-      @required this.setFlag})
-      : hasFlag = hasFlag ?? false;
+      @required this.setFlag});
 
   @override
   Widget build(BuildContext context) {
@@ -602,7 +601,7 @@ class GameViewState extends State<GameView> {
     );
   }
 
-  Widget buildBody(BuildContext context, DBDocumentSnapshot snapshot) {
+  Widget buildBody(BuildContext context, DBDocumentSnapshot /*!*/ snapshot) {
     final gameController = GameController.fromSnapshot(localGameData, snapshot);
     final gameData = gameController.gameData;
     Assert.holds(gameData != null);

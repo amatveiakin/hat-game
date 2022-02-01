@@ -99,7 +99,7 @@ class TeamCompositionsView extends StatelessWidget {
     );
   }
 
-  Widget buildBody(BuildContext context, DBDocumentSnapshot snapshot) {
+  Widget buildBody(BuildContext context, DBDocumentSnapshot/*!*/ snapshot) {
     final TeamCompositionsViewData teamCompositionsViewData =
         GameController.getTeamCompositions(localGameData, snapshot);
     Assert.holds(teamCompositionsViewData != null);

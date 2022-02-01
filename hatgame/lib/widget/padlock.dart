@@ -88,11 +88,11 @@ class Padlock extends StatefulWidget {
 
 class PadlockState extends State<Padlock> with SingleTickerProviderStateMixin {
   static const double _dragStartTolerance = 50.0;
-  Size _size = Size.zero;
   bool _panActive = false;
   bool _padlockOpen = false;
   bool _padlockHidden = false;
-  Offset _padlockPos;
+  /*late*/ Size /*!*/ _size;
+  /*late*/ Offset /*!*/ _padlockPos;
 
   var _animationProgress = 0.0;
   Animation<double> _animation;

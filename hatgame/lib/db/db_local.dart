@@ -8,7 +8,7 @@ import 'package:quiver/async.dart' as quiver_async;
 
 class LocalDocumentReference extends DBDocumentReference {
   final LocalDB localDB;
-  final String path;
+  final String/*!*/ path;
 
   LocalDocumentReference({@required this.localDB, @required this.path});
 

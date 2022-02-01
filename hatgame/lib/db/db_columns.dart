@@ -18,7 +18,8 @@ import 'package:hatgame/util/list_ext.dart';
 abstract class DBColumn<T> {
   String get name;
 
-  String serialize(T value) => value == null ? null : serializeImpl(value);
+  String serialize(T /*?*/ value) =>
+      value == null ? null : serializeImpl(value);
   T deserialize(String serialized) =>
       serialized == null ? null : deserializeImpl(serialized);
 
@@ -46,12 +47,13 @@ class DBColumnData<T> {
 }
 
 abstract class DBColumnFamily<T> extends DBColumn<T> {
-  final int id;
+  final int /*!*/ id;
   DBColumnFamily(this.id);
 }
 
-abstract class DBColumnFamilyManager<T, ColumnT extends DBColumnFamily<T>> {
-  ColumnT fromColumnName(String columnName);
+abstract class DBColumnFamilyManager<T,
+    ColumnT extends DBColumnFamily<T> /*!*/ > {
+  ColumnT /*?*/ fromColumnName(String columnName);
   // TODO: Either remove or add ID to all such columns.
   int idFromData(T data);
 }
@@ -79,7 +81,7 @@ bool dbContainsNonNull<T>(Map<String, dynamic> data, DBColumn<T> column) {
   return dbTryGet(data, column) != null;
 }
 
-T dbGet<T>(Map<String, dynamic> data, DBColumn<T> column,
+T /*!*/ dbGet<T>(Map<String, dynamic> data, DBColumn<T> column,
     {@required String documentPath}) {
   Assert.holds(dbContains(data, column),
       lazyMessage: () => documentPath != null
@@ -96,13 +98,14 @@ T dbTryGet<T>(Map<String, dynamic> data, DBColumn<T> column) {
 }
 
 List<DBIndexedColumnData<T>> dbGetAll<T, ColumnT extends DBColumnFamily<T>>(
-    Map<String, dynamic> data, DBColumnFamilyManager<T, ColumnT> columnManager,
+    Map<String, dynamic> data,
+    DBColumnFamilyManager<T /*!*/, ColumnT> columnManager,
     {@required String documentPath}) {
   final columns = List<DBIndexedColumnData<T>>();
   data.forEach((key, valueSerialized) {
     final ColumnT c = columnManager.fromColumnName(key);
     if (c != null) {
-      final value = c.deserialize(valueSerialized);
+      final value = c.deserialize(valueSerialized) /*!*/;
       columns.add(DBIndexedColumnData(c.id, value));
       final int idFromValue = columnManager.idFromData(value);
       if (idFromValue != null) {
@@ -138,7 +141,7 @@ Map<String, dynamic> dbData(List<DBColumnData> columns) {
 // most one player, called 'owner'. This allows to mostly avoid transactions.
 // Transactions are used only to generate unique IDs for games, players, etc.
 // Some columns are 'immutable' meaning that they cannot be updated or deleted
-// after they were initially writter.
+// after they were initially written.
 
 // Written when game lobby is created. Immutable.
 class DBColCreationTimeUtc extends DBColumn<String> with DBColSerializeString {
@@ -252,11 +255,11 @@ class DBColPlayerManager
 // =============================================================================
 // Implementation
 
-mixin DBColSerializeBuiltValue<T> on DBColumn<T> {
-  Serializer _serializer() => serializers.serializerForType(T);
+mixin DBColSerializeBuiltValue<T> on DBColumn<T/*!*/> {
+  Serializer/*!*/ _serializer() => serializers.serializerForType(T);
   String serializeImpl(T value) =>
       json.encode(serializers.serializeWith(_serializer(), value));
-  T deserializeImpl(String serialized) =>
+  T/*!*/ deserializeImpl(String serialized) =>
       serializers.deserializeWith(_serializer(), json.decode(serialized));
 }
 

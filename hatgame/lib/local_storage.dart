@@ -12,7 +12,7 @@ import 'package:unicode/unicode.dart' as unicode;
 
 // TODO: Also sync to personal account when it exists.
 abstract class LocalStorage {
-  static LocalStorage instance;
+  static /*late*/ LocalStorage /*!*/ instance;
 
   static Future<void> init() async {
     Assert.holds(instance == null);
@@ -23,10 +23,7 @@ abstract class LocalStorage {
       // TODO: Firebase log.
       debugPrint("Couldn't initialize local storage!");
       debugPrint('The error was: $e');
-    } finally {
-      if (instance == null) {
-        instance = LocalStorageInMemory();
-      }
+      instance = LocalStorageInMemory();
     }
   }
 

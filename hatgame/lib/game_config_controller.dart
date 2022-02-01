@@ -14,7 +14,7 @@ import 'package:hatgame/util/assertion.dart';
 import 'package:meta/meta.dart';
 
 class GameConfigController {
-  final LocalGameData localGameData;
+  final LocalGameData/*!*/ localGameData;
   final GameConfig rawConfig;
   final BuiltList<PersonalState> playerStates; // online-only
 
