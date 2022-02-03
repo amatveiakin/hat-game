@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/local_storage.dart';
 import 'package:hatgame/util/assertion.dart';
-import 'package:hatgame/util/easy_localization_ext.dart';
 import 'package:hatgame/widget/constrained_scaffold.dart';
 import 'package:hatgame/widget/enum_option_selector.dart';
 
@@ -63,9 +62,9 @@ class AppSettingsViewState extends State<AppSettingsView> {
     if (language != null) {
       final locale = Locale(language!);
       Assert.isIn(locale, context.supportedLocales);
-      context.locale = locale;
+      context.setLocale(locale);
     } else {
-      resetLocale(context);
+      context.resetLocale();
     }
   }
 
