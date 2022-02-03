@@ -22,7 +22,7 @@ class GameConfigController {
 
   bool get isInitialized =>
       rawConfig != null &&
-      (playerStates == null || playerStates!.length > localGameData.myPlayerID!);
+      (playerStates == null || playerStates!.length > localGameData.myPlayerID);
 
   static GameConfig defaultConfig() {
     return GameConfig(

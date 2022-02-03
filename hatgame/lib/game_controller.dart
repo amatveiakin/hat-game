@@ -302,6 +302,7 @@ class GameController {
       onlineMode: false,
       gameID: gameID,
       gameReference: localGameReference(gameID: gameID),
+      myPlayerID: 0,
     );
   }
 
@@ -436,7 +437,7 @@ class GameController {
         onlineMode: true,
         gameID: gameID,
         gameReference: FirestoreDocumentReference(reference),
-        myPlayerID: playerID,
+        myPlayerID: playerID!,
       ),
       reconnection: reconnection,
     );
@@ -697,7 +698,7 @@ class GameController {
     final Iterable<PersonalState> playerStates =
         _parsePersonalStates(snapshot).values;
     return WordWritingViewData(
-      playerState: snapshot.get(DBColPlayer(localGameData.myPlayerID!)),
+      playerState: snapshot.get(DBColPlayer(localGameData.myPlayerID)),
       numPlayers: playerStates.length,
       numPlayersReady:
           playerStates.where((p) => (p.wordsReady ?? false)).length,
@@ -711,7 +712,7 @@ class GameController {
   static Future<void> updatePersonalState(
       LocalGameData localGameData, PersonalState newState) {
     final DBColumn column = localGameData.onlineMode
-        ? DBColPlayer(localGameData.myPlayerID!)
+        ? DBColPlayer(localGameData.myPlayerID)
         : DBColLocalPlayer();
     return localGameData.gameReference.updateColumns([
       column.withData(newState),
@@ -756,7 +757,7 @@ class GameController {
     if (localGameData.onlineMode) {
       final allPersonalStates = _parsePersonalStates(snapshot);
       Assert.holds(allPersonalStates.containsKey(localGameData.myPlayerID));
-      personalState = allPersonalStates[localGameData.myPlayerID!];
+      personalState = allPersonalStates[localGameData.myPlayerID];
       allPersonalStates
           .removeWhere((playerID, _) => playerID == localGameData.myPlayerID);
       otherPersonalStates =

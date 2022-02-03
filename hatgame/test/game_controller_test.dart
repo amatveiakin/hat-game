@@ -188,7 +188,7 @@ void main() {
       host.localGameData =
           await GameController.newLobby(firestoreInstance, 'user_host');
       guest.localGameData = (await GameController.joinLobby(
-              firestoreInstance, 'user_guest', host.localGameData.gameID!))
+              firestoreInstance, 'user_guest', host.localGameData.gameID))
           .localGameData;
 
       await (await host.configController()).update((config) => config.rebuild(
@@ -229,14 +229,14 @@ void main() {
           await GameController.newLobby(firestoreInstance, 'user_0');
 
       user1.localGameData = (await GameController.joinLobby(
-              firestoreInstance, 'user_1', host.localGameData.gameID!))
+              firestoreInstance, 'user_1', host.localGameData.gameID))
           .localGameData;
       expect(user1.localGameData.myPlayerID, equals(1));
 
       await GameController.kickPlayer(host.localGameData.gameReference, 1);
 
       user2.localGameData = (await GameController.joinLobby(
-              firestoreInstance, 'user_2', host.localGameData.gameID!))
+              firestoreInstance, 'user_2', host.localGameData.gameID))
           .localGameData;
       expect(user2.localGameData.myPlayerID, equals(2));
 
@@ -272,7 +272,7 @@ void main() {
           await getGamePhase(host.localGameData), equals(GamePhase.configure));
 
       guest.localGameData = (await GameController.joinLobby(
-              firestoreInstance, 'user_guest', host.localGameData.gameID!))
+              firestoreInstance, 'user_guest', host.localGameData.gameID))
           .localGameData;
       expect(
           await getGamePhase(host.localGameData), equals(GamePhase.configure));
@@ -312,7 +312,7 @@ void main() {
       host.localGameData =
           await GameController.newLobby(firestoreInstance, 'user_host');
       guest.localGameData = (await GameController.joinLobby(
-              firestoreInstance, 'user_guest', host.localGameData.gameID!))
+              firestoreInstance, 'user_guest', host.localGameData.gameID))
           .localGameData;
 
       await (await host.configController()).update((config) => config.rebuild(

@@ -16,9 +16,9 @@ class NavigationState {
 
 class LocalGameData {
   final bool onlineMode;
-  final String? gameID;
+  final String gameID;
   final DBDocumentReference gameReference;
-  final int? myPlayerID;
+  final int myPlayerID;
   final navigationState = NavigationState();
 
   bool get isAdmin => !onlineMode || myPlayerID == 0;
@@ -37,12 +37,9 @@ class LocalGameData {
 
   LocalGameData(
       {required this.onlineMode,
-      this.gameID,
+      required this.gameID,
       required this.gameReference,
-      this.myPlayerID}) {
-    Assert.holds(onlineMode != null);
-    Assert.holds(gameReference != null);
-  }
+      required this.myPlayerID});
 }
 
 class LocalGameState {

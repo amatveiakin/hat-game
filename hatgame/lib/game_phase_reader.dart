@@ -22,7 +22,7 @@ class GamePhaseReader {
       {LocalGameData? localGameData}) {
     if (localGameData != null) {
       final personalState =
-          snapshot.tryGet(DBColPlayer(localGameData.myPlayerID!));
+          snapshot.tryGet(DBColPlayer(localGameData.myPlayerID));
       if (personalState?.kicked ?? false) {
         return GamePhase.kicked;
       }
