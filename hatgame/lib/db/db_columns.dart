@@ -253,11 +253,11 @@ class DBColPlayerManager
 // Implementation
 
 mixin DBColSerializeBuiltValue<T> on DBColumn<T> {
-  Serializer _serializer() => serializers.serializerForType(T)!;
+  FullType _fullType() => FullType(T).withNullability(null is T);
   String serializeImpl(T value) =>
-      json.encode(serializers.serializeWith(_serializer(), value));
-  T deserializeImpl(String serialized) =>
-      serializers.deserializeWith(_serializer(), json.decode(serialized));
+      json.encode(serializers.serialize(value, specifiedType: _fullType()));
+  T deserializeImpl(String serialized) => serializers
+      .deserialize(json.decode(serialized), specifiedType: _fullType()) as T;
 }
 
 mixin DBColSerializeString on DBColumn<String> {
