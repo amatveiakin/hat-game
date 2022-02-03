@@ -175,7 +175,7 @@ class GameNavigator {
         context: context,
         localGameData: localGameData,
         snapshot: snapshot,
-        fromPhase: pushFrom,
+        fromPhase: pushFrom!,
         toPhase: newPhase,
       );
     }
@@ -185,11 +185,9 @@ class GameNavigator {
     required BuildContext context,
     required LocalGameData localGameData,
     required DBDocumentSnapshot snapshot,
-    required GamePhase? fromPhase, // non-inclusive
+    required GamePhase fromPhase, // non-inclusive
     required GamePhase toPhase, // inclusive
   }) {
-    Assert.holds(fromPhase != null);
-    Assert.holds(toPhase != null);
     if (fromPhase != toPhase) {
       _pushPhases(
         context: context,

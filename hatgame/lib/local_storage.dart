@@ -15,7 +15,6 @@ abstract class LocalStorage {
   static late LocalStorage instance;
 
   static Future<void> init() async {
-    Assert.holds(instance == null);
     try {
       instance = await LocalStorageFromSharedPreferences.getInstance();
       debugPrint('Local storage loaded successfully.');

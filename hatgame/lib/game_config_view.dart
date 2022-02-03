@@ -165,7 +165,6 @@ class _GameConfigViewState extends State<GameConfigView>
     final configController =
         GameConfigController.fromSnapshot(localGameData, snapshot);
     final GameConfig gameConfig = configController.configWithOverrides();
-    Assert.holds(gameConfig != null);
 
     _rulesConfigViewController.updateFromConfig(gameConfig.rules);
     final sections = [

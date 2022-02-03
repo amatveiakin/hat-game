@@ -51,7 +51,6 @@ class WriteWordsViewController {
         );
 
   void updateWords(BuiltList<String> words) {
-    Assert.holds(words != null);
     // There can be a mismatch between words.length and controllers.length
     // if you go back to config and change num words per player.
     for (int i = 0; i < min(words.length, controllers.length); i++) {

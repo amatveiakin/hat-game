@@ -606,7 +606,6 @@ class GameViewState extends State<GameView> {
   Widget buildBody(BuildContext context, DBDocumentSnapshot snapshot) {
     final gameController = GameController.fromSnapshot(localGameData, snapshot);
     final gameData = gameController.gameData;
-    Assert.holds(gameData != null);
     return ConstrainedScaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
