@@ -86,7 +86,7 @@ T dbGet<T>(Map<String, dynamic> data, DBColumn<T> column,
           ? 'Column "${column.name}" not found in "$documentPath". '
               'Content: "$data"'
           : 'Column "${column.name}" not found. Content: "$data"');
-  return column.deserialize(data[column.name])!;
+  return column.deserialize(data[column.name]) as T;
 }
 
 T? dbTryGet<T>(Map<String, dynamic> data, DBColumn<T> column) {
