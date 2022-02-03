@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:built_collection/built_collection.dart';
-import 'package:flutter/material.dart' as material;
 import 'package:flutter_test/flutter_test.dart' as flutter_test;
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';

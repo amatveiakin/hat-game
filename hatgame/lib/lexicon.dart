@@ -1,12 +1,9 @@
 import 'dart:math';
 
-import 'package:built_collection/built_collection.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/invalid_operation.dart';
-import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
 class DictionaryMetadata {

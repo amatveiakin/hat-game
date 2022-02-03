@@ -9,7 +9,6 @@ import 'package:hatgame/game_phase_reader.dart';
 import 'package:hatgame/game_view.dart';
 import 'package:hatgame/kicked_screen.dart';
 import 'package:hatgame/score_view.dart';
-import 'package:hatgame/start_screen.dart';
 import 'package:hatgame/team_compositions_view.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/widget/async_snapshot_error.dart';

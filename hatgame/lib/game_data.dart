@@ -1,11 +1,9 @@
 import 'package:built_collection/built_collection.dart';
-import 'package:flutter/material.dart';
 import 'package:hatgame/app_info.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_phase.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value/personal_state.dart';
-import 'package:hatgame/built_value/team_compositions.dart';
 import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/util/assertion.dart';
 

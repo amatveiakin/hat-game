@@ -11,7 +11,6 @@ import 'package:hatgame/game_phase_reader.dart';
 import 'package:hatgame/lexicon.dart';
 import 'package:hatgame/local_storage.dart';
 import 'package:hatgame/util/assertion.dart';
-import 'package:meta/meta.dart';
 
 class GameConfigController {
   final LocalGameData localGameData;
@@ -21,7 +20,6 @@ class GameConfigController {
   bool get isReadOnly => !localGameData.isAdmin;
 
   bool get isInitialized =>
-      rawConfig != null &&
       (playerStates == null || playerStates!.length > localGameData.myPlayerID);
 
   static GameConfig defaultConfig() {

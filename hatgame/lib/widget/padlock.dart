@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:hatgame/theme.dart';
@@ -100,12 +99,13 @@ class PadlockState extends State<Padlock> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _animation = Tween(begin: 0.0, end: 1.0).animate(widget.animationController!)
-      ..addListener(() {
-        setState(() {
-          _animationProgress = _animation.value;
-        });
-      });
+    _animation =
+        Tween(begin: 0.0, end: 1.0).animate(widget.animationController!)
+          ..addListener(() {
+            setState(() {
+              _animationProgress = _animation.value;
+            });
+          });
   }
 
   // Use didChangeDependencies instead of initState, because MediaQuery

@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/list_ext.dart';
 

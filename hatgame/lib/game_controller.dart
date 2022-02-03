@@ -20,7 +20,6 @@ import 'package:hatgame/game_data.dart';
 import 'package:hatgame/game_phase_reader.dart';
 import 'package:hatgame/lexicon.dart';
 import 'package:hatgame/partying_strategy.dart';
-import 'package:hatgame/start_game_online_screen.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/built_value_ext.dart';
 import 'package:hatgame/util/invalid_operation.dart';

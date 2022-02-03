@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'dart:math';
 
-import 'package:flutter/material.dart';
 import 'package:hatgame/db/db_columns.dart';
 import 'package:hatgame/db/db_document.dart';
 import 'package:quiver/async.dart' as quiver_async;

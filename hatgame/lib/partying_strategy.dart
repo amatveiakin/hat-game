@@ -5,7 +5,6 @@ import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value/team_compositions.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/invalid_operation.dart';
-import 'package:meta/meta.dart';
 
 // =============================================================================
 // Team Generators
@@ -117,8 +116,8 @@ abstract class PartyingStrategy {
       return FixedTeamsStrategy(
           teamCompositions.teams!, config.teaming.guessingInLargeTeam);
     } else {
-      return IndividualStrategy(
-          teamCompositions.individualOrder!, config.teaming.individualPlayStyle);
+      return IndividualStrategy(teamCompositions.individualOrder!,
+          config.teaming.individualPlayStyle);
     }
   }
 }

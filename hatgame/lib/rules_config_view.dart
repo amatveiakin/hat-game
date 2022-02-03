@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/dictionary_selector.dart';
 import 'package:hatgame/game_config_controller.dart';
-import 'package:hatgame/game_data.dart';
 import 'package:hatgame/lexicon.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/widget/divider.dart';
@@ -133,7 +132,8 @@ class RulesConfigViewState extends State<RulesConfigView> {
     super.initState();
 
     viewController.turnTimeController.addListener(() {
-      final int? newValue = int.tryParse(viewController.turnTimeController.text);
+      final int? newValue =
+          int.tryParse(viewController.turnTimeController.text);
       if (newValue != null && !viewController.updatingFromConfig) {
         configController.updateRules(
             (config) => config.rebuild((b) => b..turnSeconds = newValue));

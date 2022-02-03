@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
-import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/widget/dialog.dart';
 
 class OnlinePlayersConfigView extends StatelessWidget {

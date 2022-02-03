@@ -1,7 +1,6 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/util/list_ext.dart';
-import 'package:meta/meta.dart';
 
 enum AssertInRelease {
   ignore,

@@ -3,7 +3,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/game_config_controller.dart';
-import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/widget/divider.dart';
 
@@ -203,11 +202,9 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
                     controller: player.controller,
                   ),
                 ),
-                if (manualTeams)
-                  SizedBox(width: 12),
+                if (manualTeams) SizedBox(width: 12),
                 // TODO: Make sure we don't have two drag handles on iOS.
-                if (manualTeams)
-                  Icon(Icons.drag_handle),
+                if (manualTeams) Icon(Icons.drag_handle),
                 SizedBox(width: 4),
                 IconButton(
                   padding: EdgeInsets.zero,

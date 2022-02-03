@@ -1,6 +1,5 @@
 import 'package:built_collection/built_collection.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_phase.dart';
@@ -14,9 +13,7 @@ import 'package:hatgame/game_data.dart';
 import 'package:hatgame/game_phase_reader.dart';
 import 'package:hatgame/lexicon.dart';
 import 'package:hatgame/local_storage.dart';
-import 'package:hatgame/util/list_ext.dart';
 import 'package:hatgame/util/ntp_time.dart';
-import 'package:meta/meta.dart';
 
 class AppConfig {
   bool hasNtp = true;

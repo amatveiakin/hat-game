@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/widget/labeled_checkbox.dart';
-import 'package:hatgame/widget/wide_button.dart';
 
 class CheckboxButton extends StatelessWidget {
   final bool value;
