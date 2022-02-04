@@ -39,7 +39,7 @@ generate words, keep track of time and score.
         title: Text(tr('hat_game_rules_title')),
       ),
       body: Markdown(
-        data: MarkdownUtil.joinParagraphs(content),
+        data: content,
         styleSheet: MarkdownUtil.defaultStyle(context),
         selectable: true,
       ),

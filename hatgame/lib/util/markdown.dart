@@ -3,13 +3,6 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MarkdownUtil {
-  static String joinParagraphs(String text) {
-    return text
-        .split(RegExp('\n\n+'))
-        .map((s) => s.split('\n').join(' '))
-        .join('\n');
-  }
-
   static MarkdownStyleSheet defaultStyle(BuildContext context) {
     final baseSheet = MarkdownStyleSheet.fromTheme(Theme.of(context));
     return baseSheet.copyWith(

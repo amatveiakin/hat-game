@@ -53,7 +53,7 @@ The app is written in Flutter.
         title: Text(tr('about_hat_game')),
       ),
       body: Markdown(
-        data: MarkdownUtil.joinParagraphs(content),
+        data: content,
         styleSheet: MarkdownUtil.defaultStyle(context),
         onTapLink: (text, href, title) =>
             MarkdownUtil.onLinkTapped(context, href!),
