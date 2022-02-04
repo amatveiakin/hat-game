@@ -223,8 +223,11 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
         title: Row(children: [
           Expanded(
             flex: 3,
-            child: OutlineButton(
-              padding: EdgeInsets.symmetric(vertical: 10.0),
+            child: OutlinedButton(
+              style: ButtonStyle(
+                padding: MaterialStateProperty.all(
+                    EdgeInsets.symmetric(vertical: 10.0)),
+              ),
               onPressed: () => setState(() {
                 _addPlayer('', focus: true);
               }),
@@ -242,8 +245,11 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
           if (manualTeams)
             Expanded(
               flex: 2,
-              child: OutlineButton(
-                padding: EdgeInsets.symmetric(vertical: 10.0),
+              child: OutlinedButton(
+                style: ButtonStyle(
+                  padding: MaterialStateProperty.all(
+                      EdgeInsets.symmetric(vertical: 10.0)),
+                ),
                 onPressed: () => setState(() {
                   _addDivider();
                   _addPlayer('', focus: true);

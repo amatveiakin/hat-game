@@ -59,10 +59,12 @@ class SwitchButton extends StatelessWidget {
       child: selected
           ? Padding(
               padding: EdgeInsets.all(1.5),
-              child: OutlineButton(
-                borderSide: BorderSide(
-                  color: MyTheme.accent,
-                  width: 3.0,
+              child: OutlinedButton(
+                style: ButtonStyle(
+                  side: MaterialStateProperty.all(BorderSide(
+                    color: MyTheme.accent,
+                    width: 3.0,
+                  )),
                 ),
                 child: Text(
                   text,
