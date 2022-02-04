@@ -16,7 +16,16 @@ import 'package:hatgame/util/ntp_time.dart';
 import 'package:hatgame/util/sounds.dart';
 
 Future<void> _initFirestore() async {
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+      options: FirebaseOptions(
+          apiKey: "AIzaSyBX7jo-zBfl0EKR6s7-ph4NhifkhIPzvzw",
+          authDomain: "hatgame.firebaseapp.com",
+          databaseURL: "https://hatgame.firebaseio.com",
+          projectId: "hatgame",
+          storageBucket: "hatgame.appspot.com",
+          messagingSenderId: "761993928349",
+          appId: "1:761993928349:web:a9f63af19ae7b1c9b87e74",
+          measurementId: "G-TNXGM73WRF"));
 
   // Enable offline mode. This is the default for Android and iOS, but
   // on web it need to be enabled explicitly:
