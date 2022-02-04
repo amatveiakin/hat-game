@@ -37,7 +37,7 @@ class LanguageSelector extends EnumOptionSelector<String?> {
 }
 
 class LanguageSelectorState
-    extends EnumOptionSelectorState<String, LanguageSelector> {}
+    extends EnumOptionSelectorState<String?, LanguageSelector> {}
 
 class AppSettingsView extends StatefulWidget {
   static const String routeName = '/app-settings';
@@ -53,7 +53,7 @@ class AppSettingsView extends StatefulWidget {
 class AppSettingsViewState extends State<AppSettingsView> {
   String? language;
 
-  void updateLanguage(String newValue) {
+  void updateLanguage(String? newValue) {
     setState(() {
       language = newValue;
     });
@@ -71,7 +71,7 @@ class AppSettingsViewState extends State<AppSettingsView> {
   @override
   void initState() {
     super.initState();
-    language = LocalStorage.instance.get(LocalColLocale());
+    language = LocalStorage.instance.get<String?>(LocalColLocale());
     if (optionWithValue(languageOptions(), language) == null) {
       language = null;
     }

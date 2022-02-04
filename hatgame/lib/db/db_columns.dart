@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:built_value/serializer.dart';
-import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_phase.dart';
 import 'package:hatgame/built_value/game_state.dart';
@@ -18,14 +17,8 @@ import 'package:hatgame/util/list_ext.dart';
 abstract class DBColumn<T> {
   String get name;
 
-  String? serialize(T? value) => value == null ? null : serializeImpl(value);
-  T? deserialize(String? serialized) =>
-      serialized == null ? null : deserializeImpl(serialized);
-
-  @protected
-  String serializeImpl(T value);
-  @protected
-  T deserializeImpl(String serialized);
+  String? serialize(T value);
+  T deserialize(String? serialized);
 
   // Note: `data` can be null, in which case null is written to the DB.
   // This is similar, but not equivalent to removing the column (`dbTryGet`
@@ -86,7 +79,7 @@ T dbGet<T>(Map<String, dynamic> data, DBColumn<T> column,
           ? 'Column "${column.name}" not found in "$documentPath". '
               'Content: "$data"'
           : 'Column "${column.name}" not found. Content: "$data"');
-  return column.deserialize(data[column.name]) as T;
+  return column.deserialize(data[column.name]);
 }
 
 T? dbTryGet<T>(Map<String, dynamic> data, DBColumn<T> column) {
@@ -254,15 +247,20 @@ class DBColPlayerManager
 
 mixin DBColSerializeBuiltValue<T> on DBColumn<T> {
   FullType _fullType() => FullType(T).withNullability(null is T);
-  String serializeImpl(T value) =>
+  String serialize(T value) =>
       json.encode(serializers.serialize(value, specifiedType: _fullType()));
-  T deserializeImpl(String serialized) => serializers
-      .deserialize(json.decode(serialized), specifiedType: _fullType()) as T;
+  T deserialize(String? serialized) => serializers
+      .deserialize(json.decode(serialized!), specifiedType: _fullType()) as T;
+}
+
+mixin DBColSerializeStringOr on DBColumn<String?> {
+  String? serialize(String? value) => value;
+  String? deserialize(String? serialized) => serialized;
 }
 
 mixin DBColSerializeString on DBColumn<String> {
-  String serializeImpl(String value) => value;
-  String deserializeImpl(String serialized) => serialized;
+  String? serialize(String value) => value;
+  String deserialize(String? serialized) => serialized!;
 }
 
 int? _getColumnID(String columnName, {required String prefix}) {

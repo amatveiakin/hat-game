@@ -59,7 +59,7 @@ class LocalColLastConfig extends DBColumn<GameConfig>
   String get name => 'last_config';
 }
 
-class LocalColLocale extends DBColumn<String> with DBColSerializeString {
+class LocalColLocale extends DBColumn<String?> with DBColSerializeStringOr {
   String get name => 'locale';
 }
 
@@ -101,7 +101,11 @@ class LocalStorageFromSharedPreferences extends LocalStorage {
   }
 
   Future<void> set<T>(DBColumn<T> column, T data) async {
-    await prefs.setString(column.name, column.serialize(data)!);
+    if (data == null) {
+      await prefs.remove(column.name);
+    } else {
+      await prefs.setString(column.name, column.serialize(data)!);
+    }
   }
 }
 

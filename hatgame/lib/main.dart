@@ -39,7 +39,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // TODO: Display a splash screen with a loading indicator.
   await _initApp();
-  final String? language = LocalStorage.instance.get(LocalColLocale());
+  final String? language = LocalStorage.instance.get<String?>(LocalColLocale());
   runApp(
     EasyLocalization(
       useOnlyLangCode: true,
