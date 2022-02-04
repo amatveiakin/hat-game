@@ -70,9 +70,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         // Increase default font sizes
         textTheme: Theme.of(context).textTheme.apply(fontSizeDelta: 2.0),
-        primaryColor: MyTheme.primary,
-        primaryColorDark: MyTheme.primaryDark,
-        accentColor: MyTheme.accent, // TODO: Update to colorScheme.secondary
+        // TODO: Why is selected tab highlight color still blue?
+        colorScheme: ColorScheme.fromSwatch(
+          primarySwatch: MyTheme.primary,
+          primaryColorDark: MyTheme.primaryDark,
+          accentColor: MyTheme.accent,
+        ),
       ),
       title: tr('hat_game'),
       localizationsDelegates: context.localizationDelegates,
