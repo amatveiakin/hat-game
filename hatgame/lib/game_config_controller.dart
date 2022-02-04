@@ -58,7 +58,8 @@ class GameConfigController {
 
   static GameConfig initialConfig({required bool onlineMode}) {
     final GameConfig config =
-        LocalStorage.instance.get(LocalColLastConfig()) ?? defaultConfig();
+        LocalStorage.instance.get<GameConfig?>(LocalColLastConfig()) ??
+            defaultConfig();
     // TODO: Do something to avoid breaking online-only and offline-only
     // fields in LocalColLastConfig.
     return _fix(onlineMode

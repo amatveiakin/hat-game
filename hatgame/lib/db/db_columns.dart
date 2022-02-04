@@ -14,6 +14,8 @@ import 'package:hatgame/util/list_ext.dart';
 // =============================================================================
 // Column interface
 
+// `T` must be nullable if it's ever possible to read a `null` value from DB.
+// `T` can be non-nullable otherwise (similar to `late` variables in Dart).
 abstract class DBColumn<T> {
   String get name;
 
@@ -155,7 +157,7 @@ class DBColConfig extends DBColumn<GameConfig> with DBColSerializeBuiltValue {
 
 // Owned by the host during team compositions phase. Deleted afterwards.
 class DBColTeamCompositions extends DBColumn<TeamCompositions?>
-    with DBColSerializeBuiltValue {
+    with DBColSerializeBuiltValueOr {
   String get name => 'team_compositions';
 }
 
@@ -178,7 +180,7 @@ class DBColTurnRecord extends DBColumnFamily<TurnRecord>
 // active, the previous active player must write an update handing over
 // the active player status.
 class DBColCurrentTurn extends DBColumn<TurnState?>
-    with DBColSerializeBuiltValue {
+    with DBColSerializeBuiltValueOr {
   String get name => 'turn_current';
 }
 
@@ -246,11 +248,22 @@ class DBColPlayerManager
 // Implementation
 
 mixin DBColSerializeBuiltValue<T> on DBColumn<T> {
-  FullType _fullType() => FullType(T).withNullability(null is T);
+  FullType _fullType() => FullType(T);
   String serialize(T value) =>
       json.encode(serializers.serialize(value, specifiedType: _fullType()));
   T deserialize(String? serialized) => serializers
       .deserialize(json.decode(serialized!), specifiedType: _fullType()) as T;
+}
+
+mixin DBColSerializeBuiltValueOr<T> on DBColumn<T?> {
+  FullType _fullType() => FullType.nullable(T);
+  String? serialize(T? value) => value == null
+      ? null
+      : json.encode(serializers.serialize(value, specifiedType: _fullType()));
+  T? deserialize(String? serialized) => serialized == null
+      ? null
+      : serializers.deserialize(json.decode(serialized),
+          specifiedType: _fullType()) as T;
 }
 
 mixin DBColSerializeStringOr on DBColumn<String?> {
