@@ -26,7 +26,7 @@ Future<T> multipleChoiceDialog<T>({
       content: _textWidget(contentText),
       actions: choices
           .map(
-            (c) => FlatButton(
+            (c) => TextButton(
               child: Text(c.text),
               onPressed: () => Navigator.of(context).pop(c.value),
             ),
@@ -48,7 +48,7 @@ Future<void> simpleDialog(
       title: _textWidget(titleText),
       content: _textWidget(contentText),
       actions: [
-        FlatButton(
+        TextButton(
           child: Text(closeButtonText),
           onPressed: () => Navigator.of(context).pop(),
         ),

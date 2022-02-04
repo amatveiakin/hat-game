@@ -109,7 +109,7 @@ class _GameConfigViewState extends State<GameConfigView>
             ],
           ),
           actions: [
-            FlatButton(
+            TextButton(
               child: Text(tr('ok')),
               onPressed: () {
                 Navigator.of(context).pop();

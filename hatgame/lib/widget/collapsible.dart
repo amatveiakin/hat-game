@@ -21,11 +21,14 @@ class Collapsible extends StatelessWidget {
       children: [
         Container(
           width: expandButtonWidth,
-          child: FlatButton(
-            padding: EdgeInsets.zero,
-            // TODO: Take colors from the theme.
-            color: Colors.black.withOpacity(0.15),
-            hoverColor: Colors.black.withOpacity(0.20),
+          child: TextButton(
+            style: ButtonStyle(
+                padding: MaterialStateProperty.all(EdgeInsets.zero),
+                // TODO: Take colors from the theme.
+                backgroundColor: MaterialStateProperty.resolveWith((states) =>
+                    states.contains(MaterialState.hovered)
+                        ? Colors.black.withOpacity(0.20)
+                        : Colors.black.withOpacity(0.15))),
             child: collapsed
                 ? Icon(Icons.chevron_left)
                 : Icon(Icons.chevron_right),

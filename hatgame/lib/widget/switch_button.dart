@@ -28,7 +28,7 @@ class SwitchButton extends StatelessWidget {
       BuildContext context, int index, String text, bool selected) {
     return Expanded(
       child: selected
-          ? FlatButton(
+          ? TextButton(
               child: Text(
                 text,
                 style: Theme.of(context)
@@ -39,7 +39,7 @@ class SwitchButton extends StatelessWidget {
               color: MyTheme.accent,
               onPressed: () {},
             )
-          : FlatButton(
+          : TextButton(
               child: Text(
                 text,
                 style: Theme.of(context)
@@ -74,7 +74,7 @@ class SwitchButton extends StatelessWidget {
                 onPressed: () {},
               ),
             )
-          : FlatButton(
+          : TextButton(
               child: Text(
                 text,
                 textAlign: TextAlign.center,
