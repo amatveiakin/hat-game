@@ -105,16 +105,19 @@ class StartScreenState extends State<StartScreen> {
             Expanded(child: Container()),
             WideButton(
               onPressed: () => _newGameOffline(context),
+              coloring: WideButtonColoring.neutral,
               child: Text(tr('new_local_game')),
             ),
             SizedBox(height: 24),
             WideButton(
               onPressed: () => _newGameOnline(context),
+              coloring: WideButtonColoring.neutral,
               child: Text(tr('new_game_online')),
             ),
             SizedBox(height: 24),
             WideButton(
               onPressed: () => _joinGame(context),
+              coloring: WideButtonColoring.neutral,
               child: Text(tr('join_game')),
             ),
             Expanded(child: Container()),

@@ -6,7 +6,6 @@ import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/game_navigator.dart';
-import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/widget/constrained_scaffold.dart';
 import 'package:hatgame/widget/image_assert_icon.dart';
@@ -133,7 +132,7 @@ class TeamCompositionsView extends StatelessWidget {
             onPressed: localGameData.isAdmin
                 ? () => _startGame(context, snapshot)
                 : null,
-            color: MyTheme.accent,
+            coloring: WideButtonColoring.secondary,
             child: Text(tr('start_game')),
             margin: WideButton.bottomButtonMargin,
           ),

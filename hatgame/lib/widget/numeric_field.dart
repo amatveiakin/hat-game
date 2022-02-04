@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/assertion.dart';
 
 class NumericField extends StatelessWidget {
@@ -114,6 +113,10 @@ class _NumericFieldImplState extends State<NumericFieldImpl> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final buttonStyle = ButtonStyle(
+        backgroundColor: MaterialStateProperty.all(colorScheme.secondary),
+        foregroundColor: MaterialStateProperty.all(colorScheme.onSecondary));
     return DecoratedBox(
       decoration: ShapeDecoration(
         shape: RoundedRectangleBorder(
@@ -127,12 +130,12 @@ class _NumericFieldImplState extends State<NumericFieldImpl> {
           children: [
             SizedBox(
               width: buttonWidth,
-              child: RaisedButton(
+              child: ElevatedButton(
                 child: Text(
                   '−', // minus sign (U+2212)
                   textAlign: TextAlign.center,
                 ),
-                color: MyTheme.accent,
+                style: buttonStyle,
                 onPressed: _decValue,
               ),
             ),
@@ -153,12 +156,12 @@ class _NumericFieldImplState extends State<NumericFieldImpl> {
             ),
             SizedBox(
               width: buttonWidth,
-              child: RaisedButton(
+              child: ElevatedButton(
                 child: Text(
                   '+',
                   textAlign: TextAlign.center,
                 ),
-                color: MyTheme.accent,
+                style: buttonStyle,
                 onPressed: _incValue,
               ),
             ),

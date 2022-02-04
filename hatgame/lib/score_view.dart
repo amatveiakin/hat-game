@@ -228,7 +228,7 @@ class ScoreView extends StatelessWidget {
             onPressed: localGameData.isAdmin
                 ? () => _rematch(context, snapshot)
                 : null,
-            color: MyTheme.accent,
+            coloring: WideButtonColoring.secondary,
             child: Text(tr('rematch')),
             margin: WideButton.bottomButtonMargin,
           ),

@@ -34,19 +34,21 @@ class WideWidget extends StatelessWidget {
   }
 }
 
+enum WideButtonColoring { neutral, secondary }
+
 class WideButton extends StatelessWidget {
   static const EdgeInsets bottomButtonMargin =
       EdgeInsets.symmetric(vertical: 20.0);
 
   final Widget child;
-  final Color? color;
+  final WideButtonColoring coloring;
   final VoidCallback? onPressed;
   final VoidCallback? onPressedDisabled; // executed if onPressed is null
   final EdgeInsets margin;
 
   WideButton({
     required this.child,
-    this.color,
+    required this.coloring,
     required this.onPressed,
     this.onPressedDisabled,
     this.margin = EdgeInsets.zero,
@@ -54,14 +56,30 @@ class WideButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    late final ButtonStyle colorStyle;
+    switch (coloring) {
+      case WideButtonColoring.neutral:
+        colorStyle = ButtonStyle(
+            backgroundColor: MaterialStateProperty.all(Colors.grey[300]),
+            foregroundColor: MaterialStateProperty.all(Colors.black));
+        break;
+      case WideButtonColoring.secondary:
+        colorStyle = ButtonStyle(
+            backgroundColor: MaterialStateProperty.all(colorScheme.secondary),
+            foregroundColor:
+                MaterialStateProperty.all(colorScheme.onSecondary));
+        break;
+    }
     return Padding(
       padding: margin,
       child: WideWidget(
         child: GestureDetector(
-          child: RaisedButton(
+          child: ElevatedButton(
             onPressed: onPressed,
-            color: color,
-            padding: EdgeInsets.symmetric(vertical: 12.0),
+            style: colorStyle.copyWith(
+                padding: MaterialStateProperty.all(
+                    EdgeInsets.symmetric(vertical: 12.0))),
             child: DefaultTextStyle.merge(
               style: TextStyle(fontSize: 20),
               child: child,

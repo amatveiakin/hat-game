@@ -12,7 +12,6 @@ import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/game_navigator.dart';
 import 'package:hatgame/lexicon.dart';
-import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/widget/checkbox_button.dart';
@@ -227,7 +226,7 @@ class WriteWordsViewState extends State<WriteWordsView> {
             onPressedDisabled: everybodyReady
                 ? null
                 : () => _showPlayersNotReady(viewData.playersNotReady),
-            color: MyTheme.accent,
+            coloring: WideButtonColoring.secondary,
             // Note: keep text in sync with game_config_view.dart
             child: everybodyReady
                 ? GoNextButtonCaption(tr('next'))

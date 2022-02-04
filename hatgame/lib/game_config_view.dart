@@ -12,7 +12,6 @@ import 'package:hatgame/offline_player_config_view.dart';
 import 'package:hatgame/online_player_config_view.dart';
 import 'package:hatgame/rules_config_view.dart';
 import 'package:hatgame/teaming_config_view.dart';
-import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/widget/image_assert_icon.dart';
 import 'package:hatgame/widget/invalid_operation_dialog.dart';
@@ -199,7 +198,7 @@ class _GameConfigViewState extends State<GameConfigView>
     ];
     final startButton = WideButton(
       onPressed: isAdmin ? () => _next(gameConfig) : null,
-      color: MyTheme.accent,
+      coloring: WideButtonColoring.secondary,
       child: GoNextButtonCaption(gameConfig.rules.writeWords
           ? tr('write_words_titlecase')
           : tr('next')),

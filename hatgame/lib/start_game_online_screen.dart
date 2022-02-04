@@ -6,7 +6,6 @@ import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/game_navigator.dart';
 import 'package:hatgame/local_storage.dart';
-import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/widget/checked_text_field.dart';
 import 'package:hatgame/widget/constrained_scaffold.dart';
@@ -108,7 +107,7 @@ class NewGameOnlineScreenState extends State<NewGameOnlineScreen> {
             Expanded(child: Container()),
             WideButton(
               onPressed: () => _createGame(context),
-              color: MyTheme.accent,
+              coloring: WideButtonColoring.secondary,
               child: Text(tr('create_game')),
               margin: WideButton.bottomButtonMargin,
             ),
@@ -282,7 +281,7 @@ class JoinGameOnlineScreenState extends State<JoinGameOnlineScreen> {
             Expanded(child: Container()),
             WideButton(
               onPressed: () => _joinGame(context),
-              color: MyTheme.accent,
+              coloring: WideButtonColoring.secondary,
               child: Text(tr('join_game')),
               margin: WideButton.bottomButtonMargin,
             ),

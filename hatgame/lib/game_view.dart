@@ -479,7 +479,7 @@ class PlayAreaState extends State<PlayArea>
                         : null,
                     onPressedDisabled: () =>
                         _padlockAnimationController!.forward(from: 0.0),
-                    color: MyTheme.accent,
+                    coloring: WideButtonColoring.secondary,
                     child: Text(
                       tr('start'),
                       style: TextStyle(fontSize: 24.0),
@@ -505,6 +505,7 @@ class PlayAreaState extends State<PlayArea>
             child: Center(
               child: WideButton(
                 onPressed: _turnActive ? _wordGuessed : null,
+                coloring: WideButtonColoring.neutral,
                 child: Text(
                   gameData.currentWordText(),
                   style: TextStyle(fontSize: 24.0),
@@ -565,7 +566,7 @@ class PlayAreaState extends State<PlayArea>
             SizedBox(height: 28.0),
             WideButton(
               onPressed: _reviewDone,
-              color: MyTheme.accent,
+              coloring: WideButtonColoring.secondary,
               child: Text(tr('done')),
               margin: WideButton.bottomButtonMargin,
             ),
