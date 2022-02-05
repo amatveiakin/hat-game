@@ -334,20 +334,6 @@ class GameController {
     final firestore.DocumentReference reference = firestoreGameReference(
         firestoreInstance: firestoreInstance, gameID: gameID);
 
-    if (!(await reference.get()).exists) {
-      // [1/2] Workaround flutter/firestore error:
-      //     E/flutter ( 6075): [ERROR:flutter/lib/ui/ui_dart_state.cc(157)]
-      //         Unhandled Exception: PlatformException(Error performing
-      //         transaction, Every document read in a transaction must also
-      //         be written., null)
-      // Check if the document exists beforehand. This is not 100% safe if
-      // the documents can be deleted (which may be the case), but I don't
-      // see what else we can do.
-      // TODO: Remove the workaround whe the bug is fixed.
-      throw InvalidOperation(tr('game_doesnt_exist', args: [gameID]))
-        ..addTag(JoinGameErrorSource.gameID);
-    }
-
     // TODO: Adhere to best practices: get `playerID` as a return value from
     // runTransaction. I tried doing this, but unfortunately ran into
     // https://github.com/flutter/flutter/issues/17663. Note: the issue was
@@ -370,10 +356,6 @@ class GameController {
         error = InvalidOperation(tr('game_doesnt_exist', args: [gameID]))
           ..addTag(JoinGameErrorSource.gameID);
         return;
-      }
-      {
-        // [2/2] Workaround flutter/firestore error. Do a dumb write.
-        await tx.set(reference, snapshot.data());
       }
       try {
         checkVersionCompatibility(
@@ -453,10 +435,6 @@ class GameController {
       if (!snapshot.exists) {
         return Future.error(
             InvalidOperation("Game ${firestoreReference.path} doesn't exist"));
-      }
-      {
-        // Workaround flutter/firestore error. Do a dumb write.
-        await tx.set(reference, snapshot.data());
       }
       final playerRecord = dbGet(
           snapshot.data() as Map<String, dynamic>, DBColPlayer(playerID),
