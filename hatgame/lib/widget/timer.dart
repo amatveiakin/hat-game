@@ -171,7 +171,7 @@ class _TimerViewState extends State<TimerView>
                         Icon(
                           _isRunning() ? Icons.pause : Icons.play_arrow,
                           size: 32.0,
-                          color: MyTheme.accent,
+                          color: MyTheme.secondary,
                         )
                     ],
                   ),

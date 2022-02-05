@@ -46,7 +46,7 @@ class PartyView extends StatelessWidget {
                 ? FontWeight.w900
                 : FontWeight.normal,
             decoration: TextDecoration.underline,
-            decorationColor: MyTheme.accent,
+            decorationColor: MyTheme.secondary,
             decorationThickness: turnPhase == TurnPhase.prepare ? 2.0 : 1.0,
             color: Colors.black,
           ),
@@ -98,19 +98,21 @@ Widget _getWordFeedbackIcon(
   switch (feedback) {
     case WordFeedback.good:
       return active
-          ? Icon(Icons.thumb_up, color: MyTheme.accent)
+          ? Icon(Icons.thumb_up, color: MyTheme.secondary)
           : Icon(Icons.thumb_up_outlined);
     case WordFeedback.bad:
       return active
-          ? Icon(Icons.thumb_down, color: MyTheme.accent)
+          ? Icon(Icons.thumb_down, color: MyTheme.secondary)
           : Icon(Icons.thumb_down_outlined);
     case WordFeedback.tooEasy:
       return active
-          ? ImageAssetIcon('images/too_easy_filled.png', color: MyTheme.accent)
+          ? ImageAssetIcon('images/too_easy_filled.png',
+              color: MyTheme.secondary)
           : ImageAssetIcon('images/too_easy_outlined.png');
     case WordFeedback.tooHard:
       return active
-          ? ImageAssetIcon('images/too_hard_filled.png', color: MyTheme.accent)
+          ? ImageAssetIcon('images/too_hard_filled.png',
+              color: MyTheme.secondary)
           : ImageAssetIcon('images/too_hard_outlined.png');
   }
   Assert.fail("Reached end of _getWordFeedbackIcon");
@@ -209,7 +211,7 @@ class WordReviewItem extends StatelessWidget {
             if (setFlag != null)
               IconButton(
                 icon: hasFlag
-                    ? Icon(Icons.error, color: MyTheme.accent)
+                    ? Icon(Icons.error, color: MyTheme.secondary)
                     : Icon(Icons.error_outline),
                 tooltip: tr('flag_the_word'),
                 onPressed: () => setFlag!(!hasFlag),

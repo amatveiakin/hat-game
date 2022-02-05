@@ -27,14 +27,14 @@ class _PadlockPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
     var borderPaint = Paint()
-      ..color = Color.lerp(MyTheme.accent, MyColors.black(180), 0.5)!
+      ..color = Color.lerp(MyTheme.secondary, MyColors.black(180), 0.5)!
       ..style = PaintingStyle.stroke
       ..strokeWidth = 5.0
       ..strokeCap = StrokeCap.butt
       ..maskFilter = MaskFilter.blur(BlurStyle.normal, 0.5);
     if (padlockOpen) {
       borderPaint
-        ..color = MyTheme.accent
+        ..color = MyTheme.secondary
         ..maskFilter = MaskFilter.blur(BlurStyle.normal, 5.0);
     }
     canvas.drawOval(rect, borderPaint);
@@ -54,8 +54,8 @@ class _PadlockPainter extends CustomPainter {
         style: TextStyle(
           fontSize: 72.0,
           fontFamily: icon.fontFamily,
-          color: MyTheme.accent,
-          shadows: _elevationToShadow(2, MyTheme.accent),
+          color: MyTheme.secondary,
+          shadows: _elevationToShadow(2, MyTheme.secondary),
         ));
     textPainter.layout();
 

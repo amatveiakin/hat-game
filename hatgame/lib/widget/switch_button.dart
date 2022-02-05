@@ -36,7 +36,7 @@ class SwitchButton extends StatelessWidget {
                     .subtitle1
                     .copyWith(fontWeight: FontWeight.w400),
               ),
-              color: MyTheme.accent,
+              color: MyTheme.secondary,
               onPressed: () {},
             )
           : TextButton(
@@ -62,7 +62,7 @@ class SwitchButton extends StatelessWidget {
               child: OutlinedButton(
                 style: ButtonStyle(
                   side: MaterialStateProperty.all(BorderSide(
-                    color: MyTheme.accent,
+                    color: MyTheme.secondary,
                     width: 3.0,
                   )),
                 ),
@@ -97,7 +97,7 @@ class SwitchButton extends StatelessWidget {
           ? DecoratedBox(
               decoration: ShapeDecoration(
                 shape: RoundedRectangleBorder(
-                  side: BorderSide(color: MyTheme.accent),
+                  side: BorderSide(color: MyTheme.secondary),
                   borderRadius: BorderRadius.circular(3.0),
                 ),
               ),

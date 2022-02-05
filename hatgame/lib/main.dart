@@ -82,11 +82,14 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         // Increase default font sizes
         textTheme: Theme.of(context).textTheme.apply(fontSizeDelta: 2.0),
-        // TODO: Why is selected tab highlight color still blue?
         colorScheme: ColorScheme.fromSwatch(
           primarySwatch: MyTheme.primary,
           primaryColorDark: MyTheme.primaryDark,
-          accentColor: MyTheme.accent,
+          accentColor: MyTheme.secondary,
+        ).copyWith(secondaryVariant: MyTheme.secondaryDark),
+        indicatorColor: MyTheme.secondary,
+        checkboxTheme: CheckboxThemeData(
+          fillColor: MaterialStateProperty.all(MyTheme.secondaryDark),
         ),
       ),
       title: tr('hat_game'),

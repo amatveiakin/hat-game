@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hatgame/theme.dart';
 
 class GoNextButtonCaption extends StatelessWidget {
   final String text;
@@ -61,7 +62,7 @@ class WideButton extends StatelessWidget {
     switch (coloring) {
       case WideButtonColoring.neutral:
         colorStyle = ButtonStyle(
-            backgroundColor: MaterialStateProperty.all(Colors.grey[300]),
+            backgroundColor: MaterialStateProperty.all(MyTheme.primary[100]),
             foregroundColor: MaterialStateProperty.all(Colors.black));
         break;
       case WideButtonColoring.secondary:
