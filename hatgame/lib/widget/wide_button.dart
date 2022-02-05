@@ -80,7 +80,8 @@ class WideButton extends StatelessWidget {
             onPressed: onPressed,
             style: colorStyle.copyWith(
                 padding: MaterialStateProperty.all(
-                    EdgeInsets.symmetric(vertical: 12.0))),
+                    EdgeInsets.symmetric(vertical: 12.0)),
+                visualDensity: VisualDensity.standard),
             child: DefaultTextStyle.merge(
               style: TextStyle(fontSize: 20),
               child: child,
