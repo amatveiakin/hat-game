@@ -195,6 +195,23 @@ class PersonalStateTransformer {
   }
 }
 
+class _JoinGameResultInternal {
+  // Throwing or returning Future.error from `runTransaction` doesn't work.
+  // It results in:
+  //     Unhandled Exception: PlatformException(Error performing transaction,
+  //         java.lang.Exception: DoTransaction failed: Instance of
+  //         'InvalidOperation', null)
+  // Other fields are ignored if `error` is non-null.
+  InvalidOperation? error;
+
+  int? playerID; // non-null if no error
+  Reconnection? reconnection; // non-null if no error
+
+  _JoinGameResultInternal.error(InvalidOperation this.error);
+  _JoinGameResultInternal.success(
+      {required int this.playerID, required Reconnection this.reconnection});
+}
+
 class GameController {
   final LocalGameData localGameData;
   final GameConfig config;
@@ -261,28 +278,26 @@ class GameController {
     const int maxIDLength = 8;
     const int attemptsPerTransaction = 100;
     final String idPrefix = kReleaseMode ? '' : '.';
-    String? gameID;
-    for (int idLength = minIDLength;
-        idLength <= maxIDLength && gameID == null;
-        idLength++) {
-      await firestoreInstance.runTransaction((firestore.Transaction tx) async {
+    for (int idLength = minIDLength; idLength <= maxIDLength; idLength++) {
+      final String? gameID = await firestoreInstance
+          .runTransaction((firestore.Transaction tx) async {
         for (int iter = 0; iter < attemptsPerTransaction; iter++) {
-          gameID = newFirestoreGameID(idLength, idPrefix);
+          final gameID = newFirestoreGameID(idLength, idPrefix);
           final reference = firestoreGameReference(
-              firestoreInstance: firestoreInstance, gameID: gameID!);
+              firestoreInstance: firestoreInstance, gameID: gameID);
           firestore.DocumentSnapshot snapshot = await tx.get(reference);
           if (!snapshot.exists) {
             await tx.set(reference, dbData(initialColumns));
-            return;
+            return gameID;
           }
         }
-        gameID = null;
+        return null;
       });
+      if (gameID != null) {
+        return gameID;
+      }
     }
-    if (gameID == null) {
-      throw InvalidOperation('Cannot generate game ID', isInternalError: true);
-    }
-    return gameID!;
+    throw InvalidOperation('Cannot generate game ID', isInternalError: true);
   }
 
   static Future<LocalGameData> newGameOffine() async {
@@ -334,28 +349,13 @@ class GameController {
     final firestore.DocumentReference reference = firestoreGameReference(
         firestoreInstance: firestoreInstance, gameID: gameID);
 
-    // TODO: Adhere to best practices: get `playerID` as a return value from
-    // runTransaction. I tried doing this, but unfortunately ran into
-    // https://github.com/flutter/flutter/issues/17663. Note: the issue was
-    // already marked as closed, but for me it still crashed with:
-    //     Unhandled Exception: PlatformException(Error performing transaction,
-    //         java.lang.Exception: DoTransaction failed: Invalid argument:
-    //         Instance of '_CompactLinkedHashSet<Object>', null)
-    int? playerID;
-    late Reconnection reconnection;
-    // For some reason, throwing or returning Future.error from `runTransaction`
-    // doesn't work. Got:
-    //     Unhandled Exception: PlatformException(Error performing transaction,
-    //         java.lang.Exception: DoTransaction failed: Instance of
-    //         'InvalidOperation', null)
-    InvalidOperation? error;
-
-    await firestoreInstance.runTransaction((firestore.Transaction tx) async {
+    final _JoinGameResultInternal transactionResult = await firestoreInstance
+        .runTransaction((firestore.Transaction tx) async {
       firestore.DocumentSnapshot snapshot = await tx.get(reference);
       if (!snapshot.exists) {
-        error = InvalidOperation(tr('game_doesnt_exist', args: [gameID]))
-          ..addTag(JoinGameErrorSource.gameID);
-        return;
+        return _JoinGameResultInternal.error(
+            InvalidOperation(tr('game_doesnt_exist', args: [gameID]))
+              ..addTag(JoinGameErrorSource.gameID));
       }
       try {
         checkVersionCompatibility(
@@ -363,8 +363,7 @@ class GameController {
                 DBColHostAppVersion())!,
             appVersion);
       } on InvalidOperation catch (e) {
-        error = e;
-        return;
+        return _JoinGameResultInternal.error(e);
       }
       final GamePhase gamePhase = GamePhaseReader.fromSnapshotNoPersonal(
           FirestoreDocumentSnapshot.fromFirestore(snapshot));
@@ -383,34 +382,36 @@ class GameController {
       }
 
       if (existingPlayerID != null) {
-        playerID = existingPlayerID;
-        if (userCreationPhase) {
-          reconnection = Reconnection.reconnectBeforeGame;
-        } else {
-          reconnection = Reconnection.reconnectDuringName;
-        }
+        return _JoinGameResultInternal.success(
+            playerID: existingPlayerID,
+            reconnection: userCreationPhase
+                ? Reconnection.reconnectBeforeGame
+                : Reconnection.reconnectDuringName);
       } else {
         if (userCreationPhase) {
-          playerID = dbNextIndex(playerData);
-          reconnection = Reconnection.connectForTheFirstTime;
+          final playerID = dbNextIndex(playerData);
           await tx.update(
               reference,
               dbData([
-                DBColPlayer(playerID!).withData(PersonalState((b) => b
+                DBColPlayer(playerID).withData(PersonalState((b) => b
                   ..id = playerID
                   ..name = myName))
               ]));
+          return _JoinGameResultInternal.success(
+              playerID: playerID,
+              reconnection: Reconnection.connectForTheFirstTime);
         } else {
           // TODO: Fix message:
           //     'Game $xxx has already started. In order to reconnect...'
-          error = InvalidOperation('Name $myName is already taken')
-            ..addTag(JoinGameErrorSource.playerName);
+          return _JoinGameResultInternal.error(
+              InvalidOperation('Name $myName is already taken')
+                ..addTag(JoinGameErrorSource.playerName));
         }
       }
     });
 
-    if (error != null) {
-      throw error!;
+    if (transactionResult.error != null) {
+      throw transactionResult.error!;
     }
 
     return JoinGameResult(
@@ -418,9 +419,9 @@ class GameController {
         onlineMode: true,
         gameID: gameID,
         gameReference: FirestoreDocumentReference(reference),
-        myPlayerID: playerID!,
+        myPlayerID: transactionResult.playerID!,
       ),
-      reconnection: reconnection,
+      reconnection: transactionResult.reconnection!,
     );
   }
 
