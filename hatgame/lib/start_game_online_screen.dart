@@ -220,7 +220,7 @@ class JoinGameOnlineScreenState extends State<JoinGameOnlineScreen> {
   @override
   void initState() {
     playerNameController.textController.text =
-        localStorage.get<String?>(LocalColPlayerName())!;
+        localStorage.get<String?>(LocalColPlayerName()) ?? '';
     playerNameController.textController.addListener(() {
       localStorage.set(
           LocalColPlayerName(), playerNameController.textController.text);
