@@ -197,6 +197,10 @@ class _GameConfigViewState extends State<GameConfigView>
     ];
     final startButton = WideButton(
       onPressed: isAdmin ? () => _next(gameConfig) : null,
+      onPressedDisabled: isAdmin
+          ? null
+          : () => ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Only the host can proceed'))), // TODO: tr
       coloring: WideButtonColoring.secondary,
       child: GoNextButtonCaption(gameConfig.rules.writeWords
           ? tr('write_words_titlecase')

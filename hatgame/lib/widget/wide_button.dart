@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hatgame/theme.dart';
+import 'package:hatgame/util/colors.dart';
 
 class GoNextButtonCaption extends StatelessWidget {
   final String text;
@@ -55,6 +56,11 @@ class WideButton extends StatelessWidget {
     this.margin = EdgeInsets.zero,
   });
 
+  static MaterialStateProperty<Color> _getBackgroundColor(Color color) {
+    return MaterialStateProperty.resolveWith((states) =>
+        states.contains(MaterialState.disabled) ? toGrey(color) : color);
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -62,12 +68,12 @@ class WideButton extends StatelessWidget {
     switch (coloring) {
       case WideButtonColoring.neutral:
         colorStyle = ButtonStyle(
-            backgroundColor: MaterialStateProperty.all(MyTheme.primary[100]),
+            backgroundColor: _getBackgroundColor(MyTheme.primary[100]!),
             foregroundColor: MaterialStateProperty.all(Colors.black));
         break;
       case WideButtonColoring.secondary:
         colorStyle = ButtonStyle(
-            backgroundColor: MaterialStateProperty.all(colorScheme.secondary),
+            backgroundColor: _getBackgroundColor(colorScheme.secondary),
             foregroundColor:
                 MaterialStateProperty.all(colorScheme.onSecondary));
         break;
