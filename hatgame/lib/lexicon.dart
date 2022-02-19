@@ -77,7 +77,7 @@ class Lexicon {
         : existingDicts.toList();
   }
 
-  static WordCollection wordCollection(List<String> dictionaries) {
+  static WordCollection wordCollection(Iterable<String> dictionaries) {
     Assert.holds(dictionaries.isNotEmpty);
     final List<String> words = [];
     for (final dictKey in dictionaries) {
@@ -94,7 +94,7 @@ class Lexicon {
   // Collection that contains most words. May blacklist some categories,
   // e.g. obscene words.
   static WordCollection universalCollection() {
-    return wordCollection(_dictionaries.keys as List<String>);
+    return wordCollection(_dictionaries.keys);
   }
 
   static Dictionary _parseDictionary(
