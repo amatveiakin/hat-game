@@ -78,7 +78,6 @@ class WriteWordsViewController {
 
 class WriteWordsView extends StatefulWidget {
   final LocalGameData localGameData;
-  final scaffoldKey = GlobalKey<ScaffoldState>();
 
   WriteWordsView({required this.localGameData});
 
@@ -142,7 +141,7 @@ class WriteWordsViewState extends State<WriteWordsView> {
   }
 
   void _showPlayersNotReady(List<String> playersNotReady) async {
-    widget.scaffoldKey.currentState!.showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(tr('waiting_for') + playersNotReady.join(', ')),
     ));
   }
@@ -198,7 +197,6 @@ class WriteWordsViewState extends State<WriteWordsView> {
         )
         .toList();
     return ConstrainedScaffold(
-      scaffoldKey: widget.scaffoldKey,
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         automaticallyImplyLeading: localGameData.isAdmin,

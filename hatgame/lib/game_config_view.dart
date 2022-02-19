@@ -24,7 +24,6 @@ class GameConfigView extends StatefulWidget {
   static const String routeName = '/game-config'; // for offline only
 
   final LocalGameData localGameData;
-  final scaffoldKey = GlobalKey<ScaffoldState>();
 
   GameConfigView({required this.localGameData});
 
@@ -76,7 +75,7 @@ class _GameConfigViewState extends State<GameConfigView>
     super.dispose();
   }
 
-  void _getJoinLink(GlobalKey<ScaffoldState> scaffoldKey) {
+  void _getJoinLink() {
     // TODO: Make link redirect to app on mobile.
     // TODO: Hint that this is the same as site address in web version.
     final String link = localGameData.gameUrl;
@@ -95,12 +94,12 @@ class _GameConfigViewState extends State<GameConfigView>
                 icon: Icon(Icons.content_copy),
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: link)).then((_) {
-                    scaffoldKey.currentState!.showSnackBar(SnackBar(
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                         content: Text(tr('link_copied_to_clipboard'))));
                   }, onError: (error) {
                     // TODO: Log to firebase.
                     debugPrint('Cannot copy to clipboard. Error: $error');
-                    scaffoldKey.currentState!.showSnackBar(SnackBar(
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                         content: Text(tr('cannot_copy_link_to_clipboard'))));
                   });
                 },
@@ -206,7 +205,6 @@ class _GameConfigViewState extends State<GameConfigView>
     );
 
     return SectionsScaffold(
-      scaffoldKey: widget.scaffoldKey,
       appBarAutomaticallyImplyLeading: false,
       appTitle: localGameData.onlineMode
           ? tr('hat_game_id', args: [localGameData.gameID.toString()])
@@ -216,7 +214,7 @@ class _GameConfigViewState extends State<GameConfigView>
           ? [
               IconButton(
                 icon: Icon(Icons.link),
-                onPressed: () => _getJoinLink(widget.scaffoldKey),
+                onPressed: () => _getJoinLink(),
               )
             ]
           : [],
