@@ -28,8 +28,6 @@ dependencies:
 
   quiver: ^3.0.1+1
 
-  tuple: ^2.0.0
-
   built_collection: ^5.1.1
   built_value: ^8.1.4
 

@@ -7,7 +7,6 @@ import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/partying_strategy.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:test/test.dart';
-import 'package:tuple/tuple.dart';
 
 // TODO: Test all strategies.
 
@@ -174,8 +173,8 @@ void checkCorrectness(IndividualStrategyImpl strategy) {
   final int numPlayers = strategy.numPlayers;
   final int fullRound = numPlayers * (numPlayers - 1);
   final int totalPairs = fullRound ~/ 2;
-  final orderedPairs = <Tuple2<int, int>>{};
-  final unorderedPairs = <Tuple2<int, int>>{};
+  final orderedPairs = <(int, int)>{};
+  final unorderedPairs = <(int, int)>{};
 
   for (int turn = 0; turn < fullRound; turn++) {
     final party = strategy.getPartyImpl(turn);
@@ -185,13 +184,13 @@ void checkCorrectness(IndividualStrategyImpl strategy) {
     expect(performer, inClosedOpenRange(0, numPlayers));
     expect(recipient, inClosedOpenRange(0, numPlayers));
 
-    final ordered = Tuple2(performer, recipient);
+    final ordered = (performer, recipient);
     expect(orderedPairs, isNot(contains(ordered)));
     orderedPairs.add(ordered);
 
     final int playerA = min(performer, recipient);
     final int playerB = max(performer, recipient);
-    final unordered = Tuple2(playerA, playerB);
+    final unordered = (playerA, playerB);
     if (turn < totalPairs) {
       expect(unorderedPairs, isNot(contains(unordered)));
       unorderedPairs.add(unordered);
