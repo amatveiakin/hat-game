@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class Lexion {
-  static List<String> _words;
+  static List<String>? _words;
 
   static Future<void> init() async {
     _words = (await rootBundle.loadString('words.txt')).split('\n');
   }
 
   static String randomWord() {
-    return _words[Random().nextInt(_words.length)];
+    return _words![Random().nextInt(_words!.length)];
   }
 }
 
@@ -50,8 +50,8 @@ enum Sector {
 class DragState {
   static const double certaintyThreshold = 0.8;
 
-  final Sector sector;
-  final double certainty; // [0.0, 1.0]
+  final Sector? sector;
+  final double? certainty; // [0.0, 1.0]
 
   DragState({this.sector, this.certainty});
 }
@@ -60,7 +60,7 @@ class VotingViewPainter extends CustomPainter {
   final String word;
   final DragState state;
 
-  VotingViewPainter({@required this.word, @required this.state});
+  VotingViewPainter({required this.word, required this.state});
 
   static Color sectorColor(Sector sector) {
     switch (sector) {
@@ -73,7 +73,6 @@ class VotingViewPainter extends CustomPainter {
       case Sector.hard:
         return Colors.black;
     }
-    return null;
   }
 
   static String sectorText(Sector sector) {
@@ -87,7 +86,6 @@ class VotingViewPainter extends CustomPainter {
       case Sector.hard:
         return 'Hard';
     }
-    return null;
   }
 
   static Offset sectorTextOffset(
@@ -105,26 +103,28 @@ class VotingViewPainter extends CustomPainter {
         return canvasSize.topCenter(Offset.zero) -
             textSize.topCenter(Offset.zero);
     }
-    return null;
   }
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (state.sector != null) {
-      final Color color = sectorColor(state.sector);
+    final sector = state.sector;
+    final certainty = state.certainty;
+
+    if (sector != null && certainty != null) {
+      final Color color = sectorColor(sector);
 
       var overlayPaint = Paint()
-        ..color = color.withOpacity(state.certainty / 2.0)
+        ..color = color.withOpacity(certainty / 2.0)
         ..style = PaintingStyle.fill;
       canvas.drawRect(
           Rect.fromPoints(
               size.topLeft(Offset.zero), size.bottomRight(Offset.zero)),
           overlayPaint);
 
-      if (state.certainty >= DragState.certaintyThreshold) {
+      if (certainty >= DragState.certaintyThreshold) {
         final textPainter = TextPainter(textDirection: TextDirection.rtl);
         textPainter.text = TextSpan(
-            text: sectorText(state.sector),
+            text: sectorText(sector),
             style: TextStyle(
               fontSize: 24.0,
               fontWeight: FontWeight.bold,
@@ -132,7 +132,7 @@ class VotingViewPainter extends CustomPainter {
             ));
         textPainter.layout();
         textPainter.paint(
-            canvas, sectorTextOffset(state.sector, size, textPainter.size));
+            canvas, sectorTextOffset(sector, size, textPainter.size));
       }
     }
 
@@ -168,11 +168,12 @@ class VotingView extends StatefulWidget {
 }
 
 class VotingViewState extends State<VotingView> {
-  String word;
-  Offset dragStartPos;
-  Offset dragShift;
+  String? word;
+  Offset? dragStartPos;
+  Offset? dragShift;
 
   DragState getDragState() {
+    final dragShift = this.dragShift;
     if (dragShift == null) {
       return DragState();
     }
@@ -219,7 +220,7 @@ class VotingViewState extends State<VotingView> {
   void countVote() {
     final dragState = getDragState();
     if (dragState.certainty == null ||
-        dragState.certainty < DragState.certaintyThreshold) {
+        dragState.certainty! < DragState.certaintyThreshold) {
       return;
     }
     // TODO: Write vote to Firebase
@@ -245,7 +246,7 @@ class VotingViewState extends State<VotingView> {
       },
       onPanUpdate: (DragUpdateDetails details) {
         setState(() {
-          dragShift = details.localPosition - dragStartPos;
+          dragShift = details.localPosition - dragStartPos!;
         });
       },
       onPanEnd: (DragEndDetails details) {
@@ -257,7 +258,7 @@ class VotingViewState extends State<VotingView> {
       },
       child: CustomPaint(
         painter: VotingViewPainter(
-          word: word,
+          word: word!,
           state: getDragState(),
         ),
         child: Container(),
