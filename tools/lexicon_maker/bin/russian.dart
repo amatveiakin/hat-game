@@ -1,8 +1,6 @@
 import 'dart:io';
 import 'dart:math';
 
-import 'package:meta/meta.dart';
-
 import 'common.dart';
 
 class RussianWord extends Word {
@@ -18,10 +16,10 @@ class RussianWord extends Word {
 
   RussianWord(
     String text, {
-    @required this.rarityFactor,
-    @required this.specificityFactor,
-    @required this.nastinessFactor,
-    @required this.lengthFactor,
+    required this.rarityFactor,
+    required this.specificityFactor,
+    required this.nastinessFactor,
+    required this.lengthFactor,
   }) : super(text);
 
   @override
@@ -102,7 +100,11 @@ Future<void> makeRussianDictionaries(String filename) async {
     final RussianWord word = makeWord(rec);
     int bucket = word.difficulty > 10.0
         ? 3
-        : word.difficulty > 2.0 ? 2 : word.difficulty > 0.25 ? 1 : 0;
+        : word.difficulty > 2.0
+            ? 2
+            : word.difficulty > 0.25
+                ? 1
+                : 0;
     buckets[bucket].add(word);
   }
 

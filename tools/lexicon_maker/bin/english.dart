@@ -1,8 +1,6 @@
 import 'dart:io';
 import 'dart:math';
 
-import 'package:meta/meta.dart';
-
 import 'common.dart';
 
 class EnglishWord extends Word {
@@ -17,10 +15,10 @@ class EnglishWord extends Word {
 
   EnglishWord(
     String text, {
-    @required this.rawRank,
-    @required this.nounListInc,
-    @required this.gerundInc,
-    @required this.lengthInc,
+    required this.rawRank,
+    required this.nounListInc,
+    required this.gerundInc,
+    required this.lengthInc,
   }) : super(text);
 
   @override
@@ -33,7 +31,7 @@ class EnglishWord extends Word {
 
 final vowelRegexp = RegExp('(a|e|i|o|u|y)');
 
-String parseNounIndex(final String line) {
+String? parseNounIndex(final String line) {
   final String phrase = line.split(' ').first;
   final List<String> words = phrase.split('_');
   if (words.length != 1) {
@@ -46,7 +44,7 @@ String parseNounIndex(final String line) {
   return word;
 }
 
-String parseSimple(final String line) {
+String? parseSimple(final String line) {
   assert(!line.contains(' '));
   assert(!line.contains('_'));
   if (line.toLowerCase() != line) {
@@ -55,11 +53,11 @@ String parseSimple(final String line) {
   return line;
 }
 
-EnglishWord makeWord(
+EnglishWord? makeWord(
   final String text, {
-  @required final Set<String> allNouns,
-  @required final Set<String> frequentNouns,
-  @required final Map<String, int> wordRanks,
+  required final Set<String> allNouns,
+  required final Set<String> frequentNouns,
+  required final Map<String, int> wordRanks,
 }) {
   if (!allNouns.contains(text)) {
     return null; // skip everything except common nouns
@@ -125,8 +123,7 @@ Future<void> makeEnglishDictionaries(String freqFilename,
     for (final String line in freqLines) {
       rank++;
       final t = parseSimple(line);
-      assert(t != null);
-      wordRanks[t] = rank;
+      wordRanks[t!] = rank;
     }
   }
 
@@ -138,8 +135,13 @@ Future<void> makeEnglishDictionaries(String freqFilename,
       continue;
     }
     final int rank = word.scoreRank;
-    final int bucket =
-        rank > 17000 ? 3 : rank > 10000 ? 2 : rank > 5000 ? 1 : 0;
+    final int bucket = rank > 17000
+        ? 3
+        : rank > 10000
+            ? 2
+            : rank > 5000
+                ? 1
+                : 0;
     buckets[bucket].add(word);
   }
 

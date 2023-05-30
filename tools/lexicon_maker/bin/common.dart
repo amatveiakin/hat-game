@@ -1,5 +1,3 @@
-import 'package:meta/meta.dart';
-
 abstract class Word {
   final String text;
 
@@ -22,8 +20,8 @@ String describeBucket(String name, List<Word> words) {
 
 String dumpBucket(
   List<Word> words, {
-  @required String name,
-  @required String lastUpdated,
+  required String name,
+  required String lastUpdated,
 }) {
   final buffer = StringBuffer();
   // Note. Other possible fields: author (for non-builtin); comment.
