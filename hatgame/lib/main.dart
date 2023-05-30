@@ -86,7 +86,7 @@ class MyApp extends StatelessWidget {
           primarySwatch: MyTheme.primary,
           primaryColorDark: MyTheme.primaryDark,
           accentColor: MyTheme.secondary,
-        ).copyWith(secondaryVariant: MyTheme.secondaryDark),
+        ),
         indicatorColor: MyTheme.secondary,
         checkboxTheme: CheckboxThemeData(
           fillColor: MaterialStateProperty.all(MyTheme.secondaryDark),
