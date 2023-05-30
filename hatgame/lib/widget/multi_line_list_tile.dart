@@ -39,13 +39,12 @@ class MultiLineListTile extends StatelessWidget {
     this.onTap,
     this.onLongPress,
     this.selected = false,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return subtitle == null
         ? ListTile(
-            key: key,
             leading: leading,
             title: Padding(
               padding: const EdgeInsets.symmetric(vertical: _padding),
@@ -62,7 +61,6 @@ class MultiLineListTile extends StatelessWidget {
             selected: selected,
           )
         : ListTile(
-            key: key,
             leading: leading,
             title: Padding(
               padding: const EdgeInsets.only(top: _padding),
@@ -116,7 +114,7 @@ class MultiLineSwitchListTile extends StatelessWidget {
     this.contentPadding,
     this.secondary,
     this.selected = false,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -197,13 +195,12 @@ class MultiLineCheckboxListTile extends StatelessWidget {
     this.autofocus = false,
     this.contentPadding,
     this.tristate = false,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return subtitle == null
         ? CheckboxListTile(
-            key: key,
             value: value,
             onChanged: onChanged,
             activeColor: activeColor,
@@ -223,7 +220,6 @@ class MultiLineCheckboxListTile extends StatelessWidget {
             tristate: tristate,
           )
         : CheckboxListTile(
-            key: key,
             value: value,
             onChanged: onChanged,
             activeColor: activeColor,
@@ -272,13 +268,12 @@ class MultiLineRadioListTile<T> extends StatelessWidget {
     this.secondary,
     this.selected = false,
     this.controlAffinity = ListTileControlAffinity.platform,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return subtitle == null
         ? RadioListTile<T>(
-            key: key,
             value: value,
             groupValue: groupValue,
             onChanged: onChanged,
@@ -295,7 +290,6 @@ class MultiLineRadioListTile<T> extends StatelessWidget {
             controlAffinity: controlAffinity,
           )
         : RadioListTile<T>(
-            key: key,
             value: value,
             groupValue: groupValue,
             onChanged: onChanged,
