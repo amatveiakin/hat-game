@@ -1,12 +1,9 @@
 import 'dart:io';
 
-import 'package:meta/meta.dart';
-
 import 'english.dart';
 import 'russian.dart';
 
-@alwaysThrows
-void wrongUsage() {
+Never wrongUsage() {
   stderr.write('Usage:\n'
       '  <app>  en  <google-10000-english-no-swears.txt>  <index.noun>  <nounlist>\n'
       '  <app>  ru  <freqrnc2011.csv>\n');
