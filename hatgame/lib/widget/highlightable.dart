@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class HighlightableController {
-  final _animationController;
+  final AnimationController _animationController;
 
   HighlightableController({required TickerProvider vsync})
       : _animationController = AnimationController(

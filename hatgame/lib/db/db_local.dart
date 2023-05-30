@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_renaming_method_parameters
+
 import 'dart:async';
 
 import 'package:hatgame/db/db_columns.dart';

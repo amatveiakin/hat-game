@@ -21,7 +21,12 @@ class Sounds {
   }
 
   static Future<void> _initImpl() async {
-    _soundpool = Soundpool();
+    const options = SoundpoolOptions(
+      // Default maxStreams is 1, which seems very low. E.g. it's quite possible
+      // for "word guessed" and "round over" sounds to overlap.
+      maxStreams: 4,
+    );
+    _soundpool = Soundpool.fromOptions(options: options);
     timeOver = await _load('sounds/time_over.ogg');
     bonusTimeOver = await _load('sounds/bonus_time_over.ogg');
     wordGuessedCombo = [

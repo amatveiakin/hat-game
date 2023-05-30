@@ -25,6 +25,7 @@ abstract class LocalStorage {
     }
   }
 
+  // ignore: non_constant_identifier_names
   static void test_init() {
     debugPrint("LocalStorage running in test mode.");
     instance = LocalStorageInMemory();

@@ -1,3 +1,5 @@
+// ignore_for_file: camel_case_types
+
 import 'dart:math';
 
 import 'package:built_collection/built_collection.dart';

@@ -530,7 +530,7 @@ class GameController {
 
   static TeamCompositionsViewData? getTeamCompositions(
       LocalGameData localGameData, DBDocumentSnapshot snapshot) {
-    List<String> _playerNames(GameConfig config, Iterable<int> playerIDs) {
+    List<String> getPlayerNames(GameConfig config, Iterable<int> playerIDs) {
       return playerIDs.map((id) => config.players!.names[id]!).toList();
     }
 
@@ -545,10 +545,10 @@ class GameController {
         snapshot.get<TeamCompositions?>(DBColTeamCompositions())!;
     final List<List<String>> playerNames = teamCompositions.teams != null
         ? teamCompositions.teams!
-            .map((t) => _playerNames(gameConfig, t))
+            .map((t) => getPlayerNames(gameConfig, t))
             .toList()
         : teamCompositions.individualOrder!
-            .map((p) => _playerNames(gameConfig, [p]))
+            .map((p) => getPlayerNames(gameConfig, [p]))
             .toList();
     Assert.eq(teamCompositions.teams != null, gameConfig.teaming.teamPlay);
     return TeamCompositionsViewData(

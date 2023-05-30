@@ -19,7 +19,10 @@ class MarkdownUtil {
       final String route = href.substring(internalPrefix.length);
       Navigator.of(context).pushNamed(route);
     } else {
-      await launch(href);
+      // TODO: https://pub.dev/packages/url_launcher mentions that all schemes
+      // used ("https", "mailto", etc.) should be mentioned in `<queries>`
+      // section in AndroidManifest.xml.
+      await launchUrl(Uri.parse(href));
     }
   }
 }

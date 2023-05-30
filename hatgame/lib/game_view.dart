@@ -155,27 +155,27 @@ class WordReviewItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool _statusToChecked(WordStatus status) {
+    bool statusToChecked(WordStatus status) {
       return status == WordStatus.explained;
     }
 
-    WordStatus _checkedToStatus(bool checked) {
+    WordStatus checkedToStatus(bool checked) {
       return checked ? WordStatus.explained : WordStatus.notExplained;
     }
 
     // TODO: Consider using LabeledCheckbox.
     return InkWell(
       onTap: () {
-        setStatus!(_checkedToStatus(!_statusToChecked(status)));
+        setStatus!(checkedToStatus(!statusToChecked(status)));
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 2.0, vertical: 4.0),
         child: Row(
           children: [
             Checkbox(
-              value: _statusToChecked(status),
+              value: statusToChecked(status),
               onChanged: setStatus != null
-                  ? (bool? newValue) => setStatus!(_checkedToStatus(newValue!))
+                  ? (bool? newValue) => setStatus!(checkedToStatus(newValue!))
                   : null,
             ),
             Expanded(
@@ -474,18 +474,16 @@ class PlayAreaState extends State<PlayArea>
           children: [
             Expanded(
               child: Center(
-                child: Container(
-                  child: WideButton(
-                    onPressed: localGameState.startButtonEnabled
-                        ? _startExplaning
-                        : null,
-                    onPressedDisabled: () =>
-                        _padlockAnimationController!.forward(from: 0.0),
-                    coloring: WideButtonColoring.secondary,
-                    child: Text(
-                      tr('start'),
-                      style: const TextStyle(fontSize: 24.0),
-                    ),
+                child: WideButton(
+                  onPressed: localGameState.startButtonEnabled
+                      ? _startExplaning
+                      : null,
+                  onPressedDisabled: () =>
+                      _padlockAnimationController!.forward(from: 0.0),
+                  coloring: WideButtonColoring.secondary,
+                  child: Text(
+                    tr('start'),
+                    style: const TextStyle(fontSize: 24.0),
                   ),
                 ),
               ),
@@ -612,24 +610,22 @@ class GameViewState extends State<GameView> {
         automaticallyImplyLeading: false,
         title: Text(tr('hat_game')),
       ),
-      body: Container(
-        child: Column(
-          children: [
-            PartyView(
-              gameData.currentPartyViewData(),
-              gameData.turnState!.turnPhase,
-              localGameData.myPlayerID,
+      body: Column(
+        children: [
+          PartyView(
+            gameData.currentPartyViewData(),
+            gameData.turnState!.turnPhase,
+            localGameData.myPlayerID,
+          ),
+          Expanded(
+            child: PlayArea(
+              localGameData: localGameData,
+              gameController: gameController,
+              gameData: gameData,
+              localGameState: localGameState,
             ),
-            Expanded(
-              child: PlayArea(
-                localGameData: localGameData,
-                gameController: gameController,
-                gameData: gameData,
-                localGameState: localGameState,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
