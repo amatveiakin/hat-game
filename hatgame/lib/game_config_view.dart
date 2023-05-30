@@ -47,7 +47,7 @@ class _GameConfigViewState extends State<GameConfigView>
       );
 
   static const int rulesTabIndex = 0;
-  static const int teamingTabIndex = 1;
+  static const int teamingTabIndex = 1; // ignore: unused_field
   static const int playersTabIndex = 2;
   static const int numTabs = 3;
 

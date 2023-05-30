@@ -119,9 +119,6 @@ Widget _getWordFeedbackIcon(
 }
 
 String _getWordFeedbackText(WordFeedback feedback) {
-  if (feedback == null) {
-    return tr('word_feedback_clear');
-  }
   switch (feedback) {
     case WordFeedback.good:
       return tr('word_feedback_nice');
@@ -236,7 +233,6 @@ class WordReviewItem extends StatelessWidget {
                 itemBuilder: (BuildContext context) {
                   var result = <PopupMenuItem<WordFeedback>>[];
                   result.addAll(WordFeedback.values
-                      .where((wf) => (wf != null))
                       .map((wf) => PopupMenuItem<WordFeedback>(
                             value: wf,
                             child: ListTile(
