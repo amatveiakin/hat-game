@@ -287,7 +287,7 @@ class GameController {
               firestoreInstance: firestoreInstance, gameID: gameID);
           firestore.DocumentSnapshot snapshot = await tx.get(reference);
           if (!snapshot.exists) {
-            await tx.set(reference, dbData(initialColumns));
+            tx.set(reference, dbData(initialColumns));
             return gameID;
           }
         }
@@ -390,7 +390,7 @@ class GameController {
       } else {
         if (userCreationPhase) {
           final playerID = dbNextIndex(playerData);
-          await tx.update(
+          tx.update(
               reference,
               dbData([
                 DBColPlayer(playerID).withData(PersonalState((b) => b
@@ -440,7 +440,7 @@ class GameController {
       final playerRecord = dbGet(
           snapshot.data() as Map<String, dynamic>, DBColPlayer(playerID),
           documentPath: reference.path);
-      await tx.update(
+      tx.update(
           reference,
           dbData([
             DBColPlayer(playerID)

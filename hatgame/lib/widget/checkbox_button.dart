@@ -22,7 +22,7 @@ class CheckboxButton extends StatelessWidget {
     return DecoratedBox(
       decoration: ShapeDecoration(shape: borderShape),
       child: DefaultTextStyle(
-        style: Theme.of(context).textTheme.button!,
+        style: Theme.of(context).textTheme.labelLarge!,
         child: LabeledCheckbox(
           value: value,
           onChanged: onChanged,

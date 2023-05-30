@@ -147,7 +147,7 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
           // TODO: Find a better way to do this.
           Future.delayed(Duration(milliseconds: 50), scrollCallback);
         };
-        WidgetsBinding.instance!.addPostFrameCallback((_) => scrollCallback!());
+        WidgetsBinding.instance.addPostFrameCallback((_) => scrollCallback!());
         playerData.focusNode!.requestFocus();
       }
       _playerItems.add(playerData);
