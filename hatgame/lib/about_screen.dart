@@ -13,7 +13,7 @@ class AboutScreen extends StatelessWidget {
   // TODO: Include technical info (app version, device) in support email body.
   // TODO: Add links to web version, Play Store and App Store.
   // TODO: tr
-  final String content = '''
+  static const String content = '''
 ## What is this?
 
 This app allows to play the hat game offline or online.
@@ -35,6 +35,8 @@ App version: $appVersion
 
 The app is written in Flutter.
 ''';
+
+  const AboutScreen({Key? key}) : super(key: key);
 
   // TODO: Add: acknowledgments:
   //
