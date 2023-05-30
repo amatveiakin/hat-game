@@ -28,13 +28,14 @@ class PartyView extends StatelessWidget {
   final TurnPhase turnPhase;
   final int? myPlayerID;
 
-  PartyView(this.party, this.turnPhase, this.myPlayerID);
+  const PartyView(this.party, this.turnPhase, this.myPlayerID, {Key? key})
+      : super(key: key);
 
   Widget _playerView(PlayerViewData playerData) {
     Widget textWidget = Text(playerData.name!);
     final animationDuration = turnPhase == TurnPhase.prepare
         ? Duration.zero
-        : Duration(milliseconds: 300);
+        : const Duration(milliseconds: 300);
     // TODO: Why do we need to specify color?
     // TODO: Take color from the theme.
     if (playerData.id == myPlayerID) {
@@ -68,13 +69,13 @@ class PartyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 12.0),
+      padding: const EdgeInsets.symmetric(vertical: 12.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           _playerView(party.performer),
-          if (party.recipients.isNotEmpty) Text(' → '),
+          if (party.recipients.isNotEmpty) const Text(' → '),
           if (party.recipients.isNotEmpty)
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,28 +93,28 @@ Widget _getWordFeedbackIcon(
     WordFeedback? feedback, bool menuButton, bool active) {
   if (feedback == null) {
     return menuButton
-        ? Icon(Icons.thumbs_up_down_outlined)
-        : Icon(Icons.clear_outlined);
+        ? const Icon(Icons.thumbs_up_down_outlined)
+        : const Icon(Icons.clear_outlined);
   }
   switch (feedback) {
     case WordFeedback.good:
       return active
-          ? Icon(Icons.thumb_up, color: MyTheme.secondary)
-          : Icon(Icons.thumb_up_outlined);
+          ? const Icon(Icons.thumb_up, color: MyTheme.secondary)
+          : const Icon(Icons.thumb_up_outlined);
     case WordFeedback.bad:
       return active
-          ? Icon(Icons.thumb_down, color: MyTheme.secondary)
-          : Icon(Icons.thumb_down_outlined);
+          ? const Icon(Icons.thumb_down, color: MyTheme.secondary)
+          : const Icon(Icons.thumb_down_outlined);
     case WordFeedback.tooEasy:
       return active
-          ? ImageAssetIcon('images/too_easy_filled.png',
+          ? const ImageAssetIcon('images/too_easy_filled.png',
               color: MyTheme.secondary)
-          : ImageAssetIcon('images/too_easy_outlined.png');
+          : const ImageAssetIcon('images/too_easy_outlined.png');
     case WordFeedback.tooHard:
       return active
-          ? ImageAssetIcon('images/too_hard_filled.png',
+          ? const ImageAssetIcon('images/too_hard_filled.png',
               color: MyTheme.secondary)
-          : ImageAssetIcon('images/too_hard_outlined.png');
+          : const ImageAssetIcon('images/too_hard_outlined.png');
   }
   Assert.fail("Reached end of _getWordFeedbackIcon");
 }
@@ -141,14 +142,16 @@ class WordReviewItem extends StatelessWidget {
   final void Function(WordFeedback?)? setFeedback;
   final void Function(bool)? setFlag;
 
-  WordReviewItem(
-      {required this.text,
+  const WordReviewItem(
+      {Key? key,
+      required this.text,
       required this.status,
       required this.feedback,
       this.hasFlag = false,
       required this.setStatus,
       required this.setFeedback,
-      required this.setFlag});
+      required this.setFlag})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -166,7 +169,7 @@ class WordReviewItem extends StatelessWidget {
         setStatus!(_checkedToStatus(!_statusToChecked(status)));
       },
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 2.0, vertical: 4.0),
+        padding: const EdgeInsets.symmetric(horizontal: 2.0, vertical: 4.0),
         child: Row(
           children: [
             Checkbox(
@@ -177,7 +180,7 @@ class WordReviewItem extends StatelessWidget {
             ),
             Expanded(
               child: text == null
-                  ? Row(
+                  ? const Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Flexible(
@@ -199,17 +202,17 @@ class WordReviewItem extends StatelessWidget {
             if (hasFlag && setFlag == null)
               // Padding and icon size constants are mimicing an icon button.
               Padding(
-                padding: EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8.0),
                 child: Tooltip(
-                  child: Icon(Icons.error, color: MyTheme.primary),
                   message: tr('somebody_flagged_the_word'),
+                  child: const Icon(Icons.error, color: MyTheme.primary),
                 ),
               ),
             if (setFlag != null)
               IconButton(
                 icon: hasFlag
-                    ? Icon(Icons.error, color: MyTheme.secondary)
-                    : Icon(Icons.error_outline),
+                    ? const Icon(Icons.error, color: MyTheme.secondary)
+                    : const Icon(Icons.error_outline),
                 tooltip: tr('flag_the_word'),
                 onPressed: () => setFlag!(!hasFlag),
               ),
@@ -261,12 +264,13 @@ class PlayArea extends StatefulWidget {
   final GameData gameData;
   final LocalGameState localGameState;
 
-  PlayArea({
+  const PlayArea({
+    Key? key,
     required this.localGameData,
     required this.gameController,
     required this.gameData,
     required this.localGameState,
-  });
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => PlayAreaState();
@@ -353,8 +357,8 @@ class PlayAreaState extends State<PlayArea>
   @override
   void initState() {
     super.initState();
-    _padlockAnimationController =
-        AnimationController(duration: Duration(milliseconds: 500), vsync: this);
+    _padlockAnimationController = AnimationController(
+        duration: const Duration(milliseconds: 500), vsync: this);
   }
 
   @override
@@ -433,7 +437,7 @@ class PlayAreaState extends State<PlayArea>
                             NtpTime.nowUtcOrThrow()
                                 .difference(turnState!.turnTimeStart!)),
                   ),
-          SizedBox(height: 12.0),
+          const SizedBox(height: 12.0),
         ]);
       case TurnPhase.review:
         return Column(children: [
@@ -451,7 +455,7 @@ class PlayAreaState extends State<PlayArea>
                       .difference(turnState!.bonusTimeStart!)),
               hideOnTimeEnded: true,
             ),
-          SizedBox(height: 12.0),
+          const SizedBox(height: 12.0),
         ]);
     }
     Assert.holds(gameData.gameFinished());
@@ -460,7 +464,7 @@ class PlayAreaState extends State<PlayArea>
 
   Widget _buildActivePlayer(BuildContext context) {
     final wordsInHatWidget = Container(
-      padding: EdgeInsets.symmetric(vertical: 12.0),
+      padding: const EdgeInsets.symmetric(vertical: 12.0),
       child:
           Text(tr('words_in_hat', args: [gameData.numWordsInHat().toString()])),
     );
@@ -480,7 +484,7 @@ class PlayAreaState extends State<PlayArea>
                     coloring: WideButtonColoring.secondary,
                     child: Text(
                       tr('start'),
-                      style: TextStyle(fontSize: 24.0),
+                      style: const TextStyle(fontSize: 24.0),
                     ),
                   ),
                 ),
@@ -506,7 +510,7 @@ class PlayAreaState extends State<PlayArea>
                 coloring: WideButtonColoring.neutral,
                 child: Text(
                   gameData.currentWordText(),
-                  style: TextStyle(fontSize: 24.0),
+                  style: const TextStyle(fontSize: 24.0),
                 ),
               ),
             ),
@@ -519,7 +523,7 @@ class PlayAreaState extends State<PlayArea>
               // Set key to make sure Flutter keeps the timer, because its
               // internal state is the source of truth for turn time.
               child: TimerView(
-                key: ValueKey('turn_timer'),
+                key: const ValueKey('turn_timer'),
                 style: TimerViewStyle.turnTime,
                 onTimeEnded: () => _endTurn(gameData.turnIndex()),
                 onRunningChanged: _setTurnActive,
@@ -555,18 +559,18 @@ class PlayAreaState extends State<PlayArea>
               ),
             ),
             TimerView(
-              key: ValueKey('bonus_timer'),
+              key: const ValueKey('bonus_timer'),
               style: TimerViewStyle.bonusTime,
               onTimeEnded: () => _endBonusTime(gameData.turnIndex()),
               duration: Duration(seconds: gameConfig.rules.bonusSeconds),
               hideOnTimeEnded: true,
             ),
-            SizedBox(height: 28.0),
+            const SizedBox(height: 28.0),
             WideButton(
               onPressed: _reviewDone,
               coloring: WideButtonColoring.secondary,
-              child: Text(tr('done')),
               margin: WideButton.bottomButtonMargin,
+              child: Text(tr('done')),
             ),
           ]);
         }
@@ -579,7 +583,7 @@ class PlayAreaState extends State<PlayArea>
 class GameView extends StatefulWidget {
   final LocalGameData localGameData;
 
-  GameView({required this.localGameData});
+  const GameView({Key? key, required this.localGameData}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => GameViewState();

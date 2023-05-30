@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:hatgame/theme.dart';
 
 class StyledDivider extends StatelessWidget {
-  StyledDivider({
+  const StyledDivider({
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Divider(
+    return const Divider(
       color: MyTheme.primary,
       thickness: 3.0,
       height: 20.0,
@@ -19,7 +19,7 @@ class StyledDivider extends StatelessWidget {
 class ThinDivider extends StatelessWidget {
   final double? height;
 
-  ThinDivider({
+  const ThinDivider({
     Key? key,
     this.height,
   }) : super(key: key);
@@ -38,7 +38,7 @@ class SectionDivider extends StatelessWidget {
   final String title;
   final bool firstSection;
 
-  SectionDivider({
+  const SectionDivider({
     Key? key,
     required this.title,
     this.firstSection = false,
@@ -49,18 +49,18 @@ class SectionDivider extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(height: 6.0),
+        const SizedBox(height: 6.0),
         if (!firstSection)
-          ThinDivider(
+          const ThinDivider(
             height: 20.0,
           ),
         Row(
           children: [
-            SizedBox(width: 6.0),
+            const SizedBox(width: 6.0),
             Expanded(
               child: Text(
                 title,
-                style: TextStyle(
+                style: const TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.w700,
                     fontSize: 16.0),
@@ -68,7 +68,7 @@ class SectionDivider extends StatelessWidget {
             ),
           ],
         ),
-        SizedBox(height: 6.0),
+        const SizedBox(height: 6.0),
       ],
     );
   }

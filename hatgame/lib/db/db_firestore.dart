@@ -5,17 +5,20 @@ import 'package:hatgame/db/db_local.dart';
 import 'package:hatgame/util/assertion.dart';
 
 class FirestoreDocumentReference extends DBDocumentReference {
-  firestore.DocumentReference _ref;
+  final firestore.DocumentReference _ref;
 
   FirestoreDocumentReference(this._ref);
 
   firestore.DocumentReference get firestoreReference => _ref;
 
+  @override
   String get path => _ref.path;
 
+  @override
   Future<void> setColumns(List<DBColumnData> columns) =>
       _ref.set(dbData(columns));
 
+  @override
   Future<void> updateColumnsImpl(
       List<DBColumnData> columns, LocalCacheBehavior localCache) async {
     if (localCache == LocalCacheBehavior.cache) {
@@ -24,15 +27,19 @@ class FirestoreDocumentReference extends DBDocumentReference {
     return _ref.update(dbData(columns));
   }
 
+  @override
   Future<FirestoreDocumentSnapshot> get() async => FirestoreDocumentSnapshot(
       await _ref.get(), _FirestoreLocalCache.singleton.get(this));
 
+  @override
   Future<void> delete() => _ref.delete();
 
+  @override
   void clearLocalCache() {
     return _FirestoreLocalCache.singleton.clearCache(this);
   }
 
+  @override
   void assertLocalCacheIsEmpty() {
     final localCache = _FirestoreLocalCache.singleton.get(this);
     if (localCache?.rawData != null) {
@@ -43,6 +50,7 @@ class FirestoreDocumentReference extends DBDocumentReference {
     }
   }
 
+  @override
   Stream<DBDocumentSnapshot> snapshots() => _ref.snapshots().map((s) =>
       FirestoreDocumentSnapshot(s, _FirestoreLocalCache.singleton.get(this)));
 }
@@ -56,9 +64,11 @@ class FirestoreDocumentSnapshot extends DBDocumentSnapshot {
   FirestoreDocumentSnapshot.fromFirestore(this._snapshot)
       : _localCacheOverrides = null;
 
+  @override
   FirestoreDocumentReference get reference =>
       FirestoreDocumentReference(_snapshot.reference);
 
+  @override
   Map<String, dynamic>? get rawData {
     final snapshowData = _snapshot.data() as Map<String, dynamic>?;
     return snapshowData == null || _localCacheOverrides?.rawData == null
@@ -87,7 +97,7 @@ class FirestoreDocumentSnapshot extends DBDocumentSnapshot {
 // when Flutter web is out of beta.
 
 class _FirestoreLocalCache {
-  final cachePerInstance = Map<firestore.FirebaseFirestore, LocalDB>();
+  final cachePerInstance = <firestore.FirebaseFirestore, LocalDB>{};
 
   static final singleton = _FirestoreLocalCache();
 

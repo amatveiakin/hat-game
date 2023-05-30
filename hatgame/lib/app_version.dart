@@ -17,7 +17,7 @@ String buildMode() {
 }
 
 String _buildModeSuffix() {
-  return kReleaseMode ? '' : ':' + buildMode();
+  return kReleaseMode ? '' : ':${buildMode()}';
 }
 
 String? _extractMainVersionPart(String v) {

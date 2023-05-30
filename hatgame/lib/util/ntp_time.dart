@@ -13,9 +13,9 @@ class NtpTime {
 
   static init() async {
     try {
-      final int _offsetMilliseconds =
-          await NTP.getNtpOffset().timeout(Duration(seconds: 3));
-      _ntpOffset = Duration(milliseconds: _offsetMilliseconds);
+      final int offsetMilliseconds =
+          await NTP.getNtpOffset().timeout(const Duration(seconds: 3));
+      _ntpOffset = Duration(milliseconds: offsetMilliseconds);
       debugPrint('NTP time offset = $_ntpOffset');
     } catch (e) {
       // TODO: Firebase log.

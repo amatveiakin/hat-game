@@ -11,18 +11,19 @@ class OptionSelectorHeader extends StatelessWidget {
   final Widget? subtitle;
   final GestureTapCallback? onTap;
 
-  OptionSelectorHeader({
+  const OptionSelectorHeader({
+    Key? key,
     required this.title,
     this.subtitle,
     required this.onTap,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MultiLineListTile(
         title: title,
         subtitle: subtitle,
-        trailing: onTap == null ? null : Icon(Icons.chevron_right),
+        trailing: onTap == null ? null : const Icon(Icons.chevron_right),
         onTap: onTap);
   }
 }
@@ -60,12 +61,13 @@ abstract class EnumOptionSelector<E> extends StatefulWidget {
   final E initialValue;
   final Function changeCallback;
 
-  EnumOptionSelector({
+  const EnumOptionSelector({
+    Key? key,
     required this.windowTitle,
     required this.allValues,
     required this.initialValue,
     required this.changeCallback,
-  });
+  }) : super(key: key);
 }
 
 class EnumOptionSelectorState<E, W extends EnumOptionSelector>
@@ -95,7 +97,7 @@ class EnumOptionSelectorState<E, W extends EnumOptionSelector>
         children: widget.allValues
             .map(
               (e) => e.isDivider
-                  ? ThinDivider(
+                  ? const ThinDivider(
                       height: 8.0,
                     )
                   : MultiLineRadioListTile<E?>(

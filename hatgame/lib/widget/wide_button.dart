@@ -5,7 +5,7 @@ import 'package:hatgame/util/colors.dart';
 class GoNextButtonCaption extends StatelessWidget {
   final String text;
 
-  GoNextButtonCaption(this.text);
+  const GoNextButtonCaption(this.text, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +13,7 @@ class GoNextButtonCaption extends StatelessWidget {
       children: [
         Expanded(child: Container()),
         Text(text),
-        Icon(Icons.arrow_right),
+        const Icon(Icons.arrow_right),
         Expanded(child: Container()),
       ],
     );
@@ -23,9 +23,10 @@ class GoNextButtonCaption extends StatelessWidget {
 class WideWidget extends StatelessWidget {
   final Widget child;
 
-  WideWidget({
+  const WideWidget({
+    Key? key,
     required this.child,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -48,13 +49,14 @@ class WideButton extends StatelessWidget {
   final VoidCallback? onPressedDisabled; // executed if onPressed is null
   final EdgeInsets margin;
 
-  WideButton({
+  const WideButton({
+    Key? key,
     required this.child,
     required this.coloring,
     required this.onPressed,
     this.onPressedDisabled,
     this.margin = EdgeInsets.zero,
-  });
+  }) : super(key: key);
 
   static MaterialStateProperty<Color> _getBackgroundColor(Color color) {
     return MaterialStateProperty.resolveWith((states) =>
@@ -82,18 +84,18 @@ class WideButton extends StatelessWidget {
       padding: margin,
       child: WideWidget(
         child: GestureDetector(
+          onTap: onPressed == null ? onPressedDisabled : null,
           child: ElevatedButton(
             onPressed: onPressed,
             style: colorStyle.copyWith(
                 padding: MaterialStateProperty.all(
-                    EdgeInsets.symmetric(vertical: 12.0)),
+                    const EdgeInsets.symmetric(vertical: 12.0)),
                 visualDensity: VisualDensity.standard),
             child: DefaultTextStyle.merge(
-              style: TextStyle(fontSize: 20),
+              style: const TextStyle(fontSize: 20),
               child: child,
             ),
           ),
-          onTap: onPressed == null ? onPressedDisabled : null,
         ),
       ),
     );

@@ -82,7 +82,8 @@ class CheckedTextField extends StatefulWidget {
   final ValueChanged<String>? onSubmitted;
   final VoidCallback? onEditingComplete;
 
-  CheckedTextField({
+  const CheckedTextField({
+    Key? key,
     required this.controller,
     this.labelText,
     this.textInputAction,
@@ -90,7 +91,7 @@ class CheckedTextField extends StatefulWidget {
     this.inputFormatters,
     this.onSubmitted,
     this.onEditingComplete,
-  });
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => CheckedTextFieldState();

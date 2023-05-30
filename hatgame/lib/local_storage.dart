@@ -51,15 +51,18 @@ abstract class LocalStorage {
 // Columns
 
 class LocalColPlayerName extends DBColumn<String?> with DBColSerializeStringOr {
+  @override
   String get name => 'player_name';
 }
 
 class LocalColLastConfig extends DBColumn<GameConfig?>
     with DBColSerializeBuiltValueOr {
+  @override
   String get name => 'last_config';
 }
 
 class LocalColLocale extends DBColumn<String?> with DBColSerializeStringOr {
+  @override
   String get name => 'locale';
 }
 
@@ -96,10 +99,12 @@ class LocalStorageFromSharedPreferences extends LocalStorage {
 
   LocalStorageFromSharedPreferences._(this.prefs);
 
+  @override
   T getImpl<T>(DBColumn<T> column) {
     return column.deserialize(prefs.getString(column.name));
   }
 
+  @override
   Future<void> set<T>(DBColumn<T> column, T data) async {
     if (data == null) {
       await prefs.remove(column.name);
@@ -110,12 +115,14 @@ class LocalStorageFromSharedPreferences extends LocalStorage {
 }
 
 class LocalStorageInMemory extends LocalStorage {
-  final _data = Map<String, String?>();
+  final _data = <String, String?>{};
 
+  @override
   T getImpl<T>(DBColumn<T> column) {
     return column.deserialize(_data[column.name]);
   }
 
+  @override
   Future<void> set<T>(DBColumn<T> column, T data) async {
     _data[column.name] = column.serialize(data);
   }

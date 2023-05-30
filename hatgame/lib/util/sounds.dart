@@ -11,7 +11,7 @@ class Sounds {
 
   static Future<void> init() async {
     try {
-      await _initImpl().timeout(Duration(seconds: 3));
+      await _initImpl().timeout(const Duration(seconds: 3));
       debugPrint('Sounds loaded successfully.');
     } catch (e) {
       // TODO: Firebase log.

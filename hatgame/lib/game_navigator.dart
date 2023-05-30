@@ -74,7 +74,7 @@ class GameNavigator {
             return AsyncSnapshotError(snapshot, gamePhase: currentPhase);
           }
           if (!snapshot.hasData) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
           final snapshotData = snapshot.data!;
           final newPhase =
@@ -90,7 +90,7 @@ class GameNavigator {
                 newPhase: newPhase,
               );
             }
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
           Assert.eq(newPhase, currentPhase);
           return buildBody(context, snapshotData);
@@ -256,7 +256,7 @@ class GameNavigator {
         );
       case GamePhase.kicked:
         return MaterialPageRoute(
-          builder: (context) => KickedScreen(),
+          builder: (context) => const KickedScreen(),
           settings: routeSettings,
         );
       case GamePhase.rematch:
@@ -308,7 +308,7 @@ class GameNavigator {
       context: context,
       titleText: tr('leave_game'),
       contentText: localGameData.onlineMode
-          ? tr('reconnect_link_hint') + '\n' + localGameData.gameUrl
+          ? '${tr('reconnect_link_hint')}\n${localGameData.gameUrl}'
           : "You wouldn't be able to continue (this is not implemented yet)",
       choices: [
         DialogChoice(_PopResponse.disabled, tr('stay')),

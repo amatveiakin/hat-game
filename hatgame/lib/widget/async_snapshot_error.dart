@@ -7,8 +7,10 @@ class AsyncSnapshotError extends StatelessWidget {
 
   AsyncSnapshotError(
     AsyncSnapshot<dynamic> snapshot, {
+    Key? key,
     required this.gamePhase,
-  }) : errorMessage = snapshot.error.toString() {
+  })  : errorMessage = snapshot.error.toString(),
+        super(key: key) {
     // TODO: Log to firebase.
   }
 
@@ -16,8 +18,8 @@ class AsyncSnapshotError extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Text(
-        'Error getting data at $gamePhase:\n' + errorMessage,
-        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
+        'Error getting data at $gamePhase:\n$errorMessage',
+        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
       ),
     );
   }

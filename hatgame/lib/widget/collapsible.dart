@@ -7,11 +7,12 @@ class Collapsible extends StatelessWidget {
   final void Function(bool) onCollapsedChanged;
   final Widget child;
 
-  Collapsible({
+  const Collapsible({
+    Key? key,
     required this.collapsed,
     required this.onCollapsedChanged,
     required this.child,
-  });
+  }) : super(key: key);
 
   // TODO: Consider adding AnimatedSize.
   @override
@@ -19,7 +20,7 @@ class Collapsible extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
+        SizedBox(
           width: expandButtonWidth,
           child: TextButton(
             style: ButtonStyle(
@@ -30,8 +31,8 @@ class Collapsible extends StatelessWidget {
                         ? Colors.black.withOpacity(0.20)
                         : Colors.black.withOpacity(0.15))),
             child: collapsed
-                ? Icon(Icons.chevron_left)
-                : Icon(Icons.chevron_right),
+                ? const Icon(Icons.chevron_left)
+                : const Icon(Icons.chevron_right),
             onPressed: () => onCollapsedChanged(!collapsed),
           ),
         ),

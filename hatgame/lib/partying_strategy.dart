@@ -26,13 +26,13 @@ List<List<int>> generateTeamPlayers(
 
 void checkTeamSizes(BuiltList<BuiltList<int>> teams) {
   for (final t in teams) {
-    if (t.length == 0) {
+    if (t.isEmpty) {
       // TODO: Disallow when the UI allows to delete teams.
     } else if (t.length == 1) {
       throw InvalidOperation(tr('team_has_only_one_player'));
     }
   }
-  if (teams.length == 0) {
+  if (teams.isEmpty) {
     throw InvalidOperation(tr('there_are_zero_teams'));
   } else if (teams.length == 1) {
     throw InvalidOperation(tr('there_is_only_one_team'));
@@ -156,7 +156,7 @@ abstract class IndividualStrategyImpl {
       case IndividualPlayStyle.broadcast:
         return BroadcastIndividualStrategy(numPlayers);
     }
-    Assert.fail('Unknown IndividualPlayStyle:' + playStyle.toString());
+    Assert.fail('Unknown IndividualPlayStyle:$playStyle');
   }
 
   Party getPartyImpl(int turn);

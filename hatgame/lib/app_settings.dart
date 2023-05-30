@@ -24,8 +24,9 @@ List<OptionDescription<String>> languageOptions() {
 }
 
 class LanguageSelector extends EnumOptionSelector<String?> {
-  LanguageSelector(String? initialValue, Function changeCallback)
+  LanguageSelector(String? initialValue, Function changeCallback, {Key? key})
       : super(
+          key: key,
           windowTitle: tr('app_language'),
           allValues: languageOptions(),
           initialValue: initialValue,
@@ -44,7 +45,7 @@ class AppSettingsView extends StatefulWidget {
 
   final BuildContext parentContext;
 
-  AppSettingsView(this.parentContext);
+  const AppSettingsView(this.parentContext, {Key? key}) : super(key: key);
 
   @override
   createState() => AppSettingsViewState();

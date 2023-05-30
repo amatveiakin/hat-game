@@ -9,11 +9,12 @@ class NumericField extends StatelessWidget {
   final String? suffixText;
 
   NumericField({
+    Key? key,
     required this.readOnly,
     required this.controller,
     required this.goldenValues,
     this.suffixText,
-  }) {
+  }) : super(key: key) {
     Assert.holds(goldenValues.isNotEmpty);
   }
 
@@ -23,7 +24,7 @@ class NumericField extends StatelessWidget {
       return DecoratedBox(
         decoration: ShapeDecoration(
           shape: RoundedRectangleBorder(
-            side: BorderSide(color: Colors.black26),
+            side: const BorderSide(color: Colors.black26),
             borderRadius: BorderRadius.circular(3.0),
           ),
         ),
@@ -58,10 +59,11 @@ class NumericFieldImpl extends StatefulWidget {
   final String? suffixText;
 
   NumericFieldImpl({
+    Key? key,
     required this.controller,
     required this.goldenValues,
     this.suffixText,
-  }) {
+  }) : super(key: key) {
     Assert.holds(goldenValues.isNotEmpty);
   }
 
@@ -95,6 +97,7 @@ class _NumericFieldImplState extends State<NumericFieldImpl> {
     FocusScope.of(context).unfocus();
   }
 
+  @override
   void initState() {
     super.initState();
     _focusNode.addListener(() {
@@ -120,7 +123,7 @@ class _NumericFieldImplState extends State<NumericFieldImpl> {
     return DecoratedBox(
       decoration: ShapeDecoration(
         shape: RoundedRectangleBorder(
-          side: BorderSide(color: Colors.black26),
+          side: const BorderSide(color: Colors.black26),
           borderRadius: BorderRadius.circular(3.0),
         ),
       ),
@@ -131,12 +134,12 @@ class _NumericFieldImplState extends State<NumericFieldImpl> {
             SizedBox(
               width: buttonWidth,
               child: ElevatedButton(
-                child: Text(
+                style: buttonStyle,
+                onPressed: _decValue,
+                child: const Text(
                   '−', // minus sign (U+2212)
                   textAlign: TextAlign.center,
                 ),
-                style: buttonStyle,
-                onPressed: _decValue,
               ),
             ),
             SizedBox(
@@ -157,12 +160,12 @@ class _NumericFieldImplState extends State<NumericFieldImpl> {
             SizedBox(
               width: buttonWidth,
               child: ElevatedButton(
-                child: Text(
+                style: buttonStyle,
+                onPressed: _incValue,
+                child: const Text(
                   '+',
                   textAlign: TextAlign.center,
                 ),
-                style: buttonStyle,
-                onPressed: _incValue,
               ),
             ),
           ],

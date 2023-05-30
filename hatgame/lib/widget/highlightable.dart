@@ -7,7 +7,7 @@ class HighlightableController {
 
   HighlightableController({required TickerProvider vsync})
       : _animationController = AnimationController(
-          duration: Duration(milliseconds: 700),
+          duration: const Duration(milliseconds: 700),
           vsync: vsync,
         );
 
@@ -25,10 +25,11 @@ class Highlightable extends StatefulWidget {
   final Widget child;
   final HighlightableController controller;
 
-  Highlightable({
+  const Highlightable({
+    Key? key,
     required this.child,
     required this.controller,
-  });
+  }) : super(key: key);
 
   @override
   createState() => _HighlightableState();
@@ -43,8 +44,8 @@ class _HighlightableState extends State<Highlightable> {
   @override
   void initState() {
     super.initState();
-    _animation = Tween(begin: 0.0, end: 1.0).animate(
-        widget.controller._animationController)
+    _animation = Tween(begin: 0.0, end: 1.0)
+        .animate(widget.controller._animationController)
       ..addListener(() {
         if (mounted) {
           setState(() {

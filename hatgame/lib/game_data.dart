@@ -26,7 +26,7 @@ class LocalGameData {
 
   // Returns Game ID
   static String? parseRoute(String route) {
-    final String routePrefix = '/game-';
+    const String routePrefix = '/game-';
     if (!route.startsWith(routePrefix)) {
       return null;
     }
@@ -70,7 +70,7 @@ class DerivedGameState {
 
   static Set<int> wordsFlaggedByOthers(
       Iterable<PersonalState> otherPersonalStates) {
-    final wordsFlaggedByOthers = Set<int>();
+    final wordsFlaggedByOthers = <int>{};
     for (final st in otherPersonalStates) {
       wordsFlaggedByOthers.addAll(st.wordFlags);
     }

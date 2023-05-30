@@ -5,7 +5,7 @@ class DialogChoice<T> {
   final T value;
   final String text;
 
-  DialogChoice(this.value, this.text);
+  const DialogChoice(this.value, this.text);
 }
 
 Text? _textWidget(String? text) {
@@ -21,7 +21,7 @@ Future<T> multipleChoiceDialog<T>({
 }) {
   return showDialog(
     context: context,
-    builder: (context) => new AlertDialog(
+    builder: (context) => AlertDialog(
       title: _textWidget(titleText),
       content: _textWidget(contentText),
       actions: choices
@@ -44,7 +44,7 @@ Future<void> simpleDialog(
   // TODO: Close on enter (try using RawKeyEvent).
   return showDialog(
     context: context,
-    builder: (context) => new AlertDialog(
+    builder: (context) => AlertDialog(
       title: _textWidget(titleText),
       content: _textWidget(contentText),
       actions: [

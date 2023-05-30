@@ -119,7 +119,7 @@ int dbNextIndex<T>(Iterable<DBIndexedColumnData<T>> columns) {
 }
 
 Map<String, dynamic> dbData(List<DBColumnData> columns) {
-  final result = Map<String, dynamic>();
+  final result = <String, dynamic>{};
   for (final c in columns) {
     result[c.column.name] = c.column.serialize(c.data);
   }
@@ -137,33 +137,39 @@ Map<String, dynamic> dbData(List<DBColumnData> columns) {
 
 // Written when game lobby is created. Immutable.
 class DBColCreationTimeUtc extends DBColumn<String> with DBColSerializeString {
+  @override
   String get name => 'creation_time_utc';
 }
 
 // Written when game lobby is created. Immutable.
 class DBColHostAppVersion extends DBColumn<String> with DBColSerializeString {
+  @override
   String get name => 'host_app_version';
 }
 
 // Owned by the host.
 class DBColGamePhase extends DBColumn<GamePhase> with DBColSerializeBuiltValue {
+  @override
   String get name => 'game_phase';
 }
 
 // Owned by the host during configuration phase. Immutable afterwards.
 class DBColConfig extends DBColumn<GameConfig> with DBColSerializeBuiltValue {
+  @override
   String get name => 'config';
 }
 
 // Owned by the host during team compositions phase. Deleted afterwards.
 class DBColTeamCompositions extends DBColumn<TeamCompositions?>
     with DBColSerializeBuiltValueOr {
+  @override
   String get name => 'team_compositions';
 }
 
 // Written when game starts. Immutable.
 class DBColInitialState extends DBColumn<InitialGameState>
     with DBColSerializeBuiltValue {
+  @override
   String get name => 'initial_state';
 }
 
@@ -172,6 +178,7 @@ class DBColTurnRecord extends DBColumnFamily<TurnRecord>
     with DBColSerializeBuiltValue {
   static const String prefix = 'turn-';
   DBColTurnRecord(int id) : super(id);
+  @override
   String get name => '$prefix$id';
 }
 
@@ -181,6 +188,7 @@ class DBColTurnRecord extends DBColumnFamily<TurnRecord>
 // the active player status.
 class DBColCurrentTurn extends DBColumn<TurnState?>
     with DBColSerializeBuiltValueOr {
+  @override
   String get name => 'turn_current';
 }
 
@@ -189,6 +197,7 @@ class DBColPlayer extends DBColumnFamily<PersonalState>
     with DBColSerializeBuiltValue {
   static const String prefix = 'player-';
   DBColPlayer(int id) : super(id);
+  @override
   String get name => '$prefix$id';
 }
 
@@ -198,12 +207,14 @@ class DBColPlayer extends DBColumnFamily<PersonalState>
 class DBColLocalPlayer extends DBColumn<PersonalState>
     with DBColSerializeBuiltValue {
   DBColLocalPlayer();
+  @override
   String get name => 'additional_state';
 }
 
 // Written after game over if host requested a re-match. Immutable.
 class DBColRematchNextGameID extends DBColumn<String>
     with DBColSerializeString {
+  @override
   String get name => 'rematch_next_game_id';
 }
 
@@ -211,6 +222,7 @@ class DBColRematchNextGameID extends DBColumn<String>
 // Invariant: game[game[X].rematch_prev.gameID].rematch_next_game_id == X
 class DBColRematchPrev extends DBColumn<RematchSource>
     with DBColSerializeBuiltValue {
+  @override
   String get name => 'rematch_prev';
 }
 
@@ -249,17 +261,21 @@ class DBColPlayerManager
 
 mixin DBColSerializeBuiltValue<T> on DBColumn<T> {
   FullType _fullType() => FullType(T);
+  @override
   String serialize(T value) =>
       json.encode(serializers.serialize(value, specifiedType: _fullType()));
+  @override
   T deserialize(String? serialized) => serializers
       .deserialize(json.decode(serialized!), specifiedType: _fullType()) as T;
 }
 
 mixin DBColSerializeBuiltValueOr<T> on DBColumn<T?> {
   FullType _fullType() => FullType.nullable(T);
+  @override
   String? serialize(T? value) => value == null
       ? null
       : json.encode(serializers.serialize(value, specifiedType: _fullType()));
+  @override
   T? deserialize(String? serialized) => serialized == null
       ? null
       : serializers.deserialize(json.decode(serialized),
@@ -267,12 +283,16 @@ mixin DBColSerializeBuiltValueOr<T> on DBColumn<T?> {
 }
 
 mixin DBColSerializeStringOr on DBColumn<String?> {
+  @override
   String? serialize(String? value) => value;
+  @override
   String? deserialize(String? serialized) => serialized;
 }
 
 mixin DBColSerializeString on DBColumn<String> {
+  @override
   String? serialize(String value) => value;
+  @override
   String deserialize(String? serialized) => serialized!;
 }
 

@@ -24,12 +24,12 @@ enum NavigationState {
 class _TeamView extends StatelessWidget {
   final List<String> playerNames;
 
-  _TeamView({required this.playerNames});
+  const _TeamView({required this.playerNames});
 
   Widget _playerView(String name) {
     return Text(
       name,
-      style: TextStyle(
+      style: const TextStyle(
         fontSize: 18.0,
       ),
     );
@@ -38,11 +38,11 @@ class _TeamView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
       child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: 40), // for non-team view
+        constraints: const BoxConstraints(minHeight: 40), // for non-team view
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
           child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -63,7 +63,8 @@ class TeamCompositionsView extends StatelessWidget {
   final GameNavigator navigator =
       GameNavigator(currentPhase: GamePhase.composeTeams);
 
-  TeamCompositionsView({required this.localGameData});
+  TeamCompositionsView({Key? key, required this.localGameData})
+      : super(key: key);
 
   void _onBackPressed() {
     GameController.discardTeamCompositions(localGameData.gameReference);
@@ -107,7 +108,7 @@ class TeamCompositionsView extends StatelessWidget {
         actions: [
           if (localGameData.isAdmin)
             IconButton(
-              icon: ImageAssetIcon('images/dice.png'),
+              icon: const ImageAssetIcon('images/dice.png'),
               onPressed: () => _regenerateTeamCompositions(
                   teamCompositionsViewData.gameConfig),
               tooltip: teamCompositionsViewData.gameConfig.teaming.teamPlay
@@ -120,7 +121,7 @@ class TeamCompositionsView extends StatelessWidget {
         children: [
           Expanded(
             child: Padding(
-              padding: EdgeInsets.all(6.0),
+              padding: const EdgeInsets.all(6.0),
               child: ListView(
                 children: teamCompositionsViewData.playerNames
                     .map((t) => _TeamView(playerNames: t))
@@ -133,8 +134,8 @@ class TeamCompositionsView extends StatelessWidget {
                 ? () => _startGame(context, snapshot)
                 : null,
             coloring: WideButtonColoring.secondary,
-            child: Text(tr('start_game')),
             margin: WideButton.bottomButtonMargin,
+            child: Text(tr('start_game')),
           ),
         ],
       ),

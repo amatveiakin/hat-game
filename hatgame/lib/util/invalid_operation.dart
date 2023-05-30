@@ -5,7 +5,7 @@ class InvalidOperation implements Exception {
   final String message;
   final String? comment;
   final bool isInternalError;
-  final _tags = Map<Type, dynamic>();
+  final _tags = <Type, dynamic>{};
 
   InvalidOperation(
     this.message, {

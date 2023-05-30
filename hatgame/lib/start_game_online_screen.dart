@@ -29,6 +29,8 @@ class NewGameOnlineScreen extends StatefulWidget {
   final playerNameController =
       CheckedTextFieldController(checker: checkPlayerName);
 
+  NewGameOnlineScreen({Key? key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() => NewGameOnlineScreenState();
 }
@@ -95,7 +97,8 @@ class NewGameOnlineScreenState extends State<NewGameOnlineScreen> {
         child: Column(
           children: [
             Padding(
-              padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
+              padding:
+                  const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
               child: CheckedTextField(
                 textInputAction: TextInputAction.go,
                 labelText: tr('your_name'),
@@ -108,8 +111,8 @@ class NewGameOnlineScreenState extends State<NewGameOnlineScreen> {
             WideButton(
               onPressed: () => _createGame(context),
               coloring: WideButtonColoring.secondary,
-              child: Text(tr('create_game')),
               margin: WideButton.bottomButtonMargin,
+              child: Text(tr('create_game')),
             ),
           ],
         ),
@@ -125,7 +128,7 @@ class JoinGameOnlineScreen extends StatefulWidget {
   final playerNameController =
       CheckedTextFieldController(checker: checkPlayerName);
 
-  JoinGameOnlineScreen();
+  JoinGameOnlineScreen({Key? key}) : super(key: key);
 
   static JoinGameOnlineScreen? fromRoute(RouteSettings settings) {
     final String? gameID = LocalGameData.parseRoute(settings.name!);
@@ -191,11 +194,12 @@ class JoinGameOnlineScreenState extends State<JoinGameOnlineScreen> {
       return;
     }
 
-    final navigateToGame = () {
+    navigateToGame() {
       navigatedToGame = true;
       return GameNavigator.navigateToGame(
           context: context, localGameData: joinGameResult.localGameData);
-    };
+    }
+
     switch (joinGameResult.reconnection) {
       case Reconnection.connectForTheFirstTime:
         await navigateToGame();
@@ -254,7 +258,8 @@ class JoinGameOnlineScreenState extends State<JoinGameOnlineScreen> {
         child: Column(
           children: [
             Padding(
-              padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
+              padding:
+                  const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
               child: Column(
                 // TODO: Field order?
                 children: [
@@ -282,8 +287,8 @@ class JoinGameOnlineScreenState extends State<JoinGameOnlineScreen> {
             WideButton(
               onPressed: () => _joinGame(context),
               coloring: WideButtonColoring.secondary,
-              child: Text(tr('join_game')),
               margin: WideButton.bottomButtonMargin,
+              child: Text(tr('join_game')),
             ),
           ],
         ),

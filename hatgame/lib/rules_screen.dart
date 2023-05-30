@@ -32,6 +32,8 @@ generate words, keep track of time and score.
 ### Playing online
 ''';
 
+  const RulesScreen({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return ConstrainedScaffold(

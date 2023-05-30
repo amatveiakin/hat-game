@@ -127,13 +127,14 @@ class StrategyQuality {
   }
 }
 
-partyEquals(int performer, List<int> recipients) => TypeMatcher<Party>()
+partyEquals(int performer, List<int> recipients) => const TypeMatcher<Party>()
     .having((t) => t.performer, 'performer', equals(performer))
     .having((t) => t.recipients, 'recipients', equals(recipients));
 
-qualEq(int maxIdleTime, int maxRoleStreak) => TypeMatcher<StrategyQuality>()
-    .having((t) => t.maxIdleTime, 'maxIdleTime', equals(maxIdleTime))
-    .having((t) => t.maxRoleStreak, 'maxRoleStreak', equals(maxRoleStreak));
+qualEq(int maxIdleTime, int maxRoleStreak) =>
+    const TypeMatcher<StrategyQuality>()
+        .having((t) => t.maxIdleTime, 'maxIdleTime', equals(maxIdleTime))
+        .having((t) => t.maxRoleStreak, 'maxRoleStreak', equals(maxRoleStreak));
 
 StrategyQuality qual(IndividualStrategyImpl strategy) {
   final int numPlayers = strategy.numPlayers;
@@ -173,8 +174,8 @@ void checkCorrectness(IndividualStrategyImpl strategy) {
   final int numPlayers = strategy.numPlayers;
   final int fullRound = numPlayers * (numPlayers - 1);
   final int totalPairs = fullRound ~/ 2;
-  final orderedPairs = Set<Tuple2<int, int>>();
-  final unorderedPairs = Set<Tuple2<int, int>>();
+  final orderedPairs = <Tuple2<int, int>>{};
+  final unorderedPairs = <Tuple2<int, int>>{};
 
   for (int turn = 0; turn < fullRound; turn++) {
     final party = strategy.getPartyImpl(turn);

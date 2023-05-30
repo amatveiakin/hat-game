@@ -6,12 +6,14 @@ import 'package:quiver/async.dart' as quiver_async;
 
 class LocalDocumentReference extends DBDocumentReference {
   final LocalDB localDB;
+  @override
   final String path;
 
   LocalDocumentReference({required this.localDB, required this.path});
 
   void syncGetColumns(List<DBColumnData> columns) =>
       localDB.setRow(path, dbData(columns));
+  @override
   Future<void> setColumns(List<DBColumnData> columns) async =>
       syncGetColumns(columns);
 
@@ -20,21 +22,27 @@ class LocalDocumentReference extends DBDocumentReference {
           List<DBColumnData> columns, LocalCacheBehavior _) =>
       localDB.setRow(
           path, Map.from(localDB.getRow(path)!)..addAll(dbData(columns)));
+  @override
   Future<void> updateColumnsImpl(
           List<DBColumnData> columns, LocalCacheBehavior _) async =>
       syncUpdateColumnsImpl(columns, _);
 
   LocalDocumentSnapshot syncGet() =>
       LocalDocumentSnapshot(this, localDB.getRow(path));
+  @override
   Future<LocalDocumentSnapshot> get() async => syncGet();
 
   void syncDelete() => localDB.removeRow(path);
+  @override
   Future<void> delete() async => syncDelete();
 
   // Ignore LocalCacheBehavior, since this is already a local DB.
+  @override
   void clearLocalCache() {}
+  @override
   void assertLocalCacheIsEmpty() {}
 
+  @override
   Stream<LocalDocumentSnapshot> snapshots() {
     return quiver_async.concat([
       Stream.fromFuture(get()),
@@ -52,8 +60,10 @@ class LocalDocumentSnapshot extends DBDocumentSnapshot {
 
   LocalDocumentSnapshot(this._ref, this._data);
 
+  @override
   LocalDocumentReference get reference => _ref;
 
+  @override
   Map<String, dynamic>? get rawData => _data;
 }
 
@@ -79,7 +89,7 @@ class LocalDB {
   static final LocalDB _instance = LocalDB();
 
   // TODO: Back up to some persistent local storage.
-  final _rows = Map<String, Map<String, dynamic>?>();
+  final _rows = <String, Map<String, dynamic>?>{};
   int _newRowId = 0;
   final _streamController =
       StreamController<LocalDocumentRawUpdate>.broadcast();

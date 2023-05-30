@@ -48,7 +48,7 @@ class MultiLineListTile extends StatelessWidget {
             key: key,
             leading: leading,
             title: Padding(
-              padding: EdgeInsets.symmetric(vertical: _padding),
+              padding: const EdgeInsets.symmetric(vertical: _padding),
               child: title,
             ),
             subtitle: null,
@@ -65,11 +65,11 @@ class MultiLineListTile extends StatelessWidget {
             key: key,
             leading: leading,
             title: Padding(
-              padding: EdgeInsets.only(top: _padding),
+              padding: const EdgeInsets.only(top: _padding),
               child: title,
             ),
             subtitle: Padding(
-              padding: EdgeInsets.only(bottom: _padding),
+              padding: const EdgeInsets.only(bottom: _padding),
               child: subtitle,
             ),
             trailing: trailing,
@@ -131,7 +131,7 @@ class MultiLineSwitchListTile extends StatelessWidget {
             activeThumbImage: activeThumbImage,
             inactiveThumbImage: inactiveThumbImage,
             title: Padding(
-              padding: EdgeInsets.symmetric(vertical: _padding),
+              padding: const EdgeInsets.symmetric(vertical: _padding),
               child: title,
             ),
             subtitle: null,
@@ -151,11 +151,11 @@ class MultiLineSwitchListTile extends StatelessWidget {
             activeThumbImage: activeThumbImage,
             inactiveThumbImage: inactiveThumbImage,
             title: Padding(
-              padding: EdgeInsets.only(top: _padding),
+              padding: const EdgeInsets.only(top: _padding),
               child: title,
             ),
             subtitle: Padding(
-              padding: EdgeInsets.only(bottom: _padding),
+              padding: const EdgeInsets.only(bottom: _padding),
               child: subtitle,
             ),
             secondary: secondary,
@@ -181,7 +181,6 @@ class MultiLineCheckboxListTile extends StatelessWidget {
   final bool autofocus;
   final EdgeInsetsGeometry? contentPadding;
   final bool tristate;
-
 
   const MultiLineCheckboxListTile({
     Key? key,
@@ -210,7 +209,7 @@ class MultiLineCheckboxListTile extends StatelessWidget {
             activeColor: activeColor,
             checkColor: checkColor,
             title: Padding(
-              padding: EdgeInsets.symmetric(vertical: _padding),
+              padding: const EdgeInsets.symmetric(vertical: _padding),
               child: title,
             ),
             subtitle: null,
@@ -230,11 +229,11 @@ class MultiLineCheckboxListTile extends StatelessWidget {
             activeColor: activeColor,
             checkColor: checkColor,
             title: Padding(
-              padding: EdgeInsets.only(top: _padding),
+              padding: const EdgeInsets.only(top: _padding),
               child: title,
             ),
             subtitle: Padding(
-              padding: EdgeInsets.only(bottom: _padding),
+              padding: const EdgeInsets.only(bottom: _padding),
               child: subtitle,
             ),
             isThreeLine: false,
@@ -285,7 +284,7 @@ class MultiLineRadioListTile<T> extends StatelessWidget {
             onChanged: onChanged,
             activeColor: activeColor,
             title: Padding(
-              padding: EdgeInsets.symmetric(vertical: _padding),
+              padding: const EdgeInsets.symmetric(vertical: _padding),
               child: title,
             ),
             subtitle: null,
@@ -302,11 +301,11 @@ class MultiLineRadioListTile<T> extends StatelessWidget {
             onChanged: onChanged,
             activeColor: activeColor,
             title: Padding(
-              padding: EdgeInsets.only(top: _padding),
+              padding: const EdgeInsets.only(top: _padding),
               child: title,
             ),
             subtitle: Padding(
-              padding: EdgeInsets.only(bottom: _padding),
+              padding: const EdgeInsets.only(bottom: _padding),
               child: subtitle,
             ),
             isThreeLine: false,

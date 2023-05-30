@@ -1,7 +1,7 @@
 typedef MockShuffler<E> = List<E> Function(List<E>);
 
 extension ListUtil<E> on List<E> {
-  List<E> sorted([int compare(E a, E b)?]) {
+  List<E> sorted([int Function(E a, E b)? compare]) {
     return List<E>.from(this)..sort(compare);
   }
 
@@ -13,11 +13,11 @@ extension ListUtil<E> on List<E> {
 }
 
 extension IterableUtil<E> on Iterable<E> {
-  Iterable<S> mapWithIndex<S>(S f(int index, E value)) {
+  Iterable<S> mapWithIndex<S>(S Function(int index, E value) f) {
     return Iterable<S>.generate(length, (index) => f(index, elementAt(index)));
   }
 
-  void forEachWithIndex(void f(int index, E value)) {
+  void forEachWithIndex(void Function(int index, E value) f) {
     int index = 0;
     return forEach((element) => f(index++, element));
   }

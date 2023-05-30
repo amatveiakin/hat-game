@@ -20,7 +20,7 @@ import 'package:hatgame/widget/wide_button.dart';
 class _TeamScoreView extends StatelessWidget {
   final TeamScoreViewData data;
 
-  _TeamScoreView({required this.data});
+  const _TeamScoreView({required this.data});
 
   Widget _playerView(PlayerScoreViewData player) {
     return Row(
@@ -28,7 +28,7 @@ class _TeamScoreView extends StatelessWidget {
         Expanded(
           child: Text(
             player.name,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 18.0,
             ),
           ),
@@ -43,22 +43,22 @@ class _TeamScoreView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
       clipBehavior: Clip.antiAlias,
       child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: 40), // for non-team view
+        constraints: const BoxConstraints(minHeight: 40), // for non-team view
         child: IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
+              SizedBox(
                 width: 60.0,
                 child: Container(
                   color: MyTheme.primary,
                   child: Center(
                     child: Text(
                       data.totalScore.toString(),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 28.0,
                         // TODO: Take the color from theme.
                         color: Colors.white,
@@ -67,10 +67,11 @@ class _TeamScoreView extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(width: 2),
+              const SizedBox(width: 2),
               Expanded(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
                   child: Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -93,7 +94,7 @@ class _TeamScoreView extends StatelessWidget {
 class _WordView extends StatelessWidget {
   final WordInTurnLogViewData data;
 
-  _WordView({required this.data});
+  const _WordView({required this.data});
 
   Icon _icon(WordStatus status) {
     switch (status) {
@@ -101,9 +102,9 @@ class _WordView extends StatelessWidget {
         return Icon(Icons.remove_red_eye_outlined, color: _style(status).color);
       case WordStatus.explained:
         // TODO: Find a clearer solution.
-        return Icon(Icons.check, color: Colors.transparent);
+        return const Icon(Icons.check, color: Colors.transparent);
       case WordStatus.discarded:
-        return Icon(Icons.delete);
+        return const Icon(Icons.delete);
     }
     Assert.fail('Unknown WordStatus: $status');
   }
@@ -112,11 +113,11 @@ class _WordView extends StatelessWidget {
     switch (status) {
       case WordStatus.notExplained:
         // TODO: Take the color from the theme.
-        return TextStyle(color: Colors.black45);
+        return const TextStyle(color: Colors.black45);
       case WordStatus.explained:
-        return TextStyle();
+        return const TextStyle();
       case WordStatus.discarded:
-        return TextStyle(decoration: TextDecoration.lineThrough);
+        return const TextStyle(decoration: TextDecoration.lineThrough);
     }
     Assert.fail('Unknown WordStatus: $status');
   }
@@ -126,7 +127,7 @@ class _WordView extends StatelessWidget {
     return Row(
       children: [
         _icon(data.status),
-        SizedBox(
+        const SizedBox(
           width: 4.0,
         ),
         Expanded(
@@ -143,12 +144,12 @@ class _WordView extends StatelessWidget {
 class _TurnView extends StatelessWidget {
   final TurnLogViewData data;
 
-  _TurnView({required this.data});
+  const _TurnView({required this.data});
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
       clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -157,16 +158,16 @@ class _TurnView extends StatelessWidget {
             // TODO: Take the color from the theme.
             color: Colors.black12,
             child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
               child: Text(data.party),
             ),
           ),
-          Divider(
+          const Divider(
             height: 0.0,
             thickness: 0.5,
           ),
           Padding(
-            padding: EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
             child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children:
@@ -186,7 +187,7 @@ class ScoreView extends StatelessWidget {
   final GameNavigator navigator =
       GameNavigator(currentPhase: GamePhase.gameOver);
 
-  ScoreView({required this.localGameData});
+  ScoreView({Key? key, required this.localGameData}) : super(key: key);
 
   void _rematch(BuildContext context, DBDocumentSnapshot snapshot) async {
     try {
@@ -215,7 +216,7 @@ class ScoreView extends StatelessWidget {
         children: [
           Expanded(
             child: Padding(
-              padding: EdgeInsets.all(6.0),
+              padding: const EdgeInsets.all(6.0),
               child: ListView(
                 children: gameData
                     .scoreData()
@@ -229,21 +230,21 @@ class ScoreView extends StatelessWidget {
                 ? () => _rematch(context, snapshot)
                 : null,
             coloring: WideButtonColoring.secondary,
-            child: Text(tr('rematch')),
             margin: WideButton.bottomButtonMargin,
+            child: Text(tr('rematch')),
           ),
         ],
       ),
       secondaryRouteName: '/game-log',
       secondary: Padding(
-        padding: EdgeInsets.all(6.0),
+        padding: const EdgeInsets.all(6.0),
         child: ListView(
           children:
               gameData.turnLogData().map((t) => _TurnView(data: t)).toList(),
         ),
       ),
       // TODO: Proper icon.
-      secondaryIcon: Icon(Icons.list),
+      secondaryIcon: const Icon(Icons.list),
       secondaryTitle: tr('game_log'),
     );
   }

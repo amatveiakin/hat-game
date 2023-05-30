@@ -18,10 +18,12 @@ class OfflinePlayersConfigView extends StatefulWidget {
   final GameConfigController configController;
 
   OfflinePlayersConfigView(
-      {required teamingConfig,
+      {Key? key,
+      required teamingConfig,
       required this.initialPlayersConfig,
       required this.configController})
-      : this.manualTeams = _manualTeams(teamingConfig);
+      : manualTeams = _manualTeams(teamingConfig),
+        super(key: key);
 
   @override
   createState() => _OfflinePlayersConfigViewState();
@@ -35,15 +37,15 @@ class _PlayerData {
   final FocusNode? focusNode;
 
   _PlayerData(this.name)
-      : this.isTeamDivider = false,
-        this.key = GlobalKey(),
-        this.controller = TextEditingController(),
-        this.focusNode = FocusNode();
+      : isTeamDivider = false,
+        key = GlobalKey(),
+        controller = TextEditingController(),
+        focusNode = FocusNode();
   _PlayerData.teamDivider()
-      : this.isTeamDivider = true,
-        this.key = null,
-        this.controller = null,
-        this.focusNode = null;
+      : isTeamDivider = true,
+        key = null,
+        controller = null,
+        focusNode = null;
 
   void dispose() {
     // TODO: Fix "The method 'findRenderObject' was called on null" and enable.
@@ -145,7 +147,7 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
           // Check again, because it doesn't always work immediately,
           // especially when virtual keyboard is opened.
           // TODO: Find a better way to do this.
-          Future.delayed(Duration(milliseconds: 50), scrollCallback);
+          Future.delayed(const Duration(milliseconds: 50), scrollCallback);
         };
         WidgetsBinding.instance.addPostFrameCallback((_) => scrollCallback!());
         playerData.focusNode!.requestFocus();
@@ -172,7 +174,7 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
   }
 
   List<Widget> _makeTiles() {
-    final listItemPadding = EdgeInsets.fromLTRB(10, 1, 10, 1);
+    const listItemPadding = EdgeInsets.fromLTRB(10, 1, 10, 1);
     final listItemPaddingSmallRight = EdgeInsets.fromLTRB(listItemPadding.left,
         listItemPadding.top, listItemPadding.right / 2, listItemPadding.bottom);
     var tiles = <Widget>[];
@@ -195,20 +197,20 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
                 Expanded(
                   // TODO: Fix: `Multiple widgets used the same GlobalKey.'
                   child: TextField(
-                    decoration:
-                        InputDecoration(filled: true, border: InputBorder.none),
+                    decoration: const InputDecoration(
+                        filled: true, border: InputBorder.none),
                     key: player.key,
                     focusNode: player.focusNode,
                     controller: player.controller,
                   ),
                 ),
-                if (manualTeams) SizedBox(width: 12),
+                if (manualTeams) const SizedBox(width: 12),
                 // TODO: Make sure we don't have two drag handles on iOS.
-                if (manualTeams) Icon(Icons.drag_handle),
-                SizedBox(width: 4),
+                if (manualTeams) const Icon(Icons.drag_handle),
+                const SizedBox(width: 4),
                 IconButton(
                   padding: EdgeInsets.zero,
-                  icon: Icon(Icons.clear),
+                  icon: const Icon(Icons.clear),
                   onPressed: () => _deletePlayer(player),
                 ),
               ],
@@ -226,7 +228,7 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
             child: OutlinedButton(
               style: ButtonStyle(
                 padding: MaterialStateProperty.all(
-                    EdgeInsets.symmetric(vertical: 10.0)),
+                    const EdgeInsets.symmetric(vertical: 10.0)),
               ),
               onPressed: () => setState(() {
                 _addPlayer('', focus: true);
@@ -234,21 +236,21 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.person_add),
-                  SizedBox(width: 8),
+                  const Icon(Icons.person_add),
+                  const SizedBox(width: 8),
                   Text(tr('add_player')),
                 ],
               ),
             ),
           ),
-          if (manualTeams) SizedBox(width: 12),
+          if (manualTeams) const SizedBox(width: 12),
           if (manualTeams)
             Expanded(
               flex: 2,
               child: OutlinedButton(
                 style: ButtonStyle(
                   padding: MaterialStateProperty.all(
-                      EdgeInsets.symmetric(vertical: 10.0)),
+                      const EdgeInsets.symmetric(vertical: 10.0)),
                 ),
                 onPressed: () => setState(() {
                   _addDivider();
@@ -257,8 +259,8 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.group_add),
-                    SizedBox(width: 8),
+                    const Icon(Icons.group_add),
+                    const SizedBox(width: 8),
                     Text(tr('add_team')),
                   ],
                 ),
@@ -293,7 +295,7 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
 
   @override
   Widget build(BuildContext context) {
-    final onReorder = (int oldIndex, int newIndex) {
+    onReorder(int oldIndex, int newIndex) {
       setState(() {
         if (oldIndex >= _playerItems.length) {
           // Cannot drag the `add' button.
@@ -311,7 +313,8 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
         _playerItems.insert(newIndex, p);
         _notifyPlayersUpdate();
       });
-    };
+    }
+
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       // Cancel autoscroll if the user begins to interact with the widget.
@@ -320,7 +323,7 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
       onVerticalDragDown: (_) => _cancelAutoScroll(),
       onHorizontalDragDown: (_) => _cancelAutoScroll(),
       child: Padding(
-        padding: EdgeInsets.only(top: 6),
+        padding: const EdgeInsets.only(top: 6),
         child: manualTeams
             ? ReorderableListView(
                 onReorder: onReorder,

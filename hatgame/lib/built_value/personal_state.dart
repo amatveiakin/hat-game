@@ -51,6 +51,7 @@ abstract class PersonalState
   BuiltSet<int> get wordFlags;
 
   PersonalState._();
-  factory PersonalState([updates(PersonalStateBuilder b)]) = _$PersonalState;
+  factory PersonalState([Function(PersonalStateBuilder b) updates]) =
+      _$PersonalState;
   static Serializer<PersonalState> get serializer => _$personalStateSerializer;
 }

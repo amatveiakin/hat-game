@@ -11,13 +11,14 @@ class ConstrainedScaffold extends StatelessWidget {
   final bool? resizeToAvoidBottomInset;
   final double width;
 
-  ConstrainedScaffold({
+  const ConstrainedScaffold({
+    Key? key,
     this.scaffoldKey,
     required this.appBar,
     required this.body,
     this.resizeToAvoidBottomInset,
     this.width = defaultWidth,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

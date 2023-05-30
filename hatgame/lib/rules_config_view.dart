@@ -52,12 +52,13 @@ class RulesConfigView extends StatefulWidget {
   final RulesConfig config;
   final GameConfigController configController;
 
-  RulesConfigView({
+  const RulesConfigView({
+    Key? key,
     required this.onlineMode,
     required this.viewController,
     required this.config,
     required this.configController,
-  });
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => RulesConfigViewState();
@@ -262,7 +263,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
                 title: Text(dictionariesCaption),
                 trailing: dictionariesOnTap == null
                     ? null
-                    : Icon(Icons.chevron_right),
+                    : const Icon(Icons.chevron_right),
                 onTap: dictionariesOnTap),
           ),
       ],

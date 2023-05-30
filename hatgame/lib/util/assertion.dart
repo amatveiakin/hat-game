@@ -38,7 +38,7 @@ class Assert {
     if (!condition) {
       final decoratedMessage = _combine(['Assertion failed', combinedMessage]);
       final String stackTrace = StackTrace.current.toString();
-      final firebaseLog = () => FirebaseAnalytics.instance.logEvent(
+      firebaseLog() => FirebaseAnalytics.instance.logEvent(
             name: 'assertion_failure',
             parameters: {
               'message': decoratedMessage,
@@ -73,7 +73,7 @@ class Assert {
       MessageProducer? lazyMessage,
       AssertInRelease inRelease = defaultReleaseBehavior}) {
     holds(a == b,
-        message: _combine([a.toString() + ' == ' + b.toString(), message]),
+        message: _combine(['$a == $b', message]),
         lazyMessage: lazyMessage,
         inRelease: inRelease);
   }
@@ -83,7 +83,7 @@ class Assert {
       MessageProducer? lazyMessage,
       AssertInRelease inRelease = defaultReleaseBehavior}) {
     holds(a != b,
-        message: _combine([a.toString() + ' != ' + b.toString(), message]),
+        message: _combine(['$a != $b', message]),
         lazyMessage: lazyMessage,
         inRelease: inRelease);
   }
@@ -93,7 +93,7 @@ class Assert {
       MessageProducer? lazyMessage,
       AssertInRelease inRelease = defaultReleaseBehavior}) {
     holds(a.compareTo(b) < 0,
-        message: _combine([a.toString() + ' < ' + b.toString(), message]),
+        message: _combine(['$a < $b', message]),
         lazyMessage: lazyMessage,
         inRelease: inRelease);
   }
@@ -103,7 +103,7 @@ class Assert {
       MessageProducer? lazyMessage,
       AssertInRelease inRelease = defaultReleaseBehavior}) {
     holds(a.compareTo(b) <= 0,
-        message: _combine([a.toString() + ' <= ' + b.toString(), message]),
+        message: _combine(['$a <= $b', message]),
         lazyMessage: lazyMessage,
         inRelease: inRelease);
   }
@@ -113,7 +113,7 @@ class Assert {
       MessageProducer? lazyMessage,
       AssertInRelease inRelease = defaultReleaseBehavior}) {
     holds(a.compareTo(b) > 0,
-        message: _combine([a.toString() + ' > ' + b.toString(), message]),
+        message: _combine(['$a > $b', message]),
         lazyMessage: lazyMessage,
         inRelease: inRelease);
   }
@@ -123,7 +123,7 @@ class Assert {
       MessageProducer? lazyMessage,
       AssertInRelease inRelease = defaultReleaseBehavior}) {
     holds(a.compareTo(b) >= 0,
-        message: _combine([a.toString() + ' >= ' + b.toString(), message]),
+        message: _combine(['$a >= $b', message]),
         lazyMessage: lazyMessage,
         inRelease: inRelease);
   }
@@ -133,7 +133,7 @@ class Assert {
       MessageProducer? lazyMessage,
       AssertInRelease inRelease = defaultReleaseBehavior}) {
     holds(b.contains(a),
-        message: _combine([a.toString() + ' in ' + b.toString(), message]),
+        message: _combine(['$a in $b', message]),
         lazyMessage: lazyMessage,
         inRelease: inRelease);
   }
@@ -143,7 +143,7 @@ class Assert {
       MessageProducer? lazyMessage,
       AssertInRelease inRelease = defaultReleaseBehavior}) {
     holds(b.containsAll(a),
-        message: _combine([a.toString() + ' in ' + b.toString(), message]),
+        message: _combine(['$a in $b', message]),
         lazyMessage: lazyMessage,
         inRelease: inRelease);
   }
@@ -154,7 +154,7 @@ class Assert {
 }
 
 class _AssertContext {
-  static List<MessageProducer> _stack = [];
+  static final List<MessageProducer> _stack = [];
 
   static void push(MessageProducer context) => _stack.add(context);
   static void pop() => _stack.removeLast();

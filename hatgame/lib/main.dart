@@ -17,7 +17,7 @@ import 'package:hatgame/util/ntp_time.dart';
 import 'package:hatgame/util/sounds.dart';
 
 Future<void> _initFirestore() async {
-  final option = kIsWeb
+  const option = kIsWeb
       ? FirebaseOptions(
           apiKey: "AIzaSyBX7jo-zBfl0EKR6s7-ph4NhifkhIPzvzw",
           authDomain: "hatgame.firebaseapp.com",
@@ -55,17 +55,19 @@ Future<void> main() async {
   runApp(
     EasyLocalization(
       useOnlyLangCode: true,
-      supportedLocales: [Locale('en'), Locale('ru')],
-      fallbackLocale: Locale('en'),
+      supportedLocales: const [Locale('en'), Locale('ru')],
+      fallbackLocale: const Locale('en'),
       startLocale: language == null ? null : Locale(language),
       path: 'translations',
       assetLoader: YamlAssetLoader(),
-      child: MyApp(),
+      child: const MyApp(),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   Route<dynamic>? _generateRoute(RouteSettings settings) {
     final joinGameScreen = JoinGameOnlineScreen.fromRoute(settings);
     return joinGameScreen == null
@@ -101,10 +103,10 @@ class MyApp extends StatelessWidget {
       // underscores: https://support.google.com/webmasters/answer/76329.
       initialRoute: StartScreen.routeName,
       routes: {
-        StartScreen.routeName: (context) => StartScreen(),
+        StartScreen.routeName: (context) => const StartScreen(),
         AppSettingsView.routeName: (context) => AppSettingsView(context),
-        AboutScreen.routeName: (context) => AboutScreen(),
-        RulesScreen.routeName: (context) => RulesScreen(),
+        AboutScreen.routeName: (context) => const AboutScreen(),
+        RulesScreen.routeName: (context) => const RulesScreen(),
       },
       onGenerateRoute: _generateRoute,
       navigatorObservers: [

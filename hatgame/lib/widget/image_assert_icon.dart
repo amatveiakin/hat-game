@@ -4,10 +4,11 @@ class ImageAssetIcon extends StatelessWidget {
   final String name;
   final Color? color;
 
-  ImageAssetIcon(
+  const ImageAssetIcon(
     this.name, {
+    Key? key,
     this.color,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

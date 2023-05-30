@@ -9,11 +9,12 @@ class DictionarySelector extends StatefulWidget {
   final List<String> initialValues;
   final ValueChanged<List<String>> onChanged;
 
-  DictionarySelector({
+  const DictionarySelector({
+    Key? key,
     required this.allValues,
     required this.initialValues,
     required this.onChanged,
-  });
+  }) : super(key: key);
 
   @override
   createState() => DictionarySelectorState();

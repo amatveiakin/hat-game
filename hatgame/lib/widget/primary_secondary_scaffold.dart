@@ -12,7 +12,8 @@ class PrimarySecondaryScaffold extends StatefulWidget {
   final String secondaryTitle; // used by narrow mode only
   final Widget secondaryIcon;
 
-  PrimarySecondaryScaffold({
+  const PrimarySecondaryScaffold({
+    Key? key,
     required this.primaryAutomaticallyImplyLeading,
     required this.primary,
     required this.primaryTitle,
@@ -20,7 +21,7 @@ class PrimarySecondaryScaffold extends StatefulWidget {
     required this.secondary,
     required this.secondaryTitle,
     required this.secondaryIcon,
-  });
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _PrimarySecondaryScaffoldState();
@@ -30,7 +31,7 @@ class _SecondaryView extends StatelessWidget {
   final Widget body;
   final String title;
 
-  _SecondaryView({
+  const _SecondaryView({
     required this.body,
     required this.title,
   });
@@ -75,7 +76,7 @@ class _PrimarySecondaryScaffoldState extends State<PrimarySecondaryScaffold> {
     const double maxPrimaryWidth = ConstrainedScaffold.defaultWidth;
     Assert.le(minPrimaryWidth, maxPrimaryWidth);
     const double secondaryWidth = 480;
-    final double minWideLayoutWidth =
+    const double minWideLayoutWidth =
         minPrimaryWidth + Collapsible.expandButtonWidth + secondaryWidth;
     final bool wideLayout =
         MediaQuery.of(context).size.width >= minWideLayoutWidth;
@@ -107,7 +108,7 @@ class _PrimarySecondaryScaffoldState extends State<PrimarySecondaryScaffold> {
             Expanded(
               child: Center(
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: maxPrimaryWidth),
+                  constraints: const BoxConstraints(maxWidth: maxPrimaryWidth),
                   child: primary,
                 ),
               ),

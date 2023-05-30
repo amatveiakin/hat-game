@@ -7,11 +7,12 @@ class CheckboxButton extends StatelessWidget {
   final Function onChanged;
   final Widget title;
 
-  CheckboxButton({
+  const CheckboxButton({
+    Key? key,
     required this.value,
     required this.onChanged,
     required this.title,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

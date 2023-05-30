@@ -31,11 +31,11 @@ class _PadlockPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 5.0
       ..strokeCap = StrokeCap.butt
-      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 0.5);
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.5);
     if (padlockOpen) {
       borderPaint
         ..color = MyTheme.secondary
-        ..maskFilter = MaskFilter.blur(BlurStyle.normal, 5.0);
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5.0);
     }
     canvas.drawOval(rect, borderPaint);
 
@@ -79,7 +79,9 @@ class Padlock extends StatefulWidget {
   final AnimationController? animationController;
   final void Function() onUnlocked;
 
-  Padlock({required this.onUnlocked, required this.animationController});
+  const Padlock(
+      {Key? key, required this.onUnlocked, required this.animationController})
+      : super(key: key);
 
   @override
   createState() => PadlockState();

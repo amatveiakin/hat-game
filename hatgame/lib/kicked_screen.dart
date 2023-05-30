@@ -5,6 +5,8 @@ import 'package:hatgame/widget/constrained_scaffold.dart';
 class KickedScreen extends StatelessWidget {
   static const String routeName = '/kicked';
 
+  const KickedScreen({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return ConstrainedScaffold(
@@ -14,7 +16,7 @@ class KickedScreen extends StatelessWidget {
       body: Center(
         child: Text(
           tr('you_have_been_kicked'),
-          style: TextStyle(fontSize: 18.0),
+          style: const TextStyle(fontSize: 18.0),
         ),
       ),
     );

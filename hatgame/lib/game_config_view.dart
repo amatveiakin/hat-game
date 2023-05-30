@@ -25,7 +25,8 @@ class GameConfigView extends StatefulWidget {
 
   final LocalGameData localGameData;
 
-  GameConfigView({required this.localGameData});
+  const GameConfigView({Key? key, required this.localGameData})
+      : super(key: key);
 
   @override
   createState() => _GameConfigViewState();
@@ -37,13 +38,13 @@ class _GameConfigViewState extends State<GameConfigView>
       GameNavigator(currentPhase: GamePhase.configure);
 
   SectionTitleData rulesSectionTitle() => SectionTitleData(
-        icon: ImageAssetIcon('images/rules_config.png'),
+        icon: const ImageAssetIcon('images/rules_config.png'),
       );
   SectionTitleData teamingSectionTitle() => SectionTitleData(
-        icon: ImageAssetIcon('images/teaming_config.png'),
+        icon: const ImageAssetIcon('images/teaming_config.png'),
       );
   SectionTitleData playersSectionTitle(int numPlayers) => SectionTitleData(
-        icon: ImageAssetIcon('images/players_config.png'),
+        icon: const ImageAssetIcon('images/players_config.png'),
       );
 
   static const int rulesTabIndex = 0;
@@ -91,7 +92,7 @@ class _GameConfigViewState extends State<GameConfigView>
                 child: Text(link),
               ),
               IconButton(
-                icon: Icon(Icons.content_copy),
+                icon: const Icon(Icons.content_copy),
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: link)).then((_) {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -199,13 +200,13 @@ class _GameConfigViewState extends State<GameConfigView>
       onPressed: isAdmin ? () => _next(gameConfig) : null,
       onPressedDisabled: isAdmin
           ? null
-          : () => ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Only the host can proceed'))), // TODO: tr
+          : () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('Only the host can proceed'))), // TODO: tr
       coloring: WideButtonColoring.secondary,
+      margin: WideButton.bottomButtonMargin,
       child: GoNextButtonCaption(gameConfig.rules.writeWords
           ? tr('write_words_titlecase')
           : tr('next')),
-      margin: WideButton.bottomButtonMargin,
     );
 
     return SectionsScaffold(
@@ -217,7 +218,7 @@ class _GameConfigViewState extends State<GameConfigView>
       actions: localGameData.onlineMode
           ? [
               IconButton(
-                icon: Icon(Icons.link),
+                icon: const Icon(Icons.link),
                 onPressed: () => _getJoinLink(),
               )
             ]

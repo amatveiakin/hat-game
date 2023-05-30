@@ -36,8 +36,10 @@ getIndividualPlayStyleOptions() {
 class IndividualPlayStyleSelector
     extends EnumOptionSelector<IndividualPlayStyle> {
   IndividualPlayStyleSelector(
-      IndividualPlayStyle initialValue, Function changeCallback)
+      IndividualPlayStyle initialValue, Function changeCallback,
+      {Key? key})
       : super(
+          key: key,
           windowTitle: tr('turn_order'),
           allValues: getIndividualPlayStyleOptions(),
           initialValue: initialValue,
@@ -70,8 +72,9 @@ getRandomizeTeamsOptions() {
 }
 
 class RandomizeTeamsSelector extends EnumOptionSelector<bool> {
-  RandomizeTeamsSelector(bool initialValue, Function changeCallback)
+  RandomizeTeamsSelector(bool initialValue, Function changeCallback, {Key? key})
       : super(
+          key: key,
           windowTitle: tr('team_forming'),
           allValues: getRandomizeTeamsOptions(),
           initialValue: initialValue,
@@ -113,8 +116,10 @@ getDesiredTeamSizeOptions() {
 }
 
 class DesiredTeamSizeSelector extends EnumOptionSelector<DesiredTeamSize> {
-  DesiredTeamSizeSelector(DesiredTeamSize initialValue, Function changeCallback)
+  DesiredTeamSizeSelector(DesiredTeamSize initialValue, Function changeCallback,
+      {Key? key})
       : super(
+          key: key,
           windowTitle: tr('team_size'),
           allValues: getDesiredTeamSizeOptions(),
           initialValue: initialValue,
@@ -154,8 +159,10 @@ getUnequalTeamSizeOptions() {
 }
 
 class UnequalTeamSizeSelector extends EnumOptionSelector<UnequalTeamSize> {
-  UnequalTeamSizeSelector(UnequalTeamSize initialValue, Function changeCallback)
+  UnequalTeamSizeSelector(UnequalTeamSize initialValue, Function changeCallback,
+      {Key? key})
       : super(
+          key: key,
           windowTitle: tr('unequal_team_sizes'),
           allValues: getUnequalTeamSizeOptions(),
           initialValue: initialValue,
@@ -191,8 +198,10 @@ getGuessingInLargeTeamOptions() {
 class GuessingInLargeTeamSelector
     extends EnumOptionSelector<IndividualPlayStyle> {
   GuessingInLargeTeamSelector(
-      IndividualPlayStyle initialValue, Function changeCallback)
+      IndividualPlayStyle initialValue, Function changeCallback,
+      {Key? key})
       : super(
+          key: key,
           windowTitle: tr('guessing_in_large_teams'),
           allValues: getGuessingInLargeTeamOptions(),
           initialValue: initialValue,
@@ -214,10 +223,12 @@ class TeamingConfigView extends StatelessWidget {
   final TeamingConfig config;
   final GameConfigController configController;
 
-  TeamingConfigView(
-      {required this.onlineMode,
+  const TeamingConfigView(
+      {Key? key,
+      required this.onlineMode,
       required this.config,
-      required this.configController});
+      required this.configController})
+      : super(key: key);
 
   static int _maxPossbleTeamSize(TeamingConfig config) {
     const int infinity = 1000;

@@ -277,7 +277,7 @@ class GameController {
     const int minIDLength = 4;
     const int maxIDLength = 8;
     const int attemptsPerTransaction = 100;
-    final String idPrefix = kReleaseMode ? '' : '.';
+    const String idPrefix = kReleaseMode ? '' : '.';
     for (int idLength = minIDLength; idLength <= maxIDLength; idLength++) {
       final String? gameID = await firestoreInstance
           .runTransaction((firestore.Transaction tx) async {
@@ -322,7 +322,7 @@ class GameController {
 
   static Future<LocalGameData> newLobby(
       firestore.FirebaseFirestore firestoreInstance, String myName) async {
-    final int playerID = 0;
+    const int playerID = 0;
     final GameConfig config =
         GameConfigController.initialConfig(onlineMode: true);
     final String gameID = await _createGameOnline(firestoreInstance, [

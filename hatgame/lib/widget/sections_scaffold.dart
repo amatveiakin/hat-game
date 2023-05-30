@@ -27,6 +27,7 @@ class SectionsScaffold extends StatelessWidget {
   final Widget? bottomWidget;
 
   SectionsScaffold({
+    Key? key,
     this.scaffoldKey,
     required this.appBarAutomaticallyImplyLeading,
     required this.appTitle,
@@ -35,7 +36,7 @@ class SectionsScaffold extends StatelessWidget {
     this.actions,
     this.tabController,
     this.bottomWidget,
-  }) {
+  }) : super(key: key) {
     if (appBarAutomaticallyImplyLeading) {
       Assert.holds(appTitlePresentInNarrowMode);
     }
@@ -80,10 +81,10 @@ class SectionsScaffold extends StatelessWidget {
                 // normal title text position. Hopefully this is not too
                 // noticeable. Without PreferredSize the AppBar is just too fat.
                 bottom: PreferredSize(
-                    preferredSize: Size.fromHeight(48.0), child: tabBar),
+                    preferredSize: const Size.fromHeight(48.0), child: tabBar),
               )
             : PreferredSize(
-                preferredSize: Size.fromHeight(48.0),
+                preferredSize: const Size.fromHeight(48.0),
                 child: AppBar(
                   automaticallyImplyLeading: appBarAutomaticallyImplyLeading,
                   flexibleSpace: SafeArea(child: tabBar),
@@ -104,8 +105,8 @@ class SectionsScaffold extends StatelessWidget {
       return tabController != null
           ? scaffold
           : DefaultTabController(
-              child: scaffold,
               length: sections.length,
+              child: scaffold,
             );
     } else {
       // Multi-column view for tablets in landscape mode and desktops.
@@ -114,7 +115,7 @@ class SectionsScaffold extends StatelessWidget {
         boxes.add(
           Expanded(
             child: Padding(
-              padding: EdgeInsets.all(boxMargin),
+              padding: const EdgeInsets.all(boxMargin),
               child: Card(
                 clipBehavior: Clip.antiAlias,
                 child: Column(
@@ -122,7 +123,7 @@ class SectionsScaffold extends StatelessWidget {
                   children: [
                     Container(
                       color: MyTheme.primary,
-                      padding: EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(16.0),
                       child: IconTheme(
                         data: Theme.of(context).primaryIconTheme,
                         child: sections[i].title.icon,
@@ -130,7 +131,7 @@ class SectionsScaffold extends StatelessWidget {
                     ),
                     Expanded(
                       child: Padding(
-                        padding: EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(8),
                         child: sections[i].body,
                       ),
                     ),

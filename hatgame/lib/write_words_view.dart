@@ -62,24 +62,29 @@ class WriteWordsViewController {
   }
 
   void addTextChangedListener(VoidCallback listener) {
-    controllers.forEach((c) => c.textController.addListener(() {
-          final words = getWords();
-          if (latestWords != words) {
-            listener();
-            latestWords = words;
-          }
-        }));
+    for (var c in controllers) {
+      c.textController.addListener(() {
+        final words = getWords();
+        if (latestWords != words) {
+          listener();
+          latestWords = words;
+        }
+      });
+    }
   }
 
   void dispose() {
-    controllers.forEach((c) => c.dispose());
+    for (var c in controllers) {
+      c.dispose();
+    }
   }
 }
 
 class WriteWordsView extends StatefulWidget {
   final LocalGameData localGameData;
 
-  WriteWordsView({required this.localGameData});
+  const WriteWordsView({Key? key, required this.localGameData})
+      : super(key: key);
 
   @override
   createState() => WriteWordsViewState();
@@ -167,7 +172,7 @@ class WriteWordsViewState extends State<WriteWordsView> {
     final bool everybodyReady = viewData.numPlayersReady == viewData.numPlayers;
 
     // Note: keep in sync with offline_player_config_view.dart
-    final listItemPaddingSmallRight = EdgeInsets.fromLTRB(10, 1, 5, 1);
+    const listItemPaddingSmallRight = EdgeInsets.fromLTRB(10, 1, 5, 1);
     final tiles = _viewController!.controllers
         .map(
           (controller) => ListTile(
@@ -186,7 +191,7 @@ class WriteWordsViewState extends State<WriteWordsView> {
                   ),
                 ),
                 IconButton(
-                  icon: ImageAssetIcon('images/dice.png'),
+                  icon: const ImageAssetIcon('images/dice.png'),
                   onPressed: () =>
                       _generateRandomWord(controller.textController),
                   tooltip: tr('generate_a_random_word'),
@@ -206,7 +211,7 @@ class WriteWordsViewState extends State<WriteWordsView> {
         children: [
           Expanded(
             child: Padding(
-              padding: EdgeInsets.all(6.0),
+              padding: const EdgeInsets.all(6.0),
               child: ListView(children: tiles),
             ),
           ),
@@ -225,6 +230,7 @@ class WriteWordsViewState extends State<WriteWordsView> {
                 ? null
                 : () => _showPlayersNotReady(viewData.playersNotReady),
             coloring: WideButtonColoring.secondary,
+            margin: WideButton.bottomButtonMargin,
             // Note: keep text in sync with game_config_view.dart
             child: everybodyReady
                 ? GoNextButtonCaption(tr('next'))
@@ -234,7 +240,6 @@ class WriteWordsViewState extends State<WriteWordsView> {
                       'total': viewData.numPlayers.toString()
                     }),
                   ),
-            margin: WideButton.bottomButtonMargin,
           ),
         ],
       ),

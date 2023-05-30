@@ -9,10 +9,11 @@ class OnlinePlayersConfigView extends StatelessWidget {
   final LocalGameData localGameData;
   final PlayersConfig? playersConfig;
 
-  OnlinePlayersConfigView({
+  const OnlinePlayersConfigView({
+    Key? key,
     required this.localGameData,
     required this.playersConfig,
-  });
+  }) : super(key: key);
 
   static Future<bool> _kickConfimationDialog(BuildContext context,
       {required String playerName}) async {
@@ -56,11 +57,11 @@ class OnlinePlayersConfigView extends StatelessWidget {
                   Expanded(
                     child: Text(e.value),
                   ),
-                  if (_canKick(e.key)) SizedBox(width: 4),
+                  if (_canKick(e.key)) const SizedBox(width: 4),
                   if (_canKick(e.key))
                     IconButton(
                       padding: EdgeInsets.zero,
-                      icon: Icon(Icons.clear),
+                      icon: const Icon(Icons.clear),
                       onPressed: () => _kickPlayer(context,
                           playerID: e.key, playerName: e.value),
                     ),

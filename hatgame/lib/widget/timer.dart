@@ -27,7 +27,7 @@ class _TimerPainter extends CustomPainter {
         ..strokeWidth = 5.0
         ..strokeCap = StrokeCap.butt;
       canvas.drawOval(rect, paint);
-      paint..color = MyColors.black(140);
+      paint.color = MyColors.black(140);
       canvas.drawArc(rect, -pi / 2, progress * 2 * pi, false, paint);
     } else {
       final paint = Paint()
@@ -36,7 +36,7 @@ class _TimerPainter extends CustomPainter {
         ..strokeWidth = 4.0
         ..strokeCap = StrokeCap.butt;
       canvas.drawOval(rect, paint);
-      paint..color = MyTheme.primary;
+      paint.color = MyTheme.primary;
       canvas.drawArc(rect, -pi / 2, progress * 2 * pi, true, paint);
     }
   }
@@ -57,7 +57,7 @@ class TimerView extends StatefulWidget {
   final void Function()? onTimeEnded;
   final void Function(bool)? onRunningChanged;
 
-  TimerView(
+  const TimerView(
       {Key? key,
       required this.style,
       required this.duration,

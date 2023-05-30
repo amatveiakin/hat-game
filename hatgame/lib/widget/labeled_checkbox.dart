@@ -8,12 +8,13 @@ class LabeledCheckbox extends StatelessWidget {
   final ShapeBorder? customInkWellBorder;
 
   const LabeledCheckbox({
+    Key? key,
     required this.value,
     required this.onChanged,
     required this.title,
     this.padding = EdgeInsets.zero,
     this.customInkWellBorder,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

@@ -36,7 +36,7 @@ class WordCollection {
 }
 
 class Lexicon {
-  static final _dictionaries = Map<String, Dictionary>();
+  static final _dictionaries = <String, Dictionary>{};
 
   static Future<void> init() async {
     for (final dictKey in [

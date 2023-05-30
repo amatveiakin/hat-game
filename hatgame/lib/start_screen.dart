@@ -20,6 +20,8 @@ enum _AdditionalAction {
 class StartScreen extends StatefulWidget {
   static const String routeName = '/';
 
+  const StartScreen({Key? key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() => StartScreenState();
 }
@@ -31,21 +33,21 @@ class StartScreenState extends State<StartScreen> {
       builder: (context) => GameConfigView(
         localGameData: localGameData,
       ),
-      settings: RouteSettings(name: GameConfigView.routeName),
+      settings: const RouteSettings(name: GameConfigView.routeName),
     ));
   }
 
   Future<void> _newGameOnline(BuildContext context) async {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (context) => NewGameOnlineScreen(),
-      settings: RouteSettings(name: NewGameOnlineScreen.routeName),
+      settings: const RouteSettings(name: NewGameOnlineScreen.routeName),
     ));
   }
 
   Future<void> _joinGame(BuildContext context) async {
     Navigator.of(context).push(MaterialPageRoute(
       builder: (context) => JoinGameOnlineScreen(),
-      settings: RouteSettings(name: JoinGameOnlineScreen.routeName),
+      settings: const RouteSettings(name: JoinGameOnlineScreen.routeName),
     ));
   }
 
@@ -74,11 +76,11 @@ class StartScreenState extends State<StartScreen> {
         title: Text(tr('hat_game')),
         actions: [
           IconButton(
-            icon: Icon(Icons.settings),
+            icon: const Icon(Icons.settings),
             onPressed: _openSettings,
           ),
           PopupMenuButton(
-            icon: Icon(Icons.more_vert),
+            icon: const Icon(Icons.more_vert),
             itemBuilder: (BuildContext context) => [
               PopupMenuItem<_AdditionalAction>(
                 value: _AdditionalAction.gameRules,
@@ -96,11 +98,11 @@ class StartScreenState extends State<StartScreen> {
       body: Center(
         child: Column(
           children: [
-            SizedBox(height: 6),
+            const SizedBox(height: 6),
             Text(
               tr('app_version', args: [appVersion]),
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 10.0, color: Colors.black45),
+              style: const TextStyle(fontSize: 10.0, color: Colors.black45),
             ),
             Expanded(child: Container()),
             WideButton(
@@ -108,13 +110,13 @@ class StartScreenState extends State<StartScreen> {
               coloring: WideButtonColoring.neutral,
               child: Text(tr('new_local_game')),
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             WideButton(
               onPressed: () => _newGameOnline(context),
               coloring: WideButtonColoring.neutral,
               child: Text(tr('new_game_online')),
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             WideButton(
               onPressed: () => _joinGame(context),
               coloring: WideButtonColoring.neutral,

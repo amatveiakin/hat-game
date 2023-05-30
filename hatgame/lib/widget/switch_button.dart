@@ -13,11 +13,12 @@ class SwitchButton extends StatelessWidget {
   final int selectedOption;
   final void Function(int)? onSelectedOptionChanged;
 
-  SwitchButton({
+  const SwitchButton({
+    Key? key,
     required this.options,
     required this.selectedOption,
     required this.onSelectedOptionChanged,
-  });
+  }) : super(key: key);
 
   static const _height = 48.0;
 
@@ -58,10 +59,10 @@ class SwitchButton extends StatelessWidget {
     return Expanded(
       child: selected
           ? Padding(
-              padding: EdgeInsets.all(1.5),
+              padding: const EdgeInsets.all(1.5),
               child: OutlinedButton(
                 style: ButtonStyle(
-                  side: MaterialStateProperty.all(BorderSide(
+                  side: MaterialStateProperty.all(const BorderSide(
                     color: MyTheme.secondary,
                     width: 3.0,
                   )),
@@ -97,7 +98,7 @@ class SwitchButton extends StatelessWidget {
           ? DecoratedBox(
               decoration: ShapeDecoration(
                 shape: RoundedRectangleBorder(
-                  side: BorderSide(color: MyTheme.secondary),
+                  side: const BorderSide(color: MyTheme.secondary),
                   borderRadius: BorderRadius.circular(3.0),
                 ),
               ),
@@ -129,7 +130,7 @@ class SwitchButton extends StatelessWidget {
     return DecoratedBox(
       decoration: ShapeDecoration(
         shape: RoundedRectangleBorder(
-          side: BorderSide(color: Colors.black12),
+          side: const BorderSide(color: Colors.black12),
           borderRadius: BorderRadius.circular(3.0),
         ),
       ),
