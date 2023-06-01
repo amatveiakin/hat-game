@@ -76,7 +76,7 @@ class _PadlockPainter extends CustomPainter {
 }
 
 class Padlock extends StatefulWidget {
-  final AnimationController? animationController;
+  final AnimationController animationController;
   final void Function() onUnlocked;
 
   const Padlock(
@@ -101,13 +101,14 @@ class PadlockState extends State<Padlock> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _animation =
-        Tween(begin: 0.0, end: 1.0).animate(widget.animationController!)
-          ..addListener(() {
-            setState(() {
-              _animationProgress = _animation.value;
-            });
+    _animation = Tween(begin: 0.0, end: 1.0).animate(widget.animationController)
+      ..addListener(() {
+        if (mounted) {
+          setState(() {
+            _animationProgress = _animation.value;
           });
+        }
+      });
   }
 
   // Use didChangeDependencies instead of initState, because MediaQuery

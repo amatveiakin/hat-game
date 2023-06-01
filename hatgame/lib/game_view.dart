@@ -285,7 +285,7 @@ class PlayAreaState extends State<PlayArea>
   TurnState? get turnState => gameData.turnState;
   LocalGameState get localGameState => widget.localGameState;
 
-  AnimationController? _padlockAnimationController;
+  late AnimationController _padlockAnimationController;
   bool _turnActive = false;
 
   void _unlockStartExplaning() {
@@ -363,7 +363,7 @@ class PlayAreaState extends State<PlayArea>
 
   @override
   void dispose() {
-    _padlockAnimationController!.dispose();
+    _padlockAnimationController.dispose();
     super.dispose();
   }
 
@@ -479,7 +479,7 @@ class PlayAreaState extends State<PlayArea>
                       ? _startExplaning
                       : null,
                   onPressedDisabled: () =>
-                      _padlockAnimationController!.forward(from: 0.0),
+                      _padlockAnimationController.forward(from: 0.0),
                   coloring: WideButtonColoring.secondary,
                   child: Text(
                     tr('start'),
