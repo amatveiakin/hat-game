@@ -86,7 +86,6 @@ class MyApp extends StatelessWidget {
         textTheme: Theme.of(context).textTheme.apply(fontSizeDelta: 2.0),
         colorScheme: ColorScheme.fromSwatch(
           primarySwatch: MyTheme.primary,
-          primaryColorDark: MyTheme.primaryDark,
           accentColor: MyTheme.secondary,
         ),
         indicatorColor: MyTheme.secondary,
