@@ -88,10 +88,6 @@ class MyApp extends StatelessWidget {
           primarySwatch: MyTheme.primary,
           accentColor: MyTheme.secondary,
         ),
-        indicatorColor: MyTheme.secondary,
-        checkboxTheme: CheckboxThemeData(
-          fillColor: MaterialStateProperty.all(MyTheme.secondaryDark),
-        ),
       ),
       title: tr('hat_game'),
       localizationsDelegates: context.localizationDelegates,
