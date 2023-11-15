@@ -12,11 +12,11 @@ Changes to certain aspects of the app require additional recompilation steps:
 
 In order to change anything under `lib/built_value`, run:
 
-    $ flutter pub run build_runner build
+    $ dart run build_runner build
 
 to recompile once, or
 
-    $ flutter pub run build_runner watch
+    $ dart run build_runner watch
 
 to launch a deamon that watches for file changes and recompiles automatically.
 
