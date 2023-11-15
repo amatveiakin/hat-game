@@ -8,11 +8,11 @@ class Collapsible extends StatelessWidget {
   final Widget child;
 
   const Collapsible({
-    Key? key,
+    super.key,
     required this.collapsed,
     required this.onCollapsedChanged,
     required this.child,
-  }) : super(key: key);
+  });
 
   // TODO: Consider adding AnimatedSize.
   @override

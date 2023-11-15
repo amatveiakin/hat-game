@@ -32,7 +32,7 @@ generate words, keep track of time and score.
 ### Playing online
 ''';
 
-  const RulesScreen({Key? key}) : super(key: key);
+  const RulesScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

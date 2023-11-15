@@ -20,7 +20,7 @@ enum _AdditionalAction {
 class StartScreen extends StatefulWidget {
   static const String routeName = '/';
 
-  const StartScreen({Key? key}) : super(key: key);
+  const StartScreen({super.key});
 
   @override
   State<StatefulWidget> createState() => StartScreenState();

@@ -80,8 +80,7 @@ class Padlock extends StatefulWidget {
   final void Function() onUnlocked;
 
   const Padlock(
-      {Key? key, required this.onUnlocked, required this.animationController})
-      : super(key: key);
+      {super.key, required this.onUnlocked, required this.animationController});
 
   @override
   createState() => PadlockState();

@@ -28,7 +28,7 @@ class MultiLineListTile extends StatelessWidget {
   final bool selected;
 
   const MultiLineListTile({
-    Key? key,
+    super.key,
     this.leading,
     this.title,
     this.subtitle,
@@ -39,7 +39,7 @@ class MultiLineListTile extends StatelessWidget {
     this.onTap,
     this.onLongPress,
     this.selected = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +99,7 @@ class MultiLineSwitchListTile extends StatelessWidget {
   final bool selected;
 
   const MultiLineSwitchListTile({
-    Key? key,
+    super.key,
     required this.value,
     required this.onChanged,
     this.activeColor,
@@ -114,7 +114,7 @@ class MultiLineSwitchListTile extends StatelessWidget {
     this.contentPadding,
     this.secondary,
     this.selected = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -181,7 +181,7 @@ class MultiLineCheckboxListTile extends StatelessWidget {
   final bool tristate;
 
   const MultiLineCheckboxListTile({
-    Key? key,
+    super.key,
     required this.value,
     required this.onChanged,
     this.activeColor,
@@ -195,7 +195,7 @@ class MultiLineCheckboxListTile extends StatelessWidget {
     this.autofocus = false,
     this.contentPadding,
     this.tristate = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -257,7 +257,7 @@ class MultiLineRadioListTile<T> extends StatelessWidget {
   final ListTileControlAffinity controlAffinity;
 
   const MultiLineRadioListTile({
-    Key? key,
+    super.key,
     required this.value,
     required this.groupValue,
     required this.onChanged,
@@ -268,7 +268,7 @@ class MultiLineRadioListTile<T> extends StatelessWidget {
     this.secondary,
     this.selected = false,
     this.controlAffinity = ListTileControlAffinity.platform,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

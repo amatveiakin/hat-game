@@ -83,8 +83,7 @@ class WriteWordsViewController {
 class WriteWordsView extends StatefulWidget {
   final LocalGameData localGameData;
 
-  const WriteWordsView({Key? key, required this.localGameData})
-      : super(key: key);
+  const WriteWordsView({super.key, required this.localGameData});
 
   @override
   createState() => WriteWordsViewState();

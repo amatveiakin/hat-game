@@ -3,8 +3,8 @@ import 'package:hatgame/theme.dart';
 
 class StyledDivider extends StatelessWidget {
   const StyledDivider({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,9 +20,9 @@ class ThinDivider extends StatelessWidget {
   final double? height;
 
   const ThinDivider({
-    Key? key,
+    super.key,
     this.height,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -39,10 +39,10 @@ class SectionDivider extends StatelessWidget {
   final bool firstSection;
 
   const SectionDivider({
-    Key? key,
+    super.key,
     required this.title,
     this.firstSection = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -63,8 +63,7 @@ class TeamCompositionsView extends StatelessWidget {
   final GameNavigator navigator =
       GameNavigator(currentPhase: GamePhase.composeTeams);
 
-  TeamCompositionsView({Key? key, required this.localGameData})
-      : super(key: key);
+  TeamCompositionsView({super.key, required this.localGameData});
 
   void _onBackPressed() {
     GameController.discardTeamCompositions(localGameData.gameReference);

@@ -10,10 +10,10 @@ class OnlinePlayersConfigView extends StatelessWidget {
   final PlayersConfig? playersConfig;
 
   const OnlinePlayersConfigView({
-    Key? key,
+    super.key,
     required this.localGameData,
     required this.playersConfig,
-  }) : super(key: key);
+  });
 
   static Future<bool> _kickConfimationDialog(BuildContext context,
       {required String playerName}) async {

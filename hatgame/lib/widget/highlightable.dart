@@ -26,10 +26,10 @@ class Highlightable extends StatefulWidget {
   final HighlightableController controller;
 
   const Highlightable({
-    Key? key,
+    super.key,
     required this.child,
     required this.controller,
-  }) : super(key: key);
+  });
 
   @override
   createState() => _HighlightableState();

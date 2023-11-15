@@ -59,14 +59,14 @@ Future<void> main() async {
       fallbackLocale: const Locale('en'),
       startLocale: language == null ? null : Locale(language),
       path: 'translations',
-      assetLoader: YamlAssetLoader(),
+      assetLoader: const YamlAssetLoader(),
       child: const MyApp(),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   Route<dynamic>? _generateRoute(RouteSettings settings) {
     final joinGameScreen = JoinGameOnlineScreen.fromRoute(settings);

@@ -12,11 +12,11 @@ class OptionSelectorHeader extends StatelessWidget {
   final GestureTapCallback? onTap;
 
   const OptionSelectorHeader({
-    Key? key,
+    super.key,
     required this.title,
     this.subtitle,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -62,12 +62,12 @@ abstract class EnumOptionSelector<E> extends StatefulWidget {
   final Function changeCallback;
 
   const EnumOptionSelector({
-    Key? key,
+    super.key,
     required this.windowTitle,
     required this.allValues,
     required this.initialValue,
     required this.changeCallback,
-  }) : super(key: key);
+  });
 }
 
 class EnumOptionSelectorState<E, W extends EnumOptionSelector>

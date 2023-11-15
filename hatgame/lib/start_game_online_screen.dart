@@ -29,7 +29,7 @@ class NewGameOnlineScreen extends StatefulWidget {
   final playerNameController =
       CheckedTextFieldController(checker: checkPlayerName);
 
-  NewGameOnlineScreen({Key? key}) : super(key: key);
+  NewGameOnlineScreen({super.key});
 
   @override
   State<StatefulWidget> createState() => NewGameOnlineScreenState();
@@ -128,7 +128,7 @@ class JoinGameOnlineScreen extends StatefulWidget {
   final playerNameController =
       CheckedTextFieldController(checker: checkPlayerName);
 
-  JoinGameOnlineScreen({Key? key}) : super(key: key);
+  JoinGameOnlineScreen({super.key});
 
   static JoinGameOnlineScreen? fromRoute(RouteSettings settings) {
     final String? gameID = LocalGameData.parseRoute(settings.name!);

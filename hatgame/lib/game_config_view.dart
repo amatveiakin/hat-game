@@ -25,8 +25,7 @@ class GameConfigView extends StatefulWidget {
 
   final LocalGameData localGameData;
 
-  const GameConfigView({Key? key, required this.localGameData})
-      : super(key: key);
+  const GameConfigView({super.key, required this.localGameData});
 
   @override
   createState() => _GameConfigViewState();

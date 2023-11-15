@@ -36,7 +36,7 @@ App version: $appVersion
 The app is written in Flutter.
 ''';
 
-  const AboutScreen({Key? key}) : super(key: key);
+  const AboutScreen({super.key});
 
   // TODO: Add: acknowledgments:
   //

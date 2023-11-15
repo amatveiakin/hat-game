@@ -9,12 +9,12 @@ class NumericField extends StatelessWidget {
   final String? suffixText;
 
   NumericField({
-    Key? key,
+    super.key,
     required this.readOnly,
     required this.controller,
     required this.goldenValues,
     this.suffixText,
-  }) : super(key: key) {
+  }) {
     Assert.holds(goldenValues.isNotEmpty);
   }
 
@@ -59,11 +59,11 @@ class NumericFieldImpl extends StatefulWidget {
   final String? suffixText;
 
   NumericFieldImpl({
-    Key? key,
+    super.key,
     required this.controller,
     required this.goldenValues,
     this.suffixText,
-  }) : super(key: key) {
+  }) {
     Assert.holds(goldenValues.isNotEmpty);
   }
 

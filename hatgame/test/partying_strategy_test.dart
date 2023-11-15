@@ -13,8 +13,8 @@ import 'package:test/test.dart';
 // TODO: Test all strategies.
 
 class FluidPairsIndividualStrategy_Variant0 extends IndividualStrategyImpl {
-  FluidPairsIndividualStrategy_Variant0(int numPlayers)
-      : super.internal(numPlayers);
+  FluidPairsIndividualStrategy_Variant0(super.numPlayers)
+      : super.internal();
 
   @override
   Party getPartyImpl(int turn) {
@@ -28,8 +28,8 @@ class FluidPairsIndividualStrategy_Variant0 extends IndividualStrategyImpl {
 }
 
 class FluidPairsIndividualStrategy_Variant1 extends IndividualStrategyImpl {
-  FluidPairsIndividualStrategy_Variant1(int numPlayers)
-      : super.internal(numPlayers);
+  FluidPairsIndividualStrategy_Variant1(super.numPlayers)
+      : super.internal();
 
   @override
   Party getPartyImpl(int turn) {
@@ -45,8 +45,8 @@ class FluidPairsIndividualStrategy_Variant1 extends IndividualStrategyImpl {
 }
 
 class FluidPairsIndividualStrategy_Variant2 extends IndividualStrategyImpl {
-  FluidPairsIndividualStrategy_Variant2(int numPlayers)
-      : super.internal(numPlayers);
+  FluidPairsIndividualStrategy_Variant2(super.numPlayers)
+      : super.internal();
 
   @override
   Party getPartyImpl(int turn) {
@@ -62,8 +62,8 @@ class FluidPairsIndividualStrategy_Variant2 extends IndividualStrategyImpl {
 }
 
 class FluidPairsIndividualStrategy_Variant3 extends IndividualStrategyImpl {
-  FluidPairsIndividualStrategy_Variant3(int numPlayers)
-      : super.internal(numPlayers);
+  FluidPairsIndividualStrategy_Variant3(super.numPlayers)
+      : super.internal();
 
   @override
   Party getPartyImpl(int turn) {
@@ -82,8 +82,8 @@ class FluidPairsIndividualStrategy_Variant3 extends IndividualStrategyImpl {
 }
 
 class FluidPairsIndividualStrategy_Variant4 extends IndividualStrategyImpl {
-  FluidPairsIndividualStrategy_Variant4(int numPlayers)
-      : super.internal(numPlayers);
+  FluidPairsIndividualStrategy_Variant4(super.numPlayers)
+      : super.internal();
 
   @override
   Party getPartyImpl(int turn) {

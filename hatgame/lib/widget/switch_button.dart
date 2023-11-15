@@ -14,11 +14,11 @@ class SwitchButton extends StatelessWidget {
   final void Function(int)? onSelectedOptionChanged;
 
   const SwitchButton({
-    Key? key,
+    super.key,
     required this.options,
     required this.selectedOption,
     required this.onSelectedOptionChanged,
-  }) : super(key: key);
+  });
 
   static const _height = 48.0;
 

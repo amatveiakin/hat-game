@@ -187,7 +187,7 @@ class ScoreView extends StatelessWidget {
   final GameNavigator navigator =
       GameNavigator(currentPhase: GamePhase.gameOver);
 
-  ScoreView({Key? key, required this.localGameData}) : super(key: key);
+  ScoreView({super.key, required this.localGameData});
 
   void _rematch(BuildContext context, DBDocumentSnapshot snapshot) async {
     try {

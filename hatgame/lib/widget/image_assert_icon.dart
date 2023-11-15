@@ -6,9 +6,9 @@ class ImageAssetIcon extends StatelessWidget {
 
   const ImageAssetIcon(
     this.name, {
-    Key? key,
+    super.key,
     this.color,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

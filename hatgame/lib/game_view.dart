@@ -28,8 +28,7 @@ class PartyView extends StatelessWidget {
   final TurnPhase turnPhase;
   final int? myPlayerID;
 
-  const PartyView(this.party, this.turnPhase, this.myPlayerID, {Key? key})
-      : super(key: key);
+  const PartyView(this.party, this.turnPhase, this.myPlayerID, {super.key});
 
   Widget _playerView(PlayerViewData playerData) {
     Widget textWidget = Text(playerData.name!);
@@ -143,15 +142,14 @@ class WordReviewItem extends StatelessWidget {
   final void Function(bool)? setFlag;
 
   const WordReviewItem(
-      {Key? key,
+      {super.key,
       required this.text,
       required this.status,
       required this.feedback,
       this.hasFlag = false,
       required this.setStatus,
       required this.setFeedback,
-      required this.setFlag})
-      : super(key: key);
+      required this.setFlag});
 
   @override
   Widget build(BuildContext context) {
@@ -265,12 +263,12 @@ class PlayArea extends StatefulWidget {
   final LocalGameState localGameState;
 
   const PlayArea({
-    Key? key,
+    super.key,
     required this.localGameData,
     required this.gameController,
     required this.gameData,
     required this.localGameState,
-  }) : super(key: key);
+  });
 
   @override
   State<StatefulWidget> createState() => PlayAreaState();
@@ -581,7 +579,7 @@ class PlayAreaState extends State<PlayArea>
 class GameView extends StatefulWidget {
   final LocalGameData localGameData;
 
-  const GameView({Key? key, required this.localGameData}) : super(key: key);
+  const GameView({super.key, required this.localGameData});
 
   @override
   State<StatefulWidget> createState() => GameViewState();

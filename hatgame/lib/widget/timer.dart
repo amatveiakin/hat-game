@@ -58,15 +58,14 @@ class TimerView extends StatefulWidget {
   final void Function(bool)? onRunningChanged;
 
   const TimerView(
-      {Key? key,
+      {super.key,
       required this.style,
       required this.duration,
       this.startTime = Duration.zero,
       this.startPaused = false,
       this.hideOnTimeEnded = false,
       this.onTimeEnded,
-      this.onRunningChanged})
-      : super(key: key);
+      this.onRunningChanged});
 
   @override
   createState() => _TimerViewState();

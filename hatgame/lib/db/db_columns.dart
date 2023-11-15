@@ -177,7 +177,7 @@ class DBColInitialState extends DBColumn<InitialGameState>
 class DBColTurnRecord extends DBColumnFamily<TurnRecord>
     with DBColSerializeBuiltValue {
   static const String prefix = 'turn-';
-  DBColTurnRecord(int id) : super(id);
+  DBColTurnRecord(super.id);
   @override
   String get name => '$prefix$id';
 }
@@ -196,7 +196,7 @@ class DBColCurrentTurn extends DBColumn<TurnState?>
 class DBColPlayer extends DBColumnFamily<PersonalState>
     with DBColSerializeBuiltValue {
   static const String prefix = 'player-';
-  DBColPlayer(int id) : super(id);
+  DBColPlayer(super.id);
   @override
   String get name => '$prefix$id';
 }

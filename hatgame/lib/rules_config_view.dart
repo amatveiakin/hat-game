@@ -53,12 +53,12 @@ class RulesConfigView extends StatefulWidget {
   final GameConfigController configController;
 
   const RulesConfigView({
-    Key? key,
+    super.key,
     required this.onlineMode,
     required this.viewController,
     required this.config,
     required this.configController,
-  }) : super(key: key);
+  });
 
   @override
   State<StatefulWidget> createState() => RulesConfigViewState();

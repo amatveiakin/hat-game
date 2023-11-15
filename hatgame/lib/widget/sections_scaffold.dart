@@ -27,7 +27,7 @@ class SectionsScaffold extends StatelessWidget {
   final Widget? bottomWidget;
 
   SectionsScaffold({
-    Key? key,
+    super.key,
     this.scaffoldKey,
     required this.appBarAutomaticallyImplyLeading,
     required this.appTitle,
@@ -36,7 +36,7 @@ class SectionsScaffold extends StatelessWidget {
     this.actions,
     this.tabController,
     this.bottomWidget,
-  }) : super(key: key) {
+  }) {
     if (appBarAutomaticallyImplyLeading) {
       Assert.holds(appTitlePresentInNarrowMode);
     }

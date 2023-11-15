@@ -18,12 +18,11 @@ class OfflinePlayersConfigView extends StatefulWidget {
   final GameConfigController configController;
 
   OfflinePlayersConfigView(
-      {Key? key,
+      {super.key,
       required teamingConfig,
       required this.initialPlayersConfig,
       required this.configController})
-      : manualTeams = _manualTeams(teamingConfig),
-        super(key: key);
+      : manualTeams = _manualTeams(teamingConfig);
 
   @override
   createState() => _OfflinePlayersConfigViewState();

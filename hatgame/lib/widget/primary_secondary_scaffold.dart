@@ -13,7 +13,7 @@ class PrimarySecondaryScaffold extends StatefulWidget {
   final Widget secondaryIcon;
 
   const PrimarySecondaryScaffold({
-    Key? key,
+    super.key,
     required this.primaryAutomaticallyImplyLeading,
     required this.primary,
     required this.primaryTitle,
@@ -21,7 +21,7 @@ class PrimarySecondaryScaffold extends StatefulWidget {
     required this.secondary,
     required this.secondaryTitle,
     required this.secondaryIcon,
-  }) : super(key: key);
+  });
 
   @override
   State<StatefulWidget> createState() => _PrimarySecondaryScaffoldState();

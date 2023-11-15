@@ -5,7 +5,7 @@ import 'package:hatgame/util/colors.dart';
 class GoNextButtonCaption extends StatelessWidget {
   final String text;
 
-  const GoNextButtonCaption(this.text, {Key? key}) : super(key: key);
+  const GoNextButtonCaption(this.text, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +24,9 @@ class WideWidget extends StatelessWidget {
   final Widget child;
 
   const WideWidget({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -50,13 +50,13 @@ class WideButton extends StatelessWidget {
   final EdgeInsets margin;
 
   const WideButton({
-    Key? key,
+    super.key,
     required this.child,
     required this.coloring,
     required this.onPressed,
     this.onPressedDisabled,
     this.margin = EdgeInsets.zero,
-  }) : super(key: key);
+  });
 
   static MaterialStateProperty<Color> _getBackgroundColor(Color color) {
     return MaterialStateProperty.resolveWith((states) =>

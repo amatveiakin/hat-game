@@ -163,7 +163,7 @@ abstract class IndividualStrategyImpl {
 }
 
 class ChainIndividualStrategy extends IndividualStrategyImpl {
-  ChainIndividualStrategy(int numPlayers) : super.internal(numPlayers);
+  ChainIndividualStrategy(super.numPlayers) : super.internal();
 
   @override
   Party getPartyImpl(int turn) {
@@ -176,7 +176,7 @@ class ChainIndividualStrategy extends IndividualStrategyImpl {
 }
 
 class FluidPairsIndividualStrategy extends IndividualStrategyImpl {
-  FluidPairsIndividualStrategy(int numPlayers) : super.internal(numPlayers);
+  FluidPairsIndividualStrategy(super.numPlayers) : super.internal();
 
   @override
   Party getPartyImpl(int turn) {
@@ -196,7 +196,7 @@ class FluidPairsIndividualStrategy extends IndividualStrategyImpl {
 }
 
 class BroadcastIndividualStrategy extends IndividualStrategyImpl {
-  BroadcastIndividualStrategy(int numPlayers) : super.internal(numPlayers);
+  BroadcastIndividualStrategy(super.numPlayers) : super.internal();
 
   @override
   Party getPartyImpl(int turn) {
