@@ -28,14 +28,14 @@ class Sounds {
       maxStreams: 4,
     );
     _soundpool = Soundpool.fromOptions(options: options);
-    timeOver = await _load('sounds/time_over.ogg');
-    bonusTimeOver = await _load('sounds/bonus_time_over.ogg');
+    timeOver = await _load('sounds/time_over.flac');
+    bonusTimeOver = await _load('sounds/bonus_time_over.flac');
     wordGuessedCombo = [
-      await _load('sounds/word_guessed_combo0.ogg'),
-      await _load('sounds/word_guessed_combo1.ogg'),
-      await _load('sounds/word_guessed_combo2.ogg'),
-      await _load('sounds/word_guessed_combo3.ogg'),
-      await _load('sounds/word_guessed_combo4.ogg'),
+      await _load('sounds/word_guessed_combo0.flac'),
+      await _load('sounds/word_guessed_combo1.flac'),
+      await _load('sounds/word_guessed_combo2.flac'),
+      await _load('sounds/word_guessed_combo3.flac'),
+      await _load('sounds/word_guessed_combo4.flac'),
     ];
   }
 
