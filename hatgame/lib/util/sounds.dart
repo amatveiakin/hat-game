@@ -3,17 +3,18 @@ import 'package:flutter/services.dart';
 import 'package:soundpool/soundpool.dart';
 
 class Sounds {
-  static late Soundpool _soundpool;
+  static Soundpool? _soundpool;
 
-  static late int timeOver;
-  static late int bonusTimeOver;
-  static late List<int> wordGuessedCombo;
+  static int timeOver = -1;
+  static int bonusTimeOver = -1;
+  static List<int> wordGuessedCombo = [-1];
 
   static Future<void> init() async {
     try {
       await _initImpl().timeout(const Duration(seconds: 3));
       debugPrint('Sounds loaded successfully.');
     } catch (e) {
+      _soundpool = null;
       // TODO: Firebase log.
       debugPrint("Couldn't initialize sounds!");
       debugPrint('The error was: $e');
@@ -39,11 +40,11 @@ class Sounds {
   }
 
   static void play(int sound) async {
-    await _soundpool.play(sound);
+    await _soundpool?.play(sound);
   }
 
   static Future<int> _load(String path) async {
     final asset = await rootBundle.load(path);
-    return await _soundpool.load(asset);
+    return await _soundpool!.load(asset);
   }
 }
