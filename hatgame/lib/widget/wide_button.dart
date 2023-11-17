@@ -63,6 +63,13 @@ class WideButton extends StatelessWidget {
         states.contains(MaterialState.disabled) ? toGrey(color) : color);
   }
 
+  static MaterialStateProperty<Color> _getForegroundColor(Color color) {
+    return MaterialStateProperty.resolveWith((states) =>
+        states.contains(MaterialState.disabled)
+            ? toGrey(color).withAlpha(0xa0)
+            : color);
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -71,13 +78,12 @@ class WideButton extends StatelessWidget {
       case WideButtonColoring.neutral:
         colorStyle = ButtonStyle(
             backgroundColor: _getBackgroundColor(MyTheme.primary[100]!),
-            foregroundColor: MaterialStateProperty.all(Colors.black));
+            foregroundColor: _getForegroundColor(Colors.black));
         break;
       case WideButtonColoring.secondary:
         colorStyle = ButtonStyle(
             backgroundColor: _getBackgroundColor(colorScheme.secondary),
-            foregroundColor:
-                MaterialStateProperty.all(colorScheme.onSecondary));
+            foregroundColor: _getForegroundColor(colorScheme.onSecondary));
         break;
     }
     return Padding(
