@@ -30,6 +30,16 @@ class RussianWord extends Word {
   }
 }
 
+class Blacklist {
+  final List<RegExp> banned;
+
+  Blacklist(this.banned);
+
+  bool isBanned(String word) {
+    return banned.any((r) => r.hasMatch(word));
+  }
+}
+
 class FreqrncRec {
   final String text;
   final String pos;
@@ -39,6 +49,16 @@ class FreqrncRec {
   final int doc; // (0 - ∞)
 
   FreqrncRec(this.text, this.pos, this.ipm, this.r, this.d, this.doc);
+}
+
+Blacklist parseBlacklist(final String filename) {
+  final List<String> lines = File(filename).readAsLinesSync();
+  final banned = lines
+      .map((l) => l.trim())
+      .where((l) => !l.isEmpty && !l.startsWith('#'))
+      .map((l) => RegExp('^${l}\$'))
+      .toList();
+  return Blacklist(banned);
 }
 
 FreqrncRec parseFreqrncRec(final String line) {
@@ -86,8 +106,10 @@ RussianWord makeWord(FreqrncRec rec) {
 }
 
 // Parser for http://dict.ruslang.ru/freq.php
-Future<void> makeRussianDictionaries(String filename) async {
-  final List<String> lines = File(filename).readAsLinesSync();
+Future<void> makeRussianDictionaries(
+    String freqrncFilename, String blacklistFilename) async {
+  final blacklist = parseBlacklist(blacklistFilename);
+  final List<String> lines = File(freqrncFilename).readAsLinesSync();
   lines.removeAt(0); // skip header
 
   const int numBuckets = 4;
@@ -96,6 +118,9 @@ Future<void> makeRussianDictionaries(String filename) async {
     final FreqrncRec rec = parseFreqrncRec(line);
     if (rec.pos != 's') {
       continue; // skip everything except common nouns
+    }
+    if (blacklist.isBanned(rec.text)) {
+      continue;
     }
     final RussianWord word = makeWord(rec);
     int bucket = word.difficulty > 10.0

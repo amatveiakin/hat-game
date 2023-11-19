@@ -5,8 +5,8 @@ import 'russian.dart';
 
 Never wrongUsage() {
   stderr.write('Usage:\n'
-      '  <app>  en  <google-10000-english-no-swears.txt>  <index.noun>  <nounlist>\n'
-      '  <app>  ru  <freqrnc2011.csv>\n');
+      '  <app> en <google-10000-english-no-swears.txt> <index.noun> <nounlist>\n'
+      '  <app> ru <freqrnc2011.csv> <blacklist.txt>\n');
   exit(1);
 }
 
@@ -22,10 +22,10 @@ Future<void> main(List<String> arguments) async {
     }
     await makeEnglishDictionaries(arguments[1], arguments[2], arguments[3]);
   } else if (language == 'ru') {
-    if (arguments.length != 2) {
+    if (arguments.length != 3) {
       wrongUsage();
     }
-    await makeRussianDictionaries(arguments[1]);
+    await makeRussianDictionaries(arguments[1], arguments[2]);
   } else {
     wrongUsage();
   }

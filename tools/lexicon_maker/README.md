@@ -1,4 +1,5 @@
-A simple command-line application.
+From `hatgame/lexicon` folder:
 
-Created from templates made available by Stagehand under a BSD-style
-[license](https://github.com/dart-lang/stagehand/blob/master/LICENSE).
+```
+dart run ../../tools/lexicon_maker/bin/main.dart ru ../../warehouse/lexicon/ru/freqrnc2011.csv ../../warehouse/lexicon/ru/blacklist.txt
+```
