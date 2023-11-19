@@ -51,6 +51,16 @@ class FreqrncRec {
   FreqrncRec(this.text, this.pos, this.ipm, this.r, this.d, this.doc);
 }
 
+String? swapSuffixes(String s, String suffix1, String suffix2) {
+  if (s.endsWith(suffix1)) {
+    return s.replaceRange(s.length - suffix1.length, s.length, suffix2);
+  } else if (s.endsWith(suffix2)) {
+    return s.replaceRange(s.length - suffix2.length, s.length, suffix1);
+  } else {
+    return null;
+  }
+}
+
 Blacklist parseBlacklist(final String filename) {
   final List<String> lines = File(filename).readAsLinesSync();
   final banned = lines
@@ -112,8 +122,8 @@ Future<void> makeRussianDictionaries(
   final List<String> lines = File(freqrncFilename).readAsLinesSync();
   lines.removeAt(0); // skip header
 
-  const int numBuckets = 4;
-  final buckets = List<List<RussianWord>>.generate(numBuckets, (_) => []);
+  final List<FreqrncRec> records = [];
+  final Map<String, double> wordFreq = {};
   for (final String line in lines) {
     final FreqrncRec rec = parseFreqrncRec(line);
     if (rec.pos != 's') {
@@ -122,6 +132,25 @@ Future<void> makeRussianDictionaries(
     if (blacklist.isBanned(rec.text)) {
       continue;
     }
+    records.add(rec);
+    wordFreq[rec.text] = rec.ipm;
+  }
+
+  records.retainWhere((rec) {
+    final altSpelling = swapSuffixes(rec.text, 'ие', 'ье');
+    if (altSpelling == null) {
+      return true;
+    }
+    final altFreq = wordFreq[altSpelling];
+    if (altFreq == null) {
+      return true;
+    }
+    return rec.ipm >= altFreq;
+  });
+
+  const int numBuckets = 4;
+  final buckets = List<List<RussianWord>>.generate(numBuckets, (_) => []);
+  for (final rec in records) {
     final RussianWord word = makeWord(rec);
     int bucket = word.difficulty > 10.0
         ? 3
