@@ -66,7 +66,7 @@ Blacklist parseBlacklist(final String filename) {
   final banned = lines
       .map((l) => l.trim())
       .where((l) => !l.isEmpty && !l.startsWith('#'))
-      .map((l) => RegExp('^${l}\$'))
+      .map((l) => RegExp('^(?:${l})\$'))
       .toList();
   return Blacklist(banned);
 }

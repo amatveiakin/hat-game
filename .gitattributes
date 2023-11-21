@@ -3,3 +3,6 @@
 
 *.svg text eol=lf
 *.sh text eol=lf
+
+# Generated lexicon files use unix-style line endings.
+*.yaml text eol=lf
