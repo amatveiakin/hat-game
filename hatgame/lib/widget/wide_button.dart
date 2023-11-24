@@ -77,7 +77,7 @@ class WideButton extends StatelessWidget {
     switch (coloring) {
       case WideButtonColoring.neutral:
         colorStyle = ButtonStyle(
-            backgroundColor: _getBackgroundColor(MyTheme.primary[100]!),
+            backgroundColor: _getBackgroundColor(MyTheme.primaryPale),
             foregroundColor: _getForegroundColor(Colors.black));
         break;
       case WideButtonColoring.secondary:
