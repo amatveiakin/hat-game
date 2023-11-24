@@ -43,6 +43,7 @@ class Lexicon {
       'russian_easy',
       'russian_medium',
       'russian_hard',
+      'russian_neo',
       'english_easy',
       'english_medium',
       'english_hard',
