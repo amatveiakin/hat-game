@@ -22,21 +22,21 @@ class _TimerPainter extends CustomPainter {
     final rect = Offset.zero & size;
     if (style == TimerViewStyle.turnTime) {
       final paint = Paint()
-        ..color = MyColors.black(220)
+        ..color = MyColors.grey(220)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 5.0
         ..strokeCap = StrokeCap.butt;
       canvas.drawOval(rect, paint);
-      paint.color = MyColors.black(140);
+      paint.color = MyColors.grey(140);
       canvas.drawArc(rect, -pi / 2, progress * 2 * pi, false, paint);
     } else {
       final paint = Paint()
-        ..color = MyTheme.primary.withOpacity(0.7)
+        ..color = MyTheme.secondary.withOpacity(0.6)
         ..style = PaintingStyle.fill
         ..strokeWidth = 4.0
         ..strokeCap = StrokeCap.butt;
       canvas.drawOval(rect, paint);
-      paint.color = MyTheme.primary;
+      paint.color = MyTheme.secondary;
       canvas.drawArc(rect, -pi / 2, progress * 2 * pi, true, paint);
     }
   }
@@ -162,8 +162,8 @@ class _TimerViewState extends State<TimerView>
                           fontSize:
                               style == TimerViewStyle.turnTime ? 42.0 : 32.0,
                           color: style == TimerViewStyle.turnTime
-                              ? MyColors.black(140)
-                              : MyColors.black(220),
+                              ? MyColors.grey(140)
+                              : MyColors.grey(40),
                         ),
                       ),
                       if (_canPause())
