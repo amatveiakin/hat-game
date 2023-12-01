@@ -140,7 +140,9 @@ class WriteWordsViewState extends State<WriteWordsView> {
       await GameController.updateTeamCompositions(
           localGameData.gameReference, gameConfig);
     } on InvalidOperation catch (e) {
-      showInvalidOperationDialog(context: context, error: e);
+      if (context.mounted) {
+        showInvalidOperationDialog(context: context, error: e);
+      }
     }
   }
 

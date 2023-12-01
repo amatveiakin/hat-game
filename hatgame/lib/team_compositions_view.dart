@@ -80,7 +80,9 @@ class TeamCompositionsView extends StatelessWidget {
     try {
       await GameController.startGame(localGameData, snapshot);
     } on InvalidOperation catch (e) {
-      showInvalidOperationDialog(context: context, error: e);
+      if (context.mounted) {
+        showInvalidOperationDialog(context: context, error: e);
+      }
     }
   }
 

@@ -55,13 +55,17 @@ class NewGameOnlineScreenState extends State<NewGameOnlineScreen> {
       localGameData = await GameController.newLobby(
           FirebaseFirestore.instance, playerNameController.textController.text);
     } on InvalidOperation catch (e) {
-      showInvalidOperationDialog(context: context, error: e);
+      if (context.mounted) {
+        showInvalidOperationDialog(context: context, error: e);
+      }
       return;
     }
-    // Work around: text field `onSubmitted` triggered on focus lost on web.
-    navigatedToGame = true;
-    await GameNavigator.navigateToGame(
-        context: context, localGameData: localGameData);
+    if (context.mounted) {
+      // Work around: text field `onSubmitted` triggered on focus lost on web.
+      navigatedToGame = true;
+      await GameNavigator.navigateToGame(
+          context: context, localGameData: localGameData);
+    }
   }
 
   @override
@@ -185,7 +189,9 @@ class JoinGameOnlineScreenState extends State<JoinGameOnlineScreen> {
           playerName,
           gameIDController.textController.text);
     } on InvalidOperation catch (e) {
-      showInvalidOperationDialog(context: context, error: e);
+      if (context.mounted) {
+        showInvalidOperationDialog(context: context, error: e);
+      }
       if (e.tag<JoinGameErrorSource>() == JoinGameErrorSource.playerName) {
         playerNameController.focusNode.requestFocus();
       } else {

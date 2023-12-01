@@ -48,13 +48,15 @@ class GameNavigator {
   }) async {
     final snapshot = await localGameData.gameReference.get();
     final gamePhase = GamePhaseReader.fromSnapshot(localGameData, snapshot);
-    _navigateTo(
-      context: context,
-      localGameData: localGameData,
-      snapshot: snapshot,
-      oldPhase: null,
-      newPhase: gamePhase,
-    );
+    if (context.mounted) {
+      _navigateTo(
+        context: context,
+        localGameData: localGameData,
+        snapshot: snapshot,
+        oldPhase: null,
+        newPhase: gamePhase,
+      );
+    }
   }
 
   Widget buildWrapper({
@@ -333,7 +335,9 @@ class GameNavigator {
         break;
       case _PopResponse.exitGame:
         localGameData.navigationState.exitingGame = true;
-        Navigator.of(context).popUntil(ModalRoute.withName('/'));
+        if (context.mounted) {
+          Navigator.of(context).popUntil(ModalRoute.withName('/'));
+        }
         break;
     }
     return false;

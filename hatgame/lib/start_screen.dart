@@ -29,12 +29,14 @@ class StartScreen extends StatefulWidget {
 class StartScreenState extends State<StartScreen> {
   Future<void> _newGameOffline(BuildContext context) async {
     LocalGameData localGameData = await GameController.newGameOffine();
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (context) => GameConfigView(
-        localGameData: localGameData,
-      ),
-      settings: const RouteSettings(name: GameConfigView.routeName),
-    ));
+    if (context.mounted) {
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => GameConfigView(
+          localGameData: localGameData,
+        ),
+        settings: const RouteSettings(name: GameConfigView.routeName),
+      ));
+    }
   }
 
   Future<void> _newGameOnline(BuildContext context) async {

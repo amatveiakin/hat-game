@@ -193,7 +193,9 @@ class ScoreView extends StatelessWidget {
     try {
       await GameController.rematch(localGameData, snapshot);
     } on InvalidOperation catch (e) {
-      showInvalidOperationDialog(context: context, error: e);
+      if (context.mounted) {
+        showInvalidOperationDialog(context: context, error: e);
+      }
     }
   }
 
