@@ -316,7 +316,7 @@ class GameController {
       onlineMode: false,
       gameID: gameID,
       gameReference: localGameReference(gameID: gameID),
-      myPlayerID: 0,
+      myPlayerID: null,
     );
   }
 
@@ -676,7 +676,7 @@ class GameController {
     final Iterable<PersonalState> playerStates =
         _parsePersonalStates(snapshot).values;
     return WordWritingViewData(
-      playerState: snapshot.get(DBColPlayer(localGameData.myPlayerID)),
+      playerState: snapshot.get(DBColPlayer(localGameData.myPlayerID!)),
       numPlayers: playerStates.length,
       numPlayersReady:
           playerStates.where((p) => (p.wordsReady ?? false)).length,
@@ -690,7 +690,7 @@ class GameController {
   static Future<void> updatePersonalState(
       LocalGameData localGameData, PersonalState newState) {
     final DBColumn column = localGameData.onlineMode
-        ? DBColPlayer(localGameData.myPlayerID)
+        ? DBColPlayer(localGameData.myPlayerID!)
         : DBColLocalPlayer();
     return localGameData.gameReference.updateColumns([
       column.withData(newState),

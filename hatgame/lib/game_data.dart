@@ -16,7 +16,7 @@ class LocalGameData {
   final bool onlineMode;
   final String gameID;
   final DBDocumentReference gameReference;
-  final int myPlayerID;
+  final int? myPlayerID; // online-only
   final navigationState = NavigationState();
 
   bool get isAdmin => !onlineMode || myPlayerID == 0;

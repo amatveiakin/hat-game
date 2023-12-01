@@ -20,9 +20,9 @@ class GamePhaseReader {
 
   static GamePhase _getPhase(DBDocumentSnapshot snapshot,
       {LocalGameData? localGameData}) {
-    if (localGameData != null) {
+    if (localGameData != null && localGameData.onlineMode) {
       final personalState =
-          snapshot.tryGet(DBColPlayer(localGameData.myPlayerID));
+          snapshot.tryGet(DBColPlayer(localGameData.myPlayerID!));
       if (personalState?.kicked ?? false) {
         return GamePhase.kicked;
       }

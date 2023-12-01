@@ -19,8 +19,8 @@ class GameConfigController {
 
   bool get isReadOnly => !localGameData.isAdmin;
 
-  bool get isInitialized =>
-      (playerStates == null || playerStates!.length > localGameData.myPlayerID);
+  bool get isInitialized => (playerStates == null ||
+      playerStates!.length > localGameData.myPlayerID!);
 
   static GameConfig defaultConfig() {
     return GameConfig(
