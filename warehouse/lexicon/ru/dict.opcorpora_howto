@@ -1,0 +1,2 @@
+rg \"NOUN\" dict.opcorpora.xml > nouns.txt
+rg -v \"Name|Surn|Patr|Sgtm|Pltm|Orgn|Geox|Abbr\" nouns.xml > common_nouns.xml

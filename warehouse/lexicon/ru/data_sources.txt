@@ -1,0 +1,3 @@
+freqrnc2011.csv: http://dict.ruslang.ru/freq.php
+dict.opcorpora.xml.bz2: http://opencorpora.org/?page=downloads, “Морфологический словарь”
+unigrams.cyr.lc: http://opencorpora.org/?page=downloads, “Частотные списки”
