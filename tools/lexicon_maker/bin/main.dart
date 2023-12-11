@@ -5,7 +5,7 @@ import 'russian.dart';
 
 Never wrongUsage() {
   stderr.write('Usage:\n'
-      '  <app> en <google-10000-english-no-swears.txt> <index.noun> <nounlist>\n'
+      '  <app> en <google-10000-english-no-swears.txt> <data.noun> <nounlist>\n'
       '  <app> ru <freqrnc2011.csv> <blacklist.txt>\n');
   exit(1);
 }

@@ -29,25 +29,27 @@ class EnglishWord extends Word {
   }
 }
 
-final vowelRegexp = RegExp('(a|e|i|o|u|y)');
+final vowelRegexp = RegExp('[aeiouy]');
+final nounDataRegexp = RegExp('^[0-9]+ \\w{2} n \\w{2} (\\S+)');
+final wordRegexp = RegExp('^[A-Za-z]+\$');
+final lowercaseWordRegexp = RegExp('^[a-z]+\$');
 
-String? parseNounIndex(final String line) {
-  final String phrase = line.split(' ').first;
-  final List<String> words = phrase.split('_');
-  if (words.length != 1) {
+String? parseNounData(final String line) {
+  if (line.startsWith(' ')) {
+    // Skip header.
     return null;
   }
-  final String word = words.first;
-  if (word.toLowerCase() != word) {
+  final match = nounDataRegexp.firstMatch(line);
+  assert(match != null, 'Failed to parse line:\n$line');
+  final text = match![1]!;
+  if (!lowercaseWordRegexp.hasMatch(text)) {
     return null;
   }
-  return word;
+  return text;
 }
 
 String? parseSimple(final String line) {
-  assert(!line.contains(' '));
-  assert(!line.contains('_'));
-  if (line.toLowerCase() != line) {
+  if (!lowercaseWordRegexp.hasMatch(line)) {
     return null;
   }
   return line;
@@ -69,7 +71,6 @@ EnglishWord? makeWord(
   if (!hasVowels) {
     return null;
   }
-  // TODO: Filter out proper nouns.
 
   final int rawRank = wordRanks[text] ?? 15000;
   final int nounListInc = frequentNouns.contains(text) ? 0 : 3000;
@@ -86,23 +87,22 @@ EnglishWord? makeWord(
 
 // Sources:
 //   freqFilename: https://github.com/first20hours/google-10000-english
-//   nounIndexFilename: https://wordnet.princeton.edu/download -> index.noun
+//   nounIndexFilename: https://wordnet.princeton.edu/download > data.noun
 //   nounListFilename http://www.desiquintans.com/nounlist
 Future<void> makeEnglishDictionaries(String freqFilename,
-    String nounIndexFilename, String nounListFilename) async {
+    String nounDataFilename, String nounListFilename) async {
   final List<String> freqLines = File(freqFilename).readAsLinesSync();
-  final List<String> nounIndexLines = File(nounIndexFilename).readAsLinesSync();
+  final List<String> nounDataLines = File(nounDataFilename).readAsLinesSync();
   final List<String> nounListLines = File(nounListFilename).readAsLinesSync();
-  nounIndexLines.removeAt(29); // skip header
 
   const int numBuckets = 4;
   final buckets = List<List<EnglishWord>>.generate(numBuckets, (_) => []);
 
-  final allNouns = Set<String>();
-  for (final String line in nounIndexLines) {
-    final t = parseNounIndex(line);
+  final commonNouns = Set<String>();
+  for (final String line in nounDataLines) {
+    final t = parseNounData(line);
     if (t != null) {
-      allNouns.add(t);
+      commonNouns.add(t);
     }
   }
 
@@ -115,7 +115,7 @@ Future<void> makeEnglishDictionaries(String freqFilename,
   }
 
   // Sanity check to verify that argument order is right.
-  assert(allNouns.length > frequentNouns.length);
+  assert(commonNouns.length > frequentNouns.length);
 
   final wordRanks = Map<String, int>();
   {
@@ -130,7 +130,9 @@ Future<void> makeEnglishDictionaries(String freqFilename,
   final candidates = frequentNouns.union(Set.of(wordRanks.keys));
   for (final text in candidates) {
     final word = makeWord(text,
-        allNouns: allNouns, frequentNouns: frequentNouns, wordRanks: wordRanks);
+        allNouns: commonNouns,
+        frequentNouns: frequentNouns,
+        wordRanks: wordRanks);
     if (word == null) {
       continue;
     }
