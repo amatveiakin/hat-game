@@ -3,6 +3,14 @@ import 'dart:math';
 
 import 'common.dart';
 
+String? removeSuffix(String s, String suffix) {
+  if (s.endsWith(suffix)) {
+    return s.replaceRange(s.length - suffix.length, s.length, '');
+  } else {
+    return null;
+  }
+}
+
 class EnglishWord extends Word {
   final int rawRank;
   final int nounListInc;
@@ -128,14 +136,29 @@ Future<void> makeEnglishDictionaries(String freqFilename,
   }
 
   final candidates = frequentNouns.union(Set.of(wordRanks.keys));
-  for (final text in candidates) {
-    final word = makeWord(text,
-        allNouns: commonNouns,
-        frequentNouns: frequentNouns,
-        wordRanks: wordRanks);
-    if (word == null) {
-      continue;
+  final words = candidates
+      .map((text) => makeWord(text,
+          allNouns: commonNouns,
+          frequentNouns: frequentNouns,
+          wordRanks: wordRanks))
+      .where((w) => w != null)
+      .map((w) => w!)
+      .toList();
+  final wordsSet = words.map((w) => w.text).toSet();
+  words.removeWhere((w) {
+    // TODO: Check manually. Some of the plural forms make more sense than the
+    // singular.
+    final singular = removeSuffix(w.text, 's');
+    if (singular != null) {
+      if (w.text.endsWith('ss')) {
+        // Probably not a plural after all.
+      } else {
+        return wordsSet.contains(singular);
+      }
     }
+    return false;
+  });
+  for (final word in words) {
     final int rank = word.scoreRank;
     final int bucket = rank > 17000
         ? 3
