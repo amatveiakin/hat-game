@@ -78,7 +78,8 @@ class Lexicon {
         : existingDicts.toList();
   }
 
-  static WordCollection wordCollection(Iterable<String> dictionaries) {
+  static WordCollection wordCollection(
+      Iterable<String> dictionaries, bool pluralias) {
     Assert.holds(dictionaries.isNotEmpty);
     final List<String> words = [];
     for (final dictKey in dictionaries) {
@@ -89,13 +90,33 @@ class Lexicon {
       words.addAll(_dictionaries[dictKey]!.words);
     }
     Assert.holds(words.isNotEmpty, lazyMessage: () => dictionaries.toString());
-    return WordCollection(words);
+    if (pluralias) {
+      const minIntersectionLength = 2;
+      final Map<String, List<String>> prefixToWords = {};
+      for (final w in words) {
+        for (int i = minIntersectionLength; i < w.length - 1; i++) {
+          final prefix = w.substring(0, i);
+          prefixToWords.putIfAbsent(prefix, () => []).add(w);
+        }
+      }
+      final List<String> doubleWords = [];
+      for (final first in words) {
+        for (int i = 1; i < first.length - minIntersectionLength; i++) {
+          for (final second in prefixToWords[first.substring(i)] ?? []) {
+            doubleWords.add(first.substring(0, i) + second);
+          }
+        }
+      }
+      return WordCollection(doubleWords);
+    } else {
+      return WordCollection(words);
+    }
   }
 
   // Collection that contains most words. May blacklist some categories,
   // e.g. obscene words.
   static WordCollection universalCollection() {
-    return wordCollection(_dictionaries.keys);
+    return wordCollection(_dictionaries.keys, false);
   }
 
   static Dictionary _parseDictionary(

@@ -16,6 +16,7 @@ abstract class RulesConfig implements Built<RulesConfig, RulesConfigBuilder> {
   int get wordsPerPlayer;
   bool get writeWords;
   BuiltList<String>? get dictionaries; // only if writeWords == false
+  bool get pluralias; // only if writeWords == false
 
   RulesConfig._();
   factory RulesConfig([void Function(RulesConfigBuilder) updates]) =

@@ -29,6 +29,7 @@ class GameConfigController {
         ..rules.bonusSeconds = 5
         ..rules.wordsPerPlayer = 5
         ..rules.writeWords = false
+        ..rules.pluralias = false
         ..teaming.teamPlay = true
         ..teaming.randomizeTeams = true
         ..teaming.individualPlayStyle = IndividualPlayStyle.fluidPairs

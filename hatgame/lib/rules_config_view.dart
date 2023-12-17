@@ -128,6 +128,11 @@ class RulesConfigViewState extends State<RulesConfigView> {
         (config) => config.rebuild((b) => b..writeWords = writeWords));
   }
 
+  Future<void> _setPluralias(bool pluralias) async {
+    configController.updateRules(
+        (config) => config.rebuild((b) => b..pluralias = pluralias));
+  }
+
   @override
   void initState() {
     super.initState();
@@ -266,6 +271,11 @@ class RulesConfigViewState extends State<RulesConfigView> {
                     : const Icon(Icons.chevron_right),
                 onTap: dictionariesOnTap),
           ),
+        if (!config.writeWords)
+          MultiLineSwitchListTile(
+              title: Text(tr('pluralias')),
+              value: config.pluralias,
+              onChanged: (bool value) => _setPluralias(value)),
       ],
     );
   }

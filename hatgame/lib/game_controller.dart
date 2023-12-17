@@ -562,8 +562,8 @@ class GameController {
         config.rules.dictionaries != null &&
             config.rules.dictionaries!.isNotEmpty,
         lazyMessage: () => config.rules.toString());
-    final wordCollection =
-        Lexicon.wordCollection(config.rules.dictionaries!.toList());
+    final wordCollection = Lexicon.wordCollection(
+        config.rules.dictionaries!.toList(), config.rules.pluralias);
     return List.generate(totalWords, (_) => wordCollection.randomWord());
   }
 
