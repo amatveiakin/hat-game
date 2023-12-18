@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/invalid_operation.dart';
+import 'package:hatgame/util/list_ext.dart';
 import 'package:yaml/yaml.dart';
 
 class DictionaryMetadata {
@@ -92,6 +93,7 @@ class Lexicon {
     Assert.holds(words.isNotEmpty, lazyMessage: () => dictionaries.toString());
     if (pluralias) {
       const minIntersectionLength = 2;
+      final Set<String> allWordsSet = universalCollection()._words.toSet();
       final Map<String, List<String>> prefixToWords = {};
       for (final w in words) {
         for (int i = minIntersectionLength; i < w.length - 1; i++) {
@@ -102,8 +104,28 @@ class Lexicon {
       final List<String> doubleWords = [];
       for (final first in words) {
         for (int i = 1; i < first.length - minIntersectionLength; i++) {
-          for (final second in prefixToWords[first.substring(i)] ?? []) {
-            doubleWords.add(first.substring(0, i) + second);
+          for (final second in prefixToWords[first.substring(i)].orEmpty()) {
+            final union = first.substring(0, i) + second;
+            // If the word could be constructed as a one-letter-intersection
+            // pluralias or as a pure concatenation, it is likely to be misread.
+            bool confusing = false;
+            for (int j = 1; j < union.length - 2; j++) {
+              if (allWordsSet.contains(union.substring(0, j + 1)) &&
+                  allWordsSet.contains(union.substring(j))) {
+                confusing = true;
+                break;
+              }
+            }
+            for (int j = 1; j < union.length - 1; j++) {
+              if (allWordsSet.contains(union.substring(0, j)) &&
+                  allWordsSet.contains(union.substring(j))) {
+                confusing = true;
+                break;
+              }
+            }
+            if (!confusing) {
+              doubleWords.add(union);
+            }
           }
         }
       }

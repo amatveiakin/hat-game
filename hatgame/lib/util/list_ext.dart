@@ -12,6 +12,17 @@ extension ListUtil<E> on List<E> {
   }
 }
 
+extension OptionalListUtil<E> on List<E>? {
+  // Sample usage:
+  //   for (final value in collection.orEmpty()) { ... }
+  // This is similar to
+  //   for (final value in collection ?? []) { ... }
+  // but with `orEmpty` the type of `value` is `E` rather than `dynamic`.
+  List<E> orEmpty() {
+    return this ?? [];
+  }
+}
+
 extension IterableUtil<E> on Iterable<E> {
   Iterable<S> mapWithIndex<S>(S Function(int index, E value) f) {
     return Iterable<S>.generate(length, (index) => f(index, elementAt(index)));
