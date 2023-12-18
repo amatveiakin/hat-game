@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:hatgame/util/assertion.dart';
@@ -28,12 +29,52 @@ class WordCollection {
   // proportionally to dictionary size' and 'take words from all dictionaries
   // with the same probability'.
   final List<String> _words;
+  final List<double>? _cumulativeWeights;
 
-  WordCollection(this._words);
+  WordCollection(this._words, {List<double>? weights})
+      : _cumulativeWeights =
+            weights == null ? null : computeCumulativeWeights(_words, weights);
 
   String randomWord() {
-    return _words[Random().nextInt(_words.length)];
+    if (_cumulativeWeights == null) {
+      return _words[Random().nextInt(_words.length)];
+    } else {
+      final double r = Random().nextDouble();
+      int i = lowerBound(_cumulativeWeights!, r);
+      Assert.lt(i, _words.length, inRelease: AssertInRelease.log);
+      i = min(i, _words.length - 1);
+      return _words[i];
+    }
   }
+}
+
+List<double> computeCumulativeWeights(
+    List<String> words, List<double> weights) {
+  Assert.holds(words.length == weights.length);
+  double sum = 0.0;
+  final List<double> cumulativeWeights = [];
+  for (final w in weights) {
+    sum += w;
+    cumulativeWeights.add(sum);
+  }
+  Assert.holds(sum > 0);
+  for (int i = 0; i < cumulativeWeights.length; i++) {
+    cumulativeWeights[i] /= sum;
+  }
+  return cumulativeWeights;
+}
+
+class _DoubleWord {
+  final String first;
+  final String second;
+  final String intersection;
+  final String union;
+
+  _DoubleWord(
+      {required this.first,
+      required this.second,
+      required this.intersection,
+      required this.union});
 }
 
 class Lexicon {
@@ -91,6 +132,7 @@ class Lexicon {
       words.addAll(_dictionaries[dictKey]!.words);
     }
     Assert.holds(words.isNotEmpty, lazyMessage: () => dictionaries.toString());
+
     if (pluralias) {
       const minIntersectionLength = 2;
       final Set<String> allWordsSet = universalCollection()._words.toSet();
@@ -101,10 +143,11 @@ class Lexicon {
           prefixToWords.putIfAbsent(prefix, () => []).add(w);
         }
       }
-      final List<String> doubleWords = [];
+      final List<_DoubleWord> doubleWords = [];
       for (final first in words) {
         for (int i = 1; i < first.length - minIntersectionLength; i++) {
-          for (final second in prefixToWords[first.substring(i)].orEmpty()) {
+          final intersection = first.substring(i);
+          for (final second in prefixToWords[intersection].orEmpty()) {
             final union = first.substring(0, i) + second;
             // If the word could be constructed as a one-letter-intersection
             // pluralias or as a pure concatenation, it is likely to be misread.
@@ -124,12 +167,40 @@ class Lexicon {
               }
             }
             if (!confusing) {
-              doubleWords.add(union);
+              doubleWords.add(_DoubleWord(
+                  first: first,
+                  second: second,
+                  intersection: intersection,
+                  union: union));
             }
           }
         }
       }
-      return WordCollection(doubleWords);
+      // Some words are easier to combine than others and they tend to overwhelm
+      // the distribution as the result. We fix this by promoting words and ways
+      // of combining words that appear less often.
+      final Map<String, int> wordFreq = {};
+      final Map<String, int> intersectionFreq = {};
+      for (final w in doubleWords) {
+        wordFreq.update(w.first, (x) => x + 1, ifAbsent: () => 1);
+        wordFreq.update(w.second, (x) => x + 1, ifAbsent: () => 1);
+        intersectionFreq.update(w.intersection, (x) => x + 1,
+            ifAbsent: () => 1);
+      }
+      final weights = doubleWords.map((w) {
+        // Power 1/3 was chosen empirically.
+        // Min ensures that unique pairings do not get overpromoted.
+        return min(
+            0.1,
+            1.0 /
+                pow(
+                    wordFreq[w.first]! *
+                        wordFreq[w.second]! *
+                        intersectionFreq[w.intersection]!,
+                    1.0 / 3.0));
+      }).toList();
+      return WordCollection(doubleWords.map((w) => w.union).toList(),
+          weights: weights);
     } else {
       return WordCollection(words);
     }
