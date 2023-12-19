@@ -94,6 +94,27 @@ turn_time: Turn time
 words: Words
 words_per_player: Words per player
 write_words: Write words
+pluralias_help_title: About pluralias
+pluralias_help: |
+  What is *pluralias*? It's a portmanteau word that combines _plur**al**_ and
+  _**al**ias_ by common letters.
+
+  In this mode the app will automatically generate such portmanteau words (call
+  them pluraliases), and you need to explain them. The source words are taken
+  from ordinary dictionaries. The words are used as is, without abbreviations or
+  alterations. Words always intersect by at least two letters, so
+  _mo**tor**rent_ and _mot**or**acle_ are pluraliases, but _moto**r**ock_ is
+  not.
+
+  To get the most fun out of the hat with pluraliases, we recommend not to view
+  it as competitive, but rather to relax, choose simpler dictionaries and try to
+  explain each combined word by its meaning as a single entity. For example, you
+  could explain *ancientity* as “a very very old item”, *flightning* as “the
+  process or trying to escape an electric shock from the sky” and *miracleaning*
+  as “tidying up the apartment with divine power”.
+
+  Oh, and don't worry if you had zero pluraliases explained in the first five
+  rounds. It gets better! And it's fun anyway :)
 
 # lib/local_storage.dart
 player_name_contains_invalid_character: "Player name contains invalid character: '{char}' (code {code})"

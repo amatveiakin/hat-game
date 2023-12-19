@@ -1,10 +1,13 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/dictionary_selector.dart';
 import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/lexicon.dart';
 import 'package:hatgame/util/invalid_operation.dart';
+import 'package:hatgame/util/markdown.dart';
+import 'package:hatgame/widget/constrained_scaffold.dart';
 import 'package:hatgame/widget/divider.dart';
 import 'package:hatgame/widget/highlightable.dart';
 import 'package:hatgame/widget/invalid_operation_dialog.dart';
@@ -272,11 +275,39 @@ class RulesConfigViewState extends State<RulesConfigView> {
                 onTap: dictionariesOnTap),
           ),
         if (!config.writeWords)
-          MultiLineSwitchListTile(
-              title: Text(tr('pluralias')),
-              value: config.pluralias,
-              onChanged: (bool value) => _setPluralias(value)),
+          Row(children: [
+            Expanded(
+              child: MultiLineSwitchListTile(
+                  title: Text(tr('pluralias')),
+                  value: config.pluralias,
+                  onChanged: (bool value) => _setPluralias(value)),
+            ),
+            IconButton(
+                icon: const Icon(Icons.info_outline),
+                onPressed: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const _PluraliasHelp()));
+                }),
+          ])
       ],
+    );
+  }
+}
+
+class _PluraliasHelp extends StatelessWidget {
+  const _PluraliasHelp();
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedScaffold(
+      appBar: AppBar(
+        title: Text(tr('pluralias_help_title')),
+      ),
+      body: Markdown(
+        data: tr('pluralias_help'),
+        styleSheet: MarkdownUtil.defaultStyle(context),
+        selectable: true,
+      ),
     );
   }
 }
