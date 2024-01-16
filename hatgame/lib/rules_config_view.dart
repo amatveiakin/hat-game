@@ -286,7 +286,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
                 icon: const Icon(Icons.info_outline),
                 onPressed: () {
                   Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => const _PluraliasHelp()));
+                      builder: (context) => const PluraliasHelpScreen()));
                 }),
           ])
       ],
@@ -294,8 +294,12 @@ class RulesConfigViewState extends State<RulesConfigView> {
   }
 }
 
-class _PluraliasHelp extends StatelessWidget {
-  const _PluraliasHelp();
+class PluraliasHelpScreen extends StatelessWidget {
+  // TODO: Should we also use the named path when opening pluralias help from
+  // rules config?
+  static const String routeName = '/pluralias';
+
+  const PluraliasHelpScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -304,9 +308,8 @@ class _PluraliasHelp extends StatelessWidget {
         title: Text(tr('pluralias_help_title')),
       ),
       body: Markdown(
-        data: tr('pluralias_help'),
+        data: tr('pluralias_help_body'),
         styleSheet: MarkdownUtil.defaultStyle(context),
-        selectable: true,
       ),
     );
   }

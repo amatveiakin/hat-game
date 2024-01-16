@@ -7,31 +7,6 @@ import 'package:hatgame/widget/constrained_scaffold.dart';
 class RulesScreen extends StatelessWidget {
   static const String routeName = '/rules';
 
-// TODO: Finish
-// TODO: tr
-  final String content = '''
-*This is a stub.*
-
-
-## Basics
-
-The goal of hat is to explain words as quickly as possible without using
-cognates.
-
-
-## Variants
-
-
-## Playing with the app
-
-This app helps to streamline the game process: break participants into teams,
-generate words, keep track of time and score.
-
-### Playing offline
-
-### Playing online
-''';
-
   const RulesScreen({super.key});
 
   @override
@@ -41,9 +16,10 @@ generate words, keep track of time and score.
         title: Text(tr('hat_game_rules_title')),
       ),
       body: Markdown(
-        data: content,
+        data: tr('hat_game_rules_body'),
         styleSheet: MarkdownUtil.defaultStyle(context),
-        selectable: true,
+        onTapLink: (text, href, title) =>
+            MarkdownUtil.onLinkTapped(context, href!),
       ),
     );
   }

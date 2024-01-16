@@ -9,6 +9,7 @@ import 'package:hatgame/about_screen.dart';
 import 'package:hatgame/app_settings.dart';
 import 'package:hatgame/lexicon.dart';
 import 'package:hatgame/local_storage.dart';
+import 'package:hatgame/rules_config_view.dart';
 import 'package:hatgame/rules_screen.dart';
 import 'package:hatgame/start_game_online_screen.dart';
 import 'package:hatgame/start_screen.dart';
@@ -102,6 +103,7 @@ class MyApp extends StatelessWidget {
         AppSettingsView.routeName: (context) => AppSettingsView(context),
         AboutScreen.routeName: (context) => const AboutScreen(),
         RulesScreen.routeName: (context) => const RulesScreen(),
+        PluraliasHelpScreen.routeName: (context) => const PluraliasHelpScreen(),
       },
       onGenerateRoute: _generateRoute,
       navigatorObservers: [
