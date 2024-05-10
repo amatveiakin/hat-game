@@ -71,7 +71,8 @@ getRandomizeTeamsOptions() {
 }
 
 class RandomizeTeamsSelector extends EnumOptionSelector<bool> {
-  RandomizeTeamsSelector(bool initialValue, Function changeCallback, {super.key})
+  RandomizeTeamsSelector(bool initialValue, Function changeCallback,
+      {super.key})
       : super(
           windowTitle: tr('team_forming'),
           allValues: getRandomizeTeamsOptions(),
