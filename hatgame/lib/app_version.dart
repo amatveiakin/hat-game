@@ -16,7 +16,7 @@ String? _extractMainVersionPart(String v) {
   return re.matchAsPrefix(v)?.group(0);
 }
 
-versionsCompatibile(String v1, String v2) {
+versionsCompatible(String v1, String v2) {
   final String? v1Main = _extractMainVersionPart(v1);
   final String? v2Main = _extractMainVersionPart(v2);
   return !isNullOrEmpty(v1Main) && !isNullOrEmpty(v2Main) && v1Main == v2Main;

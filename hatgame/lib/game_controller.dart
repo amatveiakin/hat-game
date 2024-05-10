@@ -253,7 +253,7 @@ class GameController {
     if (isNullOrEmpty(clientVersion)) {
       throw InvalidOperation('Unknown client version', isInternalError: true);
     }
-    if (!versionsCompatibile(hostVersion, clientVersion)) {
+    if (!versionsCompatible(hostVersion, clientVersion)) {
       throw InvalidOperation(tr('incompatible_game_version', namedArgs: {
         'hostVersion': hostVersion,
         'clientVersion': clientVersion
