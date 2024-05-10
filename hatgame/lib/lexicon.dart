@@ -134,18 +134,19 @@ class Lexicon {
     Assert.holds(words.isNotEmpty, lazyMessage: () => dictionaries.toString());
 
     if (pluralias) {
-      const minIntersectionLength = 2;
+      // TODO: Reduce to 2, but boost longer intersections.
+      const minIntersectionLength = 3;
       final Set<String> allWordsSet = universalCollection()._words.toSet();
       final Map<String, List<String>> prefixToWords = {};
       for (final w in words) {
-        for (int i = minIntersectionLength; i < w.length - 1; i++) {
+        for (int i = minIntersectionLength; i <= w.length - 1; i++) {
           final prefix = w.substring(0, i);
           prefixToWords.putIfAbsent(prefix, () => []).add(w);
         }
       }
       final List<_DoubleWord> doubleWords = [];
       for (final first in words) {
-        for (int i = 1; i < first.length - minIntersectionLength; i++) {
+        for (int i = 1; i <= first.length - minIntersectionLength; i++) {
           final intersection = first.substring(i);
           for (final second in prefixToWords[intersection].orEmpty()) {
             final union = first.substring(0, i) + second;
