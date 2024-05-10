@@ -11,6 +11,8 @@ void main() {
     });
 
     test('same modulo suffix', () {
+      expect(versionsCompatible('v1.2.3', 'v1.2.456'), isTrue);
+
       expect(
           versionsCompatible('v1.1-1-aaaa:debug', 'v1.1-1-aaaa:debug'), isTrue);
       expect(versionsCompatible('v1.1-1-aaaa:debug', 'v1.1-1-aaaa'), isTrue);
@@ -22,6 +24,8 @@ void main() {
     });
 
     test('different version', () {
+      expect(versionsCompatible('v1.2.3', 'v1.3.3'), isFalse);
+
       expect(versionsCompatible('v1.1-1-aaaa', 'v1.2-1-aaaa'), isFalse);
       expect(versionsCompatible('v1.1-1-aaaa', 'v2.1-1-aaaa'), isFalse);
     });

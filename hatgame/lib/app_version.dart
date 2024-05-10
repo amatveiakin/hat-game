@@ -5,10 +5,10 @@ import 'package:hatgame/util/strings.dart';
 const _buildModeSuffix = kReleaseMode
     ? ''
     : kDebugMode
-        ? 'debug'
+        ? '-debug'
         : kProfileMode
-            ? 'profile'
-            : 'unknown_built_type';
+            ? '-profile'
+            : '-unknownbuild';
 const String appVersion = gitVersion + _buildModeSuffix;
 
 String? _extractMainVersionPart(String v) {
