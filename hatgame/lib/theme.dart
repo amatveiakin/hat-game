@@ -16,6 +16,7 @@ class MyTheme {
     900: Color(0xff210041),
   });
   static const primaryPale = Color(0xffccb8db);
+  static const onPrimary = Color(0xffffffff);
   static const secondary = Color(0xffafc3c4);
   static const secondaryIntense = Color(0xff78b8bc);
 }

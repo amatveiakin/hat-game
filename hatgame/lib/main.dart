@@ -86,6 +86,10 @@ class MyApp extends StatelessWidget {
             ElevatedButtonThemeData(style: ButtonStyle(shape: buttonShape)),
         outlinedButtonTheme:
             OutlinedButtonThemeData(style: ButtonStyle(shape: buttonShape)),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: MyTheme.primary,
+          foregroundColor: MyTheme.onPrimary,
+        ),
       ),
       title: tr('hat_game'),
       localizationsDelegates: context.localizationDelegates,
