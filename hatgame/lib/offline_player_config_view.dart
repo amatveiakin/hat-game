@@ -226,7 +226,7 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
             flex: 3,
             child: OutlinedButton(
               style: ButtonStyle(
-                padding: MaterialStateProperty.all(
+                padding: WidgetStateProperty.all(
                     const EdgeInsets.symmetric(vertical: 10.0)),
               ),
               onPressed: () => setState(() {
@@ -248,7 +248,7 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
               flex: 2,
               child: OutlinedButton(
                 style: ButtonStyle(
-                  padding: MaterialStateProperty.all(
+                  padding: WidgetStateProperty.all(
                       const EdgeInsets.symmetric(vertical: 10.0)),
                 ),
                 onPressed: () => setState(() {

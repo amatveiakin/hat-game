@@ -58,14 +58,14 @@ class WideButton extends StatelessWidget {
     this.margin = EdgeInsets.zero,
   });
 
-  static MaterialStateProperty<Color> _getBackgroundColor(Color color) {
-    return MaterialStateProperty.resolveWith((states) =>
-        states.contains(MaterialState.disabled) ? toGrey(color) : color);
+  static WidgetStateProperty<Color> _getBackgroundColor(Color color) {
+    return WidgetStateProperty.resolveWith((states) =>
+        states.contains(WidgetState.disabled) ? toGrey(color) : color);
   }
 
-  static MaterialStateProperty<Color> _getForegroundColor(Color color) {
-    return MaterialStateProperty.resolveWith((states) =>
-        states.contains(MaterialState.disabled)
+  static WidgetStateProperty<Color> _getForegroundColor(Color color) {
+    return WidgetStateProperty.resolveWith((states) =>
+        states.contains(WidgetState.disabled)
             ? toGrey(color).withAlpha(0xa0)
             : color);
   }
@@ -94,7 +94,7 @@ class WideButton extends StatelessWidget {
           child: ElevatedButton(
             onPressed: onPressed,
             style: colorStyle.copyWith(
-                padding: MaterialStateProperty.all(
+                padding: WidgetStateProperty.all(
                     const EdgeInsets.symmetric(vertical: 12.0)),
                 visualDensity: VisualDensity.standard),
             child: DefaultTextStyle.merge(

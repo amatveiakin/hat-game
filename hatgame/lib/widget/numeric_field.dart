@@ -118,8 +118,8 @@ class _NumericFieldImplState extends State<NumericFieldImpl> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final buttonStyle = ButtonStyle(
-        backgroundColor: MaterialStateProperty.all(colorScheme.secondary),
-        foregroundColor: MaterialStateProperty.all(colorScheme.onSecondary));
+        backgroundColor: WidgetStateProperty.all(colorScheme.secondary),
+        foregroundColor: WidgetStateProperty.all(colorScheme.onSecondary));
     return DecoratedBox(
       decoration: ShapeDecoration(
         shape: RoundedRectangleBorder(

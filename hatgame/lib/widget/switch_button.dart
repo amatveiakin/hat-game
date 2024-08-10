@@ -62,7 +62,7 @@ class SwitchButton extends StatelessWidget {
               padding: const EdgeInsets.all(1.5),
               child: OutlinedButton(
                 style: ButtonStyle(
-                  side: MaterialStateProperty.all(const BorderSide(
+                  side: WidgetStateProperty.all(const BorderSide(
                     color: MyTheme.secondary,
                     width: 3.0,
                   )),

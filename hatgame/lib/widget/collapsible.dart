@@ -24,10 +24,10 @@ class Collapsible extends StatelessWidget {
           width: expandButtonWidth,
           child: TextButton(
             style: ButtonStyle(
-                padding: MaterialStateProperty.all(EdgeInsets.zero),
+                padding: WidgetStateProperty.all(EdgeInsets.zero),
                 // TODO: Take colors from the theme.
-                backgroundColor: MaterialStateProperty.resolveWith((states) =>
-                    states.contains(MaterialState.hovered)
+                backgroundColor: WidgetStateProperty.resolveWith((states) =>
+                    states.contains(WidgetState.hovered)
                         ? Colors.black.withOpacity(0.20)
                         : Colors.black.withOpacity(0.15))),
             child: collapsed
