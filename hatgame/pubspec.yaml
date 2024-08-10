@@ -52,7 +52,7 @@ dependencies:
   easy_localization: ^3.0.0
   easy_localization_loader: ^2.0.0
 
-  flutter_markdown: ^0.6.9
+  flutter_markdown: ^0.7.3+1
 
   soundpool: ^2.2.0
 
@@ -71,7 +71,7 @@ dev_dependencies:
   fake_cloud_firestore: ^2.4.1+1
 
   flutter_launcher_icons: ^0.13.1
-  flutter_lints: ^3.0.1
+  flutter_lints: ^4.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
