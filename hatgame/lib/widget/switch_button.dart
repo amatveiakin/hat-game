@@ -99,7 +99,7 @@ class SwitchButton extends StatelessWidget {
               decoration: ShapeDecoration(
                 shape: RoundedRectangleBorder(
                   side: const BorderSide(color: MyTheme.secondary),
-                  borderRadius: BorderRadius.circular(3.0),
+                  borderRadius: buttonBorderRadius,
                 ),
               ),
               child: Center(
@@ -131,7 +131,7 @@ class SwitchButton extends StatelessWidget {
       decoration: ShapeDecoration(
         shape: RoundedRectangleBorder(
           side: const BorderSide(color: Colors.black12),
-          borderRadius: BorderRadius.circular(3.0),
+          borderRadius: buttonBorderRadius,
         ),
       ),
       child: SizedBox(

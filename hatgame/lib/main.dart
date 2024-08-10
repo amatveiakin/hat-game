@@ -70,6 +70,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final buttonShape = WidgetStateProperty.all<RoundedRectangleBorder>(
+        RoundedRectangleBorder(borderRadius: buttonBorderRadius));
     return MaterialApp(
       theme: ThemeData(
         // Increase default font sizes
@@ -78,6 +80,12 @@ class MyApp extends StatelessWidget {
           primarySwatch: MyTheme.primary,
           accentColor: MyTheme.secondary,
         ),
+        textButtonTheme:
+            TextButtonThemeData(style: ButtonStyle(shape: buttonShape)),
+        elevatedButtonTheme:
+            ElevatedButtonThemeData(style: ButtonStyle(shape: buttonShape)),
+        outlinedButtonTheme:
+            OutlinedButtonThemeData(style: ButtonStyle(shape: buttonShape)),
       ),
       title: tr('hat_game'),
       localizationsDelegates: context.localizationDelegates,

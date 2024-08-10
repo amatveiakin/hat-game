@@ -18,7 +18,7 @@ class CheckboxButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final borderShape = RoundedRectangleBorder(
       side: BorderSide(color: value ? MyTheme.secondary : Colors.black12),
-      borderRadius: BorderRadius.circular(3.0),
+      borderRadius: buttonBorderRadius,
     );
     return DecoratedBox(
       decoration: ShapeDecoration(shape: borderShape),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/assertion.dart';
 
 class NumericField extends StatelessWidget {
@@ -25,7 +26,7 @@ class NumericField extends StatelessWidget {
         decoration: ShapeDecoration(
           shape: RoundedRectangleBorder(
             side: const BorderSide(color: Colors.black26),
-            borderRadius: BorderRadius.circular(3.0),
+            borderRadius: buttonBorderRadius,
           ),
         ),
         child: IntrinsicHeight(
@@ -124,7 +125,7 @@ class _NumericFieldImplState extends State<NumericFieldImpl> {
       decoration: ShapeDecoration(
         shape: RoundedRectangleBorder(
           side: const BorderSide(color: Colors.black26),
-          borderRadius: BorderRadius.circular(3.0),
+          borderRadius: buttonBorderRadius,
         ),
       ),
       child: IntrinsicHeight(

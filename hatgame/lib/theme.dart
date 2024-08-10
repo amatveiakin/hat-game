@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+final buttonBorderRadius = BorderRadius.circular(8.0);
+
 class MyTheme {
   static const primary = MaterialColor(0xff4b0082, {
     50: Color(0xffdaa8ff),
