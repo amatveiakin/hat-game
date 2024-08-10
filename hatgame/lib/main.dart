@@ -3,10 +3,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:easy_localization_loader/easy_localization_loader.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/about_screen.dart';
 import 'package:hatgame/app_settings.dart';
+import 'package:hatgame/firebase_options.dart';
 import 'package:hatgame/lexicon.dart';
 import 'package:hatgame/local_storage.dart';
 import 'package:hatgame/rules_config_view.dart';
@@ -18,18 +18,7 @@ import 'package:hatgame/util/ntp_time.dart';
 import 'package:hatgame/util/sounds.dart';
 
 Future<void> _initFirestore() async {
-  const option = kIsWeb
-      ? FirebaseOptions(
-          apiKey: "AIzaSyBX7jo-zBfl0EKR6s7-ph4NhifkhIPzvzw",
-          authDomain: "hatgame.firebaseapp.com",
-          databaseURL: "https://hatgame.firebaseio.com",
-          projectId: "hatgame",
-          storageBucket: "hatgame.appspot.com",
-          messagingSenderId: "761993928349",
-          appId: "1:761993928349:web:a9f63af19ae7b1c9b87e74",
-          measurementId: "G-TNXGM73WRF")
-      : null;
-  await Firebase.initializeApp(options: option);
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Enable offline mode. This is the default for Android and iOS, but
   // on web it need to be enabled explicitly:
