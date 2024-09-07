@@ -110,6 +110,8 @@ class RulesConfigViewState extends State<RulesConfigView> {
     30,
     40,
     50,
+    70,
+    100,
   ];
 
   static const _numericFieldPadding = EdgeInsets.symmetric(vertical: 2.0);
