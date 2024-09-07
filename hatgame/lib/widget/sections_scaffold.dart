@@ -62,6 +62,9 @@ class SectionsScaffold extends StatelessWidget {
       // TODO: Automatically increase padding on large screens.
       final tabBar = TabBar(
         controller: tabController,
+        labelColor: MyTheme.onPrimary,
+        unselectedLabelColor: MyTheme.onPrimary.withAlpha(178),
+        indicatorSize: TabBarIndicatorSize.tab,
         tabs: sections
             .map((s) => Tab(
                   icon: s.title.icon,
