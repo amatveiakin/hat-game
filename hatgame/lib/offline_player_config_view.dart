@@ -196,8 +196,10 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
                 Expanded(
                   // TODO: Fix: `Multiple widgets used the same GlobalKey.'
                   child: TextField(
-                    decoration: const InputDecoration(
-                        filled: true, border: InputBorder.none),
+                    decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.black.withAlpha(0x14),
+                        border: InputBorder.none),
                     key: player.key,
                     focusNode: player.focusNode,
                     controller: player.controller,
@@ -218,6 +220,14 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
         );
       }
     }
+    final buttonStyle = ButtonStyle(
+        padding:
+            WidgetStateProperty.all(const EdgeInsets.symmetric(vertical: 10.0)),
+        side: WidgetStateProperty.all(
+          BorderSide(
+            color: Theme.of(context).primaryColor.withAlpha(0xb0),
+          ),
+        ));
     tiles.add(ListTile(
         key: UniqueKey(),
         contentPadding: listItemPadding,
@@ -225,10 +235,7 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
           Expanded(
             flex: 3,
             child: OutlinedButton(
-              style: ButtonStyle(
-                padding: WidgetStateProperty.all(
-                    const EdgeInsets.symmetric(vertical: 10.0)),
-              ),
+              style: buttonStyle,
               onPressed: () => setState(() {
                 _addPlayer('', focus: true);
               }),
@@ -247,10 +254,7 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
             Expanded(
               flex: 2,
               child: OutlinedButton(
-                style: ButtonStyle(
-                  padding: WidgetStateProperty.all(
-                      const EdgeInsets.symmetric(vertical: 10.0)),
-                ),
+                style: buttonStyle,
                 onPressed: () => setState(() {
                   _addDivider();
                   _addPlayer('', focus: true);

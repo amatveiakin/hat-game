@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/assertion.dart';
 
+const borderWidth = 1.0;
+
 class NumericField extends StatelessWidget {
   final bool readOnly;
   final TextEditingController controller;
@@ -25,22 +27,26 @@ class NumericField extends StatelessWidget {
       return DecoratedBox(
         decoration: ShapeDecoration(
           shape: RoundedRectangleBorder(
-            side: const BorderSide(color: Colors.black26),
+            side: const BorderSide(color: Colors.black26, width: borderWidth),
             borderRadius: buttonBorderRadius,
           ),
         ),
         child: IntrinsicHeight(
-          child: SizedBox(
-            width: _NumericFieldImplState.textFieldWidth,
-            child: TextField(
-              controller: controller,
-              decoration: InputDecoration(
-                // Don't use `border` here, as it makes the text box higher.
-                filled: true,
-                suffixText: suffixText,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+                horizontal: 0, vertical: borderWidth),
+            child: SizedBox(
+              width: _NumericFieldImplState.textFieldWidth,
+              child: TextField(
+                controller: controller,
+                decoration: InputDecoration(
+                  // Don't use `border` here, as it makes the text box higher.
+                  filled: true,
+                  suffixText: suffixText,
+                ),
+                textAlign: TextAlign.center,
+                enabled: false,
               ),
-              textAlign: TextAlign.center,
-              enabled: false,
             ),
           ),
         ),
@@ -124,7 +130,7 @@ class _NumericFieldImplState extends State<NumericFieldImpl> {
     return DecoratedBox(
       decoration: ShapeDecoration(
         shape: RoundedRectangleBorder(
-          side: const BorderSide(color: Colors.black26),
+          side: const BorderSide(color: Colors.black26, width: borderWidth),
           borderRadius: buttonBorderRadius,
         ),
       ),
@@ -143,19 +149,23 @@ class _NumericFieldImplState extends State<NumericFieldImpl> {
                 ),
               ),
             ),
-            SizedBox(
-              width: textFieldWidth,
-              child: TextField(
-                controller: widget.controller,
-                focusNode: _focusNode,
-                decoration: InputDecoration(
-                  filled: true,
-                  border: InputBorder.none,
-                  suffixText: widget.suffixText,
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 0, vertical: borderWidth),
+              child: SizedBox(
+                width: textFieldWidth,
+                child: TextField(
+                  controller: widget.controller,
+                  focusNode: _focusNode,
+                  decoration: InputDecoration(
+                    filled: true,
+                    border: InputBorder.none,
+                    suffixText: widget.suffixText,
+                  ),
+                  textAlign: TextAlign.center,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 ),
-                textAlign: TextAlign.center,
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               ),
             ),
             SizedBox(

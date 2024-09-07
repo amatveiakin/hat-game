@@ -63,7 +63,7 @@ class SectionsScaffold extends StatelessWidget {
       final tabBar = TabBar(
         controller: tabController,
         labelColor: MyTheme.onPrimary,
-        unselectedLabelColor: MyTheme.onPrimary.withAlpha(178),
+        unselectedLabelColor: MyTheme.onPrimary.withAlpha(0xb0),
         indicatorSize: TabBarIndicatorSize.tab,
         tabs: sections
             .map((s) => Tab(
