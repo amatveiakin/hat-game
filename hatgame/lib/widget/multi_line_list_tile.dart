@@ -248,6 +248,7 @@ class MultiLineRadioListTile<T> extends StatelessWidget {
   final T value;
   final T groupValue;
   final ValueChanged<T?> onChanged;
+  final bool toggleable;
   final Color? activeColor;
   final Widget? title;
   final Widget? subtitle;
@@ -261,6 +262,7 @@ class MultiLineRadioListTile<T> extends StatelessWidget {
     required this.value,
     required this.groupValue,
     required this.onChanged,
+    this.toggleable = false,
     this.activeColor,
     this.title,
     this.subtitle,
@@ -272,11 +274,14 @@ class MultiLineRadioListTile<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO: Use `RadioListTile`, this just looks worse in the new Flutter.
+    // Don't forget `isThreeLine`!
     return subtitle == null
         ? RadioListTile<T>(
             value: value,
             groupValue: groupValue,
             onChanged: onChanged,
+            toggleable: toggleable,
             activeColor: activeColor,
             title: Padding(
               padding: const EdgeInsets.symmetric(vertical: _padding),
@@ -293,6 +298,7 @@ class MultiLineRadioListTile<T> extends StatelessWidget {
             value: value,
             groupValue: groupValue,
             onChanged: onChanged,
+            toggleable: toggleable,
             activeColor: activeColor,
             title: Padding(
               padding: const EdgeInsets.only(top: _padding),

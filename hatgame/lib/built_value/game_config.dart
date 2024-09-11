@@ -27,54 +27,40 @@ abstract class RulesConfig implements Built<RulesConfig, RulesConfigBuilder> {
 // =============================================================================
 // Teaming
 
-class IndividualPlayStyle extends EnumClass {
-  static const IndividualPlayStyle chain = _$chain;
-  static const IndividualPlayStyle fluidPairs = _$fluidPairs;
-  static const IndividualPlayStyle broadcast = _$broadcast;
+class TeamingStyle extends EnumClass {
+  static const TeamingStyle individual = _$individual;
+  static const TeamingStyle oneToAll = _$oneToAll;
+  static const TeamingStyle randomPairs = _$randomPairs;
+  static const TeamingStyle randomTeams = _$randomTeams;
+  static const TeamingStyle manualTeams = _$manualTeams;
+  // TODO:
+  // static const TeamingStyle namedTeams = _$namedTeams;
 
-  const IndividualPlayStyle._(String name) : super(name);
-  static BuiltSet<IndividualPlayStyle> get values =>
-      _$valuesIndividualPlayStyle;
-  static IndividualPlayStyle valueOf(String name) =>
-      _$valueOfIndividualPlayStyle(name);
-  static Serializer<IndividualPlayStyle> get serializer =>
-      _$individualPlayStyleSerializer;
-}
+  const TeamingStyle._(String name) : super(name);
+  static BuiltSet<TeamingStyle> get values => _$valuesTeamingStyle;
+  static TeamingStyle valueOf(String name) => _$valueOfTeamingStyle(name);
+  static Serializer<TeamingStyle> get serializer => _$teamingStyleSerializer;
 
-class DesiredTeamSize extends EnumClass {
-  static const DesiredTeamSize teamsOf2 = _$teamsOf2;
-  static const DesiredTeamSize teamsOf3 = _$teamsOf3;
-  static const DesiredTeamSize teamsOf4 = _$teamsOf4;
-  static const DesiredTeamSize twoTeams = _$twoTeams;
-
-  const DesiredTeamSize._(String name) : super(name);
-  static BuiltSet<DesiredTeamSize> get values => _$valuesDesiredTeamSize;
-  static DesiredTeamSize valueOf(String name) => _$valueOfDesiredTeamSize(name);
-  static Serializer<DesiredTeamSize> get serializer =>
-      _$desiredTeamSizeSerializer;
-}
-
-class UnequalTeamSize extends EnumClass {
-  static const UnequalTeamSize forbid = _$forbid;
-  static const UnequalTeamSize expandTeams = _$expandTeams;
-  static const UnequalTeamSize dropPlayers = _$dropPlayers;
-
-  const UnequalTeamSize._(String name) : super(name);
-  static BuiltSet<UnequalTeamSize> get values => _$valuesUnequalTeamSize;
-  static UnequalTeamSize valueOf(String name) => _$valueOfUnequalTeamSize(name);
-  static Serializer<UnequalTeamSize> get serializer =>
-      _$unequalTeamSizeSerializer;
+  bool teamPlay() {
+    switch (this) {
+      case TeamingStyle.individual:
+      case TeamingStyle.oneToAll:
+        return false;
+      case TeamingStyle.randomPairs:
+      case TeamingStyle.randomTeams:
+      case TeamingStyle.manualTeams:
+        return true;
+    }
+    Assert.fail('Unknown TeamingStyle: $this');
+  }
 }
 
 abstract class TeamingConfig
     implements Built<TeamingConfig, TeamingConfigBuilder> {
-  bool get teamPlay;
-  bool get randomizeTeams;
-  IndividualPlayStyle get individualPlayStyle;
-  DesiredTeamSize get desiredTeamSize;
-  UnequalTeamSize get unequalTeamSize;
-  IndividualPlayStyle get guessingInLargeTeam;
-  // TODO: Add opition: force different ream on re-match.
+  // TODO: Add "Randomize order" option when it's not implied, i.e. for:
+  // individual, oneToAll, manualTeams.
+  TeamingStyle get teamingStyle;
+  int get numTeams; // used only if teamingStyle == randomTeams
 
   TeamingConfig._();
   factory TeamingConfig([void Function(TeamingConfigBuilder) updates]) =

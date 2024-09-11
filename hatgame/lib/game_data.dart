@@ -260,8 +260,9 @@ class GameData {
             wordsGuessed: performance.wordsGuessed,
           ));
         }
-        if (config.teaming.guessingInLargeTeam !=
-            IndividualPlayStyle.broadcast) {
+        if (config.teaming.teamingStyle
+            case TeamingStyle.individual || TeamingStyle.randomPairs) {
+          // Does not have to hold with teams of 3+ players.
           Assert.eq(totalWordsExplained, totalWordsGuessed);
         }
         scoreItems.add(TeamScoreViewData(

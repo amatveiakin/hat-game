@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hatgame/theme.dart';
@@ -8,17 +11,30 @@ const borderWidth = 1.0;
 class NumericField extends StatelessWidget {
   final bool readOnly;
   final TextEditingController controller;
-  final List<int> goldenValues;
+  final List<int>? goldenValues;
+  final int? minValue;
+  final int? maxValue;
   final String? suffixText;
 
   NumericField({
     super.key,
     required this.readOnly,
     required this.controller,
-    required this.goldenValues,
+    this.goldenValues,
+    this.minValue,
+    this.maxValue,
     this.suffixText,
   }) {
-    Assert.holds(goldenValues.isNotEmpty);
+    if (goldenValues != null) {
+      Assert.holds(goldenValues!.isNotEmpty);
+      Assert.holds(goldenValues!.isSorted((a, b) => a.compareTo(b)));
+      Assert.holds(minValue == null && maxValue == null);
+    } else {
+      Assert.holds(minValue != null);
+      if (maxValue != null) {
+        Assert.le(minValue!, maxValue!);
+      }
+    }
   }
 
   @override
@@ -55,6 +71,8 @@ class NumericField extends StatelessWidget {
       return NumericFieldImpl(
           controller: controller,
           goldenValues: goldenValues,
+          minValue: minValue,
+          maxValue: maxValue,
           suffixText: suffixText);
     }
   }
@@ -62,17 +80,19 @@ class NumericField extends StatelessWidget {
 
 class NumericFieldImpl extends StatefulWidget {
   final TextEditingController controller;
-  final List<int> goldenValues;
+  final List<int>? goldenValues;
+  final int? minValue;
+  final int? maxValue;
   final String? suffixText;
 
   NumericFieldImpl({
     super.key,
     required this.controller,
     required this.goldenValues,
+    required this.minValue,
+    required this.maxValue,
     this.suffixText,
-  }) {
-    Assert.holds(goldenValues.isNotEmpty);
-  }
+  }) {}
 
   @override
   State<StatefulWidget> createState() => _NumericFieldImplState();
@@ -84,22 +104,42 @@ class _NumericFieldImplState extends State<NumericFieldImpl> {
 
   final _focusNode = FocusNode();
 
+  int _fixBounds(int value) {
+    final clampMax =
+        widget.maxValue != null ? min(value, widget.maxValue!) : value;
+    return max(clampMax, widget.minValue!);
+  }
+
   void _incValue() {
     final int? currentValue = int.tryParse(widget.controller.text);
-    final int newValue = (currentValue != null)
-        ? widget.goldenValues
-            .firstWhere((v) => v > currentValue, orElse: () => currentValue)
-        : widget.goldenValues.first;
+    final int newValue;
+    if (widget.goldenValues != null) {
+      newValue = (currentValue != null)
+          ? widget.goldenValues!
+              .firstWhere((v) => v > currentValue, orElse: () => currentValue)
+          : widget.goldenValues!.first;
+    } else {
+      newValue = (currentValue != null)
+          ? _fixBounds(currentValue + 1)
+          : widget.minValue!;
+    }
     widget.controller.text = newValue.toString();
     FocusScope.of(context).unfocus();
   }
 
   void _decValue() {
     final int? currentValue = int.tryParse(widget.controller.text);
-    final int newValue = (currentValue != null)
-        ? widget.goldenValues
-            .lastWhere((v) => v < currentValue, orElse: () => currentValue)
-        : widget.goldenValues.last;
+    final int newValue;
+    if (widget.goldenValues != null) {
+      newValue = (currentValue != null)
+          ? widget.goldenValues!
+              .lastWhere((v) => v < currentValue, orElse: () => currentValue)
+          : widget.goldenValues!.last;
+    } else {
+      newValue = (currentValue != null)
+          ? _fixBounds(currentValue - 1)
+          : (widget.maxValue ?? widget.minValue!);
+    }
     widget.controller.text = newValue.toString();
     FocusScope.of(context).unfocus();
   }

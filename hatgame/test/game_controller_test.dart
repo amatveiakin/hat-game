@@ -69,6 +69,7 @@ GameConfig twoVsTwoOfflineConfig() {
       ..players
           .names
           .replace({0: 'PlayerA', 1: 'PlayerB', 2: 'PlayerC', 3: 'PlayerD'})
+      ..teaming.teamingStyle = TeamingStyle.manualTeams
       ..rules.dictionaries.replace(Lexicon.defaultDictionaries())
       ..rules.wordsPerPlayer = 1,
   );
@@ -190,7 +191,7 @@ void main() {
 
       await (await host.configController()).update((config) => config.rebuild(
             (b) => b
-              ..teaming.teamPlay = false
+              ..teaming.teamingStyle = TeamingStyle.individual
               ..rules.wordsPerPlayer = 2,
           ));
 
@@ -241,7 +242,7 @@ void main() {
       expect(await user2.gamePhase(), isNot(equals(GamePhase.kicked)));
 
       await (await host.configController()).update((config) => config.rebuild(
-            (b) => b..teaming.teamPlay = false,
+            (b) => b..teaming.teamingStyle = TeamingStyle.individual,
           ));
       final config = (await host.configController()).configWithOverrides();
 
@@ -274,8 +275,8 @@ void main() {
       expect(
           await getGamePhase(host.localGameData), equals(GamePhase.configure));
 
-      await (await host.configController()).update(
-          (config) => config.rebuild((b) => b..teaming.teamPlay = false));
+      await (await host.configController()).update((config) => config
+          .rebuild((b) => b..teaming.teamingStyle = TeamingStyle.individual));
       expect(
           await getGamePhase(host.localGameData), equals(GamePhase.configure));
 
@@ -314,7 +315,7 @@ void main() {
 
       await (await host.configController()).update((config) => config.rebuild(
             (b) => b
-              ..teaming.teamPlay = false
+              ..teaming.teamingStyle = TeamingStyle.individual
               ..rules.wordsPerPlayer = 1
               ..rules.writeWords = true,
           ));

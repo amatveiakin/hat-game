@@ -99,20 +99,20 @@ class TeamCompositionsView extends StatelessWidget {
   Widget buildBody(BuildContext context, DBDocumentSnapshot snapshot) {
     final TeamCompositionsViewData teamCompositionsViewData =
         GameController.getTeamCompositions(localGameData, snapshot)!;
+    final teamPlay =
+        teamCompositionsViewData.gameConfig.teaming.teamingStyle.teamPlay();
 
     return ConstrainedScaffold(
       appBar: AppBar(
         automaticallyImplyLeading: localGameData.isAdmin,
-        title: Text(teamCompositionsViewData.gameConfig.teaming.teamPlay
-            ? tr('team_compositions')
-            : tr('turn_order')),
+        title: Text(teamPlay ? tr('team_compositions') : tr('turn_order')),
         actions: [
           if (localGameData.isAdmin)
             IconButton(
               icon: const ImageAssetIcon('images/dice.png'),
               onPressed: () => _regenerateTeamCompositions(
                   teamCompositionsViewData.gameConfig),
-              tooltip: teamCompositionsViewData.gameConfig.teaming.teamPlay
+              tooltip: teamPlay
                   ? tr('new_random_teams_and_turn_order')
                   : tr('new_random_turn_order'),
             )

@@ -30,12 +30,8 @@ class GameConfigController {
         ..rules.wordsPerPlayer = 5
         ..rules.writeWords = false
         ..rules.pluralias = false
-        ..teaming.teamPlay = true
-        ..teaming.randomizeTeams = true
-        ..teaming.individualPlayStyle = IndividualPlayStyle.fluidPairs
-        ..teaming.desiredTeamSize = DesiredTeamSize.teamsOf2
-        ..teaming.unequalTeamSize = UnequalTeamSize.forbid
-        ..teaming.guessingInLargeTeam = IndividualPlayStyle.fluidPairs,
+        ..teaming.teamingStyle = TeamingStyle.individual
+        ..teaming.numTeams = 2,
     );
   }
 

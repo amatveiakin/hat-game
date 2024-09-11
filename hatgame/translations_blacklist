@@ -22,10 +22,6 @@ LocalStorage running in test mode.
 NTP running in test mode, initialized = $initialized.
 NTP time offset = $_ntpOffset
 Name $myName is already taken
-One player guesses each turn
-Only the active player can change game state
-Players cannot be split into teams of desired size,
-Players cannot be split into teams of desired size, 
 Reached end of _getWordFeedbackIcon
 Reached end of _getWordFeedbackText
 Revert to default
@@ -41,14 +37,9 @@ Unknown IndividualPlayStyle: $playStyle
 Unknown client version
 Unknown host version
 Warning: cannot read "${column.name}" from LocalStorage: $e
-Writing words in offline mode is not supported (yet).
-You wouldn't be able to continue (this is not implemented yet)
 \n
 \n\n+
 _CompactLinkedHashSet<Object>
-and nobody else will see the timer when you're explaining.
-and support for dropping players isn\
-and unequally sized teams are disabled.
 assertion_failure
 bonus_timer
 char

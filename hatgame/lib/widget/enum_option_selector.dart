@@ -72,7 +72,7 @@ abstract class EnumOptionSelector<E> extends StatefulWidget {
 
 class EnumOptionSelectorState<E, W extends EnumOptionSelector>
     extends State<W> {
-  E? currentValue;
+  late E currentValue;
 
   @override
   void initState() {
@@ -80,11 +80,14 @@ class EnumOptionSelectorState<E, W extends EnumOptionSelector>
     currentValue = widget.initialValue;
   }
 
-  void _valueChanged(E? newValue) {
-    setState(() {
-      currentValue = newValue;
-    });
-    widget.changeCallback(newValue);
+  void _valueChanged(BuildContext context, E? newValue) {
+    if (newValue != null) {
+      setState(() {
+        currentValue = newValue;
+      });
+      widget.changeCallback(newValue);
+    }
+    Navigator.of(context).pop();
   }
 
   @override
@@ -93,6 +96,11 @@ class EnumOptionSelectorState<E, W extends EnumOptionSelector>
       appBar: AppBar(
         title: Text(widget.windowTitle),
       ),
+      // TODO: Add icons. Consider if the items should look like buttons or
+      // still look like list items. In the latter case we could change icon
+      // color and/or background color and/or border and/or add a vertical side
+      // line for the active option. Note: background color could conflict with
+      // keyboard navigation.
       body: ListView(
         children: widget.allValues
             .map(
@@ -105,7 +113,10 @@ class EnumOptionSelectorState<E, W extends EnumOptionSelector>
                       subtitle: e.subtitle == null ? null : Text(e.subtitle!),
                       value: e.value,
                       groupValue: currentValue,
-                      onChanged: _valueChanged,
+                      // Enable `toggleable` so that we can close the dialog
+                      // when the user clicks the current option.
+                      toggleable: true,
+                      onChanged: (v) => _valueChanged(context, v),
                     ),
             )
             .toList(),

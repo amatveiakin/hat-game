@@ -197,53 +197,64 @@ void checkCorrectness(IndividualStrategyImpl strategy) {
 
 void main() {
   group('generate team sizes', () {
-    test('4 players in teams of 2', () {
+    test('4 players, 2 teams', () {
       expect(
           generateTeamSizes(
-              4, DesiredTeamSize.teamsOf2, UnequalTeamSize.expandTeams),
+              4,
+              TeamingConfig((b) => b
+                ..teamingStyle = TeamingStyle.randomTeams
+                ..numTeams = 2)),
           equals([2, 2]));
     });
 
-    test('5 players in teams of 2', () {
+    test('5 players, 2 teams', () {
       expect(
           generateTeamSizes(
-              5, DesiredTeamSize.teamsOf2, UnequalTeamSize.expandTeams),
+              5,
+              TeamingConfig((b) => b
+                ..teamingStyle = TeamingStyle.randomTeams
+                ..numTeams = 2)),
           equals([3, 2]));
     });
 
-    test('6 players in teams of 2', () {
+    test('6 players, 2 teams', () {
       expect(
           generateTeamSizes(
-              6, DesiredTeamSize.teamsOf2, UnequalTeamSize.expandTeams),
-          equals([2, 2, 2]));
-    });
-
-    test('6 players in teams of 3', () {
-      expect(
-          generateTeamSizes(
-              6, DesiredTeamSize.teamsOf3, UnequalTeamSize.expandTeams),
+              6,
+              TeamingConfig((b) => b
+                ..teamingStyle = TeamingStyle.randomTeams
+                ..numTeams = 2)),
           equals([3, 3]));
     });
 
-    test('10 players in teams of 4', () {
+    test('6 players, 3 teams', () {
       expect(
           generateTeamSizes(
-              10, DesiredTeamSize.teamsOf4, UnequalTeamSize.expandTeams),
-          equals([5, 5]));
+              6,
+              TeamingConfig((b) => b
+                ..teamingStyle = TeamingStyle.randomTeams
+                ..numTeams = 3)),
+          equals([2, 2, 2]));
     });
 
-    test('27 players, two teams', () {
+    test('8 players, 3 teams', () {
       expect(
           generateTeamSizes(
-              27, DesiredTeamSize.twoTeams, UnequalTeamSize.expandTeams),
-          equals([14, 13]));
+              8,
+              TeamingConfig((b) => b
+                ..teamingStyle = TeamingStyle.randomTeams
+                ..numTeams = 3)),
+          equals([3, 3, 2]));
     });
 
     test('odd number of players forbidden', () {
       expect(
         () {
           generateTeamSizes(
-              5, DesiredTeamSize.teamsOf2, UnequalTeamSize.forbid);
+              5,
+              TeamingConfig((b) => b
+                ..teamingStyle = TeamingStyle.randomPairs
+                ..numTeams = 2));
         },
         flutter_test.throwsA(isA<InvalidOperation>()),
       );
@@ -281,12 +292,10 @@ void main() {
 
   group('fixed teams strategy', () {
     test('2 + 2', () {
-      final strategy = FixedTeamsStrategy(
-          toBuiltList([
-            [0, 1],
-            [2, 3],
-          ]),
-          IndividualPlayStyle.fluidPairs);
+      final strategy = FixedTeamsStrategy(toBuiltList([
+        [0, 1],
+        [2, 3],
+      ]));
       expect(strategy.getParty(0), partyEquals(0, [1]));
       expect(strategy.getParty(1), partyEquals(2, [3]));
       expect(strategy.getParty(2), partyEquals(1, [0]));
@@ -295,27 +304,23 @@ void main() {
     });
 
     test('2 + 3', () {
-      final strategy = FixedTeamsStrategy(
-          toBuiltList([
-            [0, 1, 2],
-            [3, 4],
-          ]),
-          IndividualPlayStyle.fluidPairs);
-      expect(strategy.getParty(0), partyEquals(0, [1]));
+      final strategy = FixedTeamsStrategy(toBuiltList([
+        [0, 1, 2],
+        [3, 4],
+      ]));
+      expect(strategy.getParty(0), partyEquals(0, [1, 2]));
       expect(strategy.getParty(1), partyEquals(3, [4]));
-      expect(strategy.getParty(2), partyEquals(1, [2]));
+      expect(strategy.getParty(2), partyEquals(1, [0, 2]));
       expect(strategy.getParty(3), partyEquals(4, [3]));
-      expect(strategy.getParty(4), partyEquals(2, [0]));
+      expect(strategy.getParty(4), partyEquals(2, [0, 1]));
       expect(strategy.getParty(5), partyEquals(3, [4]));
       // ---------------------------------------------
-      expect(strategy.getParty(6), partyEquals(1, [0]));
+      expect(strategy.getParty(6), partyEquals(0, [1, 2]));
       expect(strategy.getParty(7), partyEquals(4, [3]));
-      expect(strategy.getParty(8), partyEquals(2, [1]));
+      expect(strategy.getParty(8), partyEquals(1, [0, 2]));
       expect(strategy.getParty(9), partyEquals(3, [4]));
-      expect(strategy.getParty(10), partyEquals(0, [2]));
+      expect(strategy.getParty(10), partyEquals(2, [0, 1]));
       expect(strategy.getParty(11), partyEquals(4, [3]));
-      // ---------------------------------------------
-      expect(strategy.getParty(12), partyEquals(0, [1]));
     });
   });
 

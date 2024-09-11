@@ -483,32 +483,35 @@ class GameController {
   static TeamCompositions generateTeamCompositions(GameConfig config) {
     final numPlayers = config.players!.names.length;
     final playerIDs = config.players!.names.keys.toList();
-    if (config.teaming.teamPlay) {
-      BuiltList<BuiltList<int>> teams;
-      if (config.players!.teams != null) {
-        teams = BuiltList<BuiltList<int>>.from(config.players!.teams!
+    switch (config.teaming.teamingStyle) {
+      case TeamingStyle.individual:
+      case TeamingStyle.oneToAll:
+        Assert.holds(config.players!.teams == null);
+        checkNumPlayersForIndividualPlay(numPlayers, config.teaming);
+        return TeamCompositions((b) => b
+          ..individualOrder.replace(
+            playerIDs.shuffled(),
+          ));
+      case TeamingStyle.randomPairs:
+      case TeamingStyle.randomTeams:
+        Assert.holds(config.players!.teams == null);
+        final List<int> teamSizes =
+            generateTeamSizes(numPlayers, config.teaming);
+        final teamsMutable = generateTeamPlayers(
+            playerIDs: playerIDs.shuffled(), teamSizes: teamSizes.shuffled());
+        final teams = BuiltList<BuiltList<int>>.from(
+            teamsMutable.map((t) => BuiltList<int>(t)));
+        checkTeamSizes(teams);
+        return TeamCompositions((b) => b..teams.replace(teams));
+      case TeamingStyle.manualTeams:
+        final teams = BuiltList<BuiltList<int>>.from(config.players!.teams!
             .map((team) => BuiltList<int>(team.toList().shuffled()))
             .toList()
             .shuffled());
-      } else {
-        final List<int> teamSizes = generateTeamSizes(numPlayers,
-            config.teaming.desiredTeamSize, config.teaming.unequalTeamSize);
-        final teamsMutable = generateTeamPlayers(
-            playerIDs: playerIDs.shuffled(), teamSizes: teamSizes.shuffled());
-        teams = BuiltList<BuiltList<int>>.from(
-            teamsMutable.map((t) => BuiltList<int>(t)));
-      }
-      checkTeamSizes(teams);
-      return TeamCompositions((b) => b..teams.replace(teams));
-    } else {
-      Assert.holds(config.players!.teams == null);
-      checkNumPlayersForIndividualPlay(
-          numPlayers, config.teaming.individualPlayStyle);
-      return TeamCompositions((b) => b
-        ..individualOrder.replace(
-          playerIDs.shuffled(),
-        ));
+        checkTeamSizes(teams);
+        return TeamCompositions((b) => b..teams.replace(teams));
     }
+    Assert.fail('Unknown TeamingStyle: ${config.teaming.teamingStyle}');
   }
 
   static Future<void> updateTeamCompositions(
@@ -550,7 +553,6 @@ class GameController {
         : teamCompositions.individualOrder!
             .map((p) => getPlayerNames(gameConfig, [p]))
             .toList();
-    Assert.eq(teamCompositions.teams != null, gameConfig.teaming.teamPlay);
     return TeamCompositionsViewData(
         gameConfig: gameConfig, playerNames: playerNames);
   }

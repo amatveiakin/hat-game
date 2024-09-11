@@ -41,65 +41,43 @@ void checkTeamSizes(BuiltList<BuiltList<int>> teams) {
 
 List<int> generateTeamSizes(
   int numPlayers,
-  DesiredTeamSize desiredTeamSize,
-  UnequalTeamSize unequalTeamSize,
+  TeamingConfig teaming,
 ) {
-  late final int teamSize;
-  switch (desiredTeamSize) {
-    case DesiredTeamSize.teamsOf2:
-      teamSize = 2;
-      break;
-    case DesiredTeamSize.teamsOf3:
-      teamSize = 3;
-      break;
-    case DesiredTeamSize.teamsOf4:
-      teamSize = 4;
-      break;
-    case DesiredTeamSize.twoTeams:
-      teamSize = numPlayers ~/ 2;
-      break;
-  }
-
-  switch (unequalTeamSize) {
-    case UnequalTeamSize.expandTeams:
-      break;
-    case UnequalTeamSize.forbid:
-    case UnequalTeamSize.dropPlayers:
-      if (numPlayers % teamSize != 0) {
+  switch (teaming.teamingStyle) {
+    case TeamingStyle.randomPairs:
+      if (numPlayers % 2 != 0) {
         // TODO: Discard some players on dropPlayers when we have a UI for it.
         throw InvalidOperation(
           tr('cannot_make_teams'),
-          // TODO: tr
-          comment: 'Players cannot be split into teams of desired size, ' +
-              (unequalTeamSize == UnequalTeamSize.forbid
-                  ? 'and unequally sized teams are disabled.'
-                  : 'and support for dropping players isn\'t ready yet.'),
+          comment: 'Odd number of players cannot be divided into pairs.',
         );
       }
-      break;
+      return List.filled(numPlayers ~/ 2, 2);
+    case TeamingStyle.randomTeams:
+      int numTeams = teaming.numTeams;
+      int baseTeamSize = numPlayers ~/ numTeams;
+      int extraPlayers = numPlayers % numTeams;
+      return List<int>.generate(
+          numTeams, (i) => baseTeamSize + (i < extraPlayers ? 1 : 0));
   }
-
-  int extraPlayers = numPlayers % teamSize;
-  return List<int>.generate(numPlayers ~/ teamSize,
-      (index) => teamSize + (index < extraPlayers ? 1 : 0));
+  Assert.fail('generateTeamSizes does not support ${teaming.teamingStyle}');
 }
 
-void checkNumPlayersForIndividualPlay(
-    int numPlayers, IndividualPlayStyle playStyle) {
-  switch (playStyle) {
-    case IndividualPlayStyle.chain:
-    case IndividualPlayStyle.fluidPairs:
+void checkNumPlayersForIndividualPlay(int numPlayers, TeamingConfig teaming) {
+  switch (teaming.teamingStyle) {
+    case TeamingStyle.individual:
       if (numPlayers < 2) {
         throw InvalidOperation(tr('at_least_two_players_required'));
       }
       return;
-    case IndividualPlayStyle.broadcast:
+    case TeamingStyle.oneToAll:
       if (numPlayers < 1) {
         throw InvalidOperation(tr('at_least_one_player_required'));
       }
       return;
   }
-  Assert.fail('Unknown IndividualPlayStyle: $playStyle');
+  Assert.fail('checkNumPlayersForIndividualPlay '
+      'does not support ${teaming.teamingStyle}');
 }
 
 // =============================================================================
@@ -112,13 +90,17 @@ abstract class PartyingStrategy {
 
   factory PartyingStrategy.fromGame(
       GameConfig config, TeamCompositions teamCompositions) {
-    if (teamCompositions.teams != null) {
-      return FixedTeamsStrategy(
-          teamCompositions.teams!, config.teaming.guessingInLargeTeam);
-    } else {
-      return IndividualStrategy(teamCompositions.individualOrder!,
-          config.teaming.individualPlayStyle);
+    switch (config.teaming.teamingStyle) {
+      case TeamingStyle.individual:
+        return IndividualStrategy(teamCompositions.individualOrder!, false);
+      case TeamingStyle.oneToAll:
+        return IndividualStrategy(teamCompositions.individualOrder!, true);
+      case TeamingStyle.randomPairs:
+      case TeamingStyle.randomTeams:
+      case TeamingStyle.manualTeams:
+        return FixedTeamsStrategy(teamCompositions.teams!);
     }
+    Assert.fail('Unknown TeamingStyle: ${config.teaming.teamingStyle}');
   }
 }
 
@@ -129,8 +111,8 @@ class IndividualStrategy extends PartyingStrategy {
   final BuiltList<int> players;
   final IndividualStrategyImpl _impl;
 
-  IndividualStrategy(this.players, IndividualPlayStyle playStyle)
-      : _impl = IndividualStrategyImpl(players.length, playStyle);
+  IndividualStrategy(this.players, bool broadcast)
+      : _impl = IndividualStrategyImpl(players.length, broadcast);
 
   @override
   Party getParty(int turn) {
@@ -146,33 +128,13 @@ abstract class IndividualStrategyImpl {
 
   IndividualStrategyImpl.internal(this.numPlayers);
 
-  factory IndividualStrategyImpl(
-      int numPlayers, IndividualPlayStyle playStyle) {
-    switch (playStyle) {
-      case IndividualPlayStyle.chain:
-        return ChainIndividualStrategy(numPlayers);
-      case IndividualPlayStyle.fluidPairs:
-        return FluidPairsIndividualStrategy(numPlayers);
-      case IndividualPlayStyle.broadcast:
-        return BroadcastIndividualStrategy(numPlayers);
-    }
-    Assert.fail('Unknown IndividualPlayStyle:$playStyle');
+  factory IndividualStrategyImpl(int numPlayers, bool broadcast) {
+    return broadcast
+        ? BroadcastIndividualStrategy(numPlayers)
+        : FluidPairsIndividualStrategy(numPlayers);
   }
 
   Party getPartyImpl(int turn);
-}
-
-class ChainIndividualStrategy extends IndividualStrategyImpl {
-  ChainIndividualStrategy(super.numPlayers) : super.internal();
-
-  @override
-  Party getPartyImpl(int turn) {
-    final int performer = turn % numPlayers;
-    final int recipient = (performer + 1) % numPlayers;
-    return Party((b) => b
-      ..performer = performer
-      ..recipients.add(recipient));
-  }
 }
 
 class FluidPairsIndividualStrategy extends IndividualStrategyImpl {
@@ -215,16 +177,15 @@ class BroadcastIndividualStrategy extends IndividualStrategyImpl {
 
 class FixedTeamsStrategy extends PartyingStrategy {
   final BuiltList<BuiltList<int>> teamPlayers;
-  final IndividualPlayStyle individualPlayStyle;
 
-  FixedTeamsStrategy(this.teamPlayers, this.individualPlayStyle);
+  FixedTeamsStrategy(this.teamPlayers);
 
   @override
   Party getParty(int turn) {
     final int teamIdx = turn % teamPlayers.length;
     final team = teamPlayers[teamIdx];
     final int subturn = turn ~/ teamPlayers.length;
-    final singleTeamStrategy = IndividualStrategy(team, individualPlayStyle);
+    final singleTeamStrategy = IndividualStrategy(team, true);
     return singleTeamStrategy.getParty(subturn);
   }
 }

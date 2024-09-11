@@ -8,10 +8,6 @@ import 'package:hatgame/widget/divider.dart';
 
 // TODO: Allow to delete teams.
 
-bool _manualTeams(TeamingConfig teamingConfig) {
-  return teamingConfig.teamPlay && !teamingConfig.randomizeTeams;
-}
-
 class OfflinePlayersConfigView extends StatefulWidget {
   final bool manualTeams;
   final PlayersConfig? initialPlayersConfig;
@@ -22,7 +18,7 @@ class OfflinePlayersConfigView extends StatefulWidget {
       required teamingConfig,
       required this.initialPlayersConfig,
       required this.configController})
-      : manualTeams = _manualTeams(teamingConfig);
+      : manualTeams = teamingConfig.teamingStyle == TeamingStyle.manualTeams;
 
   @override
   createState() => _OfflinePlayersConfigViewState();

@@ -12,6 +12,7 @@ import 'package:hatgame/offline_player_config_view.dart';
 import 'package:hatgame/online_player_config_view.dart';
 import 'package:hatgame/rules_config_view.dart';
 import 'package:hatgame/teaming_config_view.dart';
+import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/widget/image_assert_icon.dart';
 import 'package:hatgame/widget/invalid_operation_dialog.dart';
@@ -39,23 +40,20 @@ class _GameConfigViewState extends State<GameConfigView>
   SectionTitleData rulesSectionTitle() => SectionTitleData(
         icon: const ImageAssetIcon('images/rules_config.png'),
       );
-  SectionTitleData teamingSectionTitle() => SectionTitleData(
-        icon: const ImageAssetIcon('images/teaming_config.png'),
-      );
-  SectionTitleData playersSectionTitle(int numPlayers) => SectionTitleData(
+  SectionTitleData playersSectionTitle() => SectionTitleData(
         icon: const ImageAssetIcon('images/players_config.png'),
       );
 
   static const int rulesTabIndex = 0;
-  static const int teamingTabIndex = 1; // ignore: unused_field
-  static const int playersTabIndex = 2;
-  static const int numTabs = 3;
+  static const int playersTabIndex = 1;
+  static const int numTabs = 2;
 
   LocalGameData get localGameData => widget.localGameData;
   bool get isAdmin => localGameData.isAdmin;
 
   late TabController _tabController;
   late RulesConfigViewController _rulesConfigViewController;
+  late TeamingConfigViewController _teamingConfigViewController;
 
   @override
   void initState() {
@@ -65,6 +63,7 @@ class _GameConfigViewState extends State<GameConfigView>
       FocusScope.of(context).unfocus();
     });
     _rulesConfigViewController = RulesConfigViewController(vsync: this);
+    _teamingConfigViewController = TeamingConfigViewController();
     super.initState();
   }
 
@@ -72,6 +71,7 @@ class _GameConfigViewState extends State<GameConfigView>
   void dispose() {
     _tabController.dispose();
     _rulesConfigViewController.dispose();
+    _teamingConfigViewController.dispose();
     super.dispose();
   }
 
@@ -163,6 +163,7 @@ class _GameConfigViewState extends State<GameConfigView>
     final GameConfig gameConfig = configController.configWithOverrides();
 
     _rulesConfigViewController.updateFromConfig(gameConfig.rules);
+    _teamingConfigViewController.updateFromConfig(gameConfig.teaming);
     final sections = [
       SectionData(
         title: rulesSectionTitle(),
@@ -174,27 +175,37 @@ class _GameConfigViewState extends State<GameConfigView>
         ),
       ),
       SectionData(
-        title: teamingSectionTitle(),
-        body: TeamingConfigView(
-          onlineMode: localGameData.onlineMode,
-          config: gameConfig.teaming,
-          configController: configController,
-        ),
-      ),
-      SectionData(
-        title: playersSectionTitle(gameConfig.players!.names.length),
-        body: localGameData.onlineMode
-            ? OnlinePlayersConfigView(
-                localGameData: localGameData,
-                playersConfig: gameConfig.players,
-              )
-            : OfflinePlayersConfigView(
-                teamingConfig: gameConfig.teaming,
-                initialPlayersConfig: gameConfig.players,
+        title: playersSectionTitle(),
+        body: Column(children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Material(
+              elevation: 5.0,
+              child: TeamingConfigView(
+                onlineMode: localGameData.onlineMode,
+                viewController: _teamingConfigViewController,
+                config: gameConfig.teaming,
                 configController: configController,
+                numPlayers: gameConfig.players!.names.length,
               ),
+            ),
+          ),
+          Expanded(
+            child: localGameData.onlineMode
+                ? OnlinePlayersConfigView(
+                    localGameData: localGameData,
+                    playersConfig: gameConfig.players,
+                  )
+                : OfflinePlayersConfigView(
+                    teamingConfig: gameConfig.teaming,
+                    initialPlayersConfig: gameConfig.players,
+                    configController: configController,
+                  ),
+          ),
+        ]),
       ),
     ];
+    Assert.eq(sections.length, numTabs);
     final startButton = WideButton(
       onPressed: isAdmin ? () => _next(gameConfig) : null,
       onPressedDisabled: isAdmin
