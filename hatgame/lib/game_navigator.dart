@@ -65,9 +65,15 @@ class GameNavigator {
     required Widget Function(BuildContext, DBDocumentSnapshot) buildBody,
     void Function()? onBackPressed,
   }) {
-    return WillPopScope(
-      onWillPop: () => _onWillPop(context,
-          localGameData: localGameData, onBackPressed: onBackPressed),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
+        if (didPop) {
+          return;
+        }
+        await _onPop(context,
+            localGameData: localGameData, onBackPressed: onBackPressed);
+      },
       child: StreamBuilder<DBDocumentSnapshot>(
         stream: localGameData.gameReference.snapshots(),
         builder:
@@ -320,7 +326,7 @@ class GameNavigator {
     );
   }
 
-  Future<bool> _onWillPop(
+  Future<void> _onPop(
     BuildContext context, {
     required LocalGameData localGameData,
     void Function()? onBackPressed,
@@ -340,7 +346,6 @@ class GameNavigator {
         }
         break;
     }
-    return false;
   }
 
   Future<_PopResponse> _popResponse(
