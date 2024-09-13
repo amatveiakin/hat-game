@@ -188,7 +188,8 @@ done: Done
 flag_the_word: Raise a problem with the word (invalid explanation, word not actually guessed)
 restore_word: Restore word
 somebody_flagged_the_word: Somebody thinks there was a problem with the word (invalid explanation, word not actually guessed)
-start: Start!
+pull_to_start: Go?
+release_to_start: Go!
 word_feedback_clear: Clear
 word_feedback_nice: Nice
 word_feedback_too_easy: Too easy

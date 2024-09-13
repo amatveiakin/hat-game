@@ -1,76 +1,80 @@
 import 'dart:math';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/assertion.dart';
-import 'package:hatgame/util/colors.dart';
-
-List<BoxShadow> _elevationToShadow(int elevation, Color color) {
-  return kElevationToShadow[elevation]!
-      .map((s) => BoxShadow(
-            color: color.withOpacity(s.color.opacity),
-            offset: s.offset,
-            blurRadius: s.blurRadius,
-            spreadRadius: s.spreadRadius,
-          ))
-      .toList();
-}
+import 'package:hatgame/util/assets.dart';
 
 class _PadlockPainter extends CustomPainter {
+  final ui.Image background;
+  final ui.Image foreground;
+  final int? wordsInHat;
   final bool padlockOpen;
   final Offset padlockPos;
+  final bool panActive;
   final double animationProgress;
 
-  _PadlockPainter(this.padlockOpen, this.padlockPos, this.animationProgress);
+  _PadlockPainter(
+      this.wordsInHat,
+      this.background,
+      this.foreground,
+      this.padlockOpen,
+      this.padlockPos,
+      this.panActive,
+      this.animationProgress);
 
   @override
   void paint(Canvas canvas, Size size) {
-    final rect = Offset.zero & size;
-    var borderPaint = Paint()
-      ..color = Color.lerp(MyTheme.secondaryIntense, MyColors.grey(180), 0.5)!
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 5.0
-      ..strokeCap = StrokeCap.butt
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.5);
-    if (padlockOpen) {
-      borderPaint
-        ..color = MyTheme.secondaryIntense
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5.0);
-    }
-    canvas.drawOval(rect, borderPaint);
+    const paperSize = Size(0.27, 0.42);
+    // Leave empty space above the hat to make paper area draggable.
+    final spaceAbove = size.height * 0.2;
+    final hatRect = Rect.fromLTRB(0, spaceAbove, size.width, size.height);
 
-    const double shakeReps = 4.0;
-    const double shakeAmplitude = pi / 24;
-    final double rotateAngle =
-        sin(animationProgress * pi * shakeReps) * shakeAmplitude;
+    final drawHat = (ui.Image image) {
+      paintImage(
+          canvas: canvas, rect: hatRect, image: image, fit: BoxFit.scaleDown);
+    };
+    final drawPaper = (int? showThreshold, Offset pos, double angle) {
+      if (showThreshold != null && wordsInHat != null) {
+        if (wordsInHat! < showThreshold) {
+          return;
+        }
+      }
+      final unitRect = (pos - paperSize.center(Offset.zero)) & paperSize;
+      final dstRect = _scaleRect(unitRect, size.width, size.height);
+      final fill = Paint()
+        ..color = Color(0xffe2dec8)
+        ..style = PaintingStyle.fill;
+      final stroke = Paint()
+        ..color = Color(0xff404040)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3.0
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round;
+      _drawRotatedRect(canvas, dstRect, angle, fill, stroke);
+    };
 
-    const double maxSizeIncrement = 0.25;
-    final double scale = 1.0 + sin(animationProgress * pi) * maxSizeIncrement;
-
-    final icon = padlockOpen ? Icons.lock_open : Icons.lock_outline;
-    final textPainter = TextPainter(textDirection: TextDirection.rtl);
-    textPainter.text = TextSpan(
-        text: String.fromCharCode(icon.codePoint),
-        style: TextStyle(
-          fontSize: 72.0,
-          fontFamily: icon.fontFamily,
-          color: MyTheme.secondaryIntense,
-          shadows: _elevationToShadow(2, MyTheme.secondaryIntense),
-        ));
-    textPainter.layout();
-
-    canvas.save();
-    canvas.translate(padlockPos.dx, padlockPos.dy);
-    canvas.rotate(rotateAngle);
-    canvas.scale(scale);
-    textPainter.paint(canvas, -textPainter.size.center(Offset.zero));
-    canvas.restore();
+    final animationJump = sin((panActive ? 0 : animationProgress) * pi) * 0.2;
+    final animationAngle = sin(animationProgress * 3 * pi) * 2.0;
+    drawHat(background);
+    drawPaper(4, Offset(0.42, 0.41), -8.0 + animationAngle);
+    drawPaper(2, Offset(0.58, 0.39), 4.0 - animationAngle);
+    drawPaper(5, Offset(0.55, 0.46), 2.0 + animationAngle);
+    drawPaper(
+        null,
+        padlockPos.scale(1.0 / size.width, 1.0 / size.height) +
+            Offset(0, -animationJump),
+        0.0);
+    drawPaper(3, Offset(0.45, 0.51), -3.0 - animationAngle);
+    drawHat(foreground);
   }
 
   @override
   bool shouldRepaint(_PadlockPainter oldPainter) {
-    return padlockOpen != oldPainter.padlockOpen ||
+    return wordsInHat != oldPainter.wordsInHat ||
+        padlockOpen != oldPainter.padlockOpen ||
         padlockPos != oldPainter.padlockPos ||
+        panActive != oldPainter.panActive ||
         animationProgress != oldPainter.animationProgress;
   }
 }
@@ -78,9 +82,15 @@ class _PadlockPainter extends CustomPainter {
 class Padlock extends StatefulWidget {
   final AnimationController animationController;
   final void Function() onUnlocked;
+  final int? wordsInHat;
+  final ValueNotifier<bool>? readyToOpen;
 
   const Padlock(
-      {super.key, required this.onUnlocked, required this.animationController});
+      {super.key,
+      required this.onUnlocked,
+      required this.animationController,
+      this.wordsInHat,
+      this.readyToOpen});
 
   @override
   createState() => PadlockState();
@@ -88,6 +98,10 @@ class Padlock extends StatefulWidget {
 
 class PadlockState extends State<Padlock> with SingleTickerProviderStateMixin {
   static const double _dragStartTolerance = 50.0;
+  late Future<ui.Image> _background =
+      loadAssetImage('images/hat_with_words_bg.png');
+  late Future<ui.Image> _foreground =
+      loadAssetImage('images/hat_with_words_fg.png');
   bool _panActive = false;
   bool _padlockOpen = false;
   bool _padlockHidden = false;
@@ -110,6 +124,12 @@ class PadlockState extends State<Padlock> with SingleTickerProviderStateMixin {
       });
   }
 
+  @override
+  void dispose() {
+    _doDispose();
+    super.dispose();
+  }
+
   // Use didChangeDependencies instead of initState, because MediaQuery
   // is not available in the latter.
   @override
@@ -120,38 +140,61 @@ class PadlockState extends State<Padlock> with SingleTickerProviderStateMixin {
     final double side =
         min(200, MediaQuery.of(context).size.shortestSide * 0.6);
     _size = Size.square(side);
-    _resetPadlockPos();
+    _resetPadlockPos(false);
   }
 
-  void _resetPadlockPos() {
-    _setPadlockPos(_size.center(Offset.zero));
+  void _doDispose() async {
+    (await _background).dispose();
+    (await _foreground).dispose();
   }
 
-  void _setPadlockPos(Offset pos) {
-    final radius = _size.height / 2;
+  void _resetPadlockPos(bool notify) {
+    _setPadlockPos(_size.center(Offset(0, -_size.height * 0.2)), notify);
+  }
+
+  void _setPadlockPos(Offset pos, bool notify) {
+    final depth = -_size.height * 0.12;
+    final unlockHeight = _size.height * 1.0;
     final center = _size.center(Offset.zero);
-    final v = pos - center;
-    if (v.distance < radius) {
-      _padlockOpen = false;
-      _padlockPos = pos;
-    } else {
-      _padlockOpen = true;
-      _padlockPos = center + v / v.distance * radius;
+    final minY = center.dy + depth;
+    final y = min(pos.dy, minY);
+    final maxDx = 2.0 * pow(minY - y, 2) / _size.width;
+    // Make sure the paper does not overlap with the hat.
+    final x = pos.dx.clamp(center.dx - maxDx, center.dx + maxDx);
+    _padlockPos = Offset(x, y);
+    _padlockOpen = pos.dy <= center.dy - unlockHeight;
+    if (notify && widget.readyToOpen != null) {
+      widget.readyToOpen!.value = _padlockOpen;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return _padlockHidden
-        ? SizedBox.fromSize(
-            size: _size,
-          )
-        : GestureDetector(
+    if (_padlockHidden) {
+      return SizedBox.fromSize(
+        size: _size,
+      );
+    }
+    return FutureBuilder(
+        future: Future.wait([_background, _foreground]),
+        builder: (context, AsyncSnapshot<List<ui.Image>> snapshot) {
+          if (!snapshot.hasData) {
+            return SizedBox.fromSize(
+              size: _size,
+            );
+          }
+          final [background, foreground] = snapshot.data!;
+          return GestureDetector(
             behavior: HitTestBehavior.opaque,
             onPanStart: (DragStartDetails details) {
               Assert.holds(!_panActive);
-              if ((details.localPosition - _padlockPos).distance <
-                  _dragStartTolerance) {
+              final center = _size.center(Offset.zero);
+              // Make the start region vertically prolonged to allow either
+              // dragging the piece of paper itself, or dragging something out
+              // of the hat.
+              if ((details.localPosition - _padlockPos).distance +
+                      (details.localPosition - center).distance <
+                  (_padlockPos - center).distance + 2.0 * _dragStartTolerance) {
                 setState(() {
                   _panActive = true;
                 });
@@ -160,7 +203,7 @@ class PadlockState extends State<Padlock> with SingleTickerProviderStateMixin {
             onPanUpdate: (DragUpdateDetails details) {
               if (_panActive) {
                 setState(() {
-                  _setPadlockPos(details.localPosition);
+                  _setPadlockPos(details.localPosition, true);
                 });
               }
             },
@@ -168,7 +211,7 @@ class PadlockState extends State<Padlock> with SingleTickerProviderStateMixin {
               final padlockOpen = _padlockOpen;
               setState(() {
                 _panActive = false;
-                _resetPadlockPos();
+                _resetPadlockPos(true);
                 if (padlockOpen) {
                   _padlockHidden = true;
                 }
@@ -179,7 +222,13 @@ class PadlockState extends State<Padlock> with SingleTickerProviderStateMixin {
             },
             child: CustomPaint(
               painter: _PadlockPainter(
-                  _padlockOpen, _padlockPos, _animationProgress),
+                  widget.wordsInHat,
+                  background,
+                  foreground,
+                  _padlockOpen,
+                  _padlockPos,
+                  _panActive,
+                  _animationProgress),
               isComplex: false,
               willChange: true,
               child: SizedBox.fromSize(
@@ -187,5 +236,28 @@ class PadlockState extends State<Padlock> with SingleTickerProviderStateMixin {
               ),
             ),
           );
+        });
   }
+}
+
+Rect _scaleRect(Rect rect, double scaleX, double scaleY) {
+  return Rect.fromLTWH(
+    rect.left * scaleX,
+    rect.top * scaleY,
+    rect.width * scaleX,
+    rect.height * scaleY,
+  );
+}
+
+// Draws a rectange rotated around center.
+void _drawRotatedRect(
+    Canvas canvas, Rect rect, double angle, Paint fill, Paint stroke) {
+  canvas.save();
+  final center = rect.center;
+  canvas.translate(center.dx, center.dy);
+  canvas.rotate(angle * (pi / 180.0));
+  canvas.translate(-center.dx, -center.dy);
+  canvas.drawRect(rect, fill);
+  canvas.drawRect(rect, stroke);
+  canvas.restore();
 }

@@ -23,6 +23,36 @@ import 'package:hatgame/widget/padlock.dart';
 import 'package:hatgame/widget/timer.dart';
 import 'package:hatgame/widget/wide_button.dart';
 
+class GlowingWidget extends AnimatedWidget {
+  final Widget child;
+  final bool enableGlow;
+
+  const GlowingWidget(
+      {super.key,
+      required this.child,
+      required Animation<double> animation,
+      this.enableGlow = true})
+      : super(listenable: animation);
+
+  @override
+  Widget build(BuildContext context) {
+    final animation = listenable as Animation<double>;
+    return Container(
+        decoration: enableGlow
+            ? BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: MyTheme.secondaryIntense,
+                    blurRadius: 6.0,
+                    spreadRadius: animation.value * 5.0,
+                  ),
+                ],
+              )
+            : null,
+        child: child);
+  }
+}
+
 class PartyView extends StatelessWidget {
   final PartyViewData party;
   final TurnPhase turnPhase;
@@ -274,8 +304,7 @@ class PlayArea extends StatefulWidget {
   State<StatefulWidget> createState() => PlayAreaState();
 }
 
-class PlayAreaState extends State<PlayArea>
-    with SingleTickerProviderStateMixin {
+class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
   LocalGameData get localGameData => widget.localGameData;
   GameController get gameController => widget.gameController;
   GameConfig get gameConfig => gameData.config;
@@ -283,18 +312,14 @@ class PlayAreaState extends State<PlayArea>
   TurnState? get turnState => gameData.turnState;
   LocalGameState get localGameState => widget.localGameState;
 
+  late AnimationController _glowAnimationController;
+  late Animation<double> _glowAnimation;
   late AnimationController _padlockAnimationController;
+  ValueNotifier<bool> _padlockReadyToOpen = ValueNotifier(false);
   bool _turnActive = false;
-
-  void _unlockStartExplaning() {
-    setState(() {
-      localGameState.startButtonEnabled = true;
-    });
-  }
 
   void _startExplaning() {
     setState(() {
-      localGameState.startButtonEnabled = false;
       _turnActive = true;
     });
     gameController.startExplaning();
@@ -357,11 +382,24 @@ class PlayAreaState extends State<PlayArea>
     super.initState();
     _padlockAnimationController = AnimationController(
         duration: const Duration(milliseconds: 500), vsync: this);
+    _glowAnimationController = AnimationController(
+        duration: const Duration(milliseconds: 500), vsync: this);
+    _glowAnimation =
+        Tween(begin: 0.0, end: 1.0).animate(_glowAnimationController);
+    _padlockReadyToOpen.addListener(() {
+      if (_padlockReadyToOpen.value) {
+        _glowAnimationController.reset();
+        _glowAnimationController.repeat(reverse: true);
+      } else {
+        _glowAnimationController.stop();
+      }
+    });
   }
 
   @override
   void dispose() {
     _padlockAnimationController.dispose();
+    _glowAnimationController.dispose();
     super.dispose();
   }
 
@@ -472,25 +510,41 @@ class PlayAreaState extends State<PlayArea>
           children: [
             Expanded(
               child: Center(
-                child: WideButton(
-                  onPressed: localGameState.startButtonEnabled
-                      ? _startExplaning
-                      : null,
-                  onPressedDisabled: () =>
-                      _padlockAnimationController.forward(from: 0.0),
-                  coloring: WideButtonColoring.secondary,
-                  child: Text(
-                    tr('start'),
-                    style: const TextStyle(fontSize: 24.0),
-                  ),
-                ),
+                child: ListenableBuilder(
+                    listenable: _padlockReadyToOpen,
+                    builder: (BuildContext context, Widget? child) {
+                      return GlowingWidget(
+                          animation: _glowAnimation,
+                          enableGlow: _padlockReadyToOpen.value,
+                          // TODO: Replace disabled button with smth else. It's
+                          // not really disabled, it's just not a button. Also,
+                          // glow is low contrast with button background.
+                          child: WideButton(
+                            // TODO: Use start button for non-touch devices.
+                            // onPressed: _startExplaning,
+                            onPressed: null,
+                            onPressedDisabled: () =>
+                                _padlockAnimationController.forward(from: 0.0),
+                            coloring: _padlockReadyToOpen.value
+                                ? WideButtonColoring.secondaryAlwaysActive
+                                : WideButtonColoring.secondary,
+                            child: Text(
+                              _padlockReadyToOpen.value
+                                  ? tr('release_to_start')
+                                  : tr('pull_to_start'),
+                              style: const TextStyle(fontSize: 24.0),
+                            ),
+                          ));
+                    }),
               ),
             ),
             Expanded(
               child: Center(
                 child: Padlock(
-                  onUnlocked: _unlockStartExplaning,
+                  onUnlocked: _startExplaning,
                   animationController: _padlockAnimationController,
+                  wordsInHat: gameData.numWordsInHat(),
+                  readyToOpen: _padlockReadyToOpen,
                 ),
               ),
             ),

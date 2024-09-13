@@ -37,7 +37,7 @@ class WideWidget extends StatelessWidget {
   }
 }
 
-enum WideButtonColoring { neutral, secondary }
+enum WideButtonColoring { neutral, secondary, secondaryAlwaysActive }
 
 class WideButton extends StatelessWidget {
   static const EdgeInsets bottomButtonMargin =
@@ -84,6 +84,11 @@ class WideButton extends StatelessWidget {
         colorStyle = ButtonStyle(
             backgroundColor: _getBackgroundColor(colorScheme.secondary),
             foregroundColor: _getForegroundColor(colorScheme.onSecondary));
+        break;
+      case WideButtonColoring.secondaryAlwaysActive:
+        colorStyle = ButtonStyle(
+            backgroundColor: WidgetStateProperty.all(colorScheme.secondary),
+            foregroundColor: WidgetStateProperty.all(colorScheme.onSecondary));
         break;
     }
     return Padding(

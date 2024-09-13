@@ -190,7 +190,8 @@ done: Готово
 flag_the_word: Проблема со словом (объяснение некорректно, слово не было угадано)
 restore_word: Восстановить слово
 somebody_flagged_the_word: Кто-то считает, что со словом была проблема (объяснение некорректно, слово не было угадано)
-start: 'Поехали!'
+pull_to_start: 'Поехали?'
+release_to_start: 'Поехали!'
 word_feedback_clear: Отменить
 word_feedback_nice: Хорошее слово
 word_feedback_too_easy: Слишком просто

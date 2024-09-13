@@ -41,7 +41,9 @@ class LocalGameData {
 }
 
 class LocalGameState {
-  bool startButtonEnabled = false;
+  // Can store things that affect game presentation, but not game flow.
+  // E.g. it used to store whether start button was unlocked back when
+  // unlocking the button and starting the game were separate actions.
 }
 
 // Namespace class for computing information about the game that is not
