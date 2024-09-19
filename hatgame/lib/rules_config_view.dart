@@ -12,7 +12,6 @@ import 'package:hatgame/widget/constrained_scaffold.dart';
 import 'package:hatgame/widget/divider.dart';
 import 'package:hatgame/widget/highlightable.dart';
 import 'package:hatgame/widget/invalid_operation_dialog.dart';
-import 'package:hatgame/widget/multi_line_list_tile.dart';
 import 'package:hatgame/widget/numeric_field.dart';
 import 'package:hatgame/widget/switch_button.dart';
 
@@ -241,7 +240,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
         SectionDivider(
           title: tr('words'),
         ),
-        MultiLineListTile(
+        ListTile(
           title: SwitchButton(
             options: [tr('random_words'), tr('write_words')],
             selectedOption: config.writeWords ? 1 : 0,
@@ -270,7 +269,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
         if (!config.writeWords)
           Highlightable(
             controller: viewController.dictionariesHighlightController,
-            child: MultiLineListTile(
+            child: ListTile(
                 title: Text(dictionariesCaption),
                 trailing: dictionariesOnTap == null
                     ? null
@@ -280,7 +279,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
         if (!config.writeWords)
           Row(children: [
             Expanded(
-              child: MultiLineSwitchListTile(
+              child: SwitchListTile(
                   title: Text(tr('pluralias')),
                   value: config.pluralias,
                   onChanged: (bool value) => _setPluralias(value),

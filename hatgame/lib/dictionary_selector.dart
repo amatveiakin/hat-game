@@ -1,7 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/lexicon.dart';
-import 'package:hatgame/widget/multi_line_list_tile.dart';
 
 // Similar to EnumOptionSelectorState, but allows multiple choice
 class DictionarySelector extends StatefulWidget {
@@ -51,7 +50,7 @@ class DictionarySelectorState extends State<DictionarySelector> {
       body: ListView(
         children: widget.allValues.map((d) {
           final metadata = Lexicon.dictionaryMetadata(d);
-          return MultiLineCheckboxListTile(
+          return CheckboxListTile(
             title: Text(metadata.uiName),
             subtitle: Text('Words: ${metadata.numWords}'),
             controlAffinity: ListTileControlAffinity.leading,

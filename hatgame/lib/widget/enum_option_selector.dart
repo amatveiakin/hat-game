@@ -1,7 +1,6 @@
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:hatgame/widget/divider.dart';
-import 'package:hatgame/widget/multi_line_list_tile.dart';
 
 // =============================================================================
 // Auxiliary item suggest to use for opening selector page
@@ -20,7 +19,7 @@ class OptionSelectorHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiLineListTile(
+    return ListTile(
         title: title,
         subtitle: subtitle,
         trailing: onTap == null ? null : const Icon(Icons.chevron_right),
@@ -108,10 +107,11 @@ class EnumOptionSelectorState<E, W extends EnumOptionSelector>
                   ? const ThinDivider(
                       height: 8.0,
                     )
-                  : MultiLineRadioListTile<E?>(
+                  : RadioListTile<E?>(
                       title: Text(e.title!),
                       subtitle: e.subtitle == null ? null : Text(e.subtitle!),
                       value: e.value,
+                      isThreeLine: e.subtitle != null,
                       groupValue: currentValue,
                       // Enable `toggleable` so that we can close the dialog
                       // when the user clicks the current option.
