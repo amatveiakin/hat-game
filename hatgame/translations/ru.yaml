@@ -137,7 +137,7 @@ hat_game_rules_body: |
     прекрасно!
 
 # lib/rules_config_view.dart
-bonus_time: Время на доугадывание
+bonus_time: Доугадывание
 dictionaries_many: 'Словари:'
 dictionaries_none: 'Словари:   —'
 dictionary_one: 'Словарь: '
@@ -145,7 +145,7 @@ pluralias: Шлакоблокунь
 random_words: 'Случайные слова'
 s: с
 timer: Время
-turn_time: Время на объяснение
+turn_time: Объяснение
 words: Слова
 words_per_player: Слов на игрока
 write_words: Писать слова
