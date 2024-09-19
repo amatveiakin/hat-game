@@ -120,6 +120,11 @@ class _GameConfigViewState extends State<GameConfigView>
   }
 
   void _next(GameConfig gameConfig) async {
+    if (_tabController.index < numTabs - 1) {
+      _tabController.animateTo(_tabController.index + 1);
+      return;
+    }
+
     try {
       GameController.preGameCheck(gameConfig);
     } on InvalidOperation catch (e) {
