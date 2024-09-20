@@ -5,7 +5,6 @@ import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/dictionary_selector.dart';
 import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/lexicon.dart';
-import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/util/markdown.dart';
 import 'package:hatgame/widget/constrained_scaffold.dart';
@@ -282,9 +281,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
               child: SwitchListTile(
                   title: Text(tr('pluralias')),
                   value: config.pluralias,
-                  onChanged: (bool value) => _setPluralias(value),
-                  activeColor: MyTheme.secondaryIntense,
-                  inactiveTrackColor: MyTheme.secondary),
+                  onChanged: (bool value) => _setPluralias(value)),
             ),
             IconButton(
                 icon: const Icon(Icons.info_outline),

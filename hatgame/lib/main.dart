@@ -16,6 +16,7 @@ import 'package:hatgame/start_screen.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/ntp_time.dart';
 import 'package:hatgame/util/sounds.dart';
+import 'package:hatgame/util/widget_state_property.dart';
 
 Future<void> _initFirestore() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -86,6 +87,16 @@ class MyApp extends StatelessWidget {
             ElevatedButtonThemeData(style: ButtonStyle(shape: buttonShape)),
         outlinedButtonTheme:
             OutlinedButtonThemeData(style: ButtonStyle(shape: buttonShape)),
+        switchTheme: SwitchThemeData(
+          thumbColor: WidgetStateProperty.all(Colors.white),
+          trackColor: WidgetStateProperty.resolveWith((states) {
+            return greyOutDisabled(
+                states,
+                states.contains(WidgetState.selected)
+                    ? MyTheme.secondaryIntense
+                    : MyTheme.secondary);
+          }),
+        ),
         appBarTheme: const AppBarTheme(
           backgroundColor: MyTheme.primary,
           foregroundColor: MyTheme.onPrimary,
