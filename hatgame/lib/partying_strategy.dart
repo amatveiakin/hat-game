@@ -60,7 +60,7 @@ List<int> generateTeamSizes(
       return List<int>.generate(
           numTeams, (i) => baseTeamSize + (i < extraPlayers ? 1 : 0));
   }
-  Assert.fail('generateTeamSizes does not support ${teaming.teamingStyle}');
+  Assert.unexpectedValue(teaming.teamingStyle);
 }
 
 void checkNumPlayersForIndividualPlay(int numPlayers, TeamingConfig teaming) {
@@ -76,8 +76,7 @@ void checkNumPlayersForIndividualPlay(int numPlayers, TeamingConfig teaming) {
       }
       return;
   }
-  Assert.fail('checkNumPlayersForIndividualPlay '
-      'does not support ${teaming.teamingStyle}');
+  Assert.unexpectedValue(teaming.teamingStyle);
 }
 
 // =============================================================================
@@ -100,7 +99,7 @@ abstract class PartyingStrategy {
       case TeamingStyle.manualTeams:
         return FixedTeamsStrategy(teamCompositions.teams!);
     }
-    Assert.fail('Unknown TeamingStyle: ${config.teaming.teamingStyle}');
+    Assert.unexpectedValue(config.teaming.teamingStyle);
   }
 }
 

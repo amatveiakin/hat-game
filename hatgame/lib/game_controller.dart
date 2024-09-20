@@ -511,7 +511,7 @@ class GameController {
         checkTeamSizes(teams);
         return TeamCompositions((b) => b..teams.replace(teams));
     }
-    Assert.fail('Unknown TeamingStyle: ${config.teaming.teamingStyle}');
+    Assert.unexpectedValue(config.teaming.teamingStyle);
   }
 
   static Future<void> updateTeamCompositions(

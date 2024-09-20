@@ -106,7 +106,7 @@ class _WordView extends StatelessWidget {
       case WordStatus.discarded:
         return const Icon(Icons.delete);
     }
-    Assert.fail('Unknown WordStatus: $status');
+    Assert.unexpectedValue(status);
   }
 
   TextStyle _style(WordStatus status) {
@@ -119,7 +119,7 @@ class _WordView extends StatelessWidget {
       case WordStatus.discarded:
         return const TextStyle(decoration: TextDecoration.lineThrough);
     }
-    Assert.fail('Unknown WordStatus: $status');
+    Assert.unexpectedValue(status);
   }
 
   @override

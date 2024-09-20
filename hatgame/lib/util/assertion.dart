@@ -1,3 +1,5 @@
+// TODO: Remove assertion functions from the stacktrace.
+
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/util/list_ext.dart';
@@ -66,6 +68,12 @@ class Assert {
 
   static void failDebug(String message, {required AssertInRelease inRelease}) {
     holds(false, message: message, inRelease: inRelease);
+  }
+
+  // Use to indicate that the value was not expected, e.g. after an exhaustive
+  // switch.
+  static Never unexpectedValue<T>(T value) {
+    return fail('Unexpected ${T.toString()} value: $value');
   }
 
   static void eq<T>(T a, T b,

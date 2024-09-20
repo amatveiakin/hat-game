@@ -270,7 +270,7 @@ class GameNavigator {
       case GamePhase.rematch:
         Assert.fail('There is no route for GamePhase.rematch');
     }
-    Assert.fail('Unexpected GamePhase: $phase');
+    Assert.unexpectedValue(phase);
   }
 
   static GamePhase _firstGrandparentPhase(GamePhase phase) {
@@ -303,7 +303,7 @@ class GameNavigator {
       case GamePhase.rematch:
         return null;
     }
-    Assert.fail('Unexpected GamePhase: $phase');
+    Assert.unexpectedValue(phase);
   }
 
   static Future<_PopResponse> _confimLeaveGame(
@@ -369,6 +369,6 @@ class GameNavigator {
       case GamePhase.rematch:
         return Future.value(_PopResponse.exitGame);
     }
-    Assert.fail('Unexpected game phase: $currentPhase');
+    Assert.unexpectedValue(currentPhase);
   }
 }

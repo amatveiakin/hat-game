@@ -150,7 +150,7 @@ class TeamingConfigViewState extends State<TeamingConfigView> {
         TeamingStyle.randomPairs => tr('teaming_random_pairs'),
         TeamingStyle.randomTeams => tr('teaming_random_teams'),
         TeamingStyle.manualTeams => tr('teaming_manual_teams'),
-        _ => Assert.fail('Unknown TeamingStyle: ${config.teamingStyle}'),
+        _ => Assert.unexpectedValue(config.teamingStyle),
       };
       items.add(
         OptionSelectorHeader(title: Text(title), onTap: onTap),

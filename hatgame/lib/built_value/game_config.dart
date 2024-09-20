@@ -51,7 +51,7 @@ class TeamingStyle extends EnumClass {
       case TeamingStyle.manualTeams:
         return true;
     }
-    Assert.fail('Unknown TeamingStyle: $this');
+    Assert.unexpectedValue(this);
   }
 }
 

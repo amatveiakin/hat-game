@@ -145,7 +145,7 @@ Widget _getWordFeedbackIcon(
               color: MyTheme.secondary)
           : const ImageAssetIcon('images/too_hard_outlined.png');
   }
-  Assert.fail("Reached end of _getWordFeedbackIcon");
+  Assert.unexpectedValue(feedback);
 }
 
 String _getWordFeedbackText(WordFeedback feedback) {
@@ -159,7 +159,7 @@ String _getWordFeedbackText(WordFeedback feedback) {
     case WordFeedback.tooHard:
       return tr('word_feedback_too_hard');
   }
-  Assert.fail("Reached end of _getWordFeedbackText");
+  Assert.unexpectedValue(feedback);
 }
 
 class WordReviewItem extends StatelessWidget {
