@@ -324,7 +324,7 @@ void main() {
     });
   });
 
-  group('fuild pair individual strategy', () {
+  group('fluid pair individual strategy', () {
     test('correctness', () {
       // Correctness is defined as: in one full cycle each pair plays
       // exactly once.

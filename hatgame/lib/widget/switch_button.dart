@@ -8,6 +8,8 @@ import 'package:hatgame/util/list_ext.dart';
 //   ┃ Selected option ┃  Other option   │
 //   ┗━━━━━━━━━━━━━━━━━┹─────────────────╯
 //
+// TODO: Consider replacing with a SegmentedButton.
+//
 class SwitchButton extends StatelessWidget {
   final List<String> options;
   final int selectedOption;
