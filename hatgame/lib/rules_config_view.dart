@@ -109,7 +109,8 @@ class RulesConfigViewState extends State<RulesConfigView> {
     30,
     40,
     50,
-    70,
+    60,
+    80,
     100,
   ];
 
