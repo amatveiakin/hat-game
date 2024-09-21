@@ -31,33 +31,30 @@ class OptionSelectorHeader extends StatelessWidget {
 // =============================================================================
 // Selector page
 
-class OptionDescription<E> {
-  final bool isDivider;
-  final E? value;
-  final LocalStr? title;
+sealed class OptionItem<E> {}
+
+class OptionChoice<E> extends OptionItem<E> {
+  final E value;
+  final LocalStr title;
   final LocalStr? subtitle;
 
-  OptionDescription({
+  OptionChoice({
     required this.value,
     required this.title,
     this.subtitle,
-  }) : isDivider = false;
-
-  OptionDescription.divider()
-      : isDivider = true,
-        value = null,
-        title = null,
-        subtitle = null;
+  });
 }
 
-OptionDescription<E>? optionWithValue<E>(
-    List<OptionDescription<E>> options, E value) {
-  return options.firstWhereOrNull((o) => !o.isDivider && o.value == value);
+class OptionDivider<E> extends OptionItem<E> {}
+
+OptionChoice<E>? optionWithValue<E>(List<OptionItem<E>> options, E value) {
+  return options.firstWhereOrNull(
+      (o) => o is OptionChoice<E> && o.value == value) as OptionChoice<E>?;
 }
 
 abstract class EnumOptionSelector<E> extends StatefulWidget {
   final LocalStr windowTitle;
-  final List<OptionDescription<E>> allValues;
+  final List<OptionItem<E>> allValues;
   final E initialValue;
   final Function changeCallback;
 
@@ -103,13 +100,12 @@ class EnumOptionSelectorState<E, W extends EnumOptionSelector>
       // keyboard navigation.
       body: ListView(
         children: widget.allValues
-            .map(
-              (e) => e.isDivider
-                  ? const ThinDivider(
+            .map((e) => switch (e) {
+                  OptionDivider() => const ThinDivider(
                       height: 8.0,
-                    )
-                  : RadioListTile<E?>(
-                      title: Text(e.title!.value(context)),
+                    ),
+                  OptionChoice() => RadioListTile<E?>(
+                      title: Text(e.title.value(context)),
                       subtitle: e.subtitle == null
                           ? null
                           : Text(e.subtitle!.value(context)),
@@ -121,7 +117,7 @@ class EnumOptionSelectorState<E, W extends EnumOptionSelector>
                       toggleable: true,
                       onChanged: (v) => _valueChanged(context, v),
                     ),
-            )
+                })
             .toList(),
       ),
     );

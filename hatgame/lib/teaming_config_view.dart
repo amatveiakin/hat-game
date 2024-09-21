@@ -10,27 +10,27 @@ import 'package:hatgame/widget/numeric_field.dart';
 // TODO: Add icons
 getTeamingStyleOptions() {
   return [
-    OptionDescription(
+    OptionChoice(
       value: TeamingStyle.individual,
       title: LocalStr.tr('teaming_individual'),
       subtitle: LocalStr.tr('teaming_individual_description'),
     ),
-    OptionDescription(
+    OptionChoice(
       value: TeamingStyle.oneToAll,
       title: LocalStr.tr('teaming_one_to_all'),
       subtitle: LocalStr.tr('teaming_one_to_all_description'),
     ),
-    OptionDescription(
+    OptionChoice(
       value: TeamingStyle.randomPairs,
       title: LocalStr.tr('teaming_random_pairs'),
       subtitle: LocalStr.tr('teaming_random_pairs_description'),
     ),
-    OptionDescription(
+    OptionChoice(
       value: TeamingStyle.randomTeams,
       title: LocalStr.tr('teaming_random_teams'),
       subtitle: LocalStr.tr('teaming_random_teams_description'),
     ),
-    OptionDescription(
+    OptionChoice(
       value: TeamingStyle.manualTeams,
       title: LocalStr.tr('teaming_manual_teams'),
       subtitle: LocalStr.tr('teaming_manual_teams_description'),

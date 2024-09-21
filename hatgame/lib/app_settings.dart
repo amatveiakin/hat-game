@@ -6,18 +6,18 @@ import 'package:hatgame/util/local_str.dart';
 import 'package:hatgame/widget/constrained_scaffold.dart';
 import 'package:hatgame/widget/enum_option_selector.dart';
 
-List<OptionDescription<String>> languageOptions() {
+List<OptionItem<String?>> languageOptions() {
   return [
-    OptionDescription(
+    OptionChoice(
       value: null,
       title: LocalStr.tr('system_default'),
     ),
-    OptionDescription.divider(),
-    OptionDescription(
+    OptionDivider(),
+    OptionChoice(
       value: 'en',
       title: LocalStr.raw('English'),
     ),
-    OptionDescription(
+    OptionChoice(
       value: 'ru',
       title: LocalStr.raw('Русский'),
     ),
@@ -89,7 +89,7 @@ class AppSettingsViewState extends State<AppSettingsView> {
             OptionSelectorHeader(
                 title: Text(context.tr('language') +
                     optionWithValue(languageOptions(), language)!
-                        .title!
+                        .title
                         .value(context)),
                 onTap: () {
                   Navigator.of(context).push(MaterialPageRoute(
