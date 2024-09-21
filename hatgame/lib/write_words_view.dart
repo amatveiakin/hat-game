@@ -14,6 +14,7 @@ import 'package:hatgame/game_navigator.dart';
 import 'package:hatgame/lexicon.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/invalid_operation.dart';
+import 'package:hatgame/util/local_str.dart';
 import 'package:hatgame/widget/checkbox_button.dart';
 import 'package:hatgame/widget/checked_text_field.dart';
 import 'package:hatgame/widget/constrained_scaffold.dart';
@@ -25,14 +26,14 @@ import 'package:unicode/unicode.dart' as unicode;
 // Note: this is similar to checkPlayerName, should consider syncing changes.
 InvalidOperation? checkWord(String word) {
   if (word.isEmpty) {
-    return InvalidOperation(tr('word_is_empty'));
+    return InvalidOperation(LocalStr.tr('word_is_empty'));
   }
   if (word.length > 50) {
-    return InvalidOperation(tr('word_is_too_long'));
+    return InvalidOperation(LocalStr.tr('word_is_too_long'));
   }
   for (final c in word.codeUnits) {
     if (unicode.isControl(c) || unicode.isFormat(c)) {
-      return InvalidOperation(tr('word_contains_invalid_character',
+      return InvalidOperation(LocalStr.tr('word_contains_invalid_character',
           namedArgs: {'char': String.fromCharCode(c), 'code': c.toString()}));
     }
   }
@@ -148,7 +149,7 @@ class WriteWordsViewState extends State<WriteWordsView> {
 
   void _showPlayersNotReady(List<String> playersNotReady) async {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(tr('waiting_for') + playersNotReady.join(', ')),
+      content: Text(context.tr('waiting_for') + playersNotReady.join(', ')),
     ));
   }
 
@@ -195,7 +196,7 @@ class WriteWordsViewState extends State<WriteWordsView> {
                   icon: const ImageAssetIcon('images/dice.png'),
                   onPressed: () =>
                       _generateRandomWord(controller.textController),
-                  tooltip: tr('generate_a_random_word'),
+                  tooltip: context.tr('generate_a_random_word'),
                 )
               ],
             ),
@@ -206,7 +207,7 @@ class WriteWordsViewState extends State<WriteWordsView> {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         automaticallyImplyLeading: localGameData.isAdmin,
-        title: Text(tr('write_your_words')),
+        title: Text(context.tr('write_your_words')),
       ),
       body: Column(
         children: [
@@ -218,7 +219,7 @@ class WriteWordsViewState extends State<WriteWordsView> {
           ),
           WideWidget(
             child: CheckboxButton(
-              title: Text(tr('ready')),
+              title: Text(context.tr('ready')),
               value: playerState.wordsReady ?? false,
               onChanged: (value) => _updateState(playerState, ready: value),
             ),
@@ -234,9 +235,9 @@ class WriteWordsViewState extends State<WriteWordsView> {
             margin: WideButton.bottomButtonMargin,
             // Note: keep text in sync with game_config_view.dart
             child: everybodyReady
-                ? GoNextButtonCaption(tr('next'))
+                ? GoNextButtonCaption(context.tr('next'))
                 : Text(
-                    tr('player_readiness', namedArgs: {
+                    context.tr('player_readiness', namedArgs: {
                       'ready': viewData.numPlayersReady.toString(),
                       'total': viewData.numPlayers.toString()
                     }),

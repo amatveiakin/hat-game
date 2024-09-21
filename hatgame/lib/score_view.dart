@@ -213,7 +213,7 @@ class ScoreView extends StatelessWidget {
     final gameData = gameController.gameData;
     return PrimarySecondaryScaffold(
       primaryAutomaticallyImplyLeading: true,
-      primaryTitle: tr('game_over'),
+      primaryTitle: context.tr('game_over'),
       primary: Column(
         children: [
           Expanded(
@@ -233,7 +233,7 @@ class ScoreView extends StatelessWidget {
                 : null,
             coloring: WideButtonColoring.secondary,
             margin: WideButton.bottomButtonMargin,
-            child: Text(tr('rematch')),
+            child: Text(context.tr('rematch')),
           ),
         ],
       ),
@@ -247,7 +247,7 @@ class ScoreView extends StatelessWidget {
       ),
       // TODO: Proper icon.
       secondaryIcon: const Icon(Icons.list),
-      secondaryTitle: tr('game_log'),
+      secondaryTitle: context.tr('game_log'),
     );
   }
 }

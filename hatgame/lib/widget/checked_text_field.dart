@@ -112,7 +112,7 @@ class CheckedTextFieldState extends State<CheckedTextField> {
       textInputAction: widget.textInputAction,
       decoration: InputDecoration(
         labelText: widget.labelText,
-        errorText: controller.displayError?.message,
+        errorText: controller.displayError?.message.value(context),
       ),
       keyboardType: widget.keyboardType,
       inputFormatters: widget.inputFormatters,

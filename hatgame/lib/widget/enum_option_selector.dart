@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
+import 'package:hatgame/util/local_str.dart';
 import 'package:hatgame/widget/divider.dart';
 
 // =============================================================================
@@ -33,8 +34,8 @@ class OptionSelectorHeader extends StatelessWidget {
 class OptionDescription<E> {
   final bool isDivider;
   final E? value;
-  final String? title;
-  final String? subtitle;
+  final LocalStr? title;
+  final LocalStr? subtitle;
 
   OptionDescription({
     required this.value,
@@ -55,7 +56,7 @@ OptionDescription<E>? optionWithValue<E>(
 }
 
 abstract class EnumOptionSelector<E> extends StatefulWidget {
-  final String windowTitle;
+  final LocalStr windowTitle;
   final List<OptionDescription<E>> allValues;
   final E initialValue;
   final Function changeCallback;
@@ -93,7 +94,7 @@ class EnumOptionSelectorState<E, W extends EnumOptionSelector>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.windowTitle),
+        title: Text(widget.windowTitle.value(context)),
       ),
       // TODO: Add icons. Consider if the items should look like buttons or
       // still look like list items. In the latter case we could change icon
@@ -108,8 +109,10 @@ class EnumOptionSelectorState<E, W extends EnumOptionSelector>
                       height: 8.0,
                     )
                   : RadioListTile<E?>(
-                      title: Text(e.title!),
-                      subtitle: e.subtitle == null ? null : Text(e.subtitle!),
+                      title: Text(e.title!.value(context)),
+                      subtitle: e.subtitle == null
+                          ? null
+                          : Text(e.subtitle!.value(context)),
                       value: e.value,
                       isThreeLine: e.subtitle != null,
                       groupValue: currentValue,

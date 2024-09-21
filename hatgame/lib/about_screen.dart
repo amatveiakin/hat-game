@@ -52,7 +52,7 @@ The app is written in Flutter.
   Widget build(BuildContext context) {
     return ConstrainedScaffold(
       appBar: AppBar(
-        title: Text(tr('about_hat_game')),
+        title: Text(context.tr('about_hat_game')),
       ),
       body: Markdown(
         data: content,

@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/local_storage.dart';
 import 'package:hatgame/util/assertion.dart';
+import 'package:hatgame/util/local_str.dart';
 import 'package:hatgame/widget/constrained_scaffold.dart';
 import 'package:hatgame/widget/enum_option_selector.dart';
 
@@ -9,16 +10,16 @@ List<OptionDescription<String>> languageOptions() {
   return [
     OptionDescription(
       value: null,
-      title: tr('system_default'),
+      title: LocalStr.tr('system_default'),
     ),
     OptionDescription.divider(),
     OptionDescription(
       value: 'en',
-      title: 'English', // no 'tr'
+      title: LocalStr.raw('English'),
     ),
     OptionDescription(
       value: 'ru',
-      title: 'Русский', // no 'tr'
+      title: LocalStr.raw('Русский'),
     ),
   ];
 }
@@ -26,7 +27,7 @@ List<OptionDescription<String>> languageOptions() {
 class LanguageSelector extends EnumOptionSelector<String?> {
   LanguageSelector(String? initialValue, Function changeCallback, {super.key})
       : super(
-          windowTitle: tr('app_language'),
+          windowTitle: LocalStr.tr('app_language'),
           allValues: languageOptions(),
           initialValue: initialValue,
           changeCallback: changeCallback,
@@ -81,13 +82,15 @@ class AppSettingsViewState extends State<AppSettingsView> {
   Widget build(BuildContext context) {
     return ConstrainedScaffold(
         appBar: AppBar(
-          title: Text(tr('app_settings')),
+          title: Text(context.tr('app_settings')),
         ),
         body: ListView(
           children: [
             OptionSelectorHeader(
-                title: Text(tr('language') +
-                    optionWithValue(languageOptions(), language)!.title!),
+                title: Text(context.tr('language') +
+                    optionWithValue(languageOptions(), language)!
+                        .title!
+                        .value(context)),
                 onTap: () {
                   Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => LanguageSelector(

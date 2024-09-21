@@ -6,6 +6,7 @@ import 'package:hatgame/dictionary_selector.dart';
 import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/lexicon.dart';
 import 'package:hatgame/util/invalid_operation.dart';
+import 'package:hatgame/util/local_str.dart';
 import 'package:hatgame/util/markdown.dart';
 import 'package:hatgame/widget/constrained_scaffold.dart';
 import 'package:hatgame/widget/divider.dart';
@@ -124,8 +125,8 @@ class RulesConfigViewState extends State<RulesConfigView> {
       // TODO: Support writing words in offline mode.
       await showInvalidOperationDialog(
           context: context,
-          error: InvalidOperation(
-              'Writing words in offline mode is not supported (yet).'));
+          error: InvalidOperation(LocalStr.raw(
+              'Writing words in offline mode is not supported (yet).')));
       return;
     }
     configController.updateRules(
@@ -187,24 +188,24 @@ class RulesConfigViewState extends State<RulesConfigView> {
         config.dictionaries?.map((d) => Lexicon.dictionaryMetadata(d).uiName);
     final String dictionariesCaption =
         dictionaryNames == null || dictionaryNames.isEmpty
-            ? tr('dictionaries_none')
+            ? context.tr('dictionaries_none')
             : dictionaryNames.length == 1
-                ? tr('dictionary_one') + dictionaryNames.first
-                : tr('dictionaries_many') +
+                ? context.tr('dictionary_one') + dictionaryNames.first
+                : context.tr('dictionaries_many') +
                     '\n' +
                     dictionaryNames.map((d) => '        $d').join('\n');
 
     return ListView(
       children: [
         SectionDivider(
-          title: tr('timer'),
+          title: context.tr('timer'),
           firstSection: true,
         ),
         ListTile(
           title: Row(
             children: [
               Expanded(
-                child: Text(tr('turn_time')),
+                child: Text(context.tr('turn_time')),
               ),
               Padding(
                 padding: _numericFieldPadding,
@@ -212,7 +213,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
                   readOnly: configController.isReadOnly,
                   controller: viewController.turnTimeController,
                   goldenValues: turnTimeGoldenValues,
-                  suffixText: tr('s'),
+                  suffixText: context.tr('s'),
                 ),
               ),
             ],
@@ -222,7 +223,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
           title: Row(
             children: [
               Expanded(
-                child: Text(tr('bonus_time')),
+                child: Text(context.tr('bonus_time')),
               ),
               Padding(
                 padding: _numericFieldPadding,
@@ -230,18 +231,18 @@ class RulesConfigViewState extends State<RulesConfigView> {
                   readOnly: configController.isReadOnly,
                   controller: viewController.bonusTimeController,
                   goldenValues: timeGoldenValues,
-                  suffixText: tr('s'),
+                  suffixText: context.tr('s'),
                 ),
               ),
             ],
           ),
         ),
         SectionDivider(
-          title: tr('words'),
+          title: context.tr('words'),
         ),
         ListTile(
           title: SwitchButton(
-            options: [tr('random_words'), tr('write_words')],
+            options: [context.tr('random_words'), context.tr('write_words')],
             selectedOption: config.writeWords ? 1 : 0,
             onSelectedOptionChanged: configController.isReadOnly
                 ? null
@@ -252,7 +253,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
           title: Row(
             children: [
               Expanded(
-                child: Text(tr('words_per_player')),
+                child: Text(context.tr('words_per_player')),
               ),
               Padding(
                 padding: _numericFieldPadding,
@@ -279,7 +280,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
           Row(children: [
             Expanded(
               child: SwitchListTile(
-                  title: Text(tr('pluralias')),
+                  title: Text(context.tr('pluralias')),
                   value: config.pluralias,
                   onChanged: (bool value) => _setPluralias(value)),
             ),
@@ -306,10 +307,10 @@ class PluraliasHelpScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ConstrainedScaffold(
       appBar: AppBar(
-        title: Text(tr('pluralias_help_title')),
+        title: Text(context.tr('pluralias_help_title')),
       ),
       body: Markdown(
-        data: tr('pluralias_help_body'),
+        data: context.tr('pluralias_help_body'),
         styleSheet: MarkdownUtil.defaultStyle(context),
       ),
     );

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/util/assertion.dart';
+import 'package:hatgame/util/local_str.dart';
 import 'package:hatgame/widget/enum_option_selector.dart';
 import 'package:hatgame/widget/numeric_field.dart';
 
@@ -11,28 +12,28 @@ getTeamingStyleOptions() {
   return [
     OptionDescription(
       value: TeamingStyle.individual,
-      title: tr('teaming_individual'),
-      subtitle: tr('teaming_individual_description'),
+      title: LocalStr.tr('teaming_individual'),
+      subtitle: LocalStr.tr('teaming_individual_description'),
     ),
     OptionDescription(
       value: TeamingStyle.oneToAll,
-      title: tr('teaming_one_to_all'),
-      subtitle: tr('teaming_one_to_all_description'),
+      title: LocalStr.tr('teaming_one_to_all'),
+      subtitle: LocalStr.tr('teaming_one_to_all_description'),
     ),
     OptionDescription(
       value: TeamingStyle.randomPairs,
-      title: tr('teaming_random_pairs'),
-      subtitle: tr('teaming_random_pairs_description'),
+      title: LocalStr.tr('teaming_random_pairs'),
+      subtitle: LocalStr.tr('teaming_random_pairs_description'),
     ),
     OptionDescription(
       value: TeamingStyle.randomTeams,
-      title: tr('teaming_random_teams'),
-      subtitle: tr('teaming_random_teams_description'),
+      title: LocalStr.tr('teaming_random_teams'),
+      subtitle: LocalStr.tr('teaming_random_teams_description'),
     ),
     OptionDescription(
       value: TeamingStyle.manualTeams,
-      title: tr('teaming_manual_teams'),
-      subtitle: tr('teaming_manual_teams_description'),
+      title: LocalStr.tr('teaming_manual_teams'),
+      subtitle: LocalStr.tr('teaming_manual_teams_description'),
     ),
     // OptionDescription(
     //   value: TeamingStyle.namedTeams,
@@ -47,7 +48,7 @@ class TeamingStyleSelector extends EnumOptionSelector<TeamingStyle> {
   TeamingStyleSelector(TeamingStyle initialValue, Function changeCallback,
       {super.key})
       : super(
-          windowTitle: tr('teaming'),
+          windowTitle: LocalStr.tr('teaming'),
           allValues: getTeamingStyleOptions(),
           initialValue: initialValue,
           changeCallback: changeCallback,
@@ -145,11 +146,11 @@ class TeamingConfigViewState extends State<TeamingConfigView> {
                       )));
             };
       final title = switch (config.teamingStyle) {
-        TeamingStyle.individual => tr('teaming_individual'),
-        TeamingStyle.oneToAll => tr('teaming_one_to_all'),
-        TeamingStyle.randomPairs => tr('teaming_random_pairs'),
-        TeamingStyle.randomTeams => tr('teaming_random_teams'),
-        TeamingStyle.manualTeams => tr('teaming_manual_teams'),
+        TeamingStyle.individual => context.tr('teaming_individual'),
+        TeamingStyle.oneToAll => context.tr('teaming_one_to_all'),
+        TeamingStyle.randomPairs => context.tr('teaming_random_pairs'),
+        TeamingStyle.randomTeams => context.tr('teaming_random_teams'),
+        TeamingStyle.manualTeams => context.tr('teaming_manual_teams'),
         _ => Assert.unexpectedValue(config.teamingStyle),
       };
       items.add(
@@ -167,9 +168,9 @@ class TeamingConfigViewState extends State<TeamingConfigView> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(tr('team_number')),
+                    Text(context.tr('team_number')),
                     Text(
-                      _playersPerTeamText(numPlayers, config.numTeams),
+                      _playersPerTeamText(context, numPlayers, config.numTeams),
                       style: const TextStyle(fontSize: 14.0),
                     ),
                   ],
@@ -195,13 +196,13 @@ class TeamingConfigViewState extends State<TeamingConfigView> {
   }
 }
 
-String _playersPerTeamText(int numPlayers, int numTeams) {
+String _playersPerTeamText(BuildContext context, int numPlayers, int numTeams) {
   const enDash = "–";
   final min = numPlayers ~/ numTeams;
   final max = (numPlayers + numTeams - 1) ~/ numTeams;
   if (min < 2) {
-    return tr('not_enough_players');
+    return context.tr('not_enough_players');
   }
   final value = (min == max) ? min.toString() : "${min}${enDash}${max}";
-  return plural('players_per_team', max, args: [value]);
+  return context.plural('players_per_team', max, args: [value]);
 }

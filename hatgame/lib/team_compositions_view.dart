@@ -105,7 +105,9 @@ class TeamCompositionsView extends StatelessWidget {
     return ConstrainedScaffold(
       appBar: AppBar(
         automaticallyImplyLeading: localGameData.isAdmin,
-        title: Text(teamPlay ? tr('team_compositions') : tr('turn_order')),
+        title: Text(teamPlay
+            ? context.tr('team_compositions')
+            : context.tr('turn_order')),
         actions: [
           if (localGameData.isAdmin)
             IconButton(
@@ -113,8 +115,8 @@ class TeamCompositionsView extends StatelessWidget {
               onPressed: () => _regenerateTeamCompositions(
                   teamCompositionsViewData.gameConfig),
               tooltip: teamPlay
-                  ? tr('new_random_teams_and_turn_order')
-                  : tr('new_random_turn_order'),
+                  ? context.tr('new_random_teams_and_turn_order')
+                  : context.tr('new_random_turn_order'),
             )
         ],
       ),
@@ -136,7 +138,7 @@ class TeamCompositionsView extends StatelessWidget {
                 : null,
             coloring: WideButtonColoring.secondary,
             margin: WideButton.bottomButtonMargin,
-            child: Text(tr('start_game')),
+            child: Text(context.tr('start_game')),
           ),
         ],
       ),

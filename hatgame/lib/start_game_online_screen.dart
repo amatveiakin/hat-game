@@ -7,6 +7,7 @@ import 'package:hatgame/game_data.dart';
 import 'package:hatgame/game_navigator.dart';
 import 'package:hatgame/local_storage.dart';
 import 'package:hatgame/util/invalid_operation.dart';
+import 'package:hatgame/util/local_str.dart';
 import 'package:hatgame/widget/checked_text_field.dart';
 import 'package:hatgame/widget/constrained_scaffold.dart';
 import 'package:hatgame/widget/dialog.dart';
@@ -18,7 +19,7 @@ import 'package:hatgame/widget/wide_button.dart';
 // Local checks only
 InvalidOperation? checkGameID(String gameID) {
   if (gameID.isEmpty) {
-    return InvalidOperation(tr('game_id_is_empty'));
+    return InvalidOperation(LocalStr.tr('game_id_is_empty'));
   }
   return null;
 }
@@ -95,7 +96,7 @@ class NewGameOnlineScreenState extends State<NewGameOnlineScreen> {
   Widget build(BuildContext context) {
     return ConstrainedScaffold(
       appBar: AppBar(
-        title: Text(tr('new_game_online')),
+        title: Text(context.tr('new_game_online')),
       ),
       body: Center(
         child: Column(
@@ -105,7 +106,7 @@ class NewGameOnlineScreenState extends State<NewGameOnlineScreen> {
                   const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
               child: CheckedTextField(
                 textInputAction: TextInputAction.go,
-                labelText: tr('your_name'),
+                labelText: context.tr('your_name'),
                 controller: playerNameController,
                 // TODO: Uncomment; disable auto-submit on unfocus on web.
                 // onSubmitted: (_) => _createGame(context),
@@ -116,7 +117,7 @@ class NewGameOnlineScreenState extends State<NewGameOnlineScreen> {
               onPressed: () => _createGame(context),
               coloring: WideButtonColoring.secondary,
               margin: WideButton.bottomButtonMargin,
-              child: Text(tr('create_game')),
+              child: Text(context.tr('create_game')),
             ),
           ],
         ),
@@ -160,12 +161,12 @@ class JoinGameOnlineScreenState extends State<JoinGameOnlineScreen> {
     return multipleChoiceDialog<bool>(
       context: context,
       contentText: gameStarted
-          ? tr('reconnect_as', namedArgs: {'name': playerName})
-          : tr('player_exists_confirm_reconnect',
+          ? context.tr('reconnect_as', namedArgs: {'name': playerName})
+          : context.tr('player_exists_confirm_reconnect',
               namedArgs: {'name': playerName}),
       choices: [
-        DialogChoice(false, tr('cancel')),
-        DialogChoice(true, tr('reconnect')),
+        DialogChoice(false, context.tr('cancel')),
+        DialogChoice(true, context.tr('reconnect')),
       ],
       defaultChoice: false,
     );
@@ -258,7 +259,7 @@ class JoinGameOnlineScreenState extends State<JoinGameOnlineScreen> {
   Widget build(BuildContext context) {
     return ConstrainedScaffold(
       appBar: AppBar(
-        title: Text(tr('join_game_online')),
+        title: Text(context.tr('join_game_online')),
       ),
       body: Center(
         child: Column(
@@ -271,7 +272,7 @@ class JoinGameOnlineScreenState extends State<JoinGameOnlineScreen> {
                 children: [
                   CheckedTextField(
                     textInputAction: TextInputAction.next,
-                    labelText: tr('game_id'),
+                    labelText: context.tr('game_id'),
                     keyboardType: TextInputType.number,
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[.0-9]+'))
@@ -281,7 +282,7 @@ class JoinGameOnlineScreenState extends State<JoinGameOnlineScreen> {
                   ),
                   CheckedTextField(
                     textInputAction: TextInputAction.go,
-                    labelText: tr('your_name'),
+                    labelText: context.tr('your_name'),
                     controller: playerNameController,
                     // TODO: Uncomment; disable auto-submit on unfocus on web.
                     // onSubmitted: (_) => _joinGame(context),
@@ -294,7 +295,7 @@ class JoinGameOnlineScreenState extends State<JoinGameOnlineScreen> {
               onPressed: () => _joinGame(context),
               coloring: WideButtonColoring.secondary,
               margin: WideButton.bottomButtonMargin,
-              child: Text(tr('join_game')),
+              child: Text(context.tr('join_game')),
             ),
           ],
         ),

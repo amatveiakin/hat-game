@@ -1,10 +1,10 @@
 import 'package:built_collection/built_collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value/team_compositions.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/invalid_operation.dart';
+import 'package:hatgame/util/local_str.dart';
 
 // =============================================================================
 // Team Generators
@@ -29,13 +29,13 @@ void checkTeamSizes(BuiltList<BuiltList<int>> teams) {
     if (t.isEmpty) {
       // TODO: Disallow when the UI allows to delete teams.
     } else if (t.length == 1) {
-      throw InvalidOperation(tr('team_has_only_one_player'));
+      throw InvalidOperation(LocalStr.tr('team_has_only_one_player'));
     }
   }
   if (teams.isEmpty) {
-    throw InvalidOperation(tr('there_are_zero_teams'));
+    throw InvalidOperation(LocalStr.tr('there_are_zero_teams'));
   } else if (teams.length == 1) {
-    throw InvalidOperation(tr('there_is_only_one_team'));
+    throw InvalidOperation(LocalStr.tr('there_is_only_one_team'));
   }
 }
 
@@ -48,8 +48,9 @@ List<int> generateTeamSizes(
       if (numPlayers % 2 != 0) {
         // TODO: Discard some players on dropPlayers when we have a UI for it.
         throw InvalidOperation(
-          tr('cannot_make_teams'),
-          comment: 'Odd number of players cannot be divided into pairs.',
+          LocalStr.tr('cannot_make_teams'),
+          comment: LocalStr.raw(
+              'Odd number of players cannot be divided into pairs.'),
         );
       }
       return List.filled(numPlayers ~/ 2, 2);
@@ -67,12 +68,12 @@ void checkNumPlayersForIndividualPlay(int numPlayers, TeamingConfig teaming) {
   switch (teaming.teamingStyle) {
     case TeamingStyle.individual:
       if (numPlayers < 2) {
-        throw InvalidOperation(tr('at_least_two_players_required'));
+        throw InvalidOperation(LocalStr.tr('at_least_two_players_required'));
       }
       return;
     case TeamingStyle.oneToAll:
       if (numPlayers < 1) {
-        throw InvalidOperation(tr('at_least_one_player_required'));
+        throw InvalidOperation(LocalStr.tr('at_least_one_player_required'));
       }
       return;
   }

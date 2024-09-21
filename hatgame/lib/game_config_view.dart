@@ -84,7 +84,7 @@ class _GameConfigViewState extends State<GameConfigView>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(tr('game_join_link')),
+          title: Text(context.tr('game_join_link')),
           content: Row(
             children: [
               Expanded(
@@ -95,12 +95,13 @@ class _GameConfigViewState extends State<GameConfigView>
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: link)).then((_) {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text(tr('link_copied_to_clipboard'))));
+                        content: Text(context.tr('link_copied_to_clipboard'))));
                   }, onError: (error) {
                     // TODO: Log to firebase.
                     debugPrint('Cannot copy to clipboard. Error: $error');
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text(tr('cannot_copy_link_to_clipboard'))));
+                        content:
+                            Text(context.tr('cannot_copy_link_to_clipboard'))));
                   });
                 },
               ),
@@ -108,7 +109,7 @@ class _GameConfigViewState extends State<GameConfigView>
           ),
           actions: [
             TextButton(
-              child: Text(tr('ok')),
+              child: Text(context.tr('ok')),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -220,15 +221,15 @@ class _GameConfigViewState extends State<GameConfigView>
       coloring: WideButtonColoring.secondary,
       margin: WideButton.bottomButtonMargin,
       child: GoNextButtonCaption(gameConfig.rules.writeWords
-          ? tr('write_words_titlecase')
-          : tr('next')),
+          ? context.tr('write_words_titlecase')
+          : context.tr('next')),
     );
 
     return SectionsScaffold(
       appBarAutomaticallyImplyLeading: false,
       appTitle: localGameData.onlineMode
-          ? tr('hat_game_id', args: [localGameData.gameID.toString()])
-          : tr('hat_game'),
+          ? context.tr('hat_game_id', args: [localGameData.gameID.toString()])
+          : context.tr('hat_game'),
       appTitlePresentInNarrowMode: localGameData.onlineMode,
       actions: localGameData.onlineMode
           ? [

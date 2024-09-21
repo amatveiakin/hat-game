@@ -75,7 +75,7 @@ class StartScreenState extends State<StartScreen> {
     }
     return ConstrainedScaffold(
       appBar: AppBar(
-        title: Text(tr('hat_game')),
+        title: Text(context.tr('hat_game')),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
@@ -86,11 +86,11 @@ class StartScreenState extends State<StartScreen> {
             itemBuilder: (BuildContext context) => [
               PopupMenuItem<_AdditionalAction>(
                 value: _AdditionalAction.gameRules,
-                child: Text(tr('hat_game_rules')),
+                child: Text(context.tr('hat_game_rules')),
               ),
               PopupMenuItem<_AdditionalAction>(
                 value: _AdditionalAction.aboutApp,
-                child: Text(tr('about_the_app')),
+                child: Text(context.tr('about_the_app')),
               ),
             ],
             onSelected: _executeAdditionalAction,
@@ -102,7 +102,7 @@ class StartScreenState extends State<StartScreen> {
           children: [
             const SizedBox(height: 6),
             Text(
-              tr('app_version', args: [appVersion]),
+              context.tr('app_version', args: [appVersion]),
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 10.0, color: Colors.black45),
             ),
@@ -110,19 +110,19 @@ class StartScreenState extends State<StartScreen> {
             WideButton(
               onPressed: () => _newGameOffline(context),
               coloring: WideButtonColoring.neutral,
-              child: Text(tr('new_local_game')),
+              child: Text(context.tr('new_local_game')),
             ),
             const SizedBox(height: 24),
             WideButton(
               onPressed: () => _newGameOnline(context),
               coloring: WideButtonColoring.neutral,
-              child: Text(tr('new_game_online')),
+              child: Text(context.tr('new_game_online')),
             ),
             const SizedBox(height: 24),
             WideButton(
               onPressed: () => _joinGame(context),
               coloring: WideButtonColoring.neutral,
-              child: Text(tr('join_game')),
+              child: Text(context.tr('join_game')),
             ),
             Expanded(child: Container()),
           ],

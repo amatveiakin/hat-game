@@ -45,7 +45,7 @@ class DictionarySelectorState extends State<DictionarySelector> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(tr('dictionaries')),
+        title: Text(context.tr('dictionaries')),
       ),
       body: ListView(
         children: widget.allValues.map((d) {

@@ -314,13 +314,13 @@ class GameNavigator {
     // possible to continue.
     return multipleChoiceDialog(
       context: context,
-      titleText: tr('leave_game'),
+      titleText: context.tr('leave_game'),
       contentText: localGameData.onlineMode
-          ? '${tr('reconnect_link_hint')}\n${localGameData.gameUrl}'
+          ? '${context.tr('reconnect_link_hint')}\n${localGameData.gameUrl}'
           : "You wouldn't be able to continue (this is not implemented yet)",
       choices: [
-        DialogChoice(_PopResponse.disabled, tr('stay')),
-        DialogChoice(_PopResponse.exitGame, tr('leave')),
+        DialogChoice(_PopResponse.disabled, context.tr('stay')),
+        DialogChoice(_PopResponse.exitGame, context.tr('leave')),
       ],
       defaultChoice: _PopResponse.disabled,
     );

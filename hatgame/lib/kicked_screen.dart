@@ -11,11 +11,11 @@ class KickedScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ConstrainedScaffold(
       appBar: AppBar(
-        title: Text(tr('hat_game')),
+        title: Text(context.tr('hat_game')),
       ),
       body: Center(
         child: Text(
-          tr('you_have_been_kicked'),
+          context.tr('you_have_been_kicked'),
           style: const TextStyle(fontSize: 18.0),
         ),
       ),

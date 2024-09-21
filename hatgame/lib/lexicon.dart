@@ -1,11 +1,11 @@
 import 'dart:math';
 
 import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/util/list_ext.dart';
+import 'package:hatgame/util/local_str.dart';
 import 'package:yaml/yaml.dart';
 
 class DictionaryMetadata {
@@ -126,7 +126,8 @@ class Lexicon {
     final List<String> words = [];
     for (final dictKey in dictionaries) {
       if (!_dictionaries.containsKey(dictKey)) {
-        throw InvalidOperation(tr('cannot_find_dictionary', args: [dictKey]),
+        throw InvalidOperation(
+            LocalStr.tr('cannot_find_dictionary', args: [dictKey]),
             isInternalError: true);
       }
       words.addAll(_dictionaries[dictKey]!.words);

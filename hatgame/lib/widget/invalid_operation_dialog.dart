@@ -7,9 +7,9 @@ Future<void> showInvalidOperationDialog(
     {required BuildContext context, required InvalidOperation error}) async {
   await simpleDialog(
     context: context,
-    titleText:
-        (error.isInternalError ? tr('internal_error') : '') + error.message,
-    contentText: error.comment,
-    closeButtonText: tr('ok'),
+    titleText: (error.isInternalError ? context.tr('internal_error') : '') +
+        error.message.value(context),
+    contentText: error.comment?.value(context),
+    closeButtonText: context.tr('ok'),
   );
 }

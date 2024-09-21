@@ -148,16 +148,16 @@ Widget _getWordFeedbackIcon(
   Assert.unexpectedValue(feedback);
 }
 
-String _getWordFeedbackText(WordFeedback feedback) {
+String _getWordFeedbackText(BuildContext context, WordFeedback feedback) {
   switch (feedback) {
     case WordFeedback.good:
-      return tr('word_feedback_nice');
+      return context.tr('word_feedback_nice');
     case WordFeedback.bad:
-      return tr('word_feedback_ugly');
+      return context.tr('word_feedback_ugly');
     case WordFeedback.tooEasy:
-      return tr('word_feedback_too_easy');
+      return context.tr('word_feedback_too_easy');
     case WordFeedback.tooHard:
-      return tr('word_feedback_too_hard');
+      return context.tr('word_feedback_too_hard');
   }
   Assert.unexpectedValue(feedback);
 }
@@ -232,7 +232,7 @@ class WordReviewItem extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Tooltip(
-                  message: tr('somebody_flagged_the_word'),
+                  message: context.tr('somebody_flagged_the_word'),
                   child: const Icon(Icons.error, color: MyTheme.primary),
                 ),
               ),
@@ -241,7 +241,7 @@ class WordReviewItem extends StatelessWidget {
                 icon: hasFlag
                     ? const Icon(Icons.error, color: MyTheme.secondary)
                     : const Icon(Icons.error_outline),
-                tooltip: tr('flag_the_word'),
+                tooltip: context.tr('flag_the_word'),
                 onPressed: () => setFlag!(!hasFlag),
               ),
             if (setStatus != null)
@@ -250,8 +250,8 @@ class WordReviewItem extends StatelessWidget {
                     ? Icons.restore_from_trash
                     : Icons.delete_outline),
                 tooltip: status == WordStatus.discarded
-                    ? tr('restore_word')
-                    : tr('discard_word'),
+                    ? context.tr('restore_word')
+                    : context.tr('discard_word'),
                 onPressed: () {
                   setStatus!(status == WordStatus.discarded
                       ? WordStatus.notExplained
@@ -269,7 +269,7 @@ class WordReviewItem extends StatelessWidget {
                             child: ListTile(
                                 leading: _getWordFeedbackIcon(
                                     wf, false, wf == feedback),
-                                title: Text(_getWordFeedbackText(wf))),
+                                title: Text(_getWordFeedbackText(context, wf))),
                           ))
                       .toList());
                   return result;
@@ -501,8 +501,8 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
   Widget _buildActivePlayer(BuildContext context) {
     final wordsInHatWidget = Container(
       padding: const EdgeInsets.symmetric(vertical: 12.0),
-      child:
-          Text(tr('words_in_hat', args: [gameData.numWordsInHat().toString()])),
+      child: Text(context
+          .tr('words_in_hat', args: [gameData.numWordsInHat().toString()])),
     );
     switch (turnState!.turnPhase) {
       case TurnPhase.prepare:
@@ -530,8 +530,8 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
                                 : WideButtonColoring.secondary,
                             child: Text(
                               _padlockReadyToOpen.value
-                                  ? tr('release_to_start')
-                                  : tr('pull_to_start'),
+                                  ? context.tr('release_to_start')
+                                  : context.tr('pull_to_start'),
                               style: const TextStyle(fontSize: 24.0),
                             ),
                           ));
@@ -620,7 +620,7 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
               onPressed: _reviewDone,
               coloring: WideButtonColoring.secondary,
               margin: WideButton.bottomButtonMargin,
-              child: Text(tr('done')),
+              child: Text(context.tr('done')),
             ),
           ]);
         }
@@ -660,7 +660,7 @@ class GameViewState extends State<GameView> {
     return ConstrainedScaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text(tr('hat_game')),
+        title: Text(context.tr('hat_game')),
       ),
       body: Column(
         children: [

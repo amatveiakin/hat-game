@@ -1,8 +1,8 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/db/db_columns.dart';
 import 'package:hatgame/util/invalid_operation.dart';
+import 'package:hatgame/util/local_str.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unicode/unicode.dart' as unicode;
 
@@ -72,14 +72,15 @@ class LocalColLocale extends DBColumn<String?> with DBColSerializeStringOr {
 
 InvalidOperation? checkPlayerName(String name) {
   if (name.isEmpty) {
-    return InvalidOperation(tr('player_name_is_empty'));
+    return InvalidOperation(LocalStr.tr('player_name_is_empty'));
   }
   if (name.length > 50) {
-    return InvalidOperation(tr('player_name_too_long'));
+    return InvalidOperation(LocalStr.tr('player_name_too_long'));
   }
   for (final c in name.codeUnits) {
     if (unicode.isControl(c) || unicode.isFormat(c)) {
-      return InvalidOperation(tr('player_name_contains_invalid_character',
+      return InvalidOperation(LocalStr.tr(
+          'player_name_contains_invalid_character',
           namedArgs: {'char': String.fromCharCode(c), 'code': c.toString()}));
     }
   }

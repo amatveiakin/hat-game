@@ -240,7 +240,7 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
                 children: [
                   const Icon(Icons.person_add),
                   const SizedBox(width: 8),
-                  Text(tr('add_player')),
+                  Text(context.tr('add_player')),
                 ],
               ),
             ),
@@ -260,7 +260,7 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
                   children: [
                     const Icon(Icons.group_add),
                     const SizedBox(width: 8),
-                    Text(tr('add_team')),
+                    Text(context.tr('add_team')),
                   ],
                 ),
               ),

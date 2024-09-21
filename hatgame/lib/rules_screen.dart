@@ -13,10 +13,10 @@ class RulesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ConstrainedScaffold(
       appBar: AppBar(
-        title: Text(tr('hat_game_rules_title')),
+        title: Text(context.tr('hat_game_rules_title')),
       ),
       body: Markdown(
-        data: tr('hat_game_rules_body'),
+        data: context.tr('hat_game_rules_body'),
         styleSheet: MarkdownUtil.defaultStyle(context),
         onTapLink: (text, href, title) =>
             MarkdownUtil.onLinkTapped(context, href!),

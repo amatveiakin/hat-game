@@ -19,10 +19,10 @@ class OnlinePlayersConfigView extends StatelessWidget {
       {required String playerName}) async {
     return multipleChoiceDialog<bool>(
       context: context,
-      contentText: tr('confirm_kick_player', args: [playerName]),
+      contentText: context.tr('confirm_kick_player', args: [playerName]),
       choices: [
-        DialogChoice(false, tr('cancel')),
-        DialogChoice(true, tr('kick')),
+        DialogChoice(false, context.tr('cancel')),
+        DialogChoice(true, context.tr('kick')),
       ],
       defaultChoice: false,
     );

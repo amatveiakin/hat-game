@@ -3,7 +3,6 @@ import 'dart:math';
 
 import 'package:built_collection/built_collection.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hatgame/app_version.dart';
 import 'package:hatgame/built_value/game_config.dart';
@@ -24,6 +23,7 @@ import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/built_value_ext.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/util/list_ext.dart';
+import 'package:hatgame/util/local_str.dart';
 import 'package:hatgame/util/ntp_time.dart';
 import 'package:hatgame/util/strings.dart';
 
@@ -248,16 +248,19 @@ class GameController {
   static void checkVersionCompatibility(
       String hostVersion, String clientVersion) {
     if (isNullOrEmpty(hostVersion)) {
-      throw InvalidOperation('Unknown host version', isInternalError: true);
+      throw InvalidOperation(LocalStr.raw('Unknown host version'),
+          isInternalError: true);
     }
     if (isNullOrEmpty(clientVersion)) {
-      throw InvalidOperation('Unknown client version', isInternalError: true);
+      throw InvalidOperation(LocalStr.raw('Unknown client version'),
+          isInternalError: true);
     }
     if (!versionsCompatible(hostVersion, clientVersion)) {
-      throw InvalidOperation(tr('incompatible_game_version', namedArgs: {
-        'hostVersion': hostVersion,
-        'clientVersion': clientVersion
-      }));
+      throw InvalidOperation(LocalStr.tr('incompatible_game_version',
+          namedArgs: {
+            'hostVersion': hostVersion,
+            'clientVersion': clientVersion
+          }));
     }
   }
 
@@ -297,7 +300,8 @@ class GameController {
         return gameID;
       }
     }
-    throw InvalidOperation('Cannot generate game ID', isInternalError: true);
+    throw InvalidOperation(LocalStr.raw('Cannot generate game ID'),
+        isInternalError: true);
   }
 
   static Future<LocalGameData> newGameOffine() async {
@@ -354,7 +358,7 @@ class GameController {
       firestore.DocumentSnapshot snapshot = await tx.get(reference);
       if (!snapshot.exists) {
         return _JoinGameResultInternal.error(
-            InvalidOperation(tr('game_doesnt_exist', args: [gameID]))
+            InvalidOperation(LocalStr.tr('game_doesnt_exist', args: [gameID]))
               ..addTag(JoinGameErrorSource.gameID));
       }
       try {
@@ -404,7 +408,7 @@ class GameController {
           // TODO: Fix message:
           //     'Game $xxx has already started. In order to reconnect...'
           return _JoinGameResultInternal.error(
-              InvalidOperation('Name $myName is already taken')
+              InvalidOperation(LocalStr.raw('Name $myName is already taken'))
                 ..addTag(JoinGameErrorSource.playerName));
         }
       }
@@ -434,8 +438,8 @@ class GameController {
     await firestoreInstance.runTransaction((firestore.Transaction tx) async {
       firestore.DocumentSnapshot snapshot = await tx.get(reference);
       if (!snapshot.exists) {
-        return Future.error(
-            InvalidOperation("Game ${firestoreReference.path} doesn't exist"));
+        return Future.error(InvalidOperation(
+            LocalStr.raw("Game ${firestoreReference.path} doesn't exist")));
       }
       final playerRecord = dbGet(
           snapshot.data() as Map<String, dynamic>, DBColPlayer(playerID),
@@ -468,7 +472,7 @@ class GameController {
     if (config.rules.writeWords == false &&
         (config.rules.dictionaries == null ||
             config.rules.dictionaries!.isEmpty)) {
-      throw InvalidOperation(tr('no_dictionaries_selected'))
+      throw InvalidOperation(LocalStr.tr('no_dictionaries_selected'))
         ..addTag(StartGameErrorSource.dictionaries);
     }
 
