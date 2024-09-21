@@ -47,7 +47,7 @@ class TeamingStyleSelector extends EnumOptionSelector<TeamingStyle> {
   TeamingStyleSelector(TeamingStyle initialValue, Function changeCallback,
       {super.key})
       : super(
-          windowTitle: "Teaming",
+          windowTitle: tr('teaming'),
           allValues: getTeamingStyleOptions(),
           initialValue: initialValue,
           changeCallback: changeCallback,
@@ -167,7 +167,7 @@ class TeamingConfigViewState extends State<TeamingConfigView> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Team number"),
+                    Text(tr('team_number')),
                     Text(
                       _playersPerTeamText(numPlayers, config.numTeams),
                       style: const TextStyle(fontSize: 14.0),
@@ -200,8 +200,8 @@ String _playersPerTeamText(int numPlayers, int numTeams) {
   final min = numPlayers ~/ numTeams;
   final max = (numPlayers + numTeams - 1) ~/ numTeams;
   if (min < 2) {
-    return "Not enough players";
+    return tr('not_enough_players');
   }
   final value = (min == max) ? min.toString() : "${min}${enDash}${max}";
-  return "${value} players per team";
+  return plural('players_per_team', max, args: [value]);
 }

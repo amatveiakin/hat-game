@@ -204,6 +204,7 @@ reconnect_link_hint: 'To re-connect, use this link:'
 stay: Stay
 
 # lib/teaming_config_view.dart
+teaming: Play Partners
 teaming_individual: Individual
 teaming_individual_description: All possible player pairs will play together. Your score is the sum of words explained and words guessed.
 teaming_one_to_all: One to all
@@ -214,6 +215,12 @@ teaming_random_teams: Random teams
 teaming_random_teams_description: Players are randomly grouped together to form a given number of teams.
 teaming_manual_teams: Manual mode
 teaming_manual_teams_description: Create pairs or teams manually.
+team_number: Team number
+not_enough_players: Not enough players
+players_per_team: {
+  one: '{} player per team',
+  other: '{} players per team',
+}
 
 # lib/app_settings.dart
 app_language: App Language

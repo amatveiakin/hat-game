@@ -49,6 +49,7 @@ Future<void> main() async {
       supportedLocales: const [Locale('en'), Locale('ru')],
       fallbackLocale: const Locale('en'),
       startLocale: language == null ? null : Locale(language),
+      ignorePluralRules: false,
       path: 'translations',
       assetLoader: const YamlAssetLoader(),
       child: const MyApp(),
