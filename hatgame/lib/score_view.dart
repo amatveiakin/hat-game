@@ -97,29 +97,26 @@ class _WordView extends StatelessWidget {
   const _WordView({required this.data});
 
   Icon _icon(WordStatus status) {
-    switch (status) {
-      case WordStatus.notExplained:
-        return Icon(Icons.remove_red_eye_outlined, color: _style(status).color);
-      case WordStatus.explained:
-        // TODO: Find a clearer solution.
-        return const Icon(Icons.check, color: Colors.transparent);
-      case WordStatus.discarded:
-        return const Icon(Icons.delete);
-    }
-    Assert.unexpectedValue(status);
+    return switch (status) {
+      WordStatus.notExplained =>
+        Icon(Icons.remove_red_eye_outlined, color: _style(status).color),
+      // TODO: Find a clearer solution.
+      WordStatus.explained =>
+        const Icon(Icons.check, color: Colors.transparent),
+      WordStatus.discarded => const Icon(Icons.delete),
+      _ => Assert.unexpectedValue(status),
+    };
   }
 
   TextStyle _style(WordStatus status) {
-    switch (status) {
-      case WordStatus.notExplained:
-        // TODO: Take the color from the theme.
-        return const TextStyle(color: Colors.black45);
-      case WordStatus.explained:
-        return const TextStyle();
-      case WordStatus.discarded:
-        return const TextStyle(decoration: TextDecoration.lineThrough);
-    }
-    Assert.unexpectedValue(status);
+    return switch (status) {
+      // TODO: Take the color from the theme.
+      WordStatus.notExplained => const TextStyle(color: Colors.black45),
+      WordStatus.explained => const TextStyle(),
+      WordStatus.discarded =>
+        const TextStyle(decoration: TextDecoration.lineThrough),
+      _ => Assert.unexpectedValue(status),
+    };
   }
 
   @override

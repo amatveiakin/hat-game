@@ -42,16 +42,14 @@ class TeamingStyle extends EnumClass {
   static Serializer<TeamingStyle> get serializer => _$teamingStyleSerializer;
 
   bool teamPlay() {
-    switch (this) {
-      case TeamingStyle.individual:
-      case TeamingStyle.oneToAll:
-        return false;
-      case TeamingStyle.randomPairs:
-      case TeamingStyle.randomTeams:
-      case TeamingStyle.manualTeams:
-        return true;
-    }
-    Assert.unexpectedValue(this);
+    return switch (this) {
+      TeamingStyle.individual => false,
+      TeamingStyle.oneToAll => false,
+      TeamingStyle.randomPairs => true,
+      TeamingStyle.randomTeams => true,
+      TeamingStyle.manualTeams => true,
+      _ => Assert.unexpectedValue(this),
+    };
   }
 }
 

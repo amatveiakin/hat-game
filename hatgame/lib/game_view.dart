@@ -125,41 +125,33 @@ Widget _getWordFeedbackIcon(
         ? const Icon(Icons.thumbs_up_down_outlined)
         : const Icon(Icons.clear_outlined);
   }
-  switch (feedback) {
-    case WordFeedback.good:
-      return active
-          ? const Icon(Icons.thumb_up, color: MyTheme.secondary)
-          : const Icon(Icons.thumb_up_outlined);
-    case WordFeedback.bad:
-      return active
-          ? const Icon(Icons.thumb_down, color: MyTheme.secondary)
-          : const Icon(Icons.thumb_down_outlined);
-    case WordFeedback.tooEasy:
-      return active
-          ? const ImageAssetIcon('images/too_easy_filled.png',
-              color: MyTheme.secondary)
-          : const ImageAssetIcon('images/too_easy_outlined.png');
-    case WordFeedback.tooHard:
-      return active
-          ? const ImageAssetIcon('images/too_hard_filled.png',
-              color: MyTheme.secondary)
-          : const ImageAssetIcon('images/too_hard_outlined.png');
-  }
-  Assert.unexpectedValue(feedback);
+  return switch (feedback) {
+    WordFeedback.good => active
+        ? const Icon(Icons.thumb_up, color: MyTheme.secondary)
+        : const Icon(Icons.thumb_up_outlined),
+    WordFeedback.bad => active
+        ? const Icon(Icons.thumb_down, color: MyTheme.secondary)
+        : const Icon(Icons.thumb_down_outlined),
+    WordFeedback.tooEasy => active
+        ? const ImageAssetIcon('images/too_easy_filled.png',
+            color: MyTheme.secondary)
+        : const ImageAssetIcon('images/too_easy_outlined.png'),
+    WordFeedback.tooHard => active
+        ? const ImageAssetIcon('images/too_hard_filled.png',
+            color: MyTheme.secondary)
+        : const ImageAssetIcon('images/too_hard_outlined.png'),
+    _ => Assert.unexpectedValue(feedback),
+  };
 }
 
 String _getWordFeedbackText(BuildContext context, WordFeedback feedback) {
-  switch (feedback) {
-    case WordFeedback.good:
-      return context.tr('word_feedback_nice');
-    case WordFeedback.bad:
-      return context.tr('word_feedback_ugly');
-    case WordFeedback.tooEasy:
-      return context.tr('word_feedback_too_easy');
-    case WordFeedback.tooHard:
-      return context.tr('word_feedback_too_hard');
-  }
-  Assert.unexpectedValue(feedback);
+  return switch (feedback) {
+    WordFeedback.good => context.tr('word_feedback_nice'),
+    WordFeedback.bad => context.tr('word_feedback_ugly'),
+    WordFeedback.tooEasy => context.tr('word_feedback_too_easy'),
+    WordFeedback.tooHard => context.tr('word_feedback_too_hard'),
+    _ => Assert.unexpectedValue(feedback),
+  };
 }
 
 class WordReviewItem extends StatelessWidget {

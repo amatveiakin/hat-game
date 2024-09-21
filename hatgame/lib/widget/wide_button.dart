@@ -74,24 +74,17 @@ class WideButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    late final ButtonStyle colorStyle;
-    switch (coloring) {
-      case WideButtonColoring.neutral:
-        colorStyle = ButtonStyle(
-            backgroundColor: _getBackgroundColor(MyTheme.primaryPale),
-            foregroundColor: _getForegroundColor(Colors.black));
-        break;
-      case WideButtonColoring.secondary:
-        colorStyle = ButtonStyle(
-            backgroundColor: _getBackgroundColor(colorScheme.secondary),
-            foregroundColor: _getForegroundColor(colorScheme.onSecondary));
-        break;
-      case WideButtonColoring.secondaryAlwaysActive:
-        colorStyle = ButtonStyle(
-            backgroundColor: WidgetStateProperty.all(colorScheme.secondary),
-            foregroundColor: WidgetStateProperty.all(colorScheme.onSecondary));
-        break;
-    }
+    final ButtonStyle colorStyle = switch (coloring) {
+      WideButtonColoring.neutral => ButtonStyle(
+          backgroundColor: _getBackgroundColor(MyTheme.primaryPale),
+          foregroundColor: _getForegroundColor(Colors.black)),
+      WideButtonColoring.secondary => ButtonStyle(
+          backgroundColor: _getBackgroundColor(colorScheme.secondary),
+          foregroundColor: _getForegroundColor(colorScheme.onSecondary)),
+      WideButtonColoring.secondaryAlwaysActive => ButtonStyle(
+          backgroundColor: WidgetStateProperty.all(colorScheme.secondary),
+          foregroundColor: WidgetStateProperty.all(colorScheme.onSecondary)),
+    };
     return Padding(
       padding: margin,
       child: WideWidget(

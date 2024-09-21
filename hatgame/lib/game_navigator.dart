@@ -289,21 +289,17 @@ class GameNavigator {
   }
 
   static GamePhase? _parentPhase(GamePhase phase) {
-    switch (phase) {
-      case GamePhase.configure:
-        return null;
-      case GamePhase.writeWords:
-        return GamePhase.configure;
-      case GamePhase.composeTeams:
-        // TODO: Should we go back to writeWords?
-        return GamePhase.configure;
-      case GamePhase.play:
-      case GamePhase.gameOver:
-      case GamePhase.kicked:
-      case GamePhase.rematch:
-        return null;
-    }
-    Assert.unexpectedValue(phase);
+    return switch (phase) {
+      GamePhase.configure => null,
+      GamePhase.writeWords => GamePhase.configure,
+      GamePhase.composeTeams =>
+        GamePhase.configure, // TODO: Should we go back to writeWords?
+      GamePhase.play => null,
+      GamePhase.gameOver => null,
+      GamePhase.kicked => null,
+      GamePhase.rematch => null,
+      _ => Assert.unexpectedValue(phase),
+    };
   }
 
   static Future<_PopResponse> _confimLeaveGame(
