@@ -470,8 +470,7 @@ class GameController {
 
   static void preGameCheck(GameConfig config) {
     if (config.rules.variant != GameVariant.writeWords &&
-        (config.rules.dictionaries == null ||
-            config.rules.dictionaries!.isEmpty)) {
+        config.rules.dictionaries.isEmpty) {
       throw InvalidOperation(LocalStr.tr('no_dictionaries_selected'))
         ..addTag(StartGameErrorSource.dictionaries);
     }
@@ -564,12 +563,10 @@ class GameController {
   static List<String> _generateRandomWords(GameConfig config) {
     final int numPlayers = config.players!.names.length;
     final int totalWords = config.rules.wordsPerPlayer * numPlayers;
-    Assert.holds(
-        config.rules.dictionaries != null &&
-            config.rules.dictionaries!.isNotEmpty,
+    Assert.holds(config.rules.dictionaries.isNotEmpty,
         lazyMessage: () => config.rules.toString());
     final wordCollection = Lexicon.wordCollection(
-        config.rules.dictionaries!.toList(),
+        config.rules.dictionaries.toList(),
         config.rules.variant == GameVariant.pluralias);
     return List.generate(totalWords, (_) => wordCollection.randomWord());
   }

@@ -50,7 +50,7 @@ class GameConfigController {
     return config.rebuild(
       (b) => b
         ..rules.dictionaries.replace(
-            Lexicon.fixDictionaries(config.rules.dictionaries?.toList())),
+            Lexicon.fixDictionaries(config.rules.dictionaries.toList())),
     );
   }
 

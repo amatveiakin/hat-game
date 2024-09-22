@@ -202,22 +202,21 @@ class RulesConfigViewState extends State<RulesConfigView> {
             Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) => DictionarySelector(
                       allValues: Lexicon.allDictionaries(),
-                      initialValues: config.dictionaries!.toList(),
+                      initialValues: config.dictionaries.toList(),
                       onChanged: (List<String> newValue) => configController
                           .updateRules((config) => config.rebuild(
                               (b) => b..dictionaries.replace(newValue))),
                     )));
           };
     final dictionaryNames =
-        config.dictionaries?.map((d) => Lexicon.dictionaryMetadata(d).uiName);
-    final String dictionariesCaption =
-        dictionaryNames == null || dictionaryNames.isEmpty
-            ? context.tr('dictionaries_none')
-            : dictionaryNames.length == 1
-                ? context.tr('dictionary_one') + dictionaryNames.first
-                : context.tr('dictionaries_many') +
-                    '\n' +
-                    dictionaryNames.map((d) => '        $d').join('\n');
+        config.dictionaries.map((d) => Lexicon.dictionaryMetadata(d).uiName);
+    final String dictionariesCaption = dictionaryNames.isEmpty
+        ? context.tr('dictionaries_none')
+        : dictionaryNames.length == 1
+            ? context.tr('dictionary_one') + dictionaryNames.first
+            : context.tr('dictionaries_many') +
+                '\n' +
+                dictionaryNames.map((d) => '        $d').join('\n');
 
     return ListView(
       children: [

@@ -26,7 +26,7 @@ abstract class RulesConfig implements Built<RulesConfig, RulesConfigBuilder> {
   int get bonusSeconds;
   int get wordsPerPlayer;
   GameVariant get variant;
-  BuiltList<String>? get dictionaries; // only if variant != manual
+  BuiltList<String> get dictionaries; // used if variant != manual
 
   RulesConfig._();
   factory RulesConfig([void Function(RulesConfigBuilder) updates]) =
@@ -68,7 +68,7 @@ abstract class TeamingConfig
   // TODO: Add "Randomize order" option when it's not implied, i.e. for:
   // individual, oneToAll, manualTeams.
   TeamingStyle get teamingStyle;
-  int get numTeams; // used only if teamingStyle == randomTeams
+  int get numTeams; // used if teamingStyle == randomTeams
 
   TeamingConfig._();
   factory TeamingConfig([void Function(TeamingConfigBuilder) updates]) =
