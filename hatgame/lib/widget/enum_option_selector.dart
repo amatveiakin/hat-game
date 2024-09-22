@@ -37,11 +37,15 @@ class OptionChoice<E> extends OptionItem<E> {
   final E value;
   final LocalStr title;
   final LocalStr? subtitle;
+  final bool enabled;
+  final void Function(BuildContext)? onInfo;
 
   OptionChoice({
     required this.value,
     required this.title,
     this.subtitle,
+    this.enabled = true,
+    this.onInfo,
   });
 }
 
@@ -104,18 +108,36 @@ class EnumOptionSelectorState<E, W extends EnumOptionSelector>
                   OptionDivider() => const ThinDivider(
                       height: 8.0,
                     ),
-                  OptionChoice() => RadioListTile<E?>(
-                      title: Text(e.title.value(context)),
-                      subtitle: e.subtitle == null
-                          ? null
-                          : Text(e.subtitle!.value(context)),
-                      value: e.value,
-                      isThreeLine: e.subtitle != null,
-                      groupValue: currentValue,
-                      // Enable `toggleable` so that we can close the dialog
-                      // when the user clicks the current option.
-                      toggleable: true,
-                      onChanged: (v) => _valueChanged(context, v),
+                  OptionChoice() => Row(
+                      children: <Widget>[
+                            Expanded(
+                              child: RadioListTile<E?>(
+                                title: Text(e.title.value(context)),
+                                subtitle: e.subtitle == null
+                                    ? null
+                                    : Text(e.subtitle!.value(context)),
+                                value: e.value,
+                                isThreeLine: e.subtitle != null,
+                                groupValue: currentValue,
+                                // Enable `toggleable` so that we can close the dialog
+                                // when the user clicks the current option.
+                                toggleable: true,
+                                onChanged: e.enabled
+                                    ? (v) => _valueChanged(context, v)
+                                    : null,
+                              ),
+                            )
+                          ] +
+                          (e.onInfo != null
+                              ? [
+                                  IconButton(
+                                    icon: const Icon(Icons.info_outline),
+                                    onPressed: e.onInfo == null
+                                        ? null
+                                        : () => e.onInfo!(context),
+                                  )
+                                ]
+                              : []),
                     ),
                 })
             .toList(),

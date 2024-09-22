@@ -469,7 +469,7 @@ class GameController {
   }
 
   static void preGameCheck(GameConfig config) {
-    if (config.rules.writeWords == false &&
+    if (config.rules.variant != GameVariant.writeWords &&
         (config.rules.dictionaries == null ||
             config.rules.dictionaries!.isEmpty)) {
       throw InvalidOperation(LocalStr.tr('no_dictionaries_selected'))
@@ -569,7 +569,8 @@ class GameController {
             config.rules.dictionaries!.isNotEmpty,
         lazyMessage: () => config.rules.toString());
     final wordCollection = Lexicon.wordCollection(
-        config.rules.dictionaries!.toList(), config.rules.pluralias);
+        config.rules.dictionaries!.toList(),
+        config.rules.variant == GameVariant.pluralias);
     return List.generate(totalWords, (_) => wordCollection.randomWord());
   }
 
@@ -598,7 +599,7 @@ class GameController {
         snapshot.get(DBColTeamCompositions());
 
     final List<Word> words = _wordsFromWordTexts(
-      config.rules.writeWords
+      config.rules.variant == GameVariant.writeWords
           ? _collectWordsFromPlayers(snapshot)
           : _generateRandomWords(config),
     );

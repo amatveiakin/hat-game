@@ -28,17 +28,18 @@ class GameConfigController {
         ..rules.turnSeconds = 15
         ..rules.bonusSeconds = 5
         ..rules.wordsPerPlayer = 5
-        ..rules.writeWords = false
-        ..rules.pluralias = false
+        ..rules.variant = GameVariant.standard
         ..teaming.teamingStyle = TeamingStyle.individual
         ..teaming.numTeams = 2,
     );
   }
 
   static GameConfig _adaptForOfflineMode(GameConfig config) {
-    return config.rebuild(
-      (b) => b..rules.writeWords = false,
-    );
+    return config.rules.variant == GameVariant.writeWords
+        ? config.rebuild(
+            (b) => b..rules.variant = GameVariant.standard,
+          )
+        : config;
   }
 
   static GameConfig _adaptForOnlineMode(GameConfig config) {

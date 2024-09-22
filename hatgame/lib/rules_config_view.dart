@@ -5,15 +5,56 @@ import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/dictionary_selector.dart';
 import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/lexicon.dart';
-import 'package:hatgame/util/invalid_operation.dart';
+import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/local_str.dart';
 import 'package:hatgame/util/markdown.dart';
 import 'package:hatgame/widget/constrained_scaffold.dart';
 import 'package:hatgame/widget/divider.dart';
+import 'package:hatgame/widget/enum_option_selector.dart';
 import 'package:hatgame/widget/highlightable.dart';
-import 'package:hatgame/widget/invalid_operation_dialog.dart';
 import 'package:hatgame/widget/numeric_field.dart';
-import 'package:hatgame/widget/switch_button.dart';
+
+getGameVariantOptions(bool onlineMode) {
+  return [
+    OptionChoice(
+      value: GameVariant.standard,
+      title: LocalStr.tr('variant_standard'),
+      subtitle: LocalStr.tr('variant_standard_description'),
+    ),
+    OptionChoice(
+      value: GameVariant.writeWords,
+      title: LocalStr.tr('variant_write_words'),
+      subtitle: onlineMode
+          ? LocalStr.tr('variant_write_words_description')
+          : LocalStr.tr('variant_write_words_disabled_description'),
+      enabled: onlineMode,
+    ),
+    OptionChoice(
+      value: GameVariant.pluralias,
+      title: LocalStr.tr('variant_pluralias'),
+      subtitle: LocalStr.tr('variant_pluralias_description'),
+      onInfo: (context) => Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => const PluraliasHelpScreen())),
+    ),
+  ];
+}
+
+class GameVariantSelector extends EnumOptionSelector<GameVariant> {
+  GameVariantSelector(GameVariant initialValue, Function changeCallback,
+      {required bool onlineMode, super.key})
+      : super(
+          windowTitle: LocalStr.tr('variant'),
+          allValues: getGameVariantOptions(onlineMode),
+          initialValue: initialValue,
+          changeCallback: changeCallback,
+        );
+
+  @override
+  createState() => GameVariantSelectorState();
+}
+
+class GameVariantSelectorState
+    extends EnumOptionSelectorState<GameVariant, GameVariantSelector> {}
 
 class RulesConfigViewController {
   final turnTimeController = TextEditingController();
@@ -121,24 +162,6 @@ class RulesConfigViewState extends State<RulesConfigView> {
   RulesConfig get config => widget.config;
   GameConfigController get configController => widget.configController;
 
-  Future<void> _setWriteWords(bool writeWords) async {
-    if (writeWords && !onlineMode) {
-      // TODO: Support writing words in offline mode.
-      await showInvalidOperationDialog(
-          context: context,
-          error: InvalidOperation(LocalStr.raw(
-              'Writing words in offline mode is not supported (yet).')));
-      return;
-    }
-    configController.updateRules(
-        (config) => config.rebuild((b) => b..writeWords = writeWords));
-  }
-
-  Future<void> _setPluralias(bool pluralias) async {
-    configController.updateRules(
-        (config) => config.rebuild((b) => b..pluralias = pluralias));
-  }
-
   @override
   void initState() {
     super.initState();
@@ -241,15 +264,25 @@ class RulesConfigViewState extends State<RulesConfigView> {
         SectionDivider(
           title: context.tr('words'),
         ),
-        ListTile(
-          title: SwitchButton(
-            options: [context.tr('random_words'), context.tr('write_words')],
-            selectedOption: config.writeWords ? 1 : 0,
-            onSelectedOptionChanged: configController.isReadOnly
+        OptionSelectorHeader(
+            title: Text(switch (config.variant) {
+              GameVariant.standard => context.tr('variant_standard'),
+              GameVariant.writeWords => context.tr('variant_write_words'),
+              GameVariant.pluralias => context.tr('variant_pluralias'),
+              _ => Assert.unexpectedValue(config.variant),
+            }),
+            onTap: configController.isReadOnly
                 ? null
-                : (int newOption) => _setWriteWords(newOption == 1),
-          ),
-        ),
+                : () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => GameVariantSelector(
+                              config.variant,
+                              (GameVariant newValue) => configController
+                                  .updateRules((config) => config
+                                      .rebuild((b) => b..variant = newValue)),
+                              onlineMode: onlineMode,
+                            )));
+                  }),
         ListTile(
           title: Row(
             children: [
@@ -267,7 +300,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
             ],
           ),
         ),
-        if (!config.writeWords)
+        if (config.variant != GameVariant.writeWords)
           Highlightable(
             controller: viewController.dictionariesHighlightController,
             child: ListTile(
@@ -277,21 +310,6 @@ class RulesConfigViewState extends State<RulesConfigView> {
                     : const Icon(Icons.chevron_right),
                 onTap: dictionariesOnTap),
           ),
-        if (!config.writeWords)
-          Row(children: [
-            Expanded(
-              child: SwitchListTile(
-                  title: Text(context.tr('pluralias')),
-                  value: config.pluralias,
-                  onChanged: (bool value) => _setPluralias(value)),
-            ),
-            IconButton(
-                icon: const Icon(Icons.info_outline),
-                onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => const PluraliasHelpScreen()));
-                }),
-          ])
       ],
     );
   }

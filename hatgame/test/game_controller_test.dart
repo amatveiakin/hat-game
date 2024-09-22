@@ -317,7 +317,7 @@ void main() {
             (b) => b
               ..teaming.teamingStyle = TeamingStyle.individual
               ..rules.wordsPerPlayer = 1
-              ..rules.writeWords = true,
+              ..rules.variant = GameVariant.writeWords,
           ));
 
       {

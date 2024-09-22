@@ -139,14 +139,19 @@ bonus_time: Bonus time
 dictionaries_many: 'Dictionaries:'
 dictionaries_none: 'Dictionaries:   —'
 dictionary_one: 'Dictionary: '
-pluralias: Pluralias
-random_words: Random words
 s: s
 timer: Timer
 turn_time: Turn time
+variant: Game Variant
+variant_standard: Dictionary words
+variant_standard_description: The app takes random words from chosen dictionaries.
+variant_write_words: Write words
+variant_write_words_description: Each player writes a few words.
+variant_write_words_disabled_description: Each player writes a few words. Not supported in offline mode yet.
+variant_pluralias: Pluralias
+variant_pluralias_description: The app generates portmanteau words instead of regular words.
 words: Words
 words_per_player: Words per player
-write_words: Write words
 pluralias_help_title: About pluralias
 pluralias_help_body: |
   What is *pluralias*? It's a portmanteau word that combines _plur**al**_ and

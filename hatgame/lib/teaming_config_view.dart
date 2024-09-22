@@ -133,30 +133,28 @@ class TeamingConfigViewState extends State<TeamingConfigView> {
   Widget build(BuildContext context) {
     const _numericFieldPadding = EdgeInsets.symmetric(vertical: 2.0);
     var items = <Widget>[];
-    {
-      final onTap = configController.isReadOnly
-          ? null
-          : () {
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => TeamingStyleSelector(
-                        config.teamingStyle,
-                        (TeamingStyle newValue) =>
-                            configController.updateTeaming((config) => config
-                                .rebuild((b) => b..teamingStyle = newValue)),
-                      )));
-            };
-      final title = switch (config.teamingStyle) {
-        TeamingStyle.individual => context.tr('teaming_individual'),
-        TeamingStyle.oneToAll => context.tr('teaming_one_to_all'),
-        TeamingStyle.randomPairs => context.tr('teaming_random_pairs'),
-        TeamingStyle.randomTeams => context.tr('teaming_random_teams'),
-        TeamingStyle.manualTeams => context.tr('teaming_manual_teams'),
-        _ => Assert.unexpectedValue(config.teamingStyle),
-      };
-      items.add(
-        OptionSelectorHeader(title: Text(title), onTap: onTap),
-      );
-    }
+    items.add(
+      OptionSelectorHeader(
+          title: Text(switch (config.teamingStyle) {
+            TeamingStyle.individual => context.tr('teaming_individual'),
+            TeamingStyle.oneToAll => context.tr('teaming_one_to_all'),
+            TeamingStyle.randomPairs => context.tr('teaming_random_pairs'),
+            TeamingStyle.randomTeams => context.tr('teaming_random_teams'),
+            TeamingStyle.manualTeams => context.tr('teaming_manual_teams'),
+            _ => Assert.unexpectedValue(config.teamingStyle),
+          }),
+          onTap: configController.isReadOnly
+              ? null
+              : () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => TeamingStyleSelector(
+                            config.teamingStyle,
+                            (TeamingStyle newValue) => configController
+                                .updateTeaming((config) => config.rebuild(
+                                    (b) => b..teamingStyle = newValue)),
+                          )));
+                }),
+    );
     if (config.teamingStyle == TeamingStyle.randomTeams) {
       items.add(
         ListTile(

@@ -146,7 +146,7 @@ class _GameConfigViewState extends State<GameConfigView>
       return;
     }
 
-    if (gameConfig.rules.writeWords) {
+    if (gameConfig.rules.variant == GameVariant.writeWords) {
       await GameController.toWriteWordsPhase(localGameData.gameReference);
     } else {
       await GameController.updateTeamCompositions(
@@ -220,9 +220,10 @@ class _GameConfigViewState extends State<GameConfigView>
               content: Text('Only the host can proceed'))), // TODO: tr
       coloring: WideButtonColoring.secondary,
       margin: WideButton.bottomButtonMargin,
-      child: GoNextButtonCaption(gameConfig.rules.writeWords
-          ? context.tr('write_words_titlecase')
-          : context.tr('next')),
+      child: GoNextButtonCaption(
+          gameConfig.rules.variant == GameVariant.writeWords
+              ? context.tr('write_words_titlecase')
+              : context.tr('next')),
     );
 
     return SectionsScaffold(

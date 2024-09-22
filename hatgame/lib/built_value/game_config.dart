@@ -10,13 +10,23 @@ part 'game_config.g.dart';
 // =============================================================================
 // Rules
 
+class GameVariant extends EnumClass {
+  static const GameVariant standard = _$standard;
+  static const GameVariant writeWords = _$writeWords;
+  static const GameVariant pluralias = _$pluralias;
+
+  const GameVariant._(String name) : super(name);
+  static BuiltSet<GameVariant> get values => _$valuesGameVariant;
+  static GameVariant valueOf(String name) => _$valueOfGameVariant(name);
+  static Serializer<GameVariant> get serializer => _$gameVariantSerializer;
+}
+
 abstract class RulesConfig implements Built<RulesConfig, RulesConfigBuilder> {
   int get turnSeconds;
   int get bonusSeconds;
   int get wordsPerPlayer;
-  bool get writeWords;
-  BuiltList<String>? get dictionaries; // only if writeWords == false
-  bool get pluralias; // only if writeWords == false
+  GameVariant get variant;
+  BuiltList<String>? get dictionaries; // only if variant != manual
 
   RulesConfig._();
   factory RulesConfig([void Function(RulesConfigBuilder) updates]) =

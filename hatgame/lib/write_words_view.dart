@@ -160,7 +160,7 @@ class WriteWordsViewState extends State<WriteWordsView> {
     final WordWritingViewData viewData =
         GameController.getWordWritingViewData(localGameData, snapshot);
     final PersonalState playerState = viewData.playerState;
-    Assert.holds(gameConfig.rules.writeWords);
+    Assert.eq(gameConfig.rules.variant, GameVariant.writeWords);
 
     if (_viewController == null) {
       _viewController =

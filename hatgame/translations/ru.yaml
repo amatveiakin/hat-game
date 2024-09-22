@@ -141,14 +141,19 @@ bonus_time: Доугадывание
 dictionaries_many: 'Словари:'
 dictionaries_none: 'Словари:   —'
 dictionary_one: 'Словарь: '
-pluralias: Шлакоблокунь
-random_words: 'Случайные слова'
 s: с
 timer: Время
 turn_time: Объяснение
+variant: Разновидность игры
+variant_standard: Слова из словарей
+variant_standard_description: Приложение берёт случайные слова из выбранных словарей.
+variant_write_words: Писать слова
+variant_write_words_description: Каждый игрок пишет по несколько слов.
+variant_write_words_disabled_description: Каждый игрок пишет по несколько слов. Пока не поддерживается в офлайн-режиме.
+variant_pluralias: Шлакоблокунь
+variant_pluralias_description: Приложение генерирует каламбуры вместо обычных слов.
 words: Слова
 words_per_player: Слов на игрока
-write_words: Писать слова
 pluralias_help_title: О шлакоблокуне
 pluralias_help_body: |
   Что такое *шлакоблокунь*? Это каламбур, полученный склеиванием слов
