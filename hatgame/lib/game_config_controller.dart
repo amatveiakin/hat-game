@@ -27,8 +27,10 @@ class GameConfigController {
       (b) => b
         ..rules.turnSeconds = 15
         ..rules.bonusSeconds = 5
-        ..rules.wordsPerPlayer = 5
         ..rules.variant = GameVariant.standard
+        ..rules.extent = GameExtent.fixedWordSet
+        ..rules.wordsPerPlayer = 5
+        ..rules.numRounds = 3
         ..teaming.teamingStyle = TeamingStyle.individual
         ..teaming.numTeams = 2,
     );
@@ -51,6 +53,14 @@ class GameConfigController {
     });
   }
 
+  static GameConfig fixGameExtentForGameVariant(GameConfig config) {
+    return config.rebuild((b) {
+      if (config.rules.variant == GameVariant.writeWords) {
+        b.rules.extent = GameExtent.fixedWordSet;
+      }
+    });
+  }
+
   static GameConfig fixPlayersForTeamingStyle(GameConfig config) {
     return config.rebuild((b) {
       final players = config.players;
@@ -66,11 +76,16 @@ class GameConfigController {
     });
   }
 
-  static GameConfig _fix(GameConfig config) {
-    return fixPlayersForTeamingStyle(config.rebuild((b) {
+  static GameConfig _fixDictionaries(GameConfig config) {
+    return config.rebuild((b) {
       b.rules.dictionaries
           .replace(Lexicon.fixDictionaries(config.rules.dictionaries.toList()));
-    }));
+    });
+  }
+
+  static GameConfig _fix(GameConfig config) {
+    return fixPlayersForTeamingStyle(
+        fixGameExtentForGameVariant(_fixDictionaries(config)));
   }
 
   static GameConfig initialConfig({required bool onlineMode}) {

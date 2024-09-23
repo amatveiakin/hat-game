@@ -4,6 +4,7 @@ import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 import 'package:hatgame/built_value/team_compositions.dart';
+import 'package:hatgame/built_value/word.dart';
 
 part 'game_state.g.dart';
 
@@ -41,39 +42,24 @@ class WordStatus extends EnumClass {
   static Serializer<WordStatus> get serializer => _$wordStatusSerializer;
 }
 
-abstract class WordContent implements Built<WordContent, WordContentBuilder> {
-  String get text;
-  int? get highlightFirst; // for pluralias
-  int? get highlightLast; // for pluralias
-
-  factory WordContent.plainWord(String text) {
-    return WordContent((b) => b..text = text);
-  }
-
-  factory WordContent.pluralias(String text, int prefix, int suffix) {
-    return WordContent((b) => b
-      ..text = text
-      ..highlightFirst = prefix
-      ..highlightLast = suffix);
-  }
-
-  WordContent._();
-  factory WordContent([void Function(WordContentBuilder) updates]) =
-      _$WordContent;
-  static Serializer<WordContent> get serializer => _$wordContentSerializer;
-}
-
-abstract class Word implements Built<Word, WordBuilder> {
-  int get id;
+// When GameExtent is fixedWordSet, places like TurnState store WordId referring
+// to a PersistentWord in InitialGameState.words in order to disambigute
+// identical words.
+abstract class PersistentWord
+    implements Built<PersistentWord, PersistentWordBuilder> {
+  WordId get id;
   WordContent get content;
 
-  Word._();
-  factory Word([void Function(WordBuilder) updates]) = _$Word;
-  static Serializer<Word> get serializer => _$wordSerializer;
+  PersistentWord._();
+  factory PersistentWord([void Function(PersistentWordBuilder) updates]) =
+      _$PersistentWord;
+  static Serializer<PersistentWord> get serializer =>
+      _$persistentWordSerializer;
 }
 
 abstract class WordInTurn implements Built<WordInTurn, WordInTurnBuilder> {
-  int get id;
+  WordId get id;
+  WordContent? get content; // used when GameExtent is not fixedWordSet
   WordStatus get status;
 
   WordInTurn._();
@@ -88,9 +74,8 @@ abstract class InitialGameState
     implements Built<InitialGameState, InitialGameStateBuilder> {
   TeamCompositions get teamCompositions;
 
-  // Store word IDs rather than words themselves for disambigution in case
-  // two words are equal.
-  BuiltList<Word> get words;
+  // Set when words go back to the hat, i.e. when GameExtent is fixedWordSet.
+  BuiltList<PersistentWord>? get words;
 
   InitialGameState._();
   factory InitialGameState([void Function(InitialGameStateBuilder) updates]) =

@@ -7,6 +7,7 @@ import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_phase.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value/personal_state.dart';
+import 'package:hatgame/built_value/word.dart';
 import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
@@ -21,6 +22,7 @@ import 'package:hatgame/util/vibration.dart';
 import 'package:hatgame/widget/constrained_scaffold.dart';
 import 'package:hatgame/widget/image_assert_icon.dart';
 import 'package:hatgame/widget/padlock.dart';
+import 'package:hatgame/widget/round_progress_indicator.dart';
 import 'package:hatgame/widget/timer.dart';
 import 'package:hatgame/widget/wide_button.dart';
 
@@ -156,6 +158,7 @@ String _getWordFeedbackText(BuildContext context, WordFeedback feedback) {
 }
 
 class WordReviewItem extends StatelessWidget {
+  final GameConfig gameConfig;
   final String? text;
   final WordStatus status;
   final WordFeedback? feedback;
@@ -166,6 +169,7 @@ class WordReviewItem extends StatelessWidget {
 
   const WordReviewItem(
       {super.key,
+      required this.gameConfig,
       required this.text,
       required this.status,
       required this.feedback,
@@ -237,7 +241,8 @@ class WordReviewItem extends StatelessWidget {
                 tooltip: context.tr('flag_the_word'),
                 onPressed: () => setFlag!(!hasFlag),
               ),
-            if (setStatus != null)
+            if (setStatus != null &&
+                gameConfig.rules.extent == GameExtent.fixedWordSet)
               IconButton(
                 icon: Icon(status == WordStatus.discarded
                     ? Icons.restore_from_trash
@@ -354,15 +359,15 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
     }
   }
 
-  void _setWordStatus(int wordId, WordStatus status) {
+  void _setWordStatus(WordId wordId, WordStatus status) {
     gameController.setWordStatus(wordId, status);
   }
 
-  void _setWordFeedback(int wordId, WordFeedback? feedback) {
+  void _setWordFeedback(WordId wordId, WordFeedback? feedback) {
     gameController.setWordFeedback(wordId, feedback);
   }
 
-  void _setWordFlag(int wordId, bool hasFlag) {
+  void _setWordFlag(WordId wordId, bool hasFlag) {
     gameController.setWordFlag(wordId, hasFlag);
   }
 
@@ -410,6 +415,7 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
         .wordsInThisTurnData()
         .map((w) => w.status != WordStatus.notExplained
             ? WordReviewItem(
+                gameConfig: gameConfig,
                 text: w.content.text,
                 status: w.status,
                 feedback: w.feedback,
@@ -420,6 +426,7 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
                 setFlag: (bool hasFlag) => _setWordFlag(w.id, hasFlag),
               )
             : WordReviewItem(
+                gameConfig: gameConfig,
                 text: null,
                 status: w.status,
                 feedback: null,
@@ -435,6 +442,7 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
 
     switch (turnState!.turnPhase) {
       case TurnPhase.prepare:
+        // TODO: Display game progress for inactive players too.
         return Container();
       case TurnPhase.explain:
         return Column(children: [
@@ -492,11 +500,44 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
   }
 
   Widget _buildActivePlayer(BuildContext context) {
-    final wordsInHatWidget = Container(
-      padding: const EdgeInsets.symmetric(vertical: 12.0),
-      child: Text(context
-          .tr('words_in_hat', args: [gameData.numWordsInHat().toString()])),
-    );
+    final gameProgressWidget = () {
+      final progress = gameData.gameProgress();
+      final body = switch (progress) {
+        FixedWordSetProgress() => Text(
+            context.tr('words_in_hat', args: [progress.numWords.toString()])),
+        FixedNumRoundsProgress() => Column(
+            children: [
+              Text((progress.numRounds == 1)
+                  ? context.tr('single_round')
+                  : context.tr(
+                      (progress.roundTurnIndex == 0 &&
+                              progress.numTurnsPerRound > 1)
+                          ? 'round_begins'
+                          : 'round_index',
+                      args: [
+                          (progress.roundIndex + 1).toString(),
+                          progress.numRounds.toString()
+                        ])),
+              SizedBox(height: 6),
+              RoundProgressIndicator(
+                roundIndex: progress.roundIndex,
+                numRounds: progress.numRounds,
+                roundProgress:
+                    progress.roundTurnIndex / progress.numTurnsPerRound,
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                baseColor: MyTheme.secondary,
+                highlightColor: MyTheme.secondaryIntense,
+              ),
+              SizedBox(height: 2),
+            ],
+          ),
+      };
+      return Container(
+        padding: const EdgeInsets.symmetric(vertical: 12.0),
+        child: body,
+      );
+    };
+
     switch (turnState!.turnPhase) {
       case TurnPhase.prepare:
         return Column(
@@ -541,7 +582,7 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
                 ),
               ),
             ),
-            wordsInHatWidget,
+            gameProgressWidget(),
           ],
         );
       case TurnPhase.explain:
@@ -581,13 +622,14 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
             ),
           ),
           // TODO: Dim text color similarly to team name.
-          wordsInHatWidget,
+          gameProgressWidget(),
         ]);
       case TurnPhase.review:
         {
           final wordReviewItems = gameData
               .wordsInThisTurnData()
               .map((w) => WordReviewItem(
+                    gameConfig: gameConfig,
                     text: w.content.text,
                     status: w.status,
                     feedback: localGameData.onlineMode ? w.feedback : null,

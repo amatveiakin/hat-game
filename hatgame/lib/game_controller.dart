@@ -10,6 +10,7 @@ import 'package:hatgame/built_value/game_phase.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value/personal_state.dart';
 import 'package:hatgame/built_value/team_compositions.dart';
+import 'package:hatgame/built_value/word.dart';
 import 'package:hatgame/db/db.dart';
 import 'package:hatgame/db/db_columns.dart';
 import 'package:hatgame/db/db_document.dart';
@@ -133,7 +134,7 @@ class TurnStateTransformer {
     );
   }
 
-  void setWordStatus(int wordId, WordStatus newStatus) {
+  void setWordStatus(WordId wordId, WordStatus newStatus) {
     final int wordIndex =
         turnState.wordsInThisTurn.indexWhere((w) => w.id == wordId);
     Assert.holds(wordIndex >= 0);
@@ -150,19 +151,30 @@ class TurnStateTransformer {
     Assert.eq(turnState.turnPhase, TurnPhase.explain);
     final wordsInHat =
         DerivedGameState.wordsInHat(initialState, turnLog, turnState);
-    if (wordsInHat.isEmpty) {
-      finishExplanation();
-      return;
+    final WordInTurn wordInTurn;
+    if (wordsInHat == null) {
+      final wordCollection = Lexicon.wordCollection(
+          config.rules.dictionaries.toList(),
+          config.rules.variant == GameVariant.pluralias);
+      final content = wordCollection.randomWord();
+      wordInTurn = WordInTurn((b) => b
+        ..id.turnIndex = DerivedGameState.turnIndex(turnLog)
+        ..id.index = turnState.wordsInThisTurn.length
+        ..content.replace(content)
+        ..status = WordStatus.notExplained);
+    } else {
+      if (wordsInHat.isEmpty) {
+        finishExplanation();
+        return;
+      }
+      final nextWordId =
+          wordsInHat.elementAt(Random().nextInt(wordsInHat.length));
+      wordInTurn = WordInTurn((b) => b
+        ..id.replace(nextWordId)
+        ..status = WordStatus.notExplained);
     }
-    final int nextWord =
-        wordsInHat.elementAt(Random().nextInt(wordsInHat.length));
     turnState = turnState.rebuild(
-      (b) => b
-        ..wordsInThisTurn.add(WordInTurn(
-          (b) => b
-            ..id = nextWord
-            ..status = WordStatus.notExplained,
-        )),
+      (b) => b..wordsInThisTurn.add(wordInTurn),
     );
   }
 }
@@ -172,7 +184,7 @@ class PersonalStateTransformer {
 
   PersonalStateTransformer(this.personalState);
 
-  void setWordFeedback(int wordId, WordFeedback? newFeedback) {
+  void setWordFeedback(WordId wordId, WordFeedback? newFeedback) {
     final wordFeedback = personalState.wordFeedback.toMap();
     if (newFeedback != null) {
       wordFeedback[wordId] = newFeedback;
@@ -183,7 +195,7 @@ class PersonalStateTransformer {
         personalState.rebuild((b) => b..wordFeedback.replace(wordFeedback));
   }
 
-  void setWordFlag(int wordId, bool hasFlag) {
+  void setWordFlag(WordId wordId, bool hasFlag) {
     final wordFlags = personalState.wordFlags.toSet();
     if (hasFlag) {
       wordFlags.add(wordId);
@@ -578,11 +590,11 @@ class GameController {
     return total;
   }
 
-  static List<Word> _wordsFromWordContents(List<WordContent> words) {
+  static List<PersistentWord> _wordsFromWordContents(List<WordContent> words) {
     return words
         .mapWithIndex(
-          (index, content) => Word((b) => b
-            ..id = index
+          (index, content) => PersistentWord((b) => b
+            ..id.index = index
             ..content.replace(content)),
         )
         .toList();
@@ -596,15 +608,19 @@ class GameController {
     final TeamCompositions? teamCompositions =
         snapshot.get(DBColTeamCompositions());
 
-    final List<Word> words = _wordsFromWordContents(
-      config.rules.variant == GameVariant.writeWords
-          ? _collectWordsFromPlayers(snapshot)
-          : _generateRandomWords(config),
-    );
+    final List<PersistentWord>? words = switch (config.rules.extent) {
+      GameExtent.fixedWordSet => _wordsFromWordContents(
+          config.rules.variant == GameVariant.writeWords
+              ? _collectWordsFromPlayers(snapshot)
+              : _generateRandomWords(config),
+        ),
+      GameExtent.fixedNumRounds => null,
+      _ => Assert.unexpectedValue(config.rules.extent)
+    };
 
     final InitialGameState initialState = InitialGameState((b) => b
       ..teamCompositions.replace(teamCompositions!)
-      ..words.replace(words));
+      ..words = words?.toBuiltList().toBuilder());
     final TurnState? turnState = TurnStateTransformer.newTurn(
       config,
       initialState,
@@ -784,26 +800,35 @@ class GameController {
   Future<void> nextTurn() async {
     Assert.holds(isActivePlayer(),
         message: 'Only the active player can change game state');
-    final int turnIndex = DerivedGameState.turnIndex(turnLog);
+    final int oldTurnIndex = DerivedGameState.turnIndex(turnLog);
+    final int newTurnIndex = oldTurnIndex + 1;
     final TurnRecord newTurnRecord =
         TurnStateTransformer.turnRecord(turnState!);
     final BuiltList<TurnRecord> newTurnLog =
         turnLog.rebuild((b) => b..add(newTurnRecord));
-    final bool timeToEndGame =
-        DerivedGameState.wordsInHat(initialState, newTurnLog, null).isEmpty;
+    final bool timeToEndGame = switch (config.rules.extent) {
+      GameExtent.fixedWordSet =>
+        DerivedGameState.wordsInHat(initialState, newTurnLog, null)!.isEmpty,
+      GameExtent.fixedNumRounds => config.rules.numRounds ==
+          gameData
+              .partyingStrategy()
+              .getRoundsProgress(newTurnIndex)
+              .roundIndex,
+      _ => Assert.unexpectedValue(config.rules.extent),
+    };
     final TurnState? newTurnState = TurnStateTransformer.newTurn(
       config,
       initialState,
       // pass (turnState == null) to `wordsInHat`, because words from the
       // current turn have already been moved to turn log.
       timeToEndGame: timeToEndGame,
-      turnIndex: turnIndex + 1,
+      turnIndex: newTurnIndex,
     );
     localGameData.gameReference.clearLocalCache();
     return localGameData.gameReference.updateColumns([
       if (timeToEndGame) DBColGamePhase().withData(GamePhase.gameOver),
       DBColCurrentTurn().withData(newTurnState),
-      DBColTurnRecord(turnIndex).withData(newTurnRecord),
+      DBColTurnRecord(oldTurnIndex).withData(newTurnRecord),
     ]);
   }
 
@@ -827,18 +852,18 @@ class GameController {
     return _updateTurnState((_transformer..finishExplanation()).turnState);
   }
 
-  Future<void> setWordStatus(int wordId, WordStatus newStatus) {
+  Future<void> setWordStatus(WordId wordId, WordStatus newStatus) {
     return _updateTurnState(
         (_transformer..setWordStatus(wordId, newStatus)).turnState);
   }
 
-  Future<void> setWordFeedback(int wordId, WordFeedback? newFeedback) {
+  Future<void> setWordFeedback(WordId wordId, WordFeedback? newFeedback) {
     return _updatePersonalState((_personalTransformer
           ..setWordFeedback(wordId, newFeedback))
         .personalState);
   }
 
-  Future<void> setWordFlag(int wordId, bool hasFlag) {
+  Future<void> setWordFlag(WordId wordId, bool hasFlag) {
     return _updatePersonalState(
         (_personalTransformer..setWordFlag(wordId, hasFlag)).personalState);
   }

@@ -1,8 +1,10 @@
 import 'dart:math';
 
+import 'package:built_collection/built_collection.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:hatgame/built_value/game_state.dart';
+import 'package:hatgame/built_value/word.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/util/list_ext.dart';
@@ -76,8 +78,27 @@ class _DoubleWord {
       required this.union});
 }
 
+// TODO: Make dataclass when https://dart.dev/language/macros is stable.
+class _WordCollectionKey {
+  final BuiltList<String> dictionaries;
+  final bool pluralias;
+
+  _WordCollectionKey(this.dictionaries, this.pluralias);
+
+  @override
+  bool operator ==(Object other) {
+    return other is _WordCollectionKey &&
+        dictionaries == other.dictionaries &&
+        pluralias == other.pluralias;
+  }
+
+  @override
+  int get hashCode => Object.hash(dictionaries.hashCode, pluralias.hashCode);
+}
+
 class Lexicon {
   static final _dictionaries = <String, Dictionary>{};
+  static final _wordCollectionCache = <_WordCollectionKey, WordCollection>{};
 
   static Future<void> init() async {
     for (final dictKey in [
@@ -119,7 +140,22 @@ class Lexicon {
         : existingDicts.toList();
   }
 
+  // TODO: Pre-compute relevant WordCollection when words are generated on the
+  // flight (i.e. when extent is not fixedWordSet). Consider if we should do the
+  // pre-computation in background and store `Futures` in the cache.
   static WordCollection wordCollection(
+      Iterable<String> dictionaries, bool pluralias) {
+    final key = _WordCollectionKey(BuiltList(dictionaries), pluralias);
+    return _wordCollectionCache.putIfAbsent(key, () {
+      final stopwatch = Stopwatch()..start();
+      final collection = _wordCollectionImpl(dictionaries, pluralias);
+      debugPrint("Took ${stopwatch.elapsed} to build WordCollection "
+          "for $dictionaries, pluralias=$pluralias");
+      return collection;
+    });
+  }
+
+  static WordCollection _wordCollectionImpl(
       Iterable<String> dictionaries, bool pluralias) {
     Assert.holds(dictionaries.isNotEmpty);
     final List<String> words = [];

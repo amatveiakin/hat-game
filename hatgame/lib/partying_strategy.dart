@@ -5,6 +5,7 @@ import 'package:hatgame/built_value/team_compositions.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/util/local_str.dart';
+import 'package:quiver/iterables.dart' as quiver;
 
 // =============================================================================
 // Team Generators
@@ -83,8 +84,24 @@ void checkNumPlayersForIndividualPlay(int numPlayers, TeamingConfig teaming) {
 // =============================================================================
 // PartyingStrategy interface
 
+class RoundsProgress {
+  final int roundIndex;
+  final int roundTurnIndex;
+  final int numTurnsPerRound;
+
+  RoundsProgress(this.roundIndex, this.roundTurnIndex, this.numTurnsPerRound);
+}
+
 abstract class PartyingStrategy {
   Party getParty(int turn);
+
+  int get numTurnsPerRound;
+  RoundsProgress getRoundsProgress(int turn) {
+    final turnsPerRound = numTurnsPerRound;
+    final roundIndex = turn ~/ turnsPerRound;
+    final roundTurnIndex = turn % turnsPerRound;
+    return RoundsProgress(roundIndex, roundTurnIndex, turnsPerRound);
+  }
 
   PartyingStrategy();
 
@@ -121,6 +138,9 @@ class IndividualStrategy extends PartyingStrategy {
       ..performer = players[p.performer]
       ..recipients.addAll(p.recipients.map((idx) => players[idx])));
   }
+
+  @override
+  int get numTurnsPerRound => _impl.numTurnsPerRoundImpl;
 }
 
 abstract class IndividualStrategyImpl {
@@ -135,6 +155,7 @@ abstract class IndividualStrategyImpl {
   }
 
   Party getPartyImpl(int turn);
+  int get numTurnsPerRoundImpl;
 }
 
 class FluidPairsIndividualStrategy extends IndividualStrategyImpl {
@@ -155,6 +176,9 @@ class FluidPairsIndividualStrategy extends IndividualStrategyImpl {
       ..performer = performer
       ..recipients.add(recipient));
   }
+
+  @override
+  int get numTurnsPerRoundImpl => numPlayers * (numPlayers - 1);
 }
 
 class BroadcastIndividualStrategy extends IndividualStrategyImpl {
@@ -170,6 +194,9 @@ class BroadcastIndividualStrategy extends IndividualStrategyImpl {
       ..performer = performer
       ..recipients.addAll(recipients));
   }
+
+  @override
+  int get numTurnsPerRoundImpl => numPlayers;
 }
 
 // =============================================================================
@@ -187,5 +214,16 @@ class FixedTeamsStrategy extends PartyingStrategy {
     final int subturn = turn ~/ teamPlayers.length;
     final singleTeamStrategy = IndividualStrategy(team, true);
     return singleTeamStrategy.getParty(subturn);
+  }
+
+  // In each round each player must explain at least one. Therefore we cannot
+  // simply divide the turn index by the total number of players. For example,
+  // imagine we have teams {A, B} and {C, D, E}. Then the first 5 turns might
+  // be: A, C, B, D, A. Here player E hasn't explained yet.
+  @override
+  int get numTurnsPerRound {
+    final maxTeamSize =
+        quiver.max(teamPlayers.map((players) => players.length))!;
+    return teamPlayers.length * maxTeamSize;
   }
 }

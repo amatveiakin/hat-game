@@ -39,6 +39,21 @@ List<OptionItem<GameVariant>> getGameVariantOptions(bool onlineMode) {
   ];
 }
 
+List<OptionItem<GameExtent>> getGameExtentOptions(bool onlineMode) {
+  return [
+    OptionChoice(
+      value: GameExtent.fixedWordSet,
+      title: LocalStr.tr('extent_fixed_word_set'),
+      subtitle: LocalStr.tr('extent_fixed_word_set_description'),
+    ),
+    OptionChoice(
+      value: GameExtent.fixedNumRounds,
+      title: LocalStr.tr('extent_fixed_num_rounds'),
+      subtitle: LocalStr.tr('extent_fixed_num_rounds_description'),
+    ),
+  ];
+}
+
 class GameVariantSelector extends EnumOptionSelector<GameVariant> {
   GameVariantSelector(
       GameVariant initialValue, ValueChanged<GameVariant> changeCallback,
@@ -57,10 +72,29 @@ class GameVariantSelector extends EnumOptionSelector<GameVariant> {
 class GameVariantSelectorState
     extends EnumOptionSelectorState<GameVariant, GameVariantSelector> {}
 
+class GameExtentSelector extends EnumOptionSelector<GameExtent> {
+  GameExtentSelector(
+      GameExtent initialValue, ValueChanged<GameExtent> changeCallback,
+      {required bool onlineMode, super.key})
+      : super(
+          windowTitle: LocalStr.tr('variant'),
+          allValues: getGameExtentOptions(onlineMode),
+          initialValue: initialValue,
+          changeCallback: changeCallback,
+        );
+
+  @override
+  createState() => GameExtentSelectorState();
+}
+
+class GameExtentSelectorState
+    extends EnumOptionSelectorState<GameExtent, GameExtentSelector> {}
+
 class RulesConfigViewController {
   final turnTimeController = TextEditingController();
   final bonusTimeController = TextEditingController();
   final wordsPerPlayerController = TextEditingController();
+  final numRoundsController = TextEditingController();
   final HighlightableController dictionariesHighlightController;
   bool _updatingFromConfig = false;
   bool get updatingFromConfig => _updatingFromConfig;
@@ -80,6 +114,7 @@ class RulesConfigViewController {
     _updateText(turnTimeController, config.turnSeconds.toString());
     _updateText(bonusTimeController, config.bonusSeconds.toString());
     _updateText(wordsPerPlayerController, config.wordsPerPlayer.toString());
+    _updateText(numRoundsController, config.numRounds.toString());
     _updatingFromConfig = false;
   }
 
@@ -87,6 +122,7 @@ class RulesConfigViewController {
     turnTimeController.dispose();
     bonusTimeController.dispose();
     wordsPerPlayerController.dispose();
+    numRoundsController.dispose();
     dictionariesHighlightController.dispose();
   }
 }
@@ -134,7 +170,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
   static final List<int> turnTimeGoldenValues =
       timeGoldenValues.where((t) => t > 0).toList();
 
-  static const List<int> wordsPerPlayerGoldenValues = [
+  static const List<int> nonTimeGoldenValues = [
     1,
     2,
     3,
@@ -155,8 +191,6 @@ class RulesConfigViewState extends State<RulesConfigView> {
     80,
     100,
   ];
-
-  static const _numericFieldPadding = EdgeInsets.symmetric(vertical: 2.0);
 
   bool get onlineMode => widget.onlineMode;
   RulesConfigViewController get viewController => widget.viewController;
@@ -191,6 +225,15 @@ class RulesConfigViewState extends State<RulesConfigView> {
       if (newValue != null && !viewController.updatingFromConfig) {
         configController.updateRules(
             (config) => config.rebuild((b) => b..wordsPerPlayer = newValue));
+      }
+    });
+
+    viewController.numRoundsController.addListener(() {
+      final int? newValue =
+          int.tryParse(viewController.numRoundsController.text);
+      if (newValue != null && !viewController.updatingFromConfig) {
+        configController.updateRules(
+            (config) => config.rebuild((b) => b..numRounds = newValue));
       }
     });
   }
@@ -231,14 +274,11 @@ class RulesConfigViewState extends State<RulesConfigView> {
               Expanded(
                 child: Text(context.tr('turn_time')),
               ),
-              Padding(
-                padding: _numericFieldPadding,
-                child: NumericField(
-                  readOnly: configController.isReadOnly,
-                  controller: viewController.turnTimeController,
-                  goldenValues: turnTimeGoldenValues,
-                  suffixText: context.tr('s'),
-                ),
+              NumericField(
+                readOnly: configController.isReadOnly,
+                controller: viewController.turnTimeController,
+                goldenValues: turnTimeGoldenValues,
+                suffixText: context.tr('s'),
               ),
             ],
           ),
@@ -249,14 +289,11 @@ class RulesConfigViewState extends State<RulesConfigView> {
               Expanded(
                 child: Text(context.tr('bonus_time')),
               ),
-              Padding(
-                padding: _numericFieldPadding,
-                child: NumericField(
-                  readOnly: configController.isReadOnly,
-                  controller: viewController.bonusTimeController,
-                  goldenValues: timeGoldenValues,
-                  suffixText: context.tr('s'),
-                ),
+              NumericField(
+                readOnly: configController.isReadOnly,
+                controller: viewController.bonusTimeController,
+                goldenValues: timeGoldenValues,
+                suffixText: context.tr('s'),
               ),
             ],
           ),
@@ -283,21 +320,53 @@ class RulesConfigViewState extends State<RulesConfigView> {
                               onlineMode: onlineMode,
                             )));
                   }),
+        if (config.variant != GameVariant.writeWords)
+          OptionSelectorHeader(
+              title: Text(switch (config.extent) {
+                GameExtent.fixedWordSet => context.tr('extent_fixed_word_set'),
+                GameExtent.fixedNumRounds =>
+                  context.tr('extent_fixed_num_rounds'),
+                _ => Assert.unexpectedValue(config.variant),
+              }),
+              onTap: configController.isReadOnly
+                  ? null
+                  : () {
+                      Navigator.of(context).push(MaterialPageRoute<void>(
+                          builder: (context) => GameExtentSelector(
+                                config.extent,
+                                (GameExtent newValue) => configController
+                                    .update((config) => GameConfigController
+                                        .fixGameExtentForGameVariant(
+                                            config.rebuild((b) =>
+                                                b..rules.extent = newValue))),
+                                onlineMode: onlineMode,
+                              )));
+                    }),
         ListTile(
           title: Row(
-            children: [
-              Expanded(
-                child: Text(context.tr('words_per_player')),
-              ),
-              Padding(
-                padding: _numericFieldPadding,
-                child: NumericField(
-                  readOnly: configController.isReadOnly,
-                  controller: viewController.wordsPerPlayerController,
-                  goldenValues: wordsPerPlayerGoldenValues,
-                ),
-              ),
-            ],
+            children: switch (config.extent) {
+              GameExtent.fixedWordSet => [
+                  Expanded(
+                    child: Text(context.tr('words_per_player')),
+                  ),
+                  NumericField(
+                    readOnly: configController.isReadOnly,
+                    controller: viewController.wordsPerPlayerController,
+                    goldenValues: nonTimeGoldenValues,
+                  ),
+                ],
+              GameExtent.fixedNumRounds => [
+                  Expanded(
+                    child: Text(context.tr('num_rounds')),
+                  ),
+                  NumericField(
+                    readOnly: configController.isReadOnly,
+                    controller: viewController.numRoundsController,
+                    goldenValues: nonTimeGoldenValues,
+                  ),
+                ],
+              _ => Assert.unexpectedValue(config.extent),
+            },
           ),
         ),
         if (config.variant != GameVariant.writeWords)

@@ -10,6 +10,19 @@ part 'game_config.g.dart';
 // =============================================================================
 // Rules
 
+class GameExtent extends EnumClass {
+  static const GameExtent fixedWordSet = _$fixedWordSet;
+  static const GameExtent fixedNumRounds = _$fixedNumRounds;
+  // TODO: Add an option to end the game when a team or a player reaches a given
+  //   number of points (but only after a round is over):
+  // static const GameExtent scoreGoal = _$scoreGoal;
+
+  const GameExtent._(String name) : super(name);
+  static BuiltSet<GameExtent> get values => _$valuesGameExtent;
+  static GameExtent valueOf(String name) => _$valueOfGameExtent(name);
+  static Serializer<GameExtent> get serializer => _$gameExtentSerializer;
+}
+
 class GameVariant extends EnumClass {
   static const GameVariant standard = _$standard;
   static const GameVariant writeWords = _$writeWords;
@@ -24,8 +37,10 @@ class GameVariant extends EnumClass {
 abstract class RulesConfig implements Built<RulesConfig, RulesConfigBuilder> {
   int get turnSeconds;
   int get bonusSeconds;
-  int get wordsPerPlayer;
   GameVariant get variant;
+  GameExtent get extent;
+  int get wordsPerPlayer; // used if extent == numWords
+  int get numRounds; // used if extent == numRounds
   BuiltList<String> get dictionaries; // used if variant != manual
 
   RulesConfig._();

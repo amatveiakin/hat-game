@@ -151,8 +151,13 @@ variant_write_words_description: Each player writes a few words.
 variant_write_words_disabled_description: Each player writes a few words. Not supported in offline mode.
 variant_pluralias: Pluralias
 variant_pluralias_description: The app generates portmanteau words instead of regular words.
+extent_fixed_word_set: Fixed word set
+extent_fixed_word_set_description: The hat starts with a collection of words. Words that haven't been guessed go back into hat. Game ends when the hat is empty.
+extent_fixed_num_rounds: Fixed number of rounds
+extent_fixed_num_rounds_description: The game lasts for a given number of rounds. Words that haven't been guessed are discarded.
 words: Words
 words_per_player: Words per player
+num_rounds: Number of rounds
 pluralias_help_title: About pluralias
 pluralias_help_body: |
   What is *pluralias*? It's a portmanteau word that combines _plur**al**_ and
@@ -202,6 +207,9 @@ word_feedback_too_easy: Too easy
 word_feedback_too_hard: Too hard
 word_feedback_ugly: Ugly
 words_in_hat: 'Words in hat: {}'
+single_round: One round game
+round_index: 'Round {} of {}'
+round_begins: 'Round {} of {} begins now'
 
 # lib/game_navigator.dart
 leave: Leave

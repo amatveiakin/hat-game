@@ -135,11 +135,9 @@ void main() {
           teamCompositions: twoVsTwoSimpleComposition());
 
       await (await client.controller()).startExplaning();
-      final int w0 =
-          (await client.controller()).turnState!.wordsInThisTurn.last.id;
+      final w0 = (await client.controller()).turnState!.wordsInThisTurn.last.id;
       await (await client.controller()).wordGuessed();
-      final int w1 =
-          (await client.controller()).turnState!.wordsInThisTurn.last.id;
+      final w1 = (await client.controller()).turnState!.wordsInThisTurn.last.id;
       await (await client.controller()).wordGuessed();
       await (await client.controller()).wordGuessed();
       // Last word is already pulled from the hat, although not guessed.
@@ -169,6 +167,59 @@ void main() {
       expect(scoreData.length, equals(2));
       expect(scoreData[0].totalScore, equals(2));
       expect(scoreData[1].totalScore, equals(1));
+    });
+
+    test('fixed number of rounds game', () async {
+      await setupApp(AppConfig());
+      final client = Client();
+      client.localGameData = await GameController.newGameOffine();
+      await client.startGame(
+        config: GameConfigController.defaultConfig().rebuild((b) => b
+          ..players.names.replace({0: 'PlayerA', 1: 'PlayerB'})
+          ..teaming.teamingStyle = TeamingStyle.individual
+          ..rules.dictionaries.replace(Lexicon.defaultDictionaries())
+          ..rules.extent = GameExtent.fixedNumRounds
+          ..rules.numRounds = 3),
+        teamCompositions:
+            TeamCompositions((b) => b..individualOrder.replace([0, 1])),
+      );
+
+      final playOneTurn = (int wordsGuessed) async {
+        await (await client.controller()).startExplaning();
+        for (var i = 0; i < wordsGuessed; i++) {
+          await (await client.controller()).wordGuessed();
+        }
+        await (await client.controller()).finishExplanation();
+        await (await client.controller()).nextTurn();
+      };
+
+      expect((await client.controller()).gameData.gameFinished(), isFalse);
+      expect((await client.controller()).gameData.numWordsInHat(), isNull);
+      expect((await client.controller()).gameData.gameProgress(),
+          equals(FixedNumRoundsProgress(0, 3, 0, 2)));
+
+      await playOneTurn(1);
+      expect((await client.controller()).gameData.gameFinished(), isFalse);
+      expect((await client.controller()).gameData.gameProgress(),
+          equals(FixedNumRoundsProgress(0, 3, 1, 2)));
+
+      await playOneTurn(10);
+      expect((await client.controller()).gameData.gameFinished(), isFalse);
+      expect((await client.controller()).gameData.gameProgress(),
+          equals(FixedNumRoundsProgress(1, 3, 0, 2)));
+
+      await playOneTurn(1);
+      await playOneTurn(20);
+      await playOneTurn(1);
+      await playOneTurn(0);
+      expect((await client.controller()).gameData.gameFinished(), isTrue);
+
+      final scoreData = (await client.controller()).gameData.scoreData();
+      expect(scoreData.length, equals(2));
+      expect(scoreData[0].totalScore, equals(33));
+      expect(scoreData[0].players[0].wordsExplained, equals(3));
+      expect(scoreData[1].totalScore, equals(33));
+      expect(scoreData[1].players[0].wordsExplained, equals(30));
     });
 
     test('no NTP', () async {

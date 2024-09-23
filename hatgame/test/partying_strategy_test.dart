@@ -12,8 +12,9 @@ import 'package:test/test.dart';
 
 // TODO: Test all strategies.
 
-class FluidPairsIndividualStrategy_Variant0 extends IndividualStrategyImpl {
-  FluidPairsIndividualStrategy_Variant0(super.numPlayers) : super.internal();
+class FluidPairsIndividualStrategy_Variant0
+    extends FluidPairsIndividualStrategy {
+  FluidPairsIndividualStrategy_Variant0(super.numPlayers);
 
   @override
   Party getPartyImpl(int turn) {
@@ -26,8 +27,9 @@ class FluidPairsIndividualStrategy_Variant0 extends IndividualStrategyImpl {
   }
 }
 
-class FluidPairsIndividualStrategy_Variant1 extends IndividualStrategyImpl {
-  FluidPairsIndividualStrategy_Variant1(super.numPlayers) : super.internal();
+class FluidPairsIndividualStrategy_Variant1
+    extends FluidPairsIndividualStrategy {
+  FluidPairsIndividualStrategy_Variant1(super.numPlayers);
 
   @override
   Party getPartyImpl(int turn) {
@@ -42,8 +44,9 @@ class FluidPairsIndividualStrategy_Variant1 extends IndividualStrategyImpl {
   }
 }
 
-class FluidPairsIndividualStrategy_Variant2 extends IndividualStrategyImpl {
-  FluidPairsIndividualStrategy_Variant2(super.numPlayers) : super.internal();
+class FluidPairsIndividualStrategy_Variant2
+    extends FluidPairsIndividualStrategy {
+  FluidPairsIndividualStrategy_Variant2(super.numPlayers);
 
   @override
   Party getPartyImpl(int turn) {
@@ -58,8 +61,9 @@ class FluidPairsIndividualStrategy_Variant2 extends IndividualStrategyImpl {
   }
 }
 
-class FluidPairsIndividualStrategy_Variant3 extends IndividualStrategyImpl {
-  FluidPairsIndividualStrategy_Variant3(super.numPlayers) : super.internal();
+class FluidPairsIndividualStrategy_Variant3
+    extends FluidPairsIndividualStrategy {
+  FluidPairsIndividualStrategy_Variant3(super.numPlayers);
 
   @override
   Party getPartyImpl(int turn) {
@@ -77,8 +81,9 @@ class FluidPairsIndividualStrategy_Variant3 extends IndividualStrategyImpl {
   }
 }
 
-class FluidPairsIndividualStrategy_Variant4 extends IndividualStrategyImpl {
-  FluidPairsIndividualStrategy_Variant4(super.numPlayers) : super.internal();
+class FluidPairsIndividualStrategy_Variant4
+    extends FluidPairsIndividualStrategy {
+  FluidPairsIndividualStrategy_Variant4(super.numPlayers);
 
   @override
   Party getPartyImpl(int turn) {

@@ -4,7 +4,9 @@ import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/built_value/game_phase.dart';
 import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value/personal_state.dart';
+import 'package:hatgame/built_value/word.dart';
 import 'package:hatgame/db/db_document.dart';
+import 'package:hatgame/partying_strategy.dart';
 import 'package:hatgame/util/assertion.dart';
 
 class NavigationState {
@@ -56,9 +58,12 @@ class LocalGameState {
 class DerivedGameState {
   static int turnIndex(Iterable<TurnRecord> turnLog) => turnLog.length;
 
-  static Set<int> wordsInHat(InitialGameState initialState,
+  static Set<WordId>? wordsInHat(InitialGameState initialState,
       Iterable<TurnRecord> turnLog, TurnState? turnState) {
-    final Set<int> wordsInHat = initialState.words.map((w) => w.id).toSet();
+    if (initialState.words == null) {
+      return null;
+    }
+    final Set<WordId> wordsInHat = initialState.words!.map((w) => w.id).toSet();
     for (final t in turnLog) {
       wordsInHat.removeAll(t.wordsInThisTurn
           .where((w) => w.status != WordStatus.notExplained)
@@ -70,9 +75,9 @@ class DerivedGameState {
     return wordsInHat;
   }
 
-  static Set<int> wordsFlaggedByOthers(
+  static Set<WordId> wordsFlaggedByOthers(
       Iterable<PersonalState> otherPersonalStates) {
-    final wordsFlaggedByOthers = <int>{};
+    final wordsFlaggedByOthers = <WordId>{};
     for (final st in otherPersonalStates) {
       wordsFlaggedByOthers.addAll(st.wordFlags);
     }
@@ -119,7 +124,7 @@ class PartyViewData {
 }
 
 class WordViewData {
-  final int id;
+  final WordId id;
   final WordContent content;
   final WordStatus status;
   final WordFeedback? feedback;
@@ -173,6 +178,56 @@ class TurnLogViewData {
   TurnLogViewData({required this.party, required this.wordsInThisTurn});
 }
 
+sealed class GameProgress {}
+
+// TODO: Make dataclass when https://dart.dev/language/macros is stable.
+class FixedWordSetProgress extends GameProgress {
+  final int numWords;
+
+  FixedWordSetProgress(this.numWords);
+
+  @override
+  bool operator ==(Object other) {
+    return other is FixedWordSetProgress && numWords == other.numWords;
+  }
+
+  @override
+  int get hashCode {
+    return numWords.hashCode;
+  }
+}
+
+// TODO: Make dataclass when https://dart.dev/language/macros is stable.
+class FixedNumRoundsProgress extends GameProgress {
+  final int roundIndex;
+  final int numRounds;
+  final int roundTurnIndex;
+  final int numTurnsPerRound;
+
+  FixedNumRoundsProgress(this.roundIndex, this.numRounds, this.roundTurnIndex,
+      this.numTurnsPerRound);
+
+  @override
+  String toString() {
+    return "round $roundIndex/$numRounds, "
+        "turn $roundTurnIndex/$numTurnsPerRound";
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is FixedNumRoundsProgress &&
+        roundIndex == other.roundIndex &&
+        numRounds == other.numRounds &&
+        roundTurnIndex == other.roundTurnIndex &&
+        numTurnsPerRound == other.numTurnsPerRound;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(roundIndex, numRounds, roundTurnIndex, numTurnsPerRound);
+  }
+}
+
 // All information about the game, read-only.
 // Use GameController to influence the game.
 class GameData {
@@ -190,12 +245,30 @@ class GameData {
 
   int turnIndex() => DerivedGameState.turnIndex(turnLog);
 
-  int numWordsInHat() =>
-      DerivedGameState.wordsInHat(initialState, turnLog, turnState).length;
+  PartyingStrategy partyingStrategy() =>
+      PartyingStrategy.fromGame(config, initialState.teamCompositions);
+
+  int? numWordsInHat() =>
+      DerivedGameState.wordsInHat(initialState, turnLog, turnState)?.length;
+
+  FixedNumRoundsProgress? fixedNumRoundsProgress() {
+    if (config.rules.extent != GameExtent.fixedNumRounds) {
+      return null;
+    }
+    final progress = partyingStrategy().getRoundsProgress(turnIndex());
+    return FixedNumRoundsProgress(progress.roundIndex, config.rules.numRounds,
+        progress.roundTurnIndex, progress.numTurnsPerRound);
+  }
+
+  GameProgress gameProgress() => switch (config.rules.extent) {
+        GameExtent.fixedWordSet => FixedWordSetProgress(numWordsInHat()!),
+        GameExtent.fixedNumRounds => fixedNumRoundsProgress()!,
+        _ => Assert.unexpectedValue(config.rules.extent),
+      };
 
   WordContent currentWordContent() {
     Assert.eq(turnState!.turnPhase, TurnPhase.explain);
-    return _wordContent(turnState!.wordsInThisTurn.last.id);
+    return _wordContent(turnState!.wordsInThisTurn.last);
   }
 
   int currentCombo() => turnState!.wordsInThisTurn.length - 1;
@@ -206,7 +279,7 @@ class GameData {
     return turnState!.wordsInThisTurn
         .map((w) => WordViewData(
               id: w.id,
-              content: _wordContent(w.id),
+              content: _wordContent(w),
               status: w.status,
               feedback: personalState.wordFeedback[w.id],
               flaggedByActivePlayer: personalState.wordFlags.contains(w.id),
@@ -297,7 +370,7 @@ class GameData {
               party: _partyToString(t.party),
               wordsInThisTurn: t.wordsInThisTurn
                   .map((w) => WordInTurnLogViewData(
-                        text: _wordContent(w.id).text,
+                        text: _wordContent(w).text,
                         status: w.status,
                       ))
                   .toList(),
@@ -311,9 +384,20 @@ class GameData {
         p.recipients.map((r) => config.players!.names[r]).join(', ');
   }
 
-  WordContent _wordContent(int wordID) {
-    final word = initialState.words[wordID];
-    Assert.eq(word.id, wordID);
-    return word.content;
+  WordContent _wordContent(WordInTurn wordInTurn) {
+    // We have two options:
+    //   - GameExtent is fixedWordSet, the content is stored directly in
+    //     WordInTurn;
+    //   - GameExtent is anything else, the IDs are global and refer to
+    //     InitialGameState.words.
+    if (wordInTurn.content != null) {
+      return wordInTurn.content!;
+    } else {
+      final id = wordInTurn.id;
+      Assert.holds(id.turnIndex == null);
+      final word = initialState.words![id.index];
+      Assert.eq(word.id, id);
+      return word.content;
+    }
   }
 }

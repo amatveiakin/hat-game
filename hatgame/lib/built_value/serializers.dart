@@ -8,6 +8,7 @@ import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/built_value/personal_state.dart';
 import 'package:hatgame/built_value/rematch_source.dart';
 import 'package:hatgame/built_value/team_compositions.dart';
+import 'package:hatgame/built_value/word.dart';
 
 part 'serializers.g.dart';
 

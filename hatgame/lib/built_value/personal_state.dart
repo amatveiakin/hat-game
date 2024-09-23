@@ -3,6 +3,7 @@ library player_info;
 import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
+import 'package:hatgame/built_value/word.dart';
 
 part 'personal_state.g.dart';
 
@@ -47,8 +48,8 @@ abstract class PersonalState
   BuiltList<String>? get words;
   bool? get wordsReady;
 
-  BuiltMap<int, WordFeedback> get wordFeedback;
-  BuiltSet<int> get wordFlags;
+  BuiltMap<WordId, WordFeedback> get wordFeedback;
+  BuiltSet<WordId> get wordFlags;
 
   PersonalState._();
   factory PersonalState([Function(PersonalStateBuilder b) updates]) =
