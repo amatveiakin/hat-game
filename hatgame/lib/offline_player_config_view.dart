@@ -24,23 +24,18 @@ class OfflinePlayersConfigView extends StatefulWidget {
   createState() => _OfflinePlayersConfigViewState();
 }
 
-class _PlayerData {
-  final bool isTeamDivider; // if true, other fields are meaningless
-  String? name;
-  final Key? key;
-  final TextEditingController? controller;
-  final FocusNode? focusNode;
+sealed class _ListItem {}
+
+class _PlayerData extends _ListItem {
+  String name;
+  final Key key;
+  final TextEditingController controller;
+  final FocusNode focusNode;
 
   _PlayerData(this.name)
-      : isTeamDivider = false,
-        key = GlobalKey(),
+      : key = GlobalKey(),
         controller = TextEditingController(),
         focusNode = FocusNode();
-  _PlayerData.teamDivider()
-      : isTeamDivider = true,
-        key = null,
-        controller = null,
-        focusNode = null;
 
   void dispose() {
     // TODO: Fix "The method 'findRenderObject' was called on null" and enable.
@@ -49,9 +44,11 @@ class _PlayerData {
   }
 }
 
+class _TeamDivider extends _ListItem {}
+
 // TODO: Consider making this widget stateless.
 class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
-  final _playerItems = <_PlayerData>[];
+  final _listItems = <_ListItem>[];
   final _playersToDispose = <_PlayerData>[];
   final _autoscrollStopwatch = Stopwatch();
   final _scrollController = ScrollController();
@@ -68,11 +65,11 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
       final teams = config.teams ??
           BuiltList<BuiltList<int>>([BuiltList<int>(config.names.keys)]);
       for (final team in teams) {
-        if (_playerItems.isNotEmpty) {
+        if (_listItems.isNotEmpty) {
           _addDivider();
         }
         for (final p in team) {
-          _addPlayer(config.names[p], focus: false);
+          _addPlayer(config.names[p]!, focus: false);
         }
       }
     } else {
@@ -90,13 +87,16 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
     final Map<int, String?> names = {};
     final List<List<int>> teams = [[]];
     int playerID = 0;
-    for (final p in _playerItems) {
-      if (p.isTeamDivider) {
-        teams.add([]);
-      } else {
-        names[playerID] = p.name;
-        teams.last.add(playerID);
-        playerID++;
+    for (final p in _listItems) {
+      switch (p) {
+        case _PlayerData():
+          names[playerID] = p.name;
+          teams.last.add(playerID);
+          playerID++;
+          break;
+        case _TeamDivider():
+          teams.add([]);
+          break;
       }
     }
 
@@ -114,13 +114,13 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
     }
   }
 
-  void _addPlayer(String? name, {required bool focus}) {
+  void _addPlayer(String name, {required bool focus}) {
     setState(() {
       final playerData = _PlayerData(name);
-      playerData.controller!.text = name!;
-      playerData.controller!.addListener(() {
+      playerData.controller.text = name;
+      playerData.controller.addListener(() {
         // Don't call setState, because TextField updates itself.
-        playerData.name = playerData.controller!.text;
+        playerData.name = playerData.controller.text;
         _notifyPlayersUpdate();
       });
       if (focus) {
@@ -145,9 +145,9 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
           Future.delayed(const Duration(milliseconds: 50), scrollCallback);
         };
         WidgetsBinding.instance.addPostFrameCallback((_) => scrollCallback!());
-        playerData.focusNode!.requestFocus();
+        playerData.focusNode.requestFocus();
       }
-      _playerItems.add(playerData);
+      _listItems.add(playerData);
     });
     _notifyPlayersUpdate();
   }
@@ -157,13 +157,13 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
   }
 
   void _addDivider() {
-    _playerItems.add(_PlayerData.teamDivider());
+    _listItems.add(_TeamDivider());
   }
 
   void _deletePlayer(_PlayerData player) {
     setState(() {
       _playersToDispose.add(player);
-      _playerItems.remove(player);
+      _listItems.remove(player);
     });
     _notifyPlayersUpdate();
   }
@@ -173,17 +173,10 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
     final listItemPaddingSmallRight = EdgeInsets.fromLTRB(listItemPadding.left,
         listItemPadding.top, listItemPadding.right / 2, listItemPadding.bottom);
     var tiles = <Widget>[];
-    for (int i = 0; i < _playerItems.length; ++i) {
-      final player = _playerItems[i];
-      if (player.isTeamDivider) {
-        tiles.add(
-          StyledDivider(
-            key: UniqueKey(),
-          ),
-        );
-      } else {
-        tiles.add(
-          ListTile(
+    for (int i = 0; i < _listItems.length; ++i) {
+      final player = _listItems[i];
+      final tile = switch (player) {
+        _PlayerData() => ListTile(
             key: UniqueKey(),
             contentPadding: listItemPaddingSmallRight,
             title: Row(
@@ -213,8 +206,11 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
               ],
             ),
           ),
-        );
-      }
+        _TeamDivider() => StyledDivider(
+            key: UniqueKey(),
+          ),
+      };
+      tiles.add(tile);
     }
     final buttonStyle = ButtonStyle(
         padding:
@@ -286,8 +282,17 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
 
   @override
   void dispose() {
-    for (final player in _playersToDispose + _playerItems) {
+    for (final player in _playersToDispose) {
       player.dispose();
+    }
+    for (final player in _listItems) {
+      switch (player) {
+        case _PlayerData():
+          player.dispose();
+          break;
+        case _TeamDivider():
+          break;
+      }
     }
     super.dispose();
   }
@@ -296,20 +301,20 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
   Widget build(BuildContext context) {
     onReorder(int oldIndex, int newIndex) {
       setState(() {
-        if (oldIndex >= _playerItems.length) {
+        if (oldIndex >= _listItems.length) {
           // Cannot drag the `add' button.
           // TODO: Make it impossible to start dragging the button.
           return;
         }
-        if (newIndex >= _playerItems.length) {
+        if (newIndex >= _listItems.length) {
           // Cannot drag an item below the `add' button.
-          newIndex = _playerItems.length;
+          newIndex = _listItems.length;
         }
         if (newIndex > oldIndex) {
           newIndex--;
         }
-        final p = _playerItems.removeAt(oldIndex);
-        _playerItems.insert(newIndex, p);
+        final p = _listItems.removeAt(oldIndex);
+        _listItems.insert(newIndex, p);
         _notifyPlayersUpdate();
       });
     }
