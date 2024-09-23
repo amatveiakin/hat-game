@@ -37,6 +37,7 @@ write_your_words: Write Your Words
 at_least_one_player_required: At least one player is required
 at_least_two_players_required: At least two players are required for this mode
 cannot_make_teams: Cannot make teams
+team_is_empty: A team is empty
 team_has_only_one_player: A team has only one player
 there_are_zero_teams: There are zero teams
 there_is_only_one_team: There is only one team

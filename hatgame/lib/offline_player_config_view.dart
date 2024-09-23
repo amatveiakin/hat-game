@@ -4,9 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/game_config_controller.dart';
 import 'package:hatgame/util/assertion.dart';
+import 'package:hatgame/util/widget_state_property.dart';
 import 'package:hatgame/widget/divider.dart';
-
-// TODO: Allow to delete teams.
 
 class OfflinePlayersConfigView extends StatefulWidget {
   final bool manualTeams;
@@ -77,6 +76,7 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
         _addPlayer(p, focus: false);
       }
     }
+    _deleteEmptyTeams();
   }
 
   void _notifyPlayersUpdate() {
@@ -164,8 +164,23 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
     setState(() {
       _playersToDispose.add(player);
       _listItems.remove(player);
+      _deleteEmptyTeams();
     });
     _notifyPlayersUpdate();
+  }
+
+  // Assumption: already in `setState`.
+  void _deleteEmptyTeams() {
+    var newTeam = true;
+    _listItems.removeWhere((item) {
+      final isDivider = item is _TeamDivider;
+      final remove = newTeam && isDivider;
+      newTeam = isDivider;
+      return remove;
+    });
+    if (_listItems.isNotEmpty && _listItems.last is _TeamDivider) {
+      _listItems.removeLast();
+    }
   }
 
   List<Widget> _makeTiles() {
@@ -215,9 +230,10 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
     final buttonStyle = ButtonStyle(
         padding:
             WidgetStateProperty.all(const EdgeInsets.symmetric(vertical: 10.0)),
-        side: WidgetStateProperty.all(
-          BorderSide(
-            color: Theme.of(context).primaryColor.withAlpha(0xb0),
+        side: WidgetStateProperty.resolveWith(
+          (states) => BorderSide(
+            color: greyOutDisabled(
+                states, Theme.of(context).primaryColor.withAlpha(0xb0)),
           ),
         ));
     tiles.add(ListTile(
@@ -228,9 +244,11 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
             flex: 3,
             child: OutlinedButton(
               style: buttonStyle,
-              onPressed: () => setState(() {
-                _addPlayer('', focus: true);
-              }),
+              onPressed: manualTeams && _listItems.isEmpty
+                  ? null
+                  : () => setState(() {
+                        _addPlayer('', focus: true);
+                      }),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -250,6 +268,7 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
                 onPressed: () => setState(() {
                   _addDivider();
                   _addPlayer('', focus: true);
+                  _deleteEmptyTeams();
                 }),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -315,8 +334,9 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
         }
         final p = _listItems.removeAt(oldIndex);
         _listItems.insert(newIndex, p);
-        _notifyPlayersUpdate();
+        _deleteEmptyTeams();
       });
+      _notifyPlayersUpdate();
     }
 
     return GestureDetector(

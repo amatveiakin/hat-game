@@ -5,6 +5,7 @@ import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/widget/dialog.dart';
 
+// TODO: Support or ban manual teams.
 class OnlinePlayersConfigView extends StatelessWidget {
   final LocalGameData localGameData;
   final PlayersConfig? playersConfig;

@@ -25,17 +25,17 @@ List<List<int>> generateTeamPlayers(
 }
 
 void checkTeamSizes(BuiltList<BuiltList<int>> teams) {
-  for (final t in teams) {
-    if (t.isEmpty) {
-      // TODO: Disallow when the UI allows to delete teams.
-    } else if (t.length == 1) {
-      throw InvalidOperation(LocalStr.tr('team_has_only_one_player'));
-    }
-  }
   if (teams.isEmpty) {
     throw InvalidOperation(LocalStr.tr('there_are_zero_teams'));
   } else if (teams.length == 1) {
     throw InvalidOperation(LocalStr.tr('there_is_only_one_team'));
+  }
+  for (final t in teams) {
+    if (t.isEmpty) {
+      throw InvalidOperation(LocalStr.tr('team_is_empty'));
+    } else if (t.length == 1) {
+      throw InvalidOperation(LocalStr.tr('team_has_only_one_player'));
+    }
   }
 }
 

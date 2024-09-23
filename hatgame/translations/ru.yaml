@@ -37,6 +37,7 @@ write_your_words: Написание слов
 at_least_one_player_required: Нужен хотя бы один игрок
 at_least_two_players_required: Для этого режима нужно хотя бы два игрока
 cannot_make_teams: Не получается составить команды
+team_is_empty: Команда пуста
 team_has_only_one_player: Команда состоит всего из одного игрока
 there_are_zero_teams: Нет ни одной команды
 there_is_only_one_team: Команда всего одна
