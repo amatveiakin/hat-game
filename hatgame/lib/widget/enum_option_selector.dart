@@ -71,22 +71,35 @@ abstract class EnumOptionSelector<E> extends StatefulWidget {
   });
 }
 
+// `RadioListTile` returns `null` when the user clicks on the active option and
+// we use this to close the dialog. We need to distinguish this from `E` being
+// nullable itself.
+class _Wrapper<E> {
+  final E inner;
+
+  _Wrapper(this.inner);
+
+  @override
+  bool operator ==(Object other) =>
+      other is _Wrapper<E> && inner == other.inner;
+}
+
 class EnumOptionSelectorState<E, W extends EnumOptionSelector<E>>
     extends State<W> {
-  late E currentValue;
+  late _Wrapper<E> currentValue;
 
   @override
   void initState() {
     super.initState();
-    currentValue = widget.initialValue;
+    currentValue = _Wrapper(widget.initialValue);
   }
 
-  void _valueChanged(BuildContext context, E? newValue) {
+  void _valueChanged(BuildContext context, _Wrapper<E>? newValue) {
     if (newValue != null) {
       setState(() {
         currentValue = newValue;
       });
-      widget.changeCallback(newValue);
+      widget.changeCallback(newValue.inner);
     }
     Navigator.of(context).pop();
   }
@@ -111,12 +124,12 @@ class EnumOptionSelectorState<E, W extends EnumOptionSelector<E>>
                   OptionChoice() => Row(
                       children: <Widget>[
                             Expanded(
-                              child: RadioListTile<E?>(
+                              child: RadioListTile<_Wrapper<E>>(
                                 title: Text(e.title.value(context)),
                                 subtitle: e.subtitle == null
                                     ? null
                                     : Text(e.subtitle!.value(context)),
-                                value: e.value,
+                                value: _Wrapper(e.value),
                                 isThreeLine: e.subtitle != null,
                                 groupValue: currentValue,
                                 // Enable `toggleable` so that we can close the dialog
