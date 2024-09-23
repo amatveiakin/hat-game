@@ -123,11 +123,12 @@ class StrategyQuality {
   }
 }
 
-partyEquals(int performer, List<int> recipients) => const TypeMatcher<Party>()
-    .having((t) => t.performer, 'performer', equals(performer))
-    .having((t) => t.recipients, 'recipients', equals(recipients));
+TypeMatcher<Party> partyEquals(int performer, List<int> recipients) =>
+    const TypeMatcher<Party>()
+        .having((t) => t.performer, 'performer', equals(performer))
+        .having((t) => t.recipients, 'recipients', equals(recipients));
 
-qualEq(int maxIdleTime, int maxRoleStreak) =>
+TypeMatcher<StrategyQuality> qualEq(int maxIdleTime, int maxRoleStreak) =>
     const TypeMatcher<StrategyQuality>()
         .having((t) => t.maxIdleTime, 'maxIdleTime', equals(maxIdleTime))
         .having((t) => t.maxRoleStreak, 'maxRoleStreak', equals(maxRoleStreak));

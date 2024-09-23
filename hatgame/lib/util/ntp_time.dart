@@ -11,7 +11,7 @@ import 'package:ntp/ntp.dart';
 class NtpTime {
   static Duration? _ntpOffset;
 
-  static init() async {
+  static Future<void> init() async {
     try {
       final int offsetMilliseconds =
           await NTP.getNtpOffset().timeout(const Duration(seconds: 3));
@@ -28,7 +28,7 @@ class NtpTime {
   }
 
   // ignore: non_constant_identifier_names
-  static test_setInitialized(bool initialized) {
+  static void test_setInitialized(bool initialized) {
     _ntpOffset = initialized ? Duration.zero : null;
     debugPrint("NTP running in test mode, initialized = $initialized.");
   }

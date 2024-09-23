@@ -30,7 +30,7 @@ class StartScreenState extends State<StartScreen> {
   Future<void> _newGameOffline(BuildContext context) async {
     LocalGameData localGameData = await GameController.newGameOffine();
     if (context.mounted) {
-      Navigator.of(context).push(MaterialPageRoute(
+      Navigator.of(context).push(MaterialPageRoute<void>(
         builder: (context) => GameConfigView(
           localGameData: localGameData,
         ),
@@ -40,14 +40,14 @@ class StartScreenState extends State<StartScreen> {
   }
 
   Future<void> _newGameOnline(BuildContext context) async {
-    Navigator.of(context).push(MaterialPageRoute(
+    Navigator.of(context).push(MaterialPageRoute<void>(
       builder: (context) => NewGameOnlineScreen(),
       settings: const RouteSettings(name: NewGameOnlineScreen.routeName),
     ));
   }
 
   Future<void> _joinGame(BuildContext context) async {
-    Navigator.of(context).push(MaterialPageRoute(
+    Navigator.of(context).push(MaterialPageRoute<void>(
       builder: (context) => JoinGameOnlineScreen(),
       settings: const RouteSettings(name: JoinGameOnlineScreen.routeName),
     ));

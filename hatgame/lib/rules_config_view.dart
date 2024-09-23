@@ -14,7 +14,7 @@ import 'package:hatgame/widget/enum_option_selector.dart';
 import 'package:hatgame/widget/highlightable.dart';
 import 'package:hatgame/widget/numeric_field.dart';
 
-getGameVariantOptions(bool onlineMode) {
+List<OptionItem<GameVariant>> getGameVariantOptions(bool onlineMode) {
   return [
     OptionChoice(
       value: GameVariant.standard,
@@ -33,14 +33,15 @@ getGameVariantOptions(bool onlineMode) {
       value: GameVariant.pluralias,
       title: LocalStr.tr('variant_pluralias'),
       subtitle: LocalStr.tr('variant_pluralias_description'),
-      onInfo: (context) => Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => const PluraliasHelpScreen())),
+      onInfo: (context) => Navigator.of(context).push(MaterialPageRoute<void>(
+          builder: (context) => const PluraliasHelpScreen())),
     ),
   ];
 }
 
 class GameVariantSelector extends EnumOptionSelector<GameVariant> {
-  GameVariantSelector(GameVariant initialValue, Function changeCallback,
+  GameVariantSelector(
+      GameVariant initialValue, ValueChanged<GameVariant> changeCallback,
       {required bool onlineMode, super.key})
       : super(
           windowTitle: LocalStr.tr('variant'),
@@ -199,7 +200,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
     final dictionariesOnTap = configController.isReadOnly
         ? null
         : () {
-            Navigator.of(context).push(MaterialPageRoute(
+            Navigator.of(context).push(MaterialPageRoute<void>(
                 builder: (context) => DictionarySelector(
                       allValues: Lexicon.allDictionaries(),
                       initialValues: config.dictionaries.toList(),
@@ -273,7 +274,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
             onTap: configController.isReadOnly
                 ? null
                 : () {
-                    Navigator.of(context).push(MaterialPageRoute(
+                    Navigator.of(context).push(MaterialPageRoute<void>(
                         builder: (context) => GameVariantSelector(
                               config.variant,
                               (GameVariant newValue) => configController

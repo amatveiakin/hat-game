@@ -15,7 +15,7 @@ class OfflinePlayersConfigView extends StatefulWidget {
 
   OfflinePlayersConfigView(
       {super.key,
-      required teamingConfig,
+      required TeamingConfig teamingConfig,
       required this.initialPlayersConfig,
       required this.configController})
       : manualTeams = teamingConfig.teamingStyle == TeamingStyle.manualTeams;

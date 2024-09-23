@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class LabeledCheckbox extends StatelessWidget {
   final bool value;
-  final Function onChanged;
+  final ValueChanged<bool> onChanged;
   final Widget title;
   final EdgeInsets padding;
   final ShapeBorder? customInkWellBorder;
@@ -27,7 +27,9 @@ class LabeledCheckbox extends StatelessWidget {
           children: [
             Checkbox(
               value: value,
-              onChanged: (bool? newValue) => onChanged(newValue),
+              // `newValue` is guaranteed to be non-null because the
+              // checkbox is not tristate.
+              onChanged: (bool? newValue) => onChanged(newValue!),
             ),
             Expanded(child: title),
           ],

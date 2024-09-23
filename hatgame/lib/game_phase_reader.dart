@@ -33,7 +33,7 @@ class GamePhaseReader {
     return snapshot.get(DBColGamePhase());
   }
 
-  static _checkDB(DBDocumentSnapshot snapshot, GamePhase phase) {
+  static void _checkDB(DBDocumentSnapshot snapshot, GamePhase phase) {
     Assert.withContext(
       context: () => snapshot.toString(),
       body: () {

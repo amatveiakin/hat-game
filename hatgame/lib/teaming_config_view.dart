@@ -8,7 +8,7 @@ import 'package:hatgame/widget/enum_option_selector.dart';
 import 'package:hatgame/widget/numeric_field.dart';
 
 // TODO: Add icons
-getTeamingStyleOptions() {
+List<OptionItem<TeamingStyle>> getTeamingStyleOptions() {
   return [
     OptionChoice(
       value: TeamingStyle.individual,
@@ -45,7 +45,8 @@ getTeamingStyleOptions() {
 }
 
 class TeamingStyleSelector extends EnumOptionSelector<TeamingStyle> {
-  TeamingStyleSelector(TeamingStyle initialValue, Function changeCallback,
+  TeamingStyleSelector(
+      TeamingStyle initialValue, ValueChanged<TeamingStyle> changeCallback,
       {super.key})
       : super(
           windowTitle: LocalStr.tr('teaming'),
@@ -146,7 +147,7 @@ class TeamingConfigViewState extends State<TeamingConfigView> {
           onTap: configController.isReadOnly
               ? null
               : () {
-                  Navigator.of(context).push(MaterialPageRoute(
+                  Navigator.of(context).push(MaterialPageRoute<void>(
                       builder: (context) => TeamingStyleSelector(
                             config.teamingStyle,
                             (TeamingStyle newValue) => configController

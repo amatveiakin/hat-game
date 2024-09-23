@@ -81,7 +81,7 @@ T dbGet<T>(Map<String, dynamic> data, DBColumn<T> column,
           ? 'Column "${column.name}" not found in "$documentPath". '
               'Content: "$data"'
           : 'Column "${column.name}" not found. Content: "$data"');
-  return column.deserialize(data[column.name]);
+  return column.deserialize(data[column.name] as String?);
 }
 
 T? dbTryGet<T>(Map<String, dynamic> data, DBColumn<T> column) {
@@ -97,7 +97,7 @@ List<DBIndexedColumnData<T>> dbGetAll<T, ColumnT extends DBColumnFamily<T>>(
   data.forEach((key, valueSerialized) {
     final ColumnT? c = columnManager.fromColumnName(key);
     if (c != null) {
-      final T value = c.deserialize(valueSerialized)!;
+      final T value = c.deserialize(valueSerialized as String?)!;
       columns.add(DBIndexedColumnData(c.id, value));
       final int? idFromValue = columnManager.idFromData(value);
       if (idFromValue != null) {
@@ -118,7 +118,8 @@ int dbNextIndex<T>(Iterable<DBIndexedColumnData<T>> columns) {
   return columns.length;
 }
 
-Map<String, dynamic> dbData(List<DBColumnData> columns) {
+// TODO: Why doesn't this return `Map<String, String?>`?
+Map<String, dynamic> dbData<T>(List<DBColumnData<T>> columns) {
   final result = <String, dynamic>{};
   for (final c in columns) {
     result[c.column.name] = c.column.serialize(c.data);

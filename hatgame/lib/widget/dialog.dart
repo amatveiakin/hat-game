@@ -16,10 +16,10 @@ Future<T> multipleChoiceDialog<T>({
   required BuildContext context,
   String? titleText,
   String? contentText,
-  required List<DialogChoice> choices,
+  required List<DialogChoice<T>> choices,
   required T defaultChoice, // returned when the dialog is dismissed
 }) {
-  return showDialog(
+  return showDialog<T>(
     context: context,
     builder: (context) => AlertDialog(
       title: _textWidget(titleText),

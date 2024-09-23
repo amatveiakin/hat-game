@@ -80,7 +80,7 @@ class _GameConfigViewState extends State<GameConfigView>
     // TODO: Hint that this is the same as site address in web version.
     final String link = localGameData.gameUrl;
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -96,7 +96,7 @@ class _GameConfigViewState extends State<GameConfigView>
                   Clipboard.setData(ClipboardData(text: link)).then((_) {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                         content: Text(context.tr('link_copied_to_clipboard'))));
-                  }, onError: (error) {
+                  }, onError: (Object error) {
                     // TODO: Log to firebase.
                     debugPrint('Cannot copy to clipboard. Error: $error');
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(

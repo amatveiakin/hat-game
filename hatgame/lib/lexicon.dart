@@ -233,7 +233,7 @@ class Lexicon {
       final metadataMap = metadataDoc.contents as YamlMap;
       metadata = DictionaryMetadata(
         key: key,
-        uiName: metadataMap['name'] ?? key,
+        uiName: (metadataMap['name'] as String?) ?? key,
         numWords: numWords,
       );
     } else {

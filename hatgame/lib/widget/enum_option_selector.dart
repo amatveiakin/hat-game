@@ -60,7 +60,7 @@ abstract class EnumOptionSelector<E> extends StatefulWidget {
   final LocalStr windowTitle;
   final List<OptionItem<E>> allValues;
   final E initialValue;
-  final Function changeCallback;
+  final ValueChanged<E> changeCallback;
 
   const EnumOptionSelector({
     super.key,
@@ -71,7 +71,7 @@ abstract class EnumOptionSelector<E> extends StatefulWidget {
   });
 }
 
-class EnumOptionSelectorState<E, W extends EnumOptionSelector>
+class EnumOptionSelectorState<E, W extends EnumOptionSelector<E>>
     extends State<W> {
   late E currentValue;
 

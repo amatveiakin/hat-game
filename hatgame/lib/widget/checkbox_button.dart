@@ -4,7 +4,7 @@ import 'package:hatgame/widget/labeled_checkbox.dart';
 
 class CheckboxButton extends StatelessWidget {
   final bool value;
-  final Function onChanged;
+  final ValueChanged<bool> onChanged;
   final Widget title;
 
   const CheckboxButton({

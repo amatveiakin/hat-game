@@ -438,7 +438,7 @@ class GameController {
     await firestoreInstance.runTransaction((firestore.Transaction tx) async {
       firestore.DocumentSnapshot snapshot = await tx.get(reference);
       if (!snapshot.exists) {
-        return Future.error(InvalidOperation(
+        return Future<void>.error(InvalidOperation(
             LocalStr.raw("Game ${firestoreReference.path} doesn't exist")));
       }
       final playerRecord = dbGet(

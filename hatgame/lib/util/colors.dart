@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class MyColors {
-  static grey(int v) => Color.fromARGB(255, v, v, v);
+  static Color grey(int v) => Color.fromARGB(255, v, v, v);
 }
 
 Color toGrey(Color color) {

@@ -19,7 +19,7 @@ class InvalidOperation implements Exception {
     _tags[T] = value;
   }
 
-  T? tag<T>() => _tags[T];
+  T? tag<T>() => _tags[T] as T?;
 
   @override
   String toString() {

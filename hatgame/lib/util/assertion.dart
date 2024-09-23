@@ -17,7 +17,7 @@ class Assert {
   // TODO: Change to log when stable.
   static const defaultReleaseBehavior = AssertInRelease.fail;
 
-  static withContext(
+  static void withContext(
       {required MessageProducer context, required VoidCallback body}) {
     _AssertContext.push(context);
     try {
@@ -156,7 +156,7 @@ class Assert {
         inRelease: inRelease);
   }
 
-  static _combine(List<String?> messages) {
+  static String _combine(List<String?> messages) {
     return messages.joinNonEmpty(': ');
   }
 }

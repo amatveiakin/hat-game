@@ -61,7 +61,7 @@ class _PrimarySecondaryScaffoldState extends State<PrimarySecondaryScaffold> {
   Widget get secondaryIcon => widget.secondaryIcon;
 
   void _goToSecondary(BuildContext context) {
-    Navigator.of(context).push(MaterialPageRoute(
+    Navigator.of(context).push(MaterialPageRoute<void>(
       builder: (context) => _SecondaryView(
         body: secondary,
         title: secondaryTitle,

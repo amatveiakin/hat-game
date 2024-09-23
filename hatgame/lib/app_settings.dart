@@ -25,7 +25,8 @@ List<OptionItem<String?>> languageOptions() {
 }
 
 class LanguageSelector extends EnumOptionSelector<String?> {
-  LanguageSelector(String? initialValue, Function changeCallback, {super.key})
+  LanguageSelector(String? initialValue, ValueChanged<String?> changeCallback,
+      {super.key})
       : super(
           windowTitle: LocalStr.tr('app_language'),
           allValues: languageOptions(),
@@ -92,7 +93,7 @@ class AppSettingsViewState extends State<AppSettingsView> {
                         .title
                         .value(context)),
                 onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
+                  Navigator.of(context).push(MaterialPageRoute<void>(
                       builder: (context) => LanguageSelector(
                             language,
                             updateLanguage,

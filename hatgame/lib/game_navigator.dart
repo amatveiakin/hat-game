@@ -226,7 +226,7 @@ class GameNavigator {
     Navigator.of(context).push(route);
   }
 
-  static MaterialPageRoute _route({
+  static MaterialPageRoute<void> _route({
     required LocalGameData localGameData,
     required DBDocumentSnapshot snapshot,
     required GamePhase phase,
