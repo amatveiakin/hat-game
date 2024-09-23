@@ -31,15 +31,21 @@ class Assert {
       {String? message,
       MessageProducer? lazyMessage,
       AssertInRelease inRelease = defaultReleaseBehavior}) {
-    final String combinedMessage = _combine([
-      message,
-      lazyMessage?.call(),
-      ..._AssertContext.get().map((c) => c()),
-    ]);
-    assert(condition, combinedMessage);
+    // assert(condition, combinedMessage);
     if (!condition) {
+      final stackTrace = StackTrace.current.toString();
+      final callerFrame = stackTrace.split('\n').firstWhere(
+            (frame) => !frame.contains('/assertion.dart:'),
+            orElse: () => 'Unknown location',
+          );
+      final combinedMessage = _combine([
+        message,
+        lazyMessage?.call(),
+        ..._AssertContext.get().map((c) => c()),
+      ]);
+      assert(false, '$message\nAt $callerFrame');
+
       final decoratedMessage = _combine(['Assertion failed', combinedMessage]);
-      final String stackTrace = StackTrace.current.toString();
       firebaseLog() => FirebaseAnalytics.instance.logEvent(
             name: 'assertion_failure',
             parameters: {
