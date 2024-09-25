@@ -148,7 +148,7 @@ variant_standard: Dictionary words
 variant_standard_description: The app takes random words from chosen dictionaries.
 variant_write_words: Write words
 variant_write_words_description: Each player writes a few words.
-variant_write_words_disabled_description: Each player writes a few words. Not supported in offline mode yet.
+variant_write_words_disabled_description: Each player writes a few words. Not supported in offline mode.
 variant_pluralias: Pluralias
 variant_pluralias_description: The app generates portmanteau words instead of regular words.
 words: Words
@@ -221,6 +221,7 @@ teaming_random_teams: Random teams
 teaming_random_teams_description: Players are randomly grouped together to form a given number of teams.
 teaming_manual_teams: Manual mode
 teaming_manual_teams_description: Create pairs or teams manually.
+teaming_manual_teams_disabled_description: Create pairs or teams manually. Not supported in online mode.
 team_number: Team number
 not_enough_players: Not enough players
 players_per_team: {

@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_config.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
+import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/widget/dialog.dart';
 
-// TODO: Support or ban manual teams.
 class OnlinePlayersConfigView extends StatelessWidget {
   final LocalGameData localGameData;
   final PlayersConfig playersConfig;
@@ -43,6 +43,7 @@ class OnlinePlayersConfigView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Assert.holds(playersConfig.teams == null);
     final List<MapEntry<int, String>> entries =
         playersConfig.names.entries.toList();
     // BuiltMap does not sort by key.

@@ -8,7 +8,7 @@ import 'package:hatgame/widget/enum_option_selector.dart';
 import 'package:hatgame/widget/numeric_field.dart';
 
 // TODO: Add icons
-List<OptionItem<TeamingStyle>> getTeamingStyleOptions() {
+List<OptionItem<TeamingStyle>> getTeamingStyleOptions(bool onlineMode) {
   return [
     OptionChoice(
       value: TeamingStyle.individual,
@@ -33,7 +33,10 @@ List<OptionItem<TeamingStyle>> getTeamingStyleOptions() {
     OptionChoice(
       value: TeamingStyle.manualTeams,
       title: LocalStr.tr('teaming_manual_teams'),
-      subtitle: LocalStr.tr('teaming_manual_teams_description'),
+      subtitle: !onlineMode
+          ? LocalStr.tr('teaming_manual_teams_description')
+          : LocalStr.tr('teaming_manual_teams_disabled_description'),
+      enabled: !onlineMode,
     ),
     // OptionDescription(
     //   value: TeamingStyle.namedTeams,
@@ -47,10 +50,10 @@ List<OptionItem<TeamingStyle>> getTeamingStyleOptions() {
 class TeamingStyleSelector extends EnumOptionSelector<TeamingStyle> {
   TeamingStyleSelector(
       TeamingStyle initialValue, ValueChanged<TeamingStyle> changeCallback,
-      {super.key})
+      {required bool onlineMode, super.key})
       : super(
           windowTitle: LocalStr.tr('teaming'),
-          allValues: getTeamingStyleOptions(),
+          allValues: getTeamingStyleOptions(onlineMode),
           initialValue: initialValue,
           changeCallback: changeCallback,
         );
@@ -156,6 +159,7 @@ class TeamingConfigViewState extends State<TeamingConfigView> {
                                             config.rebuild((b) {
                                       b..teaming.teamingStyle = newValue;
                                     }))),
+                            onlineMode: onlineMode,
                           )));
                 }),
     );

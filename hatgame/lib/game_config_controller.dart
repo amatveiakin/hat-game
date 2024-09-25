@@ -44,7 +44,11 @@ class GameConfigController {
   }
 
   static GameConfig _adaptForOnlineMode(GameConfig config) {
-    return config;
+    return config.rebuild((b) {
+      if (config.teaming.teamingStyle == TeamingStyle.manualTeams) {
+        b.teaming.teamingStyle = TeamingStyle.randomTeams;
+      }
+    });
   }
 
   static GameConfig fixPlayersForTeamingStyle(GameConfig config) {

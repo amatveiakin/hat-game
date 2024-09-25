@@ -150,7 +150,7 @@ variant_standard: Слова из словарей
 variant_standard_description: Приложение берёт случайные слова из выбранных словарей.
 variant_write_words: Писать слова
 variant_write_words_description: Каждый игрок пишет по несколько слов.
-variant_write_words_disabled_description: Каждый игрок пишет по несколько слов. Пока не поддерживается в офлайн-режиме.
+variant_write_words_disabled_description: Каждый игрок пишет по несколько слов. Не поддерживается в офлайн-режиме.
 variant_pluralias: Шлакоблокунь
 variant_pluralias_description: Приложение генерирует каламбуры вместо обычных слов.
 words: Слова
@@ -223,6 +223,7 @@ teaming_random_teams: Случайные команды
 teaming_random_teams_description: Игроки случайным образом делятся на заданное количество команд.
 teaming_manual_teams: Ручной режим
 teaming_manual_teams_description: Создайте пары или команды вручную.
+teaming_manual_teams_disabled_description: Создайте пары или команды вручную. Не поддерживается в онлайн-режиме.
 team_number: Число команд
 not_enough_players: Недостаточно игроков
 players_per_team: {
