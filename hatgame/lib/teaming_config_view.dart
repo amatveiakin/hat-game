@@ -150,9 +150,12 @@ class TeamingConfigViewState extends State<TeamingConfigView> {
                   Navigator.of(context).push(MaterialPageRoute<void>(
                       builder: (context) => TeamingStyleSelector(
                             config.teamingStyle,
-                            (TeamingStyle newValue) => configController
-                                .updateTeaming((config) => config.rebuild(
-                                    (b) => b..teamingStyle = newValue)),
+                            (TeamingStyle newValue) => configController.update(
+                                (config) => GameConfigController
+                                        .fixPlayersForTeamingStyle(
+                                            config.rebuild((b) {
+                                      b..teaming.teamingStyle = newValue;
+                                    }))),
                           )));
                 }),
     );

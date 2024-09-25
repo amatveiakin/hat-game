@@ -108,6 +108,8 @@ abstract class PlayersConfig
 abstract class GameConfig implements Built<GameConfig, GameConfigBuilder> {
   RulesConfig get rules;
   TeamingConfig get teaming;
+  // In rawConfig: non-null iff offline mode.
+  // In configWithOverrides: always non-null.
   PlayersConfig? get players;
 
   GameConfig._();

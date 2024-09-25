@@ -306,9 +306,7 @@ class GameController {
 
   static Future<LocalGameData> newGameOffine() async {
     final GameConfig config =
-        GameConfigController.initialConfig(onlineMode: false).rebuild(
-      (b) => b.players.names.replace({}),
-    );
+        GameConfigController.initialConfig(onlineMode: false);
     final String gameID = await _createGameOffline([
       ..._newGameRecord(),
       DBColConfig().withData(config),

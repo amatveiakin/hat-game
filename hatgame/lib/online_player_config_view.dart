@@ -8,7 +8,7 @@ import 'package:hatgame/widget/dialog.dart';
 // TODO: Support or ban manual teams.
 class OnlinePlayersConfigView extends StatelessWidget {
   final LocalGameData localGameData;
-  final PlayersConfig? playersConfig;
+  final PlayersConfig playersConfig;
 
   const OnlinePlayersConfigView({
     super.key,
@@ -44,7 +44,7 @@ class OnlinePlayersConfigView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<MapEntry<int, String>> entries =
-        playersConfig!.names.entries.toList();
+        playersConfig.names.entries.toList();
     // BuiltMap does not sort by key.
     entries.sort((a, b) => a.key.compareTo(b.key));
 

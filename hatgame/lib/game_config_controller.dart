@@ -35,23 +35,38 @@ class GameConfigController {
   }
 
   static GameConfig _adaptForOfflineMode(GameConfig config) {
-    return config.rules.variant == GameVariant.writeWords
-        ? config.rebuild(
-            (b) => b..rules.variant = GameVariant.standard,
-          )
-        : config;
+    return config.rebuild((b) {
+      if (config.rules.variant == GameVariant.writeWords) {
+        b.rules.variant = GameVariant.standard;
+      }
+      b.players.names.replace({});
+    });
   }
 
   static GameConfig _adaptForOnlineMode(GameConfig config) {
     return config;
   }
 
+  static GameConfig fixPlayersForTeamingStyle(GameConfig config) {
+    return config.rebuild((b) {
+      final players = config.players;
+      if (players != null) {
+        if (config.teaming.teamingStyle == TeamingStyle.manualTeams) {
+          if (players.teams == null) {
+            b.players.teams.replace([BuiltList<int>(players.names.keys)]);
+          }
+        } else {
+          b.players.teams = null;
+        }
+      }
+    });
+  }
+
   static GameConfig _fix(GameConfig config) {
-    return config.rebuild(
-      (b) => b
-        ..rules.dictionaries.replace(
-            Lexicon.fixDictionaries(config.rules.dictionaries.toList())),
-    );
+    return fixPlayersForTeamingStyle(config.rebuild((b) {
+      b.rules.dictionaries
+          .replace(Lexicon.fixDictionaries(config.rules.dictionaries.toList()));
+    }));
   }
 
   static GameConfig initialConfig({required bool onlineMode}) {

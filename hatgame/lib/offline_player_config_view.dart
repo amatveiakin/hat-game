@@ -9,7 +9,7 @@ import 'package:hatgame/widget/divider.dart';
 
 class OfflinePlayersConfigView extends StatefulWidget {
   final bool manualTeams;
-  final PlayersConfig? initialPlayersConfig;
+  final PlayersConfig initialPlayersConfig;
   final GameConfigController configController;
 
   OfflinePlayersConfigView(
@@ -51,18 +51,19 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
   final _playersToDispose = <_PlayerData>[];
   final _autoscrollStopwatch = Stopwatch();
   final _scrollController = ScrollController();
-  bool _freezeUpdates = true;
+  late bool _wasManualTeams;
+  bool _freezeUpdates = false;
 
   bool get manualTeams => widget.manualTeams;
   GameConfigController get configController => widget.configController;
 
-  void _generateInitialPlayerItems() {
-    final PlayersConfig config = widget.initialPlayersConfig!;
+  void _updatePlayerItemsFromConfig() {
+    _freezeUpdates = true;
+    final PlayersConfig config = widget.initialPlayersConfig;
     config.checkInvariant();
-    // Conversion might be required is teaming config changed.
+    _listItems.clear();
     if (manualTeams) {
-      final teams = config.teams ??
-          BuiltList<BuiltList<int>>([BuiltList<int>(config.names.keys)]);
+      final teams = config.teams!;
       for (final team in teams) {
         if (_listItems.isNotEmpty) {
           _addDivider();
@@ -76,7 +77,9 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
         _addPlayer(p, focus: false);
       }
     }
+    _wasManualTeams = manualTeams;
     _deleteEmptyTeams();
+    _freezeUpdates = false;
   }
 
   void _notifyPlayersUpdate() {
@@ -109,7 +112,9 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
     } else {
       Assert.eq(teams.length, 1);
       configController.updatePlayers((_) => PlayersConfig(
-            (b) => b..names.replace(names),
+            (b) => b
+              ..names.replace(names)
+              ..teams = null,
           ));
     }
   }
@@ -287,8 +292,7 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
   @override
   void initState() {
     super.initState();
-    _generateInitialPlayerItems();
-    _freezeUpdates = false;
+    _updatePlayerItemsFromConfig();
   }
 
   @override
@@ -318,7 +322,14 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
 
   @override
   Widget build(BuildContext context) {
-    onReorder(int oldIndex, int newIndex) {
+    // TODO: Always keep it in sync with the player config (not just when
+    // `manualTeams` changes), like `updateFromConfig` does for the rules and
+    // teaming configs.
+    if (manualTeams != _wasManualTeams) {
+      _updatePlayerItemsFromConfig();
+    }
+
+    void onReorder(int oldIndex, int newIndex) {
       setState(() {
         if (oldIndex >= _listItems.length) {
           // Cannot drag the `add' button.

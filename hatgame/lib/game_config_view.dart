@@ -200,11 +200,11 @@ class _GameConfigViewState extends State<GameConfigView>
             child: localGameData.onlineMode
                 ? OnlinePlayersConfigView(
                     localGameData: localGameData,
-                    playersConfig: gameConfig.players,
+                    playersConfig: gameConfig.players!,
                   )
                 : OfflinePlayersConfigView(
                     teamingConfig: gameConfig.teaming,
-                    initialPlayersConfig: gameConfig.players,
+                    initialPlayersConfig: gameConfig.players!,
                     configController: configController,
                   ),
           ),
