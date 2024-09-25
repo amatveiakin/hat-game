@@ -357,8 +357,8 @@ void main() {
           teamCompositions: ascendingIndividualTurnOrder(numPlayers: 2));
 
       await (await host.controller()).startExplaning();
-      final word = (await host.controller()).gameData.currentWordText();
-      expect(word, isIn(['foo', 'bar']));
+      final word = (await host.controller()).gameData.currentWordContent();
+      expect(word.text, isIn(['foo', 'bar']));
     });
   });
 }

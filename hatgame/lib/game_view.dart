@@ -11,6 +11,7 @@ import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
 import 'package:hatgame/game_navigator.dart';
+import 'package:hatgame/decorated_text.dart';
 import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/functions.dart';
@@ -409,7 +410,7 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
         .wordsInThisTurnData()
         .map((w) => w.status != WordStatus.notExplained
             ? WordReviewItem(
-                text: w.text,
+                text: w.content.text,
                 status: w.status,
                 feedback: w.feedback,
                 hasFlag: w.flaggedByActivePlayer,
@@ -544,15 +545,21 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
           ],
         );
       case TurnPhase.explain:
+        final wordContent = gameData.currentWordContent();
         return Column(children: [
           Expanded(
             child: Center(
               child: WideButton(
                 onPressed: _turnActive ? _wordGuessed : null,
                 coloring: WideButtonColoring.neutral,
-                child: Text(
-                  gameData.currentWordText(),
-                  style: const TextStyle(fontSize: 24.0),
+                child: DecoratedText(
+                  text: wordContent.text,
+                  highlightFirst: wordContent.highlightFirst,
+                  highlightLast: wordContent.highlightLast,
+                  lineColor: MyTheme.primary.shade400.withOpacity(0.8),
+                  textStyle: DefaultTextStyle.of(context)
+                      .style
+                      .copyWith(fontSize: 24.0, fontWeight: FontWeight.w500),
                 ),
               ),
             ),
@@ -581,7 +588,7 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
           final wordReviewItems = gameData
               .wordsInThisTurnData()
               .map((w) => WordReviewItem(
-                    text: w.text,
+                    text: w.content.text,
                     status: w.status,
                     feedback: localGameData.onlineMode ? w.feedback : null,
                     hasFlag: w.flaggedByOthers,

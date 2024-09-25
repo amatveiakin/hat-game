@@ -558,7 +558,7 @@ class GameController {
         gameConfig: gameConfig, playerNames: playerNames);
   }
 
-  static List<String> _generateRandomWords(GameConfig config) {
+  static List<WordContent> _generateRandomWords(GameConfig config) {
     final int numPlayers = config.players!.names.length;
     final int totalWords = config.rules.wordsPerPlayer * numPlayers;
     Assert.holds(config.rules.dictionaries.isNotEmpty,
@@ -569,18 +569,21 @@ class GameController {
     return List.generate(totalWords, (_) => wordCollection.randomWord());
   }
 
-  static List<String> _collectWordsFromPlayers(DBDocumentSnapshot snapshot) {
+  static List<WordContent> _collectWordsFromPlayers(
+      DBDocumentSnapshot snapshot) {
     final personalStates = _parsePersonalStates(snapshot);
-    return personalStates.values
-        .fold([], (total, state) => total + state.words!.asList());
+    final total = <WordContent>[];
+    personalStates.values.forEach((state) =>
+        total.addAll(state.words!.map((text) => WordContent.plainWord(text))));
+    return total;
   }
 
-  static List<Word> _wordsFromWordTexts(List<String> wordTexts) {
-    return wordTexts
+  static List<Word> _wordsFromWordContents(List<WordContent> words) {
+    return words
         .mapWithIndex(
-          (index, text) => Word((b) => b
+          (index, content) => Word((b) => b
             ..id = index
-            ..text = text),
+            ..content.replace(content)),
         )
         .toList();
   }
@@ -593,7 +596,7 @@ class GameController {
     final TeamCompositions? teamCompositions =
         snapshot.get(DBColTeamCompositions());
 
-    final List<Word> words = _wordsFromWordTexts(
+    final List<Word> words = _wordsFromWordContents(
       config.rules.variant == GameVariant.writeWords
           ? _collectWordsFromPlayers(snapshot)
           : _generateRandomWords(config),

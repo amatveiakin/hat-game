@@ -41,9 +41,31 @@ class WordStatus extends EnumClass {
   static Serializer<WordStatus> get serializer => _$wordStatusSerializer;
 }
 
+abstract class WordContent implements Built<WordContent, WordContentBuilder> {
+  String get text;
+  int? get highlightFirst; // for pluralias
+  int? get highlightLast; // for pluralias
+
+  factory WordContent.plainWord(String text) {
+    return WordContent((b) => b..text = text);
+  }
+
+  factory WordContent.pluralias(String text, int prefix, int suffix) {
+    return WordContent((b) => b
+      ..text = text
+      ..highlightFirst = prefix
+      ..highlightLast = suffix);
+  }
+
+  WordContent._();
+  factory WordContent([void Function(WordContentBuilder) updates]) =
+      _$WordContent;
+  static Serializer<WordContent> get serializer => _$wordContentSerializer;
+}
+
 abstract class Word implements Built<Word, WordBuilder> {
   int get id;
-  String get text;
+  WordContent get content;
 
   Word._();
   factory Word([void Function(WordBuilder) updates]) = _$Word;

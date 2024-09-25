@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/util/invalid_operation.dart';
 import 'package:hatgame/util/list_ext.dart';
@@ -28,14 +29,14 @@ class WordCollection {
   // TODO: Come up with a balanced strategy somewhere between 'take words
   // proportionally to dictionary size' and 'take words from all dictionaries
   // with the same probability'.
-  final List<String> _words;
+  final List<WordContent> _words;
   final List<double>? _cumulativeWeights;
 
   WordCollection(this._words, {List<double>? weights})
       : _cumulativeWeights =
-            weights == null ? null : computeCumulativeWeights(_words, weights);
+            weights == null ? null : computeCumulativeWeights(weights);
 
-  String randomWord() {
+  WordContent randomWord() {
     if (_cumulativeWeights == null) {
       return _words[Random().nextInt(_words.length)];
     } else {
@@ -48,9 +49,7 @@ class WordCollection {
   }
 }
 
-List<double> computeCumulativeWeights(
-    List<String> words, List<double> weights) {
-  Assert.holds(words.length == weights.length);
+List<double> computeCumulativeWeights(List<double> weights) {
   double sum = 0.0;
   final List<double> cumulativeWeights = [];
   for (final w in weights) {
@@ -137,7 +136,8 @@ class Lexicon {
     if (pluralias) {
       // TODO: Reduce to 2, but boost longer intersections.
       const minIntersectionLength = 3;
-      final Set<String> allWordsSet = universalCollection()._words.toSet();
+      final Set<String> allWordsSet =
+          universalCollection()._words.map((word) => word.text).toSet();
       final Map<String, List<String>> prefixToWords = {};
       for (final w in words) {
         for (int i = minIntersectionLength; i <= w.length - 1; i++) {
@@ -201,10 +201,15 @@ class Lexicon {
                         intersectionFreq[w.intersection]!,
                     1.0 / 3.0));
       }).toList();
-      return WordCollection(doubleWords.map((w) => w.union).toList(),
+      return WordCollection(
+          doubleWords
+              .map((w) => WordContent.pluralias(
+                  w.union, w.first.length, w.second.length))
+              .toList(),
           weights: weights);
     } else {
-      return WordCollection(words);
+      return WordCollection(
+          words.map((w) => WordContent.plainWord(w)).toList());
     }
   }
 

@@ -120,7 +120,7 @@ class PartyViewData {
 
 class WordViewData {
   final int id;
-  final String text;
+  final WordContent content;
   final WordStatus status;
   final WordFeedback? feedback;
   final bool flaggedByActivePlayer;
@@ -128,7 +128,7 @@ class WordViewData {
 
   WordViewData({
     required this.id,
-    required this.text,
+    required this.content,
     required this.status,
     required this.feedback,
     required this.flaggedByActivePlayer,
@@ -193,9 +193,9 @@ class GameData {
   int numWordsInHat() =>
       DerivedGameState.wordsInHat(initialState, turnLog, turnState).length;
 
-  String currentWordText() {
+  WordContent currentWordContent() {
     Assert.eq(turnState!.turnPhase, TurnPhase.explain);
-    return _wordText(turnState!.wordsInThisTurn.last.id);
+    return _wordContent(turnState!.wordsInThisTurn.last.id);
   }
 
   int currentCombo() => turnState!.wordsInThisTurn.length - 1;
@@ -206,7 +206,7 @@ class GameData {
     return turnState!.wordsInThisTurn
         .map((w) => WordViewData(
               id: w.id,
-              text: _wordText(w.id),
+              content: _wordContent(w.id),
               status: w.status,
               feedback: personalState.wordFeedback[w.id],
               flaggedByActivePlayer: personalState.wordFlags.contains(w.id),
@@ -297,7 +297,7 @@ class GameData {
               party: _partyToString(t.party),
               wordsInThisTurn: t.wordsInThisTurn
                   .map((w) => WordInTurnLogViewData(
-                        text: _wordText(w.id),
+                        text: _wordContent(w.id).text,
                         status: w.status,
                       ))
                   .toList(),
@@ -311,9 +311,9 @@ class GameData {
         p.recipients.map((r) => config.players!.names[r]).join(', ');
   }
 
-  String _wordText(int wordID) {
+  WordContent _wordContent(int wordID) {
     final word = initialState.words[wordID];
     Assert.eq(word.id, wordID);
-    return word.text;
+    return word.content;
   }
 }
