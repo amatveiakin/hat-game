@@ -221,7 +221,8 @@ class _GameConfigViewState extends State<GameConfigView>
       coloring: WideButtonColoring.secondary,
       margin: WideButton.bottomButtonMargin,
       child: GoNextButtonCaption(
-          gameConfig.rules.variant == GameVariant.writeWords
+          gameConfig.rules.variant == GameVariant.writeWords &&
+                  _tabController.index == numTabs - 1
               ? context.tr('write_words_titlecase')
               : context.tr('next')),
     );
