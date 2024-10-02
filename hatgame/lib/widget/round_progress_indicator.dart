@@ -2,37 +2,29 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-const double widgetWidth = 120.0;
+const double desiredWidgetWidth = 120.0;
+const double minWidgetWidth = 100.0;
+const double maxWidgetWidth = 240.0;
+const double desiredSegmentWidth = 40.0;
 const int maxDiscreteRounds = 12;
-const double inactiveRadius = 5.4;
-const double activeRadius = 9.2;
-const double activePadding = 1.8;
-const double lineThickness = 2.4;
-const double inactiveThickness = 2.0;
-const double activeThickness = 2.6;
+const double inactiveHeight = 4.0;
+const double activeHeight = 8.0;
+const double maxPadding = 2.0;
 
-// TODO: Instead of filling empty circles with background color, find a way to
-// actually keep them empty. Ideas: smth BlendMode, smth ClipPath or just
-// manually split the line into segments.
-// TODO: Consider adapting width to the number of rounds, something like:
-//   min(max(minWidth, numRounds * optimalSpacing), maxWidth, parentWidth)
-// where parentWidth is taken from LayoutBuilder.
 class RoundProgressIndicator extends StatelessWidget {
   final int roundIndex;
   final int numRounds;
   final double roundProgress;
-  final Color backgroundColor;
   final Color baseColor;
-  final Color highlightColor;
+  final Color completionColor;
 
   RoundProgressIndicator({
     Key? key,
     required this.roundIndex,
     required this.numRounds,
     required this.roundProgress,
-    required this.backgroundColor,
     required this.baseColor,
-    required this.highlightColor,
+    required this.completionColor,
   }) : super(key: key) {
     assert(roundIndex >= 0);
     assert(roundIndex < numRounds);
@@ -42,17 +34,23 @@ class RoundProgressIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: Size(widgetWidth, activeRadius * 2),
-      painter: _RoundProgressIndicatorPainter(
-        roundIndex: roundIndex,
-        numRounds: numRounds,
-        roundProgress: roundProgress,
-        backgroundColor: backgroundColor,
-        baseColor: baseColor,
-        highlightColor: highlightColor,
-      ),
-    );
+    return LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+      final desiredWidth =
+          (numRounds * desiredSegmentWidth + desiredWidgetWidth) / 2;
+      final maxWidth = min(maxWidgetWidth, constraints.maxWidth);
+      final width = desiredWidth.clamp(minWidgetWidth, maxWidth);
+      return CustomPaint(
+        size: Size(width, activeHeight),
+        painter: _RoundProgressIndicatorPainter(
+          roundIndex: roundIndex,
+          numRounds: numRounds,
+          roundProgress: roundProgress,
+          baseColor: baseColor,
+          completionColor: completionColor,
+        ),
+      );
+    });
   }
 }
 
@@ -60,99 +58,58 @@ class _RoundProgressIndicatorPainter extends CustomPainter {
   final int roundIndex;
   final int numRounds;
   final double roundProgress;
-  final Color backgroundColor;
   final Color baseColor;
-  final Color highlightColor;
+  final Color completionColor;
 
   _RoundProgressIndicatorPainter({
     required this.roundIndex,
     required this.numRounds,
     required this.roundProgress,
-    required this.backgroundColor,
     required this.baseColor,
-    required this.highlightColor,
+    required this.completionColor,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final outerRect = Offset.zero & size;
-    final innerRect = outerRect.deflate(activeRadius);
-    final backgroundFill = _fill(backgroundColor);
+    final canvasRect = Offset.zero & size;
+    final centerY = canvasRect.center.dy;
     final inactiveFill = _fill(baseColor);
-    final activeBackgroundFill =
-        _fill(Color.lerp(backgroundColor, highlightColor, 0.1)!);
-    final activeFill = _fill(highlightColor);
-    final lineStroke = _stroke(baseColor, lineThickness);
-    final inactiveStroke = _stroke(baseColor, inactiveThickness);
-    final activeStroke = _stroke(highlightColor, activeThickness);
+    final completedFill = _fill(completionColor);
 
-    final circleCenter = (int i) {
-      if (numRounds == 1) {
-        return innerRect.center;
-      }
-      final dx = innerRect.left + i * innerRect.width / (numRounds - 1);
-      var dy = innerRect.center.dy;
+    // TODO: Improve support for a huge (100+) number of rounds: add minimum
+    // active segment width; draw two monolithic rects for the inactive rounds
+    // when inactive round segments become too small.
+    final w = canvasRect.width / numRounds;
+    for (int i = 0; i < numRounds; i++) {
+      final padding = min(maxPadding, w * 0.08);
+      final left = canvasRect.left + i * w + padding;
+      final right = canvasRect.left + (i + 1) * w - padding;
+      final h = (i == roundIndex) ? activeHeight : inactiveHeight;
+      final rect = Rect.fromLTRB(left, centerY - h / 2, right, centerY + h / 2);
+      final rrect =
+          RRect.fromRectAndRadius(rect, Radius.circular(min(w, h) * 0.7));
       if (i < roundIndex) {
-        return Offset(dx - activePadding, dy);
+        canvas.drawRRect(rrect, completedFill);
       } else if (i == roundIndex) {
-        return Offset(dx, dy);
+        // Is is recommended to use `saveLayer` with clipping:
+        // https://api.flutter.dev/flutter/dart-ui/Canvas/saveLayer.html
+        canvas.save();
+        canvas.clipRRect(rrect);
+        canvas.saveLayer(rect, Paint());
+        canvas.drawRect(rect, inactiveFill);
+        canvas.drawRect(
+            rect.topLeft & Size(rect.width * roundProgress, rect.height),
+            completedFill);
+        canvas.restore();
+        canvas.restore();
       } else {
-        return Offset(dx + activePadding, dy);
+        canvas.drawRRect(rrect, inactiveFill);
       }
-    };
-
-    final drawCircle = (int i) {
-      final c = circleCenter(i);
-      final r = (i == roundIndex) ? activeRadius : inactiveRadius;
-      if (i < roundIndex) {
-        canvas.drawCircle(c, r, inactiveFill);
-        canvas.drawCircle(c, r, inactiveStroke);
-      } else if (i == roundIndex) {
-        canvas.drawCircle(c, r, activeBackgroundFill);
-        canvas.drawArc(Rect.fromCenter(center: c, width: 2 * r, height: 2 * r),
-            -pi / 2, roundProgress * 2 * pi, true, activeFill);
-        canvas.drawCircle(c, r, activeStroke);
-      } else {
-        canvas.drawCircle(c, r, backgroundFill);
-        canvas.drawCircle(c, r, inactiveStroke);
-      }
-    };
-
-    if (numRounds <= maxDiscreteRounds) {
-      canvas.drawLine(innerRect.centerLeft, innerRect.centerRight, lineStroke);
-      for (int i = 0; i < numRounds; i++) {
-        if (i != roundIndex) {
-          drawCircle(i);
-        }
-      }
-      drawCircle(roundIndex);
-    } else {
-      final topLeft = outerRect.centerLeft - Offset(0, inactiveRadius);
-      final bottomRight = outerRect.centerRight + Offset(0, inactiveRadius);
-      final radius = Radius.circular(inactiveRadius);
-      canvas.drawRRect(
-          RRect.fromRectAndRadius(
-              Rect.fromPoints(
-                  topLeft, Offset(circleCenter(roundIndex).dx, bottomRight.dy)),
-              radius),
-          inactiveFill);
-      canvas.drawRRect(
-          RRect.fromRectAndRadius(
-              Rect.fromPoints(topLeft, bottomRight), radius),
-          inactiveStroke);
-      drawCircle(roundIndex);
     }
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-Paint _stroke(Color color, double width) {
-  return Paint()
-    ..color = color
-    ..strokeWidth = width
-    ..style = PaintingStyle.stroke;
 }
 
 Paint _fill(Color color) {

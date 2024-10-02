@@ -518,17 +518,17 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
                           (progress.roundIndex + 1).toString(),
                           progress.numRounds.toString()
                         ])),
-              SizedBox(height: 6),
-              RoundProgressIndicator(
-                roundIndex: progress.roundIndex,
-                numRounds: progress.numRounds,
-                roundProgress:
-                    progress.roundTurnIndex / progress.numTurnsPerRound,
-                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                baseColor: MyTheme.secondary,
-                highlightColor: MyTheme.secondaryIntense,
+              Padding(
+                padding: EdgeInsets.fromLTRB(8, 4, 8, 0),
+                child: RoundProgressIndicator(
+                  roundIndex: progress.roundIndex,
+                  numRounds: progress.numRounds,
+                  roundProgress:
+                      progress.roundTurnIndex / progress.numTurnsPerRound,
+                  baseColor: MyTheme.secondarySemiIntense.withOpacity(0.85),
+                  completionColor: MyTheme.primary,
+                ),
               ),
-              SizedBox(height: 2),
             ],
           ),
       };
