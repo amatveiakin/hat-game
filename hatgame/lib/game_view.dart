@@ -379,7 +379,7 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _padlockAnimationController = AnimationController(
-        duration: const Duration(milliseconds: 500), vsync: this);
+        duration: const Duration(milliseconds: 800), vsync: this);
     _glowAnimationController = AnimationController(
         duration: const Duration(milliseconds: 500), vsync: this);
     _glowAnimation =

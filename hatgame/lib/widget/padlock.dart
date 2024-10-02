@@ -54,18 +54,22 @@ class _PadlockPainter extends CustomPainter {
       _drawRotatedRect(canvas, dstRect, angle, fill, stroke);
     };
 
-    final animationJump = sin((panActive ? 0 : animationProgress) * pi) * 0.2;
-    final animationAngle = sin(animationProgress * 3 * pi) * 2.0;
+    final primaryAnimationProgress = panActive ? 0.0 : animationProgress;
+    final primaryJump =
+        sin(Curves.slowMiddle.transform(primaryAnimationProgress) * pi) * 0.2;
+    final primaryAngle =
+        sin(_easeInOutLinear(primaryAnimationProgress) * 4.0 * pi) * 6.0;
+    final secondaryAngle = sin(animationProgress * 4 * pi) * 2.0;
     drawHat(background);
-    drawPaper(4, Offset(0.42, 0.41), -8.0 + animationAngle);
-    drawPaper(2, Offset(0.58, 0.39), 4.0 - animationAngle);
-    drawPaper(5, Offset(0.55, 0.46), 2.0 + animationAngle);
+    drawPaper(4, Offset(0.42, 0.41), -8.0 + secondaryAngle);
+    drawPaper(2, Offset(0.58, 0.39), 4.0 - secondaryAngle);
+    drawPaper(5, Offset(0.55, 0.46), 2.0 + secondaryAngle);
     drawPaper(
         null,
         padlockPos.scale(1.0 / size.width, 1.0 / size.height) +
-            Offset(0, -animationJump),
-        0.0);
-    drawPaper(3, Offset(0.45, 0.51), -3.0 - animationAngle);
+            Offset(0, -primaryJump),
+        primaryAngle);
+    drawPaper(3, Offset(0.45, 0.51), -3.0 - secondaryAngle);
     drawHat(foreground);
   }
 
@@ -154,7 +158,7 @@ class PadlockState extends State<Padlock> with SingleTickerProviderStateMixin {
 
   void _setPadlockPos(Offset pos, bool notify) {
     final depth = -_size.height * 0.12;
-    final unlockHeight = _size.height * 1.0;
+    final unlockHeight = _size.height * 1.3; // ~ "work guessed" button height
     final center = _size.center(Offset.zero);
     final minY = center.dy + depth;
     final y = min(pos.dy, minY);
@@ -238,6 +242,10 @@ class PadlockState extends State<Padlock> with SingleTickerProviderStateMixin {
           );
         });
   }
+}
+
+double _easeInOutLinear(double x) {
+  return ((x * 2.0) - 0.5).clamp(0.0, 1.0);
 }
 
 Rect _scaleRect(Rect rect, double scaleX, double scaleY) {
