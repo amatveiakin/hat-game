@@ -211,6 +211,17 @@ single_round: One round game
 round_index: 'Round {} of {}'
 round_begins: 'Round {} of {} begins now'
 
+# lib/game_info_view.dart
+game_info_title: Game Info
+game_info_turn_times: 'Turn duration: {}+{} s'
+game_info_variant: 'Game: {}'
+game_info_dictionary: 'Dictionary: {}'
+game_info_dictionaries: 'Dictionaries:'
+game_info_fixed_word_set: 'Words in hat: {} (of {})'
+game_info_fixed_num_rounds: 'Round {}/{}, turn {}/{}'
+game_info_teams: 'Teams:'
+game_info_individual: 'Players:'
+
 # lib/game_navigator.dart
 leave: Leave
 leave_game: Leave game?

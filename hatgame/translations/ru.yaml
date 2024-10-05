@@ -213,6 +213,17 @@ single_round: Однораундовая игра
 round_index: 'Раунд {} из {}'
 round_begins: 'Начинается раунд {} из {}'
 
+# lib/game_info_view.dart
+game_info_title: Об игре
+game_info_turn_times: 'Продолжительность хода: {}+{} с'
+game_info_variant: 'Игра: {}'
+game_info_dictionary: 'Словарь: {}'
+game_info_dictionaries: 'Словари:'
+game_info_fixed_word_set: 'Осталось слов: {} (из {})'
+game_info_fixed_num_rounds: 'Раунд {}/{}, ход {}/{}'
+game_info_teams: 'Команды:'
+game_info_individual: 'Игроки:'
+
 # lib/game_navigator.dart
 leave: Выйти
 leave_game: Выйти из игры

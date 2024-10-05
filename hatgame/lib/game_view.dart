@@ -11,6 +11,7 @@ import 'package:hatgame/built_value/word.dart';
 import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/game_controller.dart';
 import 'package:hatgame/game_data.dart';
+import 'package:hatgame/game_info_view.dart';
 import 'package:hatgame/game_navigator.dart';
 import 'package:hatgame/decorated_text.dart';
 import 'package:hatgame/theme.dart';
@@ -702,6 +703,14 @@ class GameViewState extends State<GameView> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text(context.tr('hat_game')),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                builder: (context) => GameInfoView(
+                    localGameData: localGameData, gameData: gameData))),
+          ),
+        ],
       ),
       body: Column(
         children: [

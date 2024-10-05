@@ -182,18 +182,21 @@ sealed class GameProgress {}
 
 // TODO: Make dataclass when https://dart.dev/language/macros is stable.
 class FixedWordSetProgress extends GameProgress {
+  final int initialNumWords;
   final int numWords;
 
-  FixedWordSetProgress(this.numWords);
+  FixedWordSetProgress(this.initialNumWords, this.numWords);
 
   @override
   bool operator ==(Object other) {
-    return other is FixedWordSetProgress && numWords == other.numWords;
+    return other is FixedWordSetProgress &&
+        initialNumWords == other.initialNumWords &&
+        numWords == other.numWords;
   }
 
   @override
   int get hashCode {
-    return numWords.hashCode;
+    return Object.hash(initialNumWords, numWords);
   }
 }
 
@@ -261,7 +264,8 @@ class GameData {
   }
 
   GameProgress gameProgress() => switch (config.rules.extent) {
-        GameExtent.fixedWordSet => FixedWordSetProgress(numWordsInHat()!),
+        GameExtent.fixedWordSet =>
+          FixedWordSetProgress(initialState.words!.length, numWordsInHat()!),
         GameExtent.fixedNumRounds => fixedNumRoundsProgress()!,
         _ => Assert.unexpectedValue(config.rules.extent),
       };
