@@ -158,7 +158,7 @@ extent_fixed_num_rounds_description: The game lasts for a given number of rounds
 words: Words
 words_per_player: Words per player
 num_rounds: Number of rounds
-pluralias_help_title: About pluralias
+pluralias_help_title: About Pluralias
 pluralias_help_body: |
   What is *pluralias*? It's a portmanteau word that combines _plur**al**_ and
   _**al**ias_ by common letters.
