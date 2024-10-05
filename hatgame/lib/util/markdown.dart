@@ -6,10 +6,10 @@ class MarkdownUtil {
   static MarkdownStyleSheet defaultStyle(BuildContext context) {
     final baseSheet = MarkdownStyleSheet.fromTheme(Theme.of(context));
     return baseSheet.copyWith(
-      // Make padding before the header larger than after.
-      h1: baseSheet.h1!.copyWith(height: 2.0),
-      h2: baseSheet.h2!.copyWith(height: 2.0),
       h3: baseSheet.h3!.copyWith(fontWeight: FontWeight.w500),
+      h1Padding: EdgeInsets.only(top: 20.0),
+      h2Padding: EdgeInsets.only(top: 12.0),
+      h3Padding: EdgeInsets.only(top: 8.0),
     );
   }
 
