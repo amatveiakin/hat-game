@@ -53,6 +53,7 @@ dependencies:
   easy_localization_loader: ^2.0.0
 
   flutter_markdown: ^0.7.3+1
+  flutter_expandable_fab: ^2.3.0
 
   soundpool: ^2.2.0
 

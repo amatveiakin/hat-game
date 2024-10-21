@@ -707,8 +707,8 @@ class GameViewState extends State<GameView> {
           IconButton(
             icon: const Icon(Icons.menu),
             onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
-                builder: (context) => GameInfoView(
-                    localGameData: localGameData, gameData: gameData))),
+                builder: (context) =>
+                    GameInfoView(gameController: gameController))),
           ),
         ],
       ),

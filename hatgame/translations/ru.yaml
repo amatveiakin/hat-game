@@ -219,10 +219,16 @@ game_info_turn_times: 'Продолжительность хода: {}+{} с'
 game_info_variant: 'Игра: {}'
 game_info_dictionary: 'Словарь: {}'
 game_info_dictionaries: 'Словари:'
-game_info_fixed_word_set: 'Осталось слов: {} (из {})'
+game_info_fixed_word_set: 'Слов в шляпе: {} (из {})'
 game_info_fixed_num_rounds: 'Раунд {}/{}, ход {}/{}'
 game_info_teams: 'Команды:'
 game_info_individual: 'Игроки:'
+finish_game_action: Завершить игру
+finish_game_forbidden_when_not_active: Только активный игрок может завершить игру
+finish_game_confirmation: Закончить сейчас?
+finish_game_reject: Продолжить игру
+finish_game_accept: Завершить игру
+leave_game_action: Выйти из игры
 
 # lib/game_navigator.dart
 leave: Выйти

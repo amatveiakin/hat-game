@@ -345,7 +345,9 @@ class GameNavigator {
                 localGameData.gameReference)
             : leaveGameWithConfirmation(context, localGameData: localGameData);
       case GamePhase.play:
-        return leaveGameWithConfirmation(context, localGameData: localGameData);
+        // TODO: Go back to the previous turn review. Don't forget to hide words
+        // that weren't guessed. Abort the game if it's before the first turn.
+        return;
       case GamePhase.gameOver:
       case GamePhase.kicked:
       case GamePhase.rematch:

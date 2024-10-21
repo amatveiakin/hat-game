@@ -68,19 +68,16 @@ class TurnStateTransformer {
     );
   }
 
-  static TurnState? newTurn(
+  static TurnState newTurn(
     GameConfig config,
     InitialGameState initialState, {
-    required bool timeToEndGame,
     required int turnIndex,
   }) {
-    return timeToEndGame
-        ? null
-        : TurnState((b) => b
-          ..party.replace(
-              PartyingStrategy.fromGame(config, initialState.teamCompositions)
-                  .getParty(turnIndex))
-          ..turnPhase = TurnPhase.prepare);
+    return TurnState((b) => b
+      ..party.replace(
+          PartyingStrategy.fromGame(config, initialState.teamCompositions)
+              .getParty(turnIndex))
+      ..turnPhase = TurnPhase.prepare);
   }
 
   void startExplaning() {
@@ -621,10 +618,9 @@ class GameController {
     final InitialGameState initialState = InitialGameState((b) => b
       ..teamCompositions.replace(teamCompositions!)
       ..words = words?.toBuiltList().toBuilder());
-    final TurnState? turnState = TurnStateTransformer.newTurn(
+    final TurnState turnState = TurnStateTransformer.newTurn(
       config,
       initialState,
-      timeToEndGame: false,
       turnIndex: 0,
     );
     // In addition to initial state, write the config:
@@ -774,7 +770,7 @@ class GameController {
       DBDocumentReference reference,
       GameConfig config,
       InitialGameState initialState,
-      TurnState? turnState) async {
+      TurnState turnState) async {
     reference.clearLocalCache();
     return reference.updateColumns([
       DBColGamePhase().withData(GamePhase.play),
@@ -800,36 +796,39 @@ class GameController {
   Future<void> nextTurn() async {
     Assert.holds(isActivePlayer(),
         message: 'Only the active player can change game state');
-    final int oldTurnIndex = DerivedGameState.turnIndex(turnLog);
-    final int newTurnIndex = oldTurnIndex + 1;
+    final int prevTurnIndex = DerivedGameState.turnIndex(turnLog);
+    final int nextTurnIndex = prevTurnIndex + 1;
     final TurnRecord newTurnRecord =
         TurnStateTransformer.turnRecord(turnState!);
     final BuiltList<TurnRecord> newTurnLog =
         turnLog.rebuild((b) => b..add(newTurnRecord));
     final bool timeToEndGame = switch (config.rules.extent) {
       GameExtent.fixedWordSet =>
+        // pass (turnState == null) to `wordsInHat`, because words from the
+        // current turn have already been moved to turn log.
         DerivedGameState.wordsInHat(initialState, newTurnLog, null)!.isEmpty,
       GameExtent.fixedNumRounds => config.rules.numRounds ==
           gameData
               .partyingStrategy()
-              .getRoundsProgress(newTurnIndex)
+              .getRoundsProgress(nextTurnIndex)
               .roundIndex,
       _ => Assert.unexpectedValue(config.rules.extent),
     };
-    final TurnState? newTurnState = TurnStateTransformer.newTurn(
-      config,
-      initialState,
-      // pass (turnState == null) to `wordsInHat`, because words from the
-      // current turn have already been moved to turn log.
-      timeToEndGame: timeToEndGame,
-      turnIndex: newTurnIndex,
-    );
-    localGameData.gameReference.clearLocalCache();
-    return localGameData.gameReference.updateColumns([
-      if (timeToEndGame) DBColGamePhase().withData(GamePhase.gameOver),
-      DBColCurrentTurn().withData(newTurnState),
-      DBColTurnRecord(oldTurnIndex).withData(newTurnRecord),
-    ]);
+    if (timeToEndGame) {
+      return finishGame(
+          lastTurnIndex: prevTurnIndex, lastTurnRecord: newTurnRecord);
+    } else {
+      final TurnState newTurnState = TurnStateTransformer.newTurn(
+        config,
+        initialState,
+        turnIndex: nextTurnIndex,
+      );
+      localGameData.gameReference.clearLocalCache();
+      return localGameData.gameReference.updateColumns([
+        DBColCurrentTurn().withData(newTurnState),
+        DBColTurnRecord(prevTurnIndex).withData(newTurnRecord),
+      ]);
+    }
   }
 
   Future<void> startExplaning() {
@@ -850,6 +849,18 @@ class GameController {
 
   Future<void> finishExplanation() {
     return _updateTurnState((_transformer..finishExplanation()).turnState);
+  }
+
+  Future<void> finishGame({int? lastTurnIndex, TurnRecord? lastTurnRecord}) {
+    Assert.holds(isActivePlayer(),
+        message: 'Only the active player can change game state');
+    localGameData.gameReference.clearLocalCache();
+    return localGameData.gameReference.updateColumns([
+      DBColGamePhase().withData(GamePhase.gameOver),
+      DBColCurrentTurn().withData(null),
+      if (lastTurnIndex != null)
+        DBColTurnRecord(lastTurnIndex).withData(lastTurnRecord!),
+    ]);
   }
 
   Future<void> setWordStatus(WordId wordId, WordStatus newStatus) {

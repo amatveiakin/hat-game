@@ -9,6 +9,8 @@ class ConstrainedScaffold extends StatelessWidget {
   final PreferredSizeWidget appBar;
   final Widget body;
   final bool? resizeToAvoidBottomInset;
+  final Widget? floatingActionButton;
+  final FloatingActionButtonLocation? floatingActionButtonLocation;
   final double width;
 
   const ConstrainedScaffold({
@@ -17,6 +19,8 @@ class ConstrainedScaffold extends StatelessWidget {
     required this.appBar,
     required this.body,
     this.resizeToAvoidBottomInset,
+    this.floatingActionButton,
+    this.floatingActionButtonLocation,
     this.width = defaultWidth,
   });
 
@@ -32,6 +36,8 @@ class ConstrainedScaffold extends StatelessWidget {
         ),
       ),
       resizeToAvoidBottomInset: resizeToAvoidBottomInset,
+      floatingActionButton: floatingActionButton,
+      floatingActionButtonLocation: floatingActionButtonLocation,
     );
   }
 }

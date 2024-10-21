@@ -221,6 +221,12 @@ game_info_fixed_word_set: 'Words in hat: {} (of {})'
 game_info_fixed_num_rounds: 'Round {}/{}, turn {}/{}'
 game_info_teams: 'Teams:'
 game_info_individual: 'Players:'
+finish_game_action: Finish game
+finish_game_forbidden_when_not_active: Only the active player can finish the game
+finish_game_confirmation: End game now?
+finish_game_reject: Continue playing
+finish_game_accept: Finish game
+leave_game_action: Leave game
 
 # lib/game_navigator.dart
 leave: Leave
