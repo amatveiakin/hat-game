@@ -65,10 +65,6 @@ class TeamCompositionsView extends StatelessWidget {
 
   TeamCompositionsView({super.key, required this.localGameData});
 
-  void _onBackPressed() {
-    GameController.discardTeamCompositions(localGameData.gameReference);
-  }
-
   void _regenerateTeamCompositions(GameConfig gameConfig) async {
     // Shouldn't throw, because initial compositions have been generated
     // successfully.
@@ -92,7 +88,6 @@ class TeamCompositionsView extends StatelessWidget {
       context: context,
       localGameData: localGameData,
       buildBody: buildBody,
-      onBackPressed: _onBackPressed,
     );
   }
 

@@ -15,14 +15,6 @@ import 'package:hatgame/widget/async_snapshot_error.dart';
 import 'package:hatgame/widget/dialog.dart';
 import 'package:hatgame/write_words_view.dart';
 
-// We never pop the the previous game stage directly: this is done only
-// through the navigator.
-enum _PopResponse {
-  disabled,
-  custom,
-  exitGame,
-}
-
 class RouteArguments {
   final GamePhase phase;
 
@@ -63,7 +55,6 @@ class GameNavigator {
     required BuildContext context,
     required LocalGameData localGameData,
     required Widget Function(BuildContext, DBDocumentSnapshot) buildBody,
-    void Function()? onBackPressed,
   }) {
     return PopScope(
       canPop: false,
@@ -71,8 +62,7 @@ class GameNavigator {
         if (didPop) {
           return;
         }
-        await _onPop(context,
-            localGameData: localGameData, onBackPressed: onBackPressed);
+        await _onPop(context, localGameData: localGameData);
       },
       child: StreamBuilder<DBDocumentSnapshot>(
         stream: localGameData.gameReference.snapshots(),
@@ -302,68 +292,64 @@ class GameNavigator {
     };
   }
 
-  static Future<_PopResponse> _confimLeaveGame(
+  static void leaveGame(
     BuildContext context, {
     required LocalGameData localGameData,
   }) {
+    localGameData.navigationState.exitingGame = true;
+    if (context.mounted) {
+      Navigator.of(context).popUntil(ModalRoute.withName('/'));
+    }
+  }
+
+  static Future<void> leaveGameWithConfirmation(
+    BuildContext context, {
+    required LocalGameData localGameData,
+  }) async {
     // TODO: Replace with a description of how to continue when it's
     // possible to continue.
-    return multipleChoiceDialog(
+    final leave = await multipleChoiceDialog(
       context: context,
       titleText: context.tr('leave_game'),
       contentText: localGameData.onlineMode
           ? '${context.tr('reconnect_link_hint')}\n${localGameData.gameUrl}'
           : "You wouldn't be able to continue (this is not implemented yet)",
       choices: [
-        DialogChoice(_PopResponse.disabled, context.tr('stay')),
-        DialogChoice(_PopResponse.exitGame, context.tr('leave')),
+        DialogChoice(false, context.tr('stay')),
+        DialogChoice(true, context.tr('leave')),
       ],
-      defaultChoice: _PopResponse.disabled,
+      defaultChoice: false,
     );
-  }
-
-  Future<void> _onPop(
-    BuildContext context, {
-    required LocalGameData localGameData,
-    void Function()? onBackPressed,
-  }) async {
-    final popResponse =
-        await _popResponse(context, localGameData: localGameData);
-    switch (popResponse) {
-      case _PopResponse.disabled:
-        break;
-      case _PopResponse.custom:
-        onBackPressed!();
-        break;
-      case _PopResponse.exitGame:
-        localGameData.navigationState.exitingGame = true;
-        if (context.mounted) {
-          Navigator.of(context).popUntil(ModalRoute.withName('/'));
-        }
-        break;
+    if (leave) {
+      leaveGame(context, localGameData: localGameData);
     }
   }
 
-  Future<_PopResponse> _popResponse(
+  Future<void> _onPop(
     BuildContext context, {
     required LocalGameData localGameData,
   }) async {
     switch (currentPhase) {
       case GamePhase.configure:
         return localGameData.isAdmin
-            ? Future.value(_PopResponse.exitGame)
-            : _confimLeaveGame(context, localGameData: localGameData);
+            ? leaveGame(context, localGameData: localGameData)
+            : leaveGameWithConfirmation(context, localGameData: localGameData);
       case GamePhase.composeTeams:
+        return localGameData.isAdmin
+            ? GameController.discardTeamCompositions(
+                localGameData.gameReference)
+            : leaveGameWithConfirmation(context, localGameData: localGameData);
       case GamePhase.writeWords:
         return localGameData.isAdmin
-            ? Future.value(_PopResponse.custom)
-            : _confimLeaveGame(context, localGameData: localGameData);
+            ? GameController.backFromWordWritingPhase(
+                localGameData.gameReference)
+            : leaveGameWithConfirmation(context, localGameData: localGameData);
       case GamePhase.play:
-        return _confimLeaveGame(context, localGameData: localGameData);
+        return leaveGameWithConfirmation(context, localGameData: localGameData);
       case GamePhase.gameOver:
       case GamePhase.kicked:
       case GamePhase.rematch:
-        return Future.value(_PopResponse.exitGame);
+        return leaveGame(context, localGameData: localGameData);
     }
     Assert.unexpectedValue(currentPhase);
   }

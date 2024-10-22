@@ -108,7 +108,6 @@ class WriteWordsViewState extends State<WriteWordsView> {
       context: context,
       localGameData: localGameData,
       buildBody: buildBody,
-      onBackPressed: _onBackPressed,
     );
   }
 
@@ -130,10 +129,6 @@ class WriteWordsViewState extends State<WriteWordsView> {
           ..wordsReady = ready,
       ),
     );
-  }
-
-  void _onBackPressed() {
-    GameController.backFromWordWritingPhase(localGameData.gameReference);
   }
 
   void _next(GameConfig gameConfig) async {
