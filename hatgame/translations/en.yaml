@@ -9,7 +9,7 @@ turn_order: Turn Order
 
 # lib/start_screen.dart
 about_the_app: About the app
-app_version: "This app is in Beta. Version: {}"
+app_version: "Version: {}"
 hat_game_rules: Hat game rules
 new_local_game: New Local Game
 

@@ -9,7 +9,7 @@ turn_order: Порядок хода
 
 # lib/start_screen.dart
 about_the_app: О приложении
-app_version: 'Это приложение находится в бете. Версия: {}'
+app_version: 'Версия: {}'
 hat_game_rules: Правила шляпы
 new_local_game: Локальная игра
 
