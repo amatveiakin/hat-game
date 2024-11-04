@@ -3,6 +3,15 @@ import 'package:hatgame/theme.dart';
 import 'package:hatgame/util/assertion.dart';
 import 'package:hatgame/widget/constrained_scaffold.dart';
 
+const double _minBoxWidth = 360;
+const double _maxBoxWidth = 480;
+const double _boxMargin = 16;
+
+double _minWideLayoutWidth(int numSections) =>
+    (_minBoxWidth + 2 * _boxMargin) * numSections;
+double _maxWideLayoutWidth(int numSections) =>
+    (_maxBoxWidth + 2 * _boxMargin) * numSections;
+
 class SectionTitleData {
   final Widget icon;
 
@@ -21,10 +30,14 @@ class SectionsScaffold extends StatelessWidget {
   final bool appBarAutomaticallyImplyLeading;
   final String appTitle;
   final bool appTitlePresentInNarrowMode;
+  final bool wideLayout;
   final List<SectionData> sections;
   final List<Widget>? actions;
   final TabController? tabController;
   final Widget? bottomWidget;
+
+  static bool useWideLayout(BuildContext context, int numSections) =>
+      MediaQuery.of(context).size.width >= _minWideLayoutWidth(numSections);
 
   SectionsScaffold({
     super.key,
@@ -32,6 +45,7 @@ class SectionsScaffold extends StatelessWidget {
     required this.appBarAutomaticallyImplyLeading,
     required this.appTitle,
     required this.appTitlePresentInNarrowMode,
+    required this.wideLayout,
     required this.sections,
     this.actions,
     this.tabController,
@@ -47,16 +61,6 @@ class SectionsScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double minBoxWidth = 360;
-    const double maxBoxWidth = 480;
-    const double boxMargin = 16;
-    final double minWideLayoutWidth =
-        (minBoxWidth + 2 * boxMargin) * sections.length;
-    final double maxWideLayoutWidth =
-        (maxBoxWidth + 2 * boxMargin) * sections.length;
-    final bool wideLayout =
-        MediaQuery.of(context).size.width >= minWideLayoutWidth;
-
     if (!wideLayout) {
       // One-column view for phones and tablets in portrait mode.
       // TODO: Automatically increase padding on large screens.
@@ -118,7 +122,7 @@ class SectionsScaffold extends StatelessWidget {
         boxes.add(
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(boxMargin),
+              padding: const EdgeInsets.all(_boxMargin),
               child: Card(
                 clipBehavior: Clip.antiAlias,
                 child: Column(
@@ -158,7 +162,7 @@ class SectionsScaffold extends StatelessWidget {
             children: [
               Expanded(
                 child: SizedBox(
-                  width: maxWideLayoutWidth,
+                  width: _maxWideLayoutWidth(sections.length),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: boxes,

@@ -120,8 +120,8 @@ class _GameConfigViewState extends State<GameConfigView>
     );
   }
 
-  void _next(GameConfig gameConfig) async {
-    if (_tabController.index < numTabs - 1) {
+  void _next(GameConfig gameConfig, bool wideLayout) async {
+    if (!wideLayout && _tabController.index < numTabs - 1) {
       _tabController.animateTo(_tabController.index + 1);
       return;
     }
@@ -211,9 +211,10 @@ class _GameConfigViewState extends State<GameConfigView>
         ]),
       ),
     ];
+    final wideLayout = SectionsScaffold.useWideLayout(context, sections.length);
     Assert.eq(sections.length, numTabs);
     final startButton = WideButton(
-      onPressed: isAdmin ? () => _next(gameConfig) : null,
+      onPressed: isAdmin ? () => _next(gameConfig, wideLayout) : null,
       onPressedDisabled: isAdmin
           ? null
           : () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -233,6 +234,7 @@ class _GameConfigViewState extends State<GameConfigView>
           ? context.tr('hat_game_id', args: [localGameData.gameID.toString()])
           : context.tr('hat_game'),
       appTitlePresentInNarrowMode: localGameData.onlineMode,
+      wideLayout: wideLayout,
       actions: localGameData.onlineMode
           ? [
               IconButton(
