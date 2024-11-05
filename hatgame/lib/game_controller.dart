@@ -68,6 +68,15 @@ class TurnStateTransformer {
     );
   }
 
+  static TurnState backToRereview(TurnRecord turnRecord) {
+    return TurnState(
+      (b) => b
+        ..party.replace(turnRecord.party)
+        ..wordsInThisTurn.replace(turnRecord.wordsInThisTurn)
+        ..turnPhase = TurnPhase.rereview,
+    );
+  }
+
   static TurnState newTurn(
     GameConfig config,
     InitialGameState initialState, {
@@ -236,6 +245,8 @@ class GameController {
       TurnStateTransformer(config, initialState, turnLog, turnState!);
   PersonalStateTransformer get _personalTransformer =>
       PersonalStateTransformer(personalState);
+
+  int get turnIndex => DerivedGameState.turnIndex(turnLog);
 
   bool isActivePlayer() => turnState == null
       ? false
@@ -796,7 +807,7 @@ class GameController {
   Future<void> nextTurn() async {
     Assert.holds(isActivePlayer(),
         message: 'Only the active player can change game state');
-    final int prevTurnIndex = DerivedGameState.turnIndex(turnLog);
+    final int prevTurnIndex = turnIndex;
     final int nextTurnIndex = prevTurnIndex + 1;
     final TurnRecord newTurnRecord =
         TurnStateTransformer.turnRecord(turnState!);
@@ -831,6 +842,21 @@ class GameController {
     }
   }
 
+  // Go back to reviewing the words from the previous turn. Typically used when
+  // somebody points out after the fact that there was a mistake in one of the
+  // explanations.
+  Future<void> backToRereview() async {
+    Assert.holds(turnState!.turnPhase == TurnPhase.prepare && turnIndex > 0);
+    final int prevTurnIndex = turnIndex - 1;
+    final prevTurnState =
+        TurnStateTransformer.backToRereview(turnLog[prevTurnIndex]);
+    localGameData.gameReference.clearLocalCache();
+    return localGameData.gameReference.updateColumns([
+      DBColCurrentTurn().setValue(prevTurnState),
+      DBColTurnRecord(prevTurnIndex).delete(),
+    ]);
+  }
+
   Future<void> startExplaning() {
     return _updateTurnState((_transformer..startExplaning()).turnState);
   }
@@ -851,6 +877,8 @@ class GameController {
     return _updateTurnState((_transformer..finishExplanation()).turnState);
   }
 
+  // TODO: Always include the last turn, even if finishing the game early during
+  // explanation or review.
   Future<void> finishGame({int? lastTurnIndex, TurnRecord? lastTurnRecord}) {
     Assert.holds(isActivePlayer(),
         message: 'Only the active player can change game state');

@@ -478,11 +478,14 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
           const SizedBox(height: 12.0),
         ]);
       case TurnPhase.review:
+      case TurnPhase.rereview:
         return Column(children: [
           Expanded(
             child: wordReviewView,
           ),
-          if (NtpTime.initialized && turnState!.bonusTimeStart != null)
+          if (NtpTime.initialized &&
+              turnState!.bonusTimeStart != null &&
+              turnState!.turnPhase == TurnPhase.review)
             TimerView(
               key: UniqueKey(),
               style: TimerViewStyle.bonusTime,
@@ -629,23 +632,44 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
           gameProgressWidget(),
         ]);
       case TurnPhase.review:
+      case TurnPhase.rereview:
         {
           final wordReviewItems = gameData
               .wordsInThisTurnData()
-              .map((w) => WordReviewItem(
-                    gameConfig: gameConfig,
-                    text: w.content.text,
-                    status: w.status,
-                    feedback: localGameData.onlineMode ? w.feedback : null,
-                    hasFlag: w.flaggedByOthers,
-                    setStatus: (WordStatus status) =>
-                        _setWordStatus(w.id, status),
-                    setFeedback: localGameData.onlineMode
-                        ? (WordFeedback? feedback) =>
-                            _setWordFeedback(w.id, feedback)
-                        : null,
-                    setFlag: null,
-                  ))
+              .map((w) => (!localGameData.onlineMode &&
+                      gameConfig.rules.extent == GameExtent.fixedWordSet &&
+                      w.status == WordStatus.notExplained &&
+                      turnState!.turnPhase == TurnPhase.rereview)
+                  // Hide words that go back to hat during rereview. The typical
+                  // case for going back to the last turn results is to make
+                  // sure that the player before you explained their words
+                  // correctly. For this, seeing explained words is useful, but
+                  // words that go back to hat are a spoiler.
+                  ? WordReviewItem(
+                      gameConfig: gameConfig,
+                      text: null,
+                      status: w.status,
+                      feedback: null,
+                      hasFlag: false,
+                      setStatus: (WordStatus status) =>
+                          _setWordStatus(w.id, status),
+                      setFeedback: null,
+                      setFlag: null,
+                    )
+                  : WordReviewItem(
+                      gameConfig: gameConfig,
+                      text: w.content.text,
+                      status: w.status,
+                      feedback: localGameData.onlineMode ? w.feedback : null,
+                      hasFlag: w.flaggedByOthers,
+                      setStatus: (WordStatus status) =>
+                          _setWordStatus(w.id, status),
+                      setFeedback: localGameData.onlineMode
+                          ? (WordFeedback? feedback) =>
+                              _setWordFeedback(w.id, feedback)
+                          : null,
+                      setFlag: null,
+                    ))
               .toList();
           return Column(children: [
             Expanded(
@@ -653,13 +677,14 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
                 children: wordReviewItems,
               ),
             ),
-            TimerView(
-              key: const ValueKey('bonus_timer'),
-              style: TimerViewStyle.bonusTime,
-              onTimeEnded: () => _endBonusTime(gameData.turnIndex()),
-              duration: Duration(seconds: gameConfig.rules.bonusSeconds),
-              hideOnTimeEnded: true,
-            ),
+            if (turnState!.turnPhase == TurnPhase.review)
+              TimerView(
+                key: const ValueKey('bonus_timer'),
+                style: TimerViewStyle.bonusTime,
+                onTimeEnded: () => _endBonusTime(gameData.turnIndex()),
+                duration: Duration(seconds: gameConfig.rules.bonusSeconds),
+                hideOnTimeEnded: true,
+              ),
             const SizedBox(height: 28.0),
             WideButton(
               onPressed: _reviewDone,
@@ -702,24 +727,32 @@ class GameViewState extends State<GameView> {
   Widget buildBody(BuildContext context, DBDocumentSnapshot snapshot) {
     final gameController = GameController.fromSnapshot(localGameData, snapshot);
     final gameData = gameController.gameData;
+    final turnPhase = gameData.turnState!.turnPhase;
     return ConstrainedScaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text(context.tr('hat_game')),
+        title: Text(turnPhase == TurnPhase.rereview
+            ? context.tr('rereview_title')
+            : context.tr('hat_game')),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
-                builder: (context) =>
-                    GameInfoView(gameController: gameController))),
-          ),
+          // Don't show game info during rereview, because it is not clear what
+          // state should be displayed. Both the state reverted to the last turn
+          // and the present state feel potentially confusing.
+          if (turnPhase != TurnPhase.rereview)
+            IconButton(
+              icon: const Icon(Icons.menu),
+              onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                      builder: (context) =>
+                          GameInfoView(gameController: gameController))),
+            ),
         ],
       ),
       body: Column(
         children: [
           PartyView(
             gameData.currentPartyViewData(),
-            gameData.turnState!.turnPhase,
+            turnPhase,
             localGameData.myPlayerID,
           ),
           Expanded(

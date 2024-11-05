@@ -196,6 +196,7 @@ game_over: Игра окончена
 rematch: Реванш!
 
 # lib/game_view.dart
+rereview_title: Результаты прошлого хода
 discard_word: Удалить слово
 done: Готово
 flag_the_word: Проблема со словом (объяснение некорректно, слово не было угадано)

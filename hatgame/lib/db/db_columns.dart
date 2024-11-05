@@ -174,7 +174,8 @@ class DBColInitialState extends DBColumn<InitialGameState>
   String get name => 'initial_state';
 }
 
-// Written after turn. Immutable. Uses sequential numeration.
+// Written after turn. Uses sequential numeration. Typically immutable, but
+// latest record can be updated during rereview.
 class DBColTurnRecord extends DBColumnFamily<TurnRecord>
     with DBColSerializeBuiltValue {
   static const String prefix = 'turn-';

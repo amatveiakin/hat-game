@@ -24,6 +24,7 @@ class TurnPhase extends EnumClass {
   static const TurnPhase prepare = _$prepare;
   static const TurnPhase explain = _$explain;
   static const TurnPhase review = _$review;
+  static const TurnPhase rereview = _$rereview; // back to last turn review
 
   const TurnPhase._(String name) : super(name);
   static BuiltSet<TurnPhase> get values => _$valuesTurnPhase;

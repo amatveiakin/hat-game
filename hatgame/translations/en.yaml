@@ -194,6 +194,7 @@ game_over: Game Over
 rematch: Rematch!
 
 # lib/game_view.dart
+rereview_title: Last Turn Results
 discard_word: Discard word
 done: Done
 flag_the_word: Raise a problem with the word (invalid explanation, word not actually guessed)

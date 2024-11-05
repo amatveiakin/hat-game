@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:hatgame/built_value/game_phase.dart';
+import 'package:hatgame/built_value/game_state.dart';
 import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/game_config_view.dart';
 import 'package:hatgame/game_controller.dart';
@@ -56,44 +57,45 @@ class GameNavigator {
     required LocalGameData localGameData,
     required Widget Function(BuildContext, DBDocumentSnapshot) buildBody,
   }) {
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (bool didPop, Object? result) async {
-        if (didPop) {
-          return;
+    return StreamBuilder<DBDocumentSnapshot>(
+      stream: localGameData.gameReference.snapshots(),
+      builder:
+          (BuildContext context, AsyncSnapshot<DBDocumentSnapshot> snapshot) {
+        if (snapshot.hasError) {
+          return AsyncSnapshotError(snapshot, gamePhase: currentPhase);
         }
-        await _onPop(context, localGameData: localGameData);
-      },
-      child: StreamBuilder<DBDocumentSnapshot>(
-        stream: localGameData.gameReference.snapshots(),
-        builder:
-            (BuildContext context, AsyncSnapshot<DBDocumentSnapshot> snapshot) {
-          if (snapshot.hasError) {
-            return AsyncSnapshotError(snapshot, gamePhase: currentPhase);
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final snapshotData = snapshot.data!;
+        final newPhase =
+            GamePhaseReader.fromSnapshot(localGameData, snapshotData);
+        if (newPhase != currentPhase) {
+          if (newPhase != localGameData.navigationState.lastSeenGamePhase &&
+              !localGameData.navigationState.exitingGame) {
+            _navigateTo(
+              context: context,
+              localGameData: localGameData,
+              snapshot: snapshotData,
+              oldPhase: currentPhase,
+              newPhase: newPhase,
+            );
           }
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final snapshotData = snapshot.data!;
-          final newPhase =
-              GamePhaseReader.fromSnapshot(localGameData, snapshotData);
-          if (newPhase != currentPhase) {
-            if (newPhase != localGameData.navigationState.lastSeenGamePhase &&
-                !localGameData.navigationState.exitingGame) {
-              _navigateTo(
-                context: context,
-                localGameData: localGameData,
-                snapshot: snapshotData,
-                oldPhase: currentPhase,
-                newPhase: newPhase,
-              );
+          return const Center(child: CircularProgressIndicator());
+        }
+        Assert.eq(newPhase, currentPhase);
+        return PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (bool didPop, Object? result) async {
+            if (didPop) {
+              return;
             }
-            return const Center(child: CircularProgressIndicator());
-          }
-          Assert.eq(newPhase, currentPhase);
-          return buildBody(context, snapshotData);
-        },
-      ),
+            await _onPop(context,
+                localGameData: localGameData, snapshot: snapshotData);
+          },
+          child: buildBody(context, snapshotData),
+        );
+      },
     );
   }
 
@@ -328,6 +330,7 @@ class GameNavigator {
   Future<void> _onPop(
     BuildContext context, {
     required LocalGameData localGameData,
+    required DBDocumentSnapshot snapshot,
   }) async {
     switch (currentPhase) {
       case GamePhase.configure:
@@ -345,8 +348,15 @@ class GameNavigator {
                 localGameData.gameReference)
             : leaveGameWithConfirmation(context, localGameData: localGameData);
       case GamePhase.play:
-        // TODO: Go back to the previous turn review. Don't forget to hide words
-        // that weren't guessed. Abort the game if it's before the first turn.
+        final gameController =
+            GameController.fromSnapshot(localGameData, snapshot);
+        if (gameController.turnState!.turnPhase == TurnPhase.prepare) {
+          if (gameController.turnIndex > 0) {
+            gameController.backToRereview();
+          } else {
+            leaveGameWithConfirmation(context, localGameData: localGameData);
+          }
+        }
         return;
       case GamePhase.gameOver:
       case GamePhase.kicked:
