@@ -148,20 +148,24 @@ String _describeGame(
     }
   }
 
-  final progress = gameData.gameProgress();
-  switch (progress) {
-    case FixedWordSetProgress():
+  switch (gameData.gameProgress()) {
+    case FixedWordSetProgress(:final numWords, :final initialNumWords):
       addTitle(context.tr('game_info_fixed_word_set', args: [
-        progress.numWords.toString(),
-        progress.initialNumWords.toString(),
+        numWords.toString(),
+        initialNumWords.toString(),
       ]));
       break;
-    case FixedNumRoundsProgress():
+    case FixedNumRoundsProgress(
+        :final roundIndex,
+        :final numRounds,
+        :final roundTurnIndex,
+        :final numTurnsPerRound
+      ):
       addTitle(context.tr('game_info_fixed_num_rounds', args: [
-        (progress.roundIndex + 1).toString(),
-        progress.numRounds.toString(),
-        (progress.roundTurnIndex + 1).toString(),
-        progress.numTurnsPerRound.toString(),
+        (roundIndex + 1).toString(),
+        numRounds.toString(),
+        (roundTurnIndex + 1).toString(),
+        numTurnsPerRound.toString(),
       ]));
       break;
   }

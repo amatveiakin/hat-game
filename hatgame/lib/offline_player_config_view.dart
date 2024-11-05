@@ -90,10 +90,10 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
     final Map<int, String?> names = {};
     final List<List<int>> teams = [[]];
     int playerID = 0;
-    for (final p in _listItems) {
-      switch (p) {
-        case _PlayerData():
-          names[playerID] = p.name;
+    for (final item in _listItems) {
+      switch (item) {
+        case _PlayerData(:final name):
+          names[playerID] = name;
           teams.last.add(playerID);
           playerID++;
           break;
@@ -308,10 +308,10 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
     for (final player in _playersToDispose) {
       player.dispose();
     }
-    for (final player in _listItems) {
-      switch (player) {
+    for (final item in _listItems) {
+      switch (item) {
         case _PlayerData():
-          player.dispose();
+          item.dispose();
           break;
         case _TeamDivider():
           break;

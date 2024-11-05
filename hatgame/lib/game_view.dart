@@ -502,30 +502,33 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
 
   Widget _buildActivePlayer(BuildContext context) {
     final gameProgressWidget = () {
-      final progress = gameData.gameProgress();
-      final body = switch (progress) {
-        FixedWordSetProgress() => Text(
-            context.tr('words_in_hat', args: [progress.numWords.toString()])),
-        FixedNumRoundsProgress() => Column(
+      final body = switch (gameData.gameProgress()) {
+        FixedWordSetProgress(:final numWords) =>
+          Text(context.tr('words_in_hat', args: [numWords.toString()])),
+        FixedNumRoundsProgress(
+          :final roundIndex,
+          :final numRounds,
+          :final roundTurnIndex,
+          :final numTurnsPerRound
+        ) =>
+          Column(
             children: [
-              Text((progress.numRounds == 1)
+              Text((numRounds == 1)
                   ? context.tr('single_round')
                   : context.tr(
-                      (progress.roundTurnIndex == 0 &&
-                              progress.numTurnsPerRound > 1)
+                      (roundTurnIndex == 0 && numTurnsPerRound > 1)
                           ? 'round_begins'
                           : 'round_index',
                       args: [
-                          (progress.roundIndex + 1).toString(),
-                          progress.numRounds.toString()
+                          (roundIndex + 1).toString(),
+                          numRounds.toString()
                         ])),
               Padding(
                 padding: EdgeInsets.fromLTRB(8, 4, 8, 0),
                 child: RoundProgressIndicator(
-                  roundIndex: progress.roundIndex,
-                  numRounds: progress.numRounds,
-                  roundProgress:
-                      progress.roundTurnIndex / progress.numTurnsPerRound,
+                  roundIndex: roundIndex,
+                  numRounds: numRounds,
+                  roundProgress: roundTurnIndex / numTurnsPerRound,
                   baseColor: MyTheme.secondarySemiIntense.withOpacity(0.85),
                   completionColor: MyTheme.primary,
                 ),
