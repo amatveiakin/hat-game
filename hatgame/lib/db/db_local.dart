@@ -13,20 +13,19 @@ class LocalDocumentReference extends DBDocumentReference {
 
   LocalDocumentReference({required this.localDB, required this.path});
 
-  void syncGetColumns(List<DBColumnData> columns) =>
-      localDB.setRow(path, dbData(columns));
+  void syncSetColumns(List<DBColumnUpdate> columns) =>
+      localDB.setRow(path, _applyUpdates({}, columns));
   @override
-  Future<void> setColumns(List<DBColumnData> columns) async =>
-      syncGetColumns(columns);
+  Future<void> setColumns(List<DBColumnUpdate> columns) async =>
+      syncSetColumns(columns);
 
   // Ignore LocalCacheBehavior, since this is already a local DB.
   void syncUpdateColumnsImpl(
-          List<DBColumnData> columns, LocalCacheBehavior _) =>
-      localDB.setRow(
-          path, Map.from(localDB.getRow(path)!)..addAll(dbData(columns)));
+          List<DBColumnUpdate> columns, LocalCacheBehavior _) =>
+      localDB.setRow(path, _applyUpdates(localDB.getRow(path)!, columns));
   @override
   Future<void> updateColumnsImpl(
-          List<DBColumnData> columns, LocalCacheBehavior _) async =>
+          List<DBColumnUpdate> columns, LocalCacheBehavior _) async =>
       syncUpdateColumnsImpl(columns, _);
 
   LocalDocumentSnapshot syncGet() =>
@@ -58,7 +57,7 @@ class LocalDocumentReference extends DBDocumentReference {
 
 class LocalDocumentSnapshot extends DBDocumentSnapshot {
   final LocalDocumentReference _ref;
-  final Map<String, dynamic>? _data;
+  final Map<String, String?>? _data;
 
   LocalDocumentSnapshot(this._ref, this._data);
 
@@ -66,12 +65,12 @@ class LocalDocumentSnapshot extends DBDocumentSnapshot {
   LocalDocumentReference get reference => _ref;
 
   @override
-  Map<String, dynamic>? get rawData => _data;
+  Map<String, String?>? get rawData => _data;
 }
 
 class LocalDocumentRawUpdate {
   String path;
-  Map<String, dynamic>? data;
+  Map<String, String?>? data;
 
   LocalDocumentRawUpdate(this.path, this.data);
 }
@@ -91,14 +90,14 @@ class LocalDB {
   static final LocalDB _instance = LocalDB();
 
   // TODO: Back up to some persistent local storage.
-  final _rows = <String, Map<String, dynamic>?>{};
+  final _rows = <String, Map<String, String?>?>{};
   int _newRowId = 0;
   final _streamController =
       StreamController<LocalDocumentRawUpdate>.broadcast();
 
   static LocalDB get instance => _instance;
 
-  Map<String, dynamic>? getRow(String path) {
+  Map<String, String?>? getRow(String path) {
     return _rows[path];
   }
 
@@ -113,7 +112,7 @@ class LocalDB {
     }
   }
 
-  void setRow(String path, Map<String, dynamic> value) {
+  void setRow(String path, Map<String, String?> value) {
     _rows[path] = Map.unmodifiable(value);
     _streamController.add(LocalDocumentRawUpdate(path, value));
   }
@@ -128,4 +127,20 @@ class LocalDB {
       LocalDocumentReference(localDB: this, path: path);
 
   Stream<LocalDocumentRawUpdate> snapshots() => _streamController.stream;
+}
+
+Map<String, String?> _applyUpdates(
+    Map<String, String?> row, List<DBColumnUpdate> updates) {
+  final updatedRow = Map.of(row);
+  for (final update in updates) {
+    switch (update) {
+      case DBColumnSetValue(:final value):
+        updatedRow[update.column.name] = update.column.serialize(value);
+        break;
+      case DBColumnDelete():
+        updatedRow.remove(update.column.name);
+        break;
+    }
+  }
+  return updatedRow;
 }

@@ -25,19 +25,28 @@ abstract class DBColumn<T> {
   // Note: `data` can be null, in which case null is written to the DB.
   // This is similar, but not equivalent to removing the column (`dbTryGet`
   // doesn't distinguish between the two, but `dbContains` does).
-  // TODO: Consider: forbid null; add 'delete column' sentinel; delete
-  // `dbContainsNonNull`.
-  DBColumnData<T> withData(T data) {
-    return DBColumnData<T>(this, data);
+  // TODO: Consider: forbid null; delete `dbContainsNonNull`.
+  DBColumnUpdate<T> setValue(T value) {
+    return DBColumnSetValue<T>(this, value);
+  }
+
+  DBColumnUpdate<T> delete() {
+    return DBColumnDelete<T>(this);
   }
 }
 
-// TODO: data -> value
-class DBColumnData<T> {
-  final DBColumn<T> column;
-  final T data;
+sealed class DBColumnUpdate<T> {
+  DBColumn<T> column;
+  DBColumnUpdate(this.column);
+}
 
-  DBColumnData(this.column, this.data);
+class DBColumnSetValue<T> extends DBColumnUpdate<T> {
+  final T value;
+  DBColumnSetValue(super.column, this.value);
+}
+
+class DBColumnDelete<T> extends DBColumnUpdate<T> {
+  DBColumnDelete(super.column);
 }
 
 abstract class DBColumnFamily<T> extends DBColumn<T> {
@@ -116,15 +125,6 @@ List<DBIndexedColumnData<T>> dbGetAll<T, ColumnT extends DBColumnFamily<T>>(
 int dbNextIndex<T>(Iterable<DBIndexedColumnData<T>> columns) {
   _dbCheckContinuity(columns.ids().toList());
   return columns.length;
-}
-
-// TODO: Why doesn't this return `Map<String, String?>`?
-Map<String, dynamic> dbData<T>(List<DBColumnData<T>> columns) {
-  final result = <String, dynamic>{};
-  for (final c in columns) {
-    result[c.column.name] = c.column.serialize(c.data);
-  }
-  return result;
 }
 
 // =============================================================================

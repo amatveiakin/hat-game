@@ -4,6 +4,15 @@ import 'package:hatgame/db/db_document.dart';
 import 'package:hatgame/db/db_local.dart';
 import 'package:hatgame/util/assertion.dart';
 
+Map<String, dynamic> firestoreUpdates<T>(List<DBColumnUpdate<T>> updates) {
+  return Map.fromEntries(updates.map((update) => MapEntry(
+      update.column.name,
+      switch (update) {
+        DBColumnSetValue(:final value) => update.column.serialize(value),
+        DBColumnDelete() => firestore.FieldValue.delete(),
+      })));
+}
+
 class FirestoreDocumentReference extends DBDocumentReference {
   final firestore.DocumentReference _ref;
 
@@ -15,16 +24,16 @@ class FirestoreDocumentReference extends DBDocumentReference {
   String get path => _ref.path;
 
   @override
-  Future<void> setColumns(List<DBColumnData> columns) =>
-      _ref.set(dbData(columns));
+  Future<void> setColumns(List<DBColumnUpdate> columns) =>
+      _ref.set(firestoreUpdates(columns));
 
   @override
   Future<void> updateColumnsImpl(
-      List<DBColumnData> columns, LocalCacheBehavior localCache) async {
+      List<DBColumnUpdate> columns, LocalCacheBehavior localCache) async {
     if (localCache == LocalCacheBehavior.cache) {
       _FirestoreLocalCache.singleton.updateColumns(this, columns);
     }
-    return _ref.update(dbData(columns));
+    return _ref.update(firestoreUpdates(columns));
   }
 
   @override
@@ -102,14 +111,14 @@ class _FirestoreLocalCache {
   static final singleton = _FirestoreLocalCache();
 
   void updateColumns(
-      FirestoreDocumentReference reference, List<DBColumnData> columns) {
+      FirestoreDocumentReference reference, List<DBColumnUpdate> columns) {
     final firestore.FirebaseFirestore instance =
         reference.firestoreReference.firestore;
     if (cachePerInstance[instance] == null) {
       cachePerInstance[instance] = LocalDB();
     }
     final document = cachePerInstance[instance]!.document(reference.path);
-    document.syncGetColumns([]);
+    document.syncSetColumns([]);
     return document.syncUpdateColumnsImpl(columns, LocalCacheBehavior.noCache);
   }
 

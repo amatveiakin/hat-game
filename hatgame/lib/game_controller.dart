@@ -243,12 +243,12 @@ class GameController {
           ? activePlayer(turnState!) == localGameData.myPlayerID
           : true);
 
-  static List<DBColumnData> _newGameRecord() {
+  static List<DBColumnUpdate> _newGameRecord() {
     return [
       DBColCreationTimeUtc()
-          .withData(NtpTime.nowUtcNoPrecisionGuarantee().toString()),
-      DBColHostAppVersion().withData(appVersion),
-      DBColGamePhase().withData(GamePhase.configure),
+          .setValue(NtpTime.nowUtcNoPrecisionGuarantee().toString()),
+      DBColHostAppVersion().setValue(appVersion),
+      DBColGamePhase().setValue(GamePhase.configure),
     ];
   }
 
@@ -275,7 +275,7 @@ class GameController {
 
   // Returns game ID.
   static Future<String> _createGameOffline(
-      List<DBColumnData> initialColumns) async {
+      List<DBColumnUpdate> initialColumns) async {
     final String gameID = newLocalGameID();
     DBDocumentReference reference = localGameReference(gameID: gameID);
     await reference.setColumns(initialColumns);
@@ -285,7 +285,7 @@ class GameController {
   // Returns game ID.
   static Future<String> _createGameOnline(
       firestore.FirebaseFirestore firestoreInstance,
-      List<DBColumnData> initialColumns) async {
+      List<DBColumnUpdate> initialColumns) async {
     const int minIDLength = 4;
     const int maxIDLength = 8;
     const int attemptsPerTransaction = 100;
@@ -299,7 +299,7 @@ class GameController {
               firestoreInstance: firestoreInstance, gameID: gameID);
           firestore.DocumentSnapshot snapshot = await tx.get(reference);
           if (!snapshot.exists) {
-            tx.set(reference, dbData(initialColumns));
+            tx.set(reference, firestoreUpdates(initialColumns));
             return gameID;
           }
         }
@@ -318,8 +318,8 @@ class GameController {
         GameConfigController.initialConfig(onlineMode: false);
     final String gameID = await _createGameOffline([
       ..._newGameRecord(),
-      DBColConfig().withData(config),
-      DBColLocalPlayer().withData(PersonalState((b) => b
+      DBColConfig().setValue(config),
+      DBColLocalPlayer().setValue(PersonalState((b) => b
         ..id = 0
         ..name = 'fake')),
     ]);
@@ -338,8 +338,8 @@ class GameController {
         GameConfigController.initialConfig(onlineMode: true);
     final String gameID = await _createGameOnline(firestoreInstance, [
       ..._newGameRecord(),
-      DBColConfig().withData(config),
-      DBColPlayer(playerID).withData(PersonalState((b) => b
+      DBColConfig().setValue(config),
+      DBColPlayer(playerID).setValue(PersonalState((b) => b
         ..id = playerID
         ..name = myName)),
     ]);
@@ -403,8 +403,8 @@ class GameController {
           final playerID = dbNextIndex(playerData);
           tx.update(
               reference,
-              dbData([
-                DBColPlayer(playerID).withData(PersonalState((b) => b
+              firestoreUpdates([
+                DBColPlayer(playerID).setValue(PersonalState((b) => b
                   ..id = playerID
                   ..name = myName))
               ]));
@@ -453,9 +453,9 @@ class GameController {
           documentPath: reference.path);
       tx.update(
           reference,
-          dbData([
+          firestoreUpdates([
             DBColPlayer(playerID)
-                .withData(playerRecord.rebuild((b) => b..kicked = true))
+                .setValue(playerRecord.rebuild((b) => b..kicked = true))
           ]));
     });
   }
@@ -463,7 +463,7 @@ class GameController {
   static Future<void> toWriteWordsPhase(DBDocumentReference reference) async {
     reference.clearLocalCache();
     return reference.updateColumns([
-      DBColGamePhase().withData(GamePhase.writeWords),
+      DBColGamePhase().setValue(GamePhase.writeWords),
     ]);
   }
 
@@ -471,7 +471,7 @@ class GameController {
       DBDocumentReference reference) async {
     reference.clearLocalCache();
     return reference.updateColumns([
-      DBColGamePhase().withData(GamePhase.configure),
+      DBColGamePhase().setValue(GamePhase.configure),
     ]);
   }
 
@@ -529,15 +529,15 @@ class GameController {
     final TeamCompositions teamCompositions = generateTeamCompositions(config);
     reference.clearLocalCache();
     return reference.updateColumns([
-      DBColTeamCompositions().withData(teamCompositions),
-      DBColGamePhase().withData(GamePhase.composeTeams),
+      DBColTeamCompositions().setValue(teamCompositions),
+      DBColGamePhase().setValue(GamePhase.composeTeams),
     ]);
   }
 
   static Future<void> discardTeamCompositions(DBDocumentReference reference) {
     return reference.updateColumns([
-      DBColTeamCompositions().withData(null),
-      DBColGamePhase().withData(GamePhase.configure),
+      DBColTeamCompositions().setValue(null),
+      DBColGamePhase().setValue(GamePhase.configure),
     ]);
   }
 
@@ -632,18 +632,18 @@ class GameController {
 
   static Future<void> rematch(
       LocalGameData localGameData, DBDocumentSnapshot snapshot) async {
-    List<DBColumnData> initialColumns = _newGameRecord();
+    List<DBColumnUpdate> initialColumns = _newGameRecord();
     String gameID;
     if (localGameData.onlineMode) {
       final firestore.FirebaseFirestore firestoreInstance =
           (localGameData.gameReference as FirestoreDocumentReference)
               .firestoreReference
               .firestore;
-      initialColumns.add(DBColConfig().withData(
+      initialColumns.add(DBColConfig().setValue(
           snapshot.get(DBColConfig()).rebuild((b) => b..players = null)));
       initialColumns.addAll(snapshot
           .getAll(DBColPlayerManager())
-          .map((c) => DBColPlayer(c.id).withData(PersonalState(
+          .map((c) => DBColPlayer(c.id).setValue(PersonalState(
                 (b) => b
                   ..id = c.value.id
                   ..name = c.value.name
@@ -651,13 +651,13 @@ class GameController {
               ))));
       gameID = await _createGameOnline(firestoreInstance, initialColumns);
     } else {
-      initialColumns.add(DBColConfig().withData(snapshot.get(DBColConfig())));
+      initialColumns.add(DBColConfig().setValue(snapshot.get(DBColConfig())));
       initialColumns
-          .add(DBColLocalPlayer().withData(snapshot.get(DBColLocalPlayer())));
+          .add(DBColLocalPlayer().setValue(snapshot.get(DBColLocalPlayer())));
       gameID = await _createGameOffline(initialColumns);
     }
     return localGameData.gameReference.updateColumns([
-      DBColRematchNextGameID().withData(gameID),
+      DBColRematchNextGameID().setValue(gameID),
     ]);
   }
 
@@ -710,7 +710,7 @@ class GameController {
         ? DBColPlayer(localGameData.myPlayerID!)
         : DBColLocalPlayer();
     return localGameData.gameReference.updateColumns([
-      column.withData(newState),
+      column.setValue(newState),
     ], localCache: LocalCacheBehavior.cache);
   }
 
@@ -773,11 +773,11 @@ class GameController {
       TurnState turnState) async {
     reference.clearLocalCache();
     return reference.updateColumns([
-      DBColGamePhase().withData(GamePhase.play),
-      DBColConfig().withData(config),
-      DBColTeamCompositions().withData(null),
-      DBColInitialState().withData(initialState),
-      DBColCurrentTurn().withData(turnState),
+      DBColGamePhase().setValue(GamePhase.play),
+      DBColConfig().setValue(config),
+      DBColTeamCompositions().setValue(null),
+      DBColInitialState().setValue(initialState),
+      DBColCurrentTurn().setValue(turnState),
     ]);
   }
 
@@ -785,7 +785,7 @@ class GameController {
     Assert.holds(isActivePlayer(),
         message: 'Only the active player can change game state');
     return localGameData.gameReference.updateColumns([
-      DBColCurrentTurn().withData(newState),
+      DBColCurrentTurn().setValue(newState),
     ], localCache: LocalCacheBehavior.cache);
   }
 
@@ -825,8 +825,8 @@ class GameController {
       );
       localGameData.gameReference.clearLocalCache();
       return localGameData.gameReference.updateColumns([
-        DBColCurrentTurn().withData(newTurnState),
-        DBColTurnRecord(prevTurnIndex).withData(newTurnRecord),
+        DBColCurrentTurn().setValue(newTurnState),
+        DBColTurnRecord(prevTurnIndex).setValue(newTurnRecord),
       ]);
     }
   }
@@ -856,10 +856,10 @@ class GameController {
         message: 'Only the active player can change game state');
     localGameData.gameReference.clearLocalCache();
     return localGameData.gameReference.updateColumns([
-      DBColGamePhase().withData(GamePhase.gameOver),
-      DBColCurrentTurn().withData(null),
+      DBColGamePhase().setValue(GamePhase.gameOver),
+      DBColCurrentTurn().setValue(null),
       if (lastTurnIndex != null)
-        DBColTurnRecord(lastTurnIndex).withData(lastTurnRecord!),
+        DBColTurnRecord(lastTurnIndex).setValue(lastTurnRecord!),
     ]);
   }
 

@@ -49,13 +49,13 @@ class Client {
       {GameConfig? config, TeamCompositions? teamCompositions}) async {
     if (config != null) {
       await localGameData.gameReference.updateColumns([
-        DBColConfig().withData(config),
+        DBColConfig().setValue(config),
       ]);
     }
     if (teamCompositions != null) {
       await localGameData.gameReference.updateColumns([
-        DBColTeamCompositions().withData(teamCompositions),
-        DBColGamePhase().withData(GamePhase.composeTeams),
+        DBColTeamCompositions().setValue(teamCompositions),
+        DBColGamePhase().setValue(GamePhase.composeTeams),
       ]);
     }
     final snapshot = await localGameData.gameReference.get();
