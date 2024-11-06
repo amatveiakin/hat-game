@@ -412,34 +412,35 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
   }
 
   Widget _buildInactivePlayer(BuildContext context) {
-    final wordReviewItems = gameData
-        .wordsInThisTurnData()
-        .map((w) => w.status != WordStatus.notExplained
-            ? WordReviewItem(
-                gameConfig: gameConfig,
-                text: w.content.text,
-                status: w.status,
-                feedback: w.feedback,
-                hasFlag: w.flaggedByActivePlayer,
-                setStatus: null,
-                setFeedback: (WordFeedback? feedback) =>
-                    _setWordFeedback(w.id, feedback),
-                setFlag: (bool hasFlag) => _setWordFlag(w.id, hasFlag),
-              )
-            : WordReviewItem(
-                gameConfig: gameConfig,
-                text: null,
-                status: w.status,
-                feedback: null,
-                hasFlag: false,
-                setStatus: null,
-                setFeedback: null,
-                setFlag: null,
-              ))
-        .toList();
-    final wordReviewView = ListView(
-      children: wordReviewItems,
-    );
+    final wordReviewView = () {
+      return ListView(
+        children: gameData
+            .wordsInThisTurnData()
+            .map((w) => w.status != WordStatus.notExplained
+                ? WordReviewItem(
+                    gameConfig: gameConfig,
+                    text: w.content.text,
+                    status: w.status,
+                    feedback: w.feedback,
+                    hasFlag: w.flaggedByActivePlayer,
+                    setStatus: null,
+                    setFeedback: (WordFeedback? feedback) =>
+                        _setWordFeedback(w.id, feedback),
+                    setFlag: (bool hasFlag) => _setWordFlag(w.id, hasFlag),
+                  )
+                : WordReviewItem(
+                    gameConfig: gameConfig,
+                    text: null,
+                    status: w.status,
+                    feedback: null,
+                    hasFlag: false,
+                    setStatus: null,
+                    setFeedback: null,
+                    setFlag: null,
+                  ))
+            .toList(),
+      );
+    };
 
     switch (turnState!.turnPhase) {
       case TurnPhase.prepare:
@@ -448,7 +449,7 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
       case TurnPhase.explain:
         return Column(children: [
           Expanded(
-            child: wordReviewView,
+            child: wordReviewView(),
           ),
           // Use unique key to make sure Flutter doesn't cache timer state,
           // therefore updates from gameState are effective.
@@ -481,7 +482,7 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
       case TurnPhase.rereview:
         return Column(children: [
           Expanded(
-            child: wordReviewView,
+            child: wordReviewView(),
           ),
           if (NtpTime.initialized &&
               turnState!.bonusTimeStart != null &&
