@@ -222,6 +222,41 @@ void main() {
       expect(scoreData[1].players[0].wordsExplained, equals(30));
     });
 
+    test('edit last turn results', () async {
+      await setupApp(AppConfig());
+      final client = Client();
+      client.localGameData = await GameController.newGameOffine();
+      await client.startGame(
+          config: twoVsTwoOfflineConfig(),
+          teamCompositions: twoVsTwoSimpleComposition());
+
+      await (await client.controller()).startExplaning();
+      final w0 = (await client.controller()).turnState!.wordsInThisTurn.last.id;
+      await (await client.controller()).wordGuessed();
+      final w1 = (await client.controller()).turnState!.wordsInThisTurn.last.id;
+      await (await client.controller()).wordGuessed();
+      await (await client.controller()).finishExplanation();
+      await (await client.controller()).nextTurn();
+
+      await (await client.controller()).backToRereview();
+      await (await client.controller())
+          .setWordStatus(w0, WordStatus.notExplained);
+      await (await client.controller()).setWordStatus(w1, WordStatus.discarded);
+      await (await client.controller()).nextTurn();
+
+      await (await client.controller()).startExplaning();
+      await (await client.controller()).wordGuessed();
+      await (await client.controller()).wordGuessed();
+      await (await client.controller()).wordGuessed();
+      await (await client.controller()).nextTurn();
+
+      expect((await client.controller()).gameData.gameFinished(), isTrue);
+      final scoreData = (await client.controller()).gameData.scoreData();
+      expect(scoreData.length, equals(2));
+      expect(scoreData[0].totalScore, equals(3));
+      expect(scoreData[1].totalScore, equals(0));
+    });
+
     test('finish game between turns', () async {
       await setupApp(AppConfig());
       final client = Client();
