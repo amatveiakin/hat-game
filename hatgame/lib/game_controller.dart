@@ -815,8 +815,10 @@ class GameController {
         turnLog.rebuild((b) => b..add(newTurnRecord));
     final bool timeToEndGame = switch (config.rules.extent) {
       GameExtent.fixedWordSet =>
-        // pass (turnState == null) to `wordsInHat`, because words from the
-        // current turn have already been moved to turn log.
+        // Pass (turnState == null) to `wordsInHat`, because words from the
+        // current turn have already been moved to turn log. Cannot simply pass
+        // (turnLog, turnState) because that would treat unexplained words
+        // incorrectly.
         DerivedGameState.wordsInHat(initialState, newTurnLog, null)!.isEmpty,
       GameExtent.fixedNumRounds => config.rules.numRounds ==
           gameData
@@ -826,8 +828,7 @@ class GameController {
       _ => Assert.unexpectedValue(config.rules.extent),
     };
     if (timeToEndGame) {
-      return finishGame(
-          lastTurnIndex: prevTurnIndex, lastTurnRecord: newTurnRecord);
+      return finishGame();
     } else {
       final TurnState newTurnState = TurnStateTransformer.newTurn(
         config,
@@ -877,17 +878,16 @@ class GameController {
     return _updateTurnState((_transformer..finishExplanation()).turnState);
   }
 
-  // TODO: Always include the last turn, even if finishing the game early during
-  // explanation or review.
-  Future<void> finishGame({int? lastTurnIndex, TurnRecord? lastTurnRecord}) {
+  Future<void> finishGame() {
     Assert.holds(isActivePlayer(),
         message: 'Only the active player can change game state');
     localGameData.gameReference.clearLocalCache();
     return localGameData.gameReference.updateColumns([
       DBColGamePhase().setValue(GamePhase.gameOver),
       DBColCurrentTurn().setValue(null),
-      if (lastTurnIndex != null)
-        DBColTurnRecord(lastTurnIndex).setValue(lastTurnRecord!),
+      if (turnState!.turnPhase != TurnPhase.prepare)
+        DBColTurnRecord(turnIndex)
+            .setValue(TurnStateTransformer.turnRecord(turnState!)),
     ]);
   }
 

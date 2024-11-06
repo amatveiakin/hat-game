@@ -222,6 +222,52 @@ void main() {
       expect(scoreData[1].players[0].wordsExplained, equals(30));
     });
 
+    test('finish game between turns', () async {
+      await setupApp(AppConfig());
+      final client = Client();
+      client.localGameData = await GameController.newGameOffine();
+      await client.startGame(
+          config: twoVsTwoOfflineConfig(),
+          teamCompositions: twoVsTwoSimpleComposition());
+
+      await (await client.controller()).startExplaning();
+      await (await client.controller()).wordGuessed();
+      await (await client.controller()).finishExplanation();
+      await (await client.controller()).nextTurn();
+      await (await client.controller()).finishGame();
+
+      expect((await client.controller()).gameData.gameFinished(), isTrue);
+      final scoreData = (await client.controller()).gameData.scoreData();
+      expect(scoreData.length, equals(2));
+      expect(scoreData[0].totalScore, equals(1));
+      expect(scoreData[1].totalScore, equals(0));
+    });
+
+    test('finish game in the middle of a turn', () async {
+      await setupApp(AppConfig());
+      final client = Client();
+      client.localGameData = await GameController.newGameOffine();
+      await client.startGame(
+          config: twoVsTwoOfflineConfig(),
+          teamCompositions: twoVsTwoSimpleComposition());
+
+      await (await client.controller()).startExplaning();
+      await (await client.controller()).wordGuessed();
+      await (await client.controller()).finishExplanation();
+      await (await client.controller()).nextTurn();
+
+      await (await client.controller()).startExplaning();
+      await (await client.controller()).wordGuessed();
+      await (await client.controller()).wordGuessed();
+      await (await client.controller()).finishGame();
+
+      expect((await client.controller()).gameData.gameFinished(), isTrue);
+      final scoreData = (await client.controller()).gameData.scoreData();
+      expect(scoreData.length, equals(2));
+      expect(scoreData[0].totalScore, equals(2));
+      expect(scoreData[1].totalScore, equals(1));
+    });
+
     test('no NTP', () async {
       await setupApp(AppConfig()..hasNtp = false);
       await minimalOfflineGameTest();
