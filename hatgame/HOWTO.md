@@ -36,6 +36,13 @@ Before releasing the app anywhere, update the version:
 
     $ ./update_git_version.sh
 
+### Install on Android via USB
+
+1. Make sure USB debugging is enabled on the device.
+2. Run `flutter build apk`.
+3. Run `flutter devices` to find out the device id.
+4. Run `flutter install -d <device-id>`.
+
 ### Web
 
 In order to deploy the web version, run:
