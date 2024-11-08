@@ -484,7 +484,8 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
           Expanded(
             child: wordReviewView(),
           ),
-          if (NtpTime.initialized &&
+          if (gameConfig.rules.bonusSeconds > 0 &&
+              NtpTime.initialized &&
               turnState!.bonusTimeStart != null &&
               turnState!.turnPhase == TurnPhase.review)
             TimerView(
@@ -678,7 +679,8 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
                 children: wordReviewItems,
               ),
             ),
-            if (turnState!.turnPhase == TurnPhase.review)
+            if (gameConfig.rules.bonusSeconds > 0 &&
+                turnState!.turnPhase == TurnPhase.review)
               TimerView(
                 key: const ValueKey('bonus_timer'),
                 style: TimerViewStyle.bonusTime,
