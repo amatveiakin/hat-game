@@ -1,0 +1,10 @@
+[package]
+name = "palindromer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.5", features = ["derive"] }
+itertools = "0.14"
+serde_yaml = "0.9"
+serde = "1.0"
