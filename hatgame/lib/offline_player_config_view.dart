@@ -140,6 +140,10 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
             _autoscrollStopwatch.stop();
             return;
           }
+          if (!_scrollController.hasClients) {
+            _autoscrollStopwatch.stop();
+            return;
+          }
           _scrollController.animateTo(
               _scrollController.position.maxScrollExtent,
               duration: const Duration(milliseconds: 100),
