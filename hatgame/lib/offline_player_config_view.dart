@@ -184,7 +184,7 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
       final player = _listItems[i];
       final tile = switch (player) {
         _PlayerData() => ListTile(
-            key: UniqueKey(),
+            key: ValueKey('player_${player.key}'),
             contentPadding: listItemPaddingSmallRight,
             title: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -216,7 +216,7 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
             ),
           ),
         _TeamDivider() => StyledDivider(
-            key: UniqueKey(),
+            key: ValueKey('divider_$i'),
           ),
       };
       tiles.add(tile);
@@ -231,7 +231,7 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
           ),
         ));
     tiles.add(ListTile(
-        key: UniqueKey(),
+        key: const ValueKey('add_player_buttons'),
         contentPadding: listItemPadding,
         title: Row(children: [
           Expanded(
