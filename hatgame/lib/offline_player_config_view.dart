@@ -49,7 +49,6 @@ class _TeamDivider extends _ListItem {}
 class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
   final _listItems = <_ListItem>[];
   final _playersToDispose = <_PlayerData>[];
-  final _autoscrollStopwatch = Stopwatch();
   final _scrollController = ScrollController();
   late bool _wasManualTeams;
   bool _freezeUpdates = false;
@@ -130,37 +129,24 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
       _notifyPlayersUpdate();
     });
     if (focus) {
-      // TODO: Why does it scroll far below the end of the list on my phone
-      // (not on emulator)?
-      _autoscrollStopwatch.reset();
-      _autoscrollStopwatch.start();
-      void Function()? scrollCallback;
-      scrollCallback = () {
-        if (!_autoscrollStopwatch.isRunning ||
-            _autoscrollStopwatch.elapsedMilliseconds > 1000) {
-          _autoscrollStopwatch.stop();
-          return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
         }
-        if (!_scrollController.hasClients) {
-          _autoscrollStopwatch.stop();
-          return;
-        }
-        _scrollController.animateTo(_scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 100), curve: Curves.easeOut);
-        // Check again, because it doesn't always work immediately,
-        // especially when virtual keyboard is opened.
-        // TODO: Find a better way to do this.
-        Future.delayed(const Duration(milliseconds: 50), scrollCallback);
-      };
-      WidgetsBinding.instance.addPostFrameCallback((_) => scrollCallback!());
-      playerData.focusNode.requestFocus();
+        // Request focus after a short delay to ensure scroll completes
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (mounted && playerData.focusNode.canRequestFocus) {
+            playerData.focusNode.requestFocus();
+          }
+        });
+      });
     }
     _listItems.add(playerData);
     _notifyPlayersUpdate();
-  }
-
-  void _cancelAutoScroll() {
-    _autoscrollStopwatch.stop();
   }
 
   void _addDivider() {
@@ -355,26 +341,18 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
       _notifyPlayersUpdate();
     }
 
-    return GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      // Cancel autoscroll if the user begins to interact with the widget.
-      // It seems that onTapDown is sufficient, but adding more to be sure.
-      onTapDown: (_) => _cancelAutoScroll(),
-      onVerticalDragDown: (_) => _cancelAutoScroll(),
-      onHorizontalDragDown: (_) => _cancelAutoScroll(),
-      child: Padding(
-        padding: const EdgeInsets.only(top: 6),
-        child: manualTeams
-            ? ReorderableListView(
-                onReorder: onReorder,
-                scrollController: _scrollController,
-                children: _makeTiles(),
-              )
-            : ListView(
-                controller: _scrollController,
-                children: _makeTiles(),
-              ),
-      ),
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: manualTeams
+          ? ReorderableListView(
+              onReorder: onReorder,
+              scrollController: _scrollController,
+              children: _makeTiles(),
+            )
+          : ListView(
+              controller: _scrollController,
+              children: _makeTiles(),
+            ),
     );
   }
 }
