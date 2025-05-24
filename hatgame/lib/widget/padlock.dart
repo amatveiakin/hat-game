@@ -26,9 +26,12 @@ class _PadlockPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     const paperSize = Size(0.27, 0.42);
+    final side = min(size.width, size.height);
     // Leave empty space above the hat to make paper area draggable.
-    final spaceAbove = size.height * 0.2;
-    final hatRect = Rect.fromLTRB(0, spaceAbove, size.width, size.height);
+    final spaceAbove = side * 0.2;
+    final center =
+        size.center(Offset.zero) - Size.square(side).center(Offset.zero);
+    final hatRect = Rect.fromLTRB(0, spaceAbove, side, side).shift(center);
 
     final drawHat = (ui.Image image) {
       paintImage(
@@ -41,7 +44,7 @@ class _PadlockPainter extends CustomPainter {
         }
       }
       final unitRect = (pos - paperSize.center(Offset.zero)) & paperSize;
-      final dstRect = _scaleRect(unitRect, size.width, size.height);
+      final dstRect = _scaleRect(unitRect, side, side).shift(center);
       final fill = Paint()
         ..color = Color(0xffe2dec8)
         ..style = PaintingStyle.fill;
@@ -66,8 +69,7 @@ class _PadlockPainter extends CustomPainter {
     drawPaper(5, Offset(0.55, 0.46), 2.0 + secondaryAngle);
     drawPaper(
         null,
-        padlockPos.scale(1.0 / size.width, 1.0 / size.height) +
-            Offset(0, -primaryJump),
+        (padlockPos - center) * (1.0 / side) + Offset(0, -primaryJump),
         primaryAngle);
     drawPaper(3, Offset(0.45, 0.51), -3.0 - secondaryAngle);
     drawHat(foreground);
@@ -84,6 +86,7 @@ class _PadlockPainter extends CustomPainter {
 }
 
 class Padlock extends StatefulWidget {
+  final Size size;
   final AnimationController animationController;
   final void Function() onUnlocked;
   final int? wordsInHat;
@@ -91,6 +94,7 @@ class Padlock extends StatefulWidget {
 
   const Padlock(
       {super.key,
+      required this.size,
       required this.onUnlocked,
       required this.animationController,
       this.wordsInHat,
@@ -109,7 +113,6 @@ class PadlockState extends State<Padlock> with SingleTickerProviderStateMixin {
   bool _panActive = false;
   bool _padlockOpen = false;
   bool _padlockHidden = false;
-  late Size _size;
   late Offset _padlockPos;
 
   var _animationProgress = 0.0;
@@ -118,6 +121,7 @@ class PadlockState extends State<Padlock> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    _resetPadlockPos(false);
     _animation = Tween(begin: 0.0, end: 1.0).animate(widget.animationController)
       ..addListener(() {
         if (mounted) {
@@ -134,35 +138,25 @@ class PadlockState extends State<Padlock> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
-  // Use didChangeDependencies instead of initState, because MediaQuery
-  // is not available in the latter.
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // TODO: Check available space rather then screen size: replace MediaQuery
-    // with LayoutBuilder or FractionallySizedBox.
-    final double side =
-        min(200, MediaQuery.of(context).size.shortestSide * 0.6);
-    _size = Size.square(side);
-    _resetPadlockPos(false);
-  }
-
   void _doDispose() async {
     (await _background).dispose();
     (await _foreground).dispose();
   }
 
   void _resetPadlockPos(bool notify) {
-    _setPadlockPos(_size.center(Offset(0, -_size.height * 0.2)), notify);
+    final size = widget.size;
+    final side = min(size.width, size.height);
+    _setPadlockPos(size.center(Offset(0, -side * 0.2)), notify);
   }
 
   void _setPadlockPos(Offset pos, bool notify) {
-    final depth = -_size.height * 0.12;
-    final unlockHeight = _size.height * 1.3; // ~ "work guessed" button height
-    final center = _size.center(Offset.zero);
-    final minY = center.dy + depth;
+    final size = widget.size;
+    final side = min(size.width, size.height);
+    final unlockHeight = size.height * 0.4;
+    final center = size.center(Offset.zero);
+    final minY = center.dy - side * 0.12;
     final y = min(pos.dy, minY);
-    final maxDx = 2.0 * pow(minY - y, 2) / _size.width;
+    final maxDx = 2.0 * pow(minY - y, 2) / size.width;
     // Make sure the paper does not overlap with the hat.
     final x = pos.dx.clamp(center.dx - maxDx, center.dx + maxDx);
     _padlockPos = Offset(x, y);
@@ -174,9 +168,10 @@ class PadlockState extends State<Padlock> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final size = widget.size;
     if (_padlockHidden) {
       return SizedBox.fromSize(
-        size: _size,
+        size: size,
       );
     }
     return FutureBuilder(
@@ -184,7 +179,7 @@ class PadlockState extends State<Padlock> with SingleTickerProviderStateMixin {
         builder: (context, AsyncSnapshot<List<ui.Image>> snapshot) {
           if (!snapshot.hasData) {
             return SizedBox.fromSize(
-              size: _size,
+              size: size,
             );
           }
           final [background, foreground] = snapshot.data!;
@@ -192,7 +187,7 @@ class PadlockState extends State<Padlock> with SingleTickerProviderStateMixin {
             behavior: HitTestBehavior.opaque,
             onPanStart: (DragStartDetails details) {
               Assert.holds(!_panActive);
-              final center = _size.center(Offset.zero);
+              final center = size.center(Offset.zero);
               // Make the start region vertically prolonged to allow either
               // dragging the piece of paper itself, or dragging something out
               // of the hat.
@@ -236,7 +231,7 @@ class PadlockState extends State<Padlock> with SingleTickerProviderStateMixin {
               isComplex: false,
               willChange: true,
               child: SizedBox.fromSize(
-                size: _size,
+                size: size,
               ),
             ),
           );

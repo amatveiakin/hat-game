@@ -405,7 +405,7 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     if (gameController.isActivePlayer()) {
-      return _buildActivePlayer(context);
+      return LayoutBuilder(builder: _buildActivePlayer);
     } else {
       return _buildInactivePlayer(context);
     }
@@ -505,7 +505,13 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
     return Container();
   }
 
-  Widget _buildActivePlayer(BuildContext context) {
+  Widget _buildActivePlayer(BuildContext context, BoxConstraints constraints) {
+    final double bottomWidgetHeight = min(500, constraints.maxHeight * 0.60);
+    final double bottomWidgetWidth =
+        min(bottomWidgetHeight, min(200, constraints.maxWidth * 0.6));
+    final bottomWidgetSize = Size(bottomWidgetWidth, bottomWidgetHeight);
+    final topPadding = constraints.maxHeight * 0.18;
+
     final gameProgressWidget = () {
       final body = switch (gameData.gameProgress()) {
         FixedWordSetProgress(:final numWords) =>
@@ -551,44 +557,48 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
       case TurnPhase.prepare:
         return Column(
           children: [
-            Expanded(
-              child: Center(
-                child: ListenableBuilder(
-                    listenable: _padlockReadyToOpen,
-                    builder: (BuildContext context, Widget? child) {
-                      return GlowingWidget(
-                          animation: _glowAnimation,
-                          enableGlow: _padlockReadyToOpen.value,
-                          // TODO: Replace disabled button with smth else. It's
-                          // not really disabled, it's just not a button. Also,
-                          // glow is low contrast with button background.
-                          child: WideButton(
-                            // TODO: Use start button for non-touch devices.
-                            // onPressed: _startExplaning,
-                            onPressed: null,
-                            onPressedDisabled: () =>
-                                _padlockAnimationController.forward(from: 0.0),
-                            coloring: _padlockReadyToOpen.value
-                                ? WideButtonColoring.secondaryAlwaysActive
-                                : WideButtonColoring.secondary,
-                            child: Text(
-                              _padlockReadyToOpen.value
-                                  ? context.tr('release_to_start')
-                                  : context.tr('pull_to_start'),
-                              style: const TextStyle(fontSize: 24.0),
-                            ),
-                          ));
-                    }),
-              ),
+            SizedBox(
+              height: topPadding,
             ),
             Expanded(
-              child: Center(
-                child: Padlock(
-                  onUnlocked: _startExplaning,
-                  animationController: _padlockAnimationController,
-                  wordsInHat: gameData.numWordsInHat(),
-                  readyToOpen: _padlockReadyToOpen,
-                ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ListenableBuilder(
+                      listenable: _padlockReadyToOpen,
+                      builder: (BuildContext context, Widget? child) {
+                        return GlowingWidget(
+                            animation: _glowAnimation,
+                            enableGlow: _padlockReadyToOpen.value,
+                            // TODO: Replace disabled button with smth else. It's
+                            // not really disabled, it's just not a button. Also,
+                            // glow is low contrast with button background.
+                            child: WideButton(
+                              // TODO: Use start button for non-touch devices.
+                              // onPressed: _startExplaning,
+                              onPressed: null,
+                              onPressedDisabled: () =>
+                                  _padlockAnimationController.forward(
+                                      from: 0.0),
+                              coloring: _padlockReadyToOpen.value
+                                  ? WideButtonColoring.secondaryAlwaysActive
+                                  : WideButtonColoring.secondary,
+                              child: Text(
+                                _padlockReadyToOpen.value
+                                    ? context.tr('release_to_start')
+                                    : context.tr('pull_to_start'),
+                                style: const TextStyle(fontSize: 24.0),
+                              ),
+                            ));
+                      }),
+                  Padlock(
+                    size: bottomWidgetSize,
+                    onUnlocked: _startExplaning,
+                    animationController: _padlockAnimationController,
+                    wordsInHat: gameData.numWordsInHat(),
+                    readyToOpen: _padlockReadyToOpen,
+                  ),
+                ],
               ),
             ),
             gameProgressWidget(),
@@ -597,9 +607,13 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
       case TurnPhase.explain:
         final wordContent = gameData.currentWordContent();
         return Column(children: [
+          SizedBox(
+            height: topPadding,
+          ),
           Expanded(
-            child: Center(
-              child: WideButton(
+            child:
+                Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+              WideButton(
                 onPressed: _turnActive ? _wordGuessed : null,
                 coloring: WideButtonColoring.neutral,
                 child: DecoratedText(
@@ -612,23 +626,25 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
                       .copyWith(fontSize: 24.0, fontWeight: FontWeight.w500),
                 ),
               ),
-            ),
-          ),
-          Expanded(
-            child: Center(
               // Don't set start time and paused state from gameState for
               // smoother experience for explaining players and more precise
               // time tracking.
               // Set key to make sure Flutter keeps the timer, because its
               // internal state is the source of truth for turn time.
-              child: TimerView(
-                key: const ValueKey('turn_timer'),
-                style: TimerViewStyle.turnTime,
-                onTimeEnded: () => _endTurn(gameData.turnIndex()),
-                onRunningChanged: _setTurnActive,
-                duration: Duration(seconds: gameConfig.rules.turnSeconds),
+              SizedBox.fromSize(
+                size: bottomWidgetSize,
+                child: Align(
+                  alignment: Alignment.center,
+                  child: TimerView(
+                    key: const ValueKey('turn_timer'),
+                    style: TimerViewStyle.turnTime,
+                    onTimeEnded: () => _endTurn(gameData.turnIndex()),
+                    onRunningChanged: _setTurnActive,
+                    duration: Duration(seconds: gameConfig.rules.turnSeconds),
+                  ),
+                ),
               ),
-            ),
+            ]),
           ),
           // TODO: Dim text color similarly to team name.
           gameProgressWidget(),
