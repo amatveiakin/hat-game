@@ -57,6 +57,7 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
   bool get manualTeams => widget.manualTeams;
   GameConfigController get configController => widget.configController;
 
+  // Assumption: already in `setState`.
   void _updatePlayerItemsFromConfig() {
     _freezeUpdates = true;
     final PlayersConfig config = widget.initialPlayersConfig;
@@ -119,45 +120,42 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
     }
   }
 
+  // Assumption: already in `setState`.
   void _addPlayer(String name, {required bool focus}) {
-    setState(() {
-      final playerData = _PlayerData(name);
-      playerData.controller.text = name;
-      playerData.controller.addListener(() {
-        // Don't call setState, because TextField updates itself.
-        playerData.name = playerData.controller.text;
-        _notifyPlayersUpdate();
-      });
-      if (focus) {
-        // TODO: Why does it scroll far below the end of the list on my phone
-        // (not on emulator)?
-        _autoscrollStopwatch.reset();
-        _autoscrollStopwatch.start();
-        void Function()? scrollCallback;
-        scrollCallback = () {
-          if (!_autoscrollStopwatch.isRunning ||
-              _autoscrollStopwatch.elapsedMilliseconds > 1000) {
-            _autoscrollStopwatch.stop();
-            return;
-          }
-          if (!_scrollController.hasClients) {
-            _autoscrollStopwatch.stop();
-            return;
-          }
-          _scrollController.animateTo(
-              _scrollController.position.maxScrollExtent,
-              duration: const Duration(milliseconds: 100),
-              curve: Curves.easeOut);
-          // Check again, because it doesn't always work immediately,
-          // especially when virtual keyboard is opened.
-          // TODO: Find a better way to do this.
-          Future.delayed(const Duration(milliseconds: 50), scrollCallback);
-        };
-        WidgetsBinding.instance.addPostFrameCallback((_) => scrollCallback!());
-        playerData.focusNode.requestFocus();
-      }
-      _listItems.add(playerData);
+    final playerData = _PlayerData(name);
+    playerData.controller.text = name;
+    playerData.controller.addListener(() {
+      // Don't call setState, because TextField updates itself.
+      playerData.name = playerData.controller.text;
+      _notifyPlayersUpdate();
     });
+    if (focus) {
+      // TODO: Why does it scroll far below the end of the list on my phone
+      // (not on emulator)?
+      _autoscrollStopwatch.reset();
+      _autoscrollStopwatch.start();
+      void Function()? scrollCallback;
+      scrollCallback = () {
+        if (!_autoscrollStopwatch.isRunning ||
+            _autoscrollStopwatch.elapsedMilliseconds > 1000) {
+          _autoscrollStopwatch.stop();
+          return;
+        }
+        if (!_scrollController.hasClients) {
+          _autoscrollStopwatch.stop();
+          return;
+        }
+        _scrollController.animateTo(_scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 100), curve: Curves.easeOut);
+        // Check again, because it doesn't always work immediately,
+        // especially when virtual keyboard is opened.
+        // TODO: Find a better way to do this.
+        Future.delayed(const Duration(milliseconds: 50), scrollCallback);
+      };
+      WidgetsBinding.instance.addPostFrameCallback((_) => scrollCallback!());
+      playerData.focusNode.requestFocus();
+    }
+    _listItems.add(playerData);
     _notifyPlayersUpdate();
   }
 
@@ -169,12 +167,11 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
     _listItems.add(_TeamDivider());
   }
 
+  // Assumption: already in `setState`.
   void _deletePlayer(_PlayerData player) {
-    setState(() {
-      _playersToDispose.add(player);
-      _listItems.remove(player);
-      _deleteEmptyTeams();
-    });
+    _playersToDispose.add(player);
+    _listItems.remove(player);
+    _deleteEmptyTeams();
     _notifyPlayersUpdate();
   }
 
@@ -225,7 +222,9 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
                 IconButton(
                   padding: EdgeInsets.zero,
                   icon: const Icon(Icons.clear),
-                  onPressed: () => _deletePlayer(player),
+                  onPressed: () => setState(() {
+                    _deletePlayer(player);
+                  }),
                 ),
               ],
             ),
@@ -330,7 +329,9 @@ class _OfflinePlayersConfigViewState extends State<OfflinePlayersConfigView> {
     // `manualTeams` changes), like `updateFromConfig` does for the rules and
     // teaming configs.
     if (manualTeams != _wasManualTeams) {
-      _updatePlayerItemsFromConfig();
+      setState(() {
+        _updatePlayerItemsFromConfig();
+      });
     }
 
     void onReorder(int oldIndex, int newIndex) {
