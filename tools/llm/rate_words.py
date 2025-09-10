@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 from termcolor import colored
 from tqdm import tqdm
 
-from common import not_none
+from tools.llm.common import not_none
 
 MODEL = "gpt-4o-mini"
 
