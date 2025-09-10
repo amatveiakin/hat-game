@@ -1,7 +1,7 @@
 import argparse
-from pathlib import Path
 import random
 import sys
+from pathlib import Path
 
 import yaml
 
@@ -14,7 +14,7 @@ parser.add_argument("--denylist", nargs="*", type=Path, help="Denylist")
 
 
 def parse_source_dict(path: Path) -> set[str]:
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         doc = list(yaml.safe_load_all(f))
         return set(doc[1])
 
@@ -31,8 +31,8 @@ def parse_denylists(args: argparse.Namespace) -> set[str]:
 
 
 def main():
-    sys.stdout.reconfigure(encoding='utf-8')
-    sys.stderr.reconfigure(encoding='utf-8')
+    sys.stdout.reconfigure(encoding="utf-8")  # pyright: ignore[reportAttributeAccessIssue]
+    sys.stderr.reconfigure(encoding="utf-8")  # pyright: ignore[reportAttributeAccessIssue]
 
     args = parser.parse_args()
 

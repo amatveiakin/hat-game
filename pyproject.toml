@@ -7,11 +7,13 @@ name = "hat-game-python-tools"
 version = "0.1.0"
 requires-python = ">=3.13"
 dependencies = [
+    "midiutil>=1.2.1",
     "nltk>=3.8",
     "openai>=1.0.0",
     "pandas>=2.0.0",
     "pydantic>=2.0.0",
     "pymorphy3>=1.0.0",
+    "pyyaml>=6.0.2",
     "termcolor>=2.0.0",
     "tqdm>=4.65.0",
 ]
@@ -21,5 +23,22 @@ packages = ["tools"]
 
 [project.optional-dependencies]
 dev = [
+    "pyright>=1.1.405",
     "pytest>=7.0.0",
+    "ruff>=0.13.0",
 ]
+
+[tool.ruff.lint]
+select = [
+    "F",
+    "UP",
+    "B",
+    "SIM",
+    "I",
+]
+
+[tool.ruff.format]
+exclude = ["tools/sound_gen/**"]
+
+[tool.pyright]
+include = ["tools/**"]

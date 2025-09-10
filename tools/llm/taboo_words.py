@@ -1,13 +1,13 @@
 # TODO: Idea: first, ask GPT to generate taboo words as it understands them,
 # then request for structured output, then ask to choose the best options.
 
-from typing import TypeVar
 
-from tools.llm.cognates_via_letters import RussianCognateDetector
-from tools.llm.common import not_none
 from openai import OpenAI
 from pydantic import BaseModel, Field
 from termcolor import colored
+
+from tools.llm.cognates_via_letters import RussianCognateDetector
+from tools.llm.common import not_none
 
 # MODEL = "gpt-4o-2024-08-06"
 MODEL = "gpt-4o-mini"
@@ -81,10 +81,9 @@ class ForbiddenWordsStructured(BaseModel):
     )
 
 
-T = TypeVar("T", ForbiddenWords, ForbiddenWordsStructured)
-
-
-def gen_forbidden_words(result_type: type[T], language: str, word: str) -> T:
+def gen_forbidden_words[T: (ForbiddenWords, ForbiddenWordsStructured)](
+    result_type: type[T], language: str, word: str
+) -> T:
     response = client.beta.chat.completions.parse(
         model=MODEL,
         messages=[
@@ -160,23 +159,23 @@ WORDS = ["яблоко", "книга", "цвет", "миссия", "тарелк
 #     print(f"{colored(word, "white")}: {', '.join(gen_forbidden_words(word).words)}")
 
 for word in WORDS:
-    print(f"{colored(word, "white")}:")
+    print(f"{colored(word, 'white')}:")
     simple = gen_forbidden_words(ForbiddenWords, LANGUAGE, word)
     for key, value in simple.model_dump().items():
-        print(f"  {colored(key, "cyan")}: {', '.join(value)}")
+        print(f"  {colored(key, 'cyan')}: {', '.join(value)}")
     simple_candidates = [
         word for words in simple.model_dump().values() for word in words
     ]
 
     structured = gen_forbidden_words(ForbiddenWordsStructured, LANGUAGE, word)
     for key, value in structured.model_dump().items():
-        print(f"  {colored(key, "yellow")}: {', '.join(value)}")
+        print(f"  {colored(key, 'yellow')}: {', '.join(value)}")
     structured_candidates = [
         word for words in structured.model_dump().values() for word in words
     ]
 
     candidates = simple_candidates + structured_candidates
     collated = collate_forbidden_words(LANGUAGE, word, candidates).words
-    print(f"  {colored("collated", "green")}: {', '.join(collated)}")
+    print(f"  {colored('collated', 'green')}: {', '.join(collated)}")
     fixed = fix_taboo_words(word, collated)
-    print(f"  {colored("fixed", "light_green")}: {', '.join(fixed)}")
+    print(f"  {colored('fixed', 'light_green')}: {', '.join(fixed)}")

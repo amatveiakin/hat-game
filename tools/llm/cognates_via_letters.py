@@ -1,6 +1,7 @@
-import nltk
 import re
 from difflib import SequenceMatcher
+
+import nltk
 from nltk.metrics import edit_distance
 
 nltk.download("punkt", quiet=True)

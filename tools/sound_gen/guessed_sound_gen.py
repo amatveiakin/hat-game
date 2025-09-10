@@ -1,9 +1,7 @@
 import os
 import subprocess
-from time import sleep
 
 from midiutil import MIDIFile
-
 
 track = 0
 channel = 0
@@ -27,9 +25,8 @@ def generateSoundFile(midi, filepath, fade_start_sec, trim_sec, volume=1.0):
     subprocess.run(['timidity', 'tmp.midi', '-Ow', '-o', 'tmp.wav'],
                    stdout=subprocess.DEVNULL)
     ffmpeg_command = ['ffmpeg', '-y', '-i', 'tmp.wav',
-                      '-af', 'volume={},afade=out:st={}:d={}'.format(
-                          volume, fade_start_sec, trim_sec - fade_start_sec),
-                      '-to', '{}'.format(trim_sec),
+                      '-af', f'volume={volume},afade=out:st={fade_start_sec}:d={trim_sec - fade_start_sec}',
+                      '-to', f'{trim_sec}',
                       filepath]
     print(' '.join(ffmpeg_command))
     subprocess.run(ffmpeg_command,
@@ -57,14 +54,12 @@ for combo in range(0, max_combo):
     for note in degrees[combo]:
         midi.addNote(track, channel, note, start_time, duration, volume)
     generateSoundFile(midi,
-                      'word_guessed_combo{:01}.ogg'.format(combo),
+                      f'word_guessed_combo{combo:01}.ogg',
                       fade_start_sec=0.9,
                       trim_sec=1.0)
 
 midi = newMidi(program=time_over_program)
-time = 0
-for note in time_over_degrees:
-    time += 1
+for time, note in enumerate(time_over_degrees):
     midi.addNote(track, channel, note, time, duration, max_volume)
 generateSoundFile(midi,
                   'time_over.ogg',
@@ -73,9 +68,7 @@ generateSoundFile(midi,
                   volume=time_over_volume_coeff)
 
 midi = newMidi(program=time_over_program)
-time = 0
-for note in bonus_time_over_degrees:
-    time += 1
+for time, note in enumerate(bonus_time_over_degrees):
     midi.addNote(track, channel, note, time, duration, max_volume)
 generateSoundFile(midi,
                   'bonus_time_over.ogg',

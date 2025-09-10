@@ -1,8 +1,9 @@
 import argparse
 from pathlib import Path
 from typing import Literal
-from openai import OpenAI
+
 import pandas as pd
+from openai import OpenAI
 from pydantic import BaseModel, Field
 from termcolor import colored
 from tqdm import tqdm
@@ -117,7 +118,7 @@ def ensure_columns(df: pd.DataFrame, columns: list[str]) -> None:
 
 def inspect(words: list[str]) -> None:
     for word in words:
-        print(f"{colored(word, "white")}:")
+        print(f"{colored(word, 'white')}:")
         for key, value in gen_word_ratings(word).model_dump().items():
             print(f"  {key}: {value}")
 
@@ -129,7 +130,8 @@ def inspect(words: list[str]) -> None:
 # TODO: Consider using a CSV instead for better git diffs.
 # TODO: Add "difficulty level" column and scripts to sync it with lexicon files
 # in both directions.
-df: pd.DataFrame = pd.read_pickle(words_df_path)
+df = pd.read_pickle(words_df_path)
+assert isinstance(df, pd.DataFrame)
 ensure_columns(df, ["confidence", "refusal"])
 
 total_rows = len(df)
