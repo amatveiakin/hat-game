@@ -1,5 +1,7 @@
-name: 'Средние слова'
-last_updated: 2024-08-15
+name: "Средние слова"
+kind: "standard"
+language: "Russian"
+updated_at: 2024-08-15
 ---
 - "абажур"
 - "аббат"

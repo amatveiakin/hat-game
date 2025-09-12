@@ -1,5 +1,7 @@
-name: 'Medium words'
-last_updated: 2023-12-13
+name: "Medium words"
+kind: "standard"
+language: "English"
+updated_at: 2023-12-13
 ---
 - "abortion"
 - "absolute"

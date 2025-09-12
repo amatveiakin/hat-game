@@ -1,25 +1,32 @@
 import asyncio
+import datetime
+import hashlib
 import time
+from pathlib import Path
 from typing import Literal
 
-from litellm import Choices, acompletion, completion
+import typer
+from litellm import Choices, acompletion
 from litellm.cost_calculator import completion_cost
 from litellm.types.utils import ModelResponse
 from pydantic import BaseModel
 from rich.console import Console
-from rich.panel import Panel
 from tqdm.asyncio import tqdm
+
+from tools.utils.lexicon import TabooLexicon, lexicon_to_yaml, yaml_to_lexicon
 
 ReasoningEffort = Literal["none", "minimal", "low", "medium", "high", "default"]
 
 
-class ForbiddenDemoResult(BaseModel):
-    model: str
-    reasoning_effort: ReasoningEffort
+class ForbiddenWordsResult(BaseModel):
+    word: str
+    forbidden_words: list[str] | None
     duration: float
     cost: float
-    words: list[str]
 
+
+MODEL = "gemini/gemini-2.5-pro"
+REASONING_EFFORT = "low"
 
 REQUEST_COLLATE = """
 Generate 10 forbidden words for a Taboo-like game in {language}.
@@ -43,81 +50,118 @@ console = Console(highlight=False)
 
 async def gen_forbidden_words(
     *,
-    model: str,
-    reasoning_effort: ReasoningEffort,
     language: str,
     word: str,
-) -> ForbiddenDemoResult:
+) -> ForbiddenWordsResult:
     start_time = time.monotonic()
-    response = await acompletion(
-        model=model,
-        reasoning_effort=reasoning_effort,
-        messages=[
-            {
-                "role": "system",
-                "content": REQUEST_COLLATE.format(language=language),
-            },
-            {"role": "user", "content": word},
-        ],
-    )
+    try:
+        response = await acompletion(
+            model=MODEL,
+            reasoning_effort=REASONING_EFFORT,
+            messages=[
+                {
+                    "role": "system",
+                    "content": REQUEST_COLLATE.format(language=language),
+                },
+                {"role": "user", "content": word},
+            ],
+            max_retries=3,
+            retry_strategy="exponential_backoff_retry",
+        )
+    except Exception:
+        duration = time.monotonic() - start_time
+        return ForbiddenWordsResult(
+            word=word,
+            forbidden_words=None,
+            duration=duration,
+            cost=0,
+        )
     duration = time.monotonic() - start_time
+
     assert isinstance(response, ModelResponse)
     assert len(response.choices) == 1
     assert isinstance(response.choices[0], Choices)
     assert response.choices[0].message.content is not None
-    cost = completion_cost(completion_response=response, model=model)
+    cost = completion_cost(completion_response=response, model=MODEL)
     words = response.choices[0].message.content.split("\n")
-    return ForbiddenDemoResult(
-        model=model,
-        reasoning_effort=reasoning_effort,
+    return ForbiddenWordsResult(
+        word=word,
+        forbidden_words=words,
         duration=duration,
         cost=cost,
-        words=words,
     )
 
 
-# LANGUAGE = "Russian"
-# WORD = "тарелка"
-LANGUAGE = "English"
-WORD = "falcon"
-MODELS = [
-    "openai/gpt-5-nano",
-    "openai/gpt-5-mini",
-    "openai/gpt-5",
-    "anthropic/claude-sonnet-4-20250514",
-    "anthropic/claude-opus-4-1-20250805",
-    "gemini/gemini-2.5-flash-lite",
-    "gemini/gemini-2.5-flash",
-    "gemini/gemini-2.5-pro",
-]
+def stable_hash(word: str) -> int:
+    return int(hashlib.blake2b(word.encode("utf-8")).hexdigest(), 16)
 
 
-async def main():
-    console.print(Panel.fit(WORD))
-    console.print()
-    tasks: list[asyncio.Task[ForbiddenDemoResult]] = []
-    for model in MODELS:
-        for reasoning_effort in ("low", "medium", "high"):
+def include_word(word: str) -> bool:
+    return stable_hash(word) % 16 == 0
+
+
+async def generate_forbidden_words(
+    *, source_lexicon_path: Path, target_lexicon_path: Path
+):
+    source_lexicon = yaml_to_lexicon(source_lexicon_path.read_text(encoding="utf-8"))
+    assert source_lexicon.kind == "standard"
+    assert source_lexicon.language in ("English", "Russian")
+    source_words = source_lexicon.words
+
+    if target_lexicon_path.exists():
+        target_lexicon = yaml_to_lexicon(
+            target_lexicon_path.read_text(encoding="utf-8")
+        )
+        assert target_lexicon.kind == "taboo"
+        assert target_lexicon.language == source_lexicon.language
+        target_lexicon.updated_at = datetime.date.today()
+    else:
+        target_lexicon = TabooLexicon(
+            name=source_lexicon.name,
+            kind="taboo",
+            language=source_lexicon.language,
+            updated_at=datetime.date.today(),
+            words={},
+        )
+
+    tasks: list[asyncio.Task[ForbiddenWordsResult]] = []
+    for word in source_words:
+        if include_word(word) and word not in target_lexicon.words:
             tasks.append(
                 asyncio.create_task(
                     gen_forbidden_words(
-                        model=model,
-                        reasoning_effort=reasoning_effort,
-                        language=LANGUAGE,
-                        word=WORD,
+                        language=source_lexicon.language,
+                        word=word,
                     )
                 )
             )
 
-    results = await tqdm.gather(*tasks, desc="Generating forbidden words")
+    results: list[ForbiddenWordsResult] = await tqdm.gather(
+        *tasks, desc="Generating forbidden words"
+    )
 
+    total_cost = 0
     for r in results:
-        console.print(
-            f"[bright_yellow]{r.model}[/bright_yellow]@[bright_white]{r.reasoning_effort}[/bright_white] used [cyan]{r.cost:.4f}[/cyan]$ in [cyan]{r.duration:.1f}[/cyan]s"
+        if r.forbidden_words is not None:
+            target_lexicon.words[r.word] = r.forbidden_words
+        total_cost += r.cost
+
+    target_lexicon.words = {k: v for k, v in sorted(target_lexicon.words.items())}
+    target_lexicon_path.write_text(lexicon_to_yaml(target_lexicon), encoding="utf-8")
+    console.print(f"Total cost: {total_cost:.2f}$")
+
+
+def main(
+    source_lexicon_path: Path,
+    target_lexicon_path: Path,
+):
+    asyncio.run(
+        generate_forbidden_words(
+            source_lexicon_path=source_lexicon_path,
+            target_lexicon_path=target_lexicon_path,
         )
-        console.print("\n".join(r.words))
-        console.print()
+    )
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    typer.run(main)

@@ -1,5 +1,7 @@
-name: 'Hard words'
-last_updated: 2023-12-13
+name: "Hard words"
+kind: "standard"
+language: "English"
+updated_at: 2023-12-13
 ---
 - "aardvark"
 - "abacus"

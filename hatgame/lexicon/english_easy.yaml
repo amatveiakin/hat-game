@@ -1,5 +1,7 @@
-name: 'Easy words'
-last_updated: 2023-12-13
+name: "Easy words"
+kind: "standard"
+language: "English"
+updated_at: 2023-12-13
 ---
 - "ability"
 - "above"
