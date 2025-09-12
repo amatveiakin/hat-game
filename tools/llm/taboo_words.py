@@ -33,7 +33,7 @@ Requirements:
 - Single words only (hyphens OK, spaces not allowed).
 - Never include cognates of the target word or other forbidden words.
 - Match gender/number agreement for adjectives when relevant.
-- Use standard capitalization. Do not capitalize the words unless they are always capitalized.
+- All words must be in lowercase, unless the word is a proper noun and is always capitalized.
 - Output one word per line.
 - Do not include any other text. NO bullets, NO numbering, NO comments, NO headers, NO nothing.
 """.strip()
