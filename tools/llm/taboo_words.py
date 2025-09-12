@@ -4,25 +4,23 @@ from litellm import Choices, completion
 from litellm.cost_calculator import completion_cost
 from litellm.types.utils import ModelResponse
 from rich.console import Console
+from rich.panel import Panel
 
 REQUEST_COLLATE = """
-You are an assistant that generates forbidden words for a Taboo-like game.
-The words that you generate can be any part of speech.
-Remember that good forbidden words include everything that makes a word hard to explain:
-synonyms, antonyms, hypernyms, hyponyms, meronyms, holonyms,
-adjectives that often go with the word, common collocations (such as words that form idioms),
-words that can be added to form the title of a book, a movie, a song, etc.,
-and generally any words that one would naturally use to explain the word.
+Generate 10 forbidden words for a Taboo-like game in {language}.
 
-Game language is {language}.
+Good forbidden words make the target word hard to explain and include:
+- Synonyms, antonyms and related words: parts, categories, descriptions, etc.
+- Words commonly used together with the target word: idioms, quotes, names, movie titles, etc.
+- Any words that would naturally come up when explaining the target word.
 
-You must produce a list of single words only (dashes are ok, spaces are not).
-The words you select must not be cognates with the original word or with each other.
-For adjectives, prefer forms that are in agreement with the gender of the original word.
-
-Generate 10 to 20 forbidden words for the requested word.
-Output exactly one word per line. Do not include any other text.
-Don't capitalize the words unless they are always capitalized.
+Requirements:
+- Single words only (hyphens OK, spaces not allowed).
+- Never include cognates of the target word or other forbidden words.
+- Match gender/number agreement for adjectives when relevant.
+- Use standard capitalization. Do not capitalize the words unless they are always capitalized.
+- Output one word per line.
+- Do not include any other text. NO bullets, NO numbering, NO comments, NO headers, NO nothing.
 """.strip()
 
 console = Console(highlight=False)
