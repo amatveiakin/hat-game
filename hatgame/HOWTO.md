@@ -2,7 +2,7 @@
 
 After cloning the repository before compiling the app for the first time, run
 
-    $ ./init_repo.sh
+    $ make init-repo
 
 Afterwards use the normal Flutter build proccess in order to compile the app.
 
@@ -34,7 +34,7 @@ In order to change app icon:
 
 Before releasing the app anywhere, update the version:
 
-    $ ./update_git_version.sh
+    $ make update-git-version
 
 ### Install on Android via USB
 
@@ -47,9 +47,9 @@ Before releasing the app anywhere, update the version:
 
 In order to deploy the web version, run:
 
-    $ ./deploy_web.sh
+    $ make deploy-web
 
-This script calls `update_git_version.sh` internally, so there is no need to
+This script calls `update-git-version` internally, so there is no need to
 run it manually.
 
 The new version should be immediately accessible at https://hatgame.web.app.
