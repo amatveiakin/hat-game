@@ -198,6 +198,7 @@ game_over: Игра окончена
 rematch: Реванш!
 
 # lib/game_view.dart
+skip_word: Пропуск
 rereview_title: Результаты прошлого хода
 discard_word: Удалить слово
 done: Готово

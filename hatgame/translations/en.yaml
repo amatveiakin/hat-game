@@ -196,6 +196,7 @@ game_over: Game Over
 rematch: Rematch!
 
 # lib/game_view.dart
+skip_word: Skip
 rereview_title: Last Turn Results
 discard_word: Discard word
 done: Done

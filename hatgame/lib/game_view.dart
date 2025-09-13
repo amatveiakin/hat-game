@@ -343,6 +343,11 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
     gameController.wordGuessed();
   }
 
+  void _wordSkipped() {
+    HapticFeedback.heavyImpact();
+    gameController.wordSkipped();
+  }
+
   void _endTurn(int turnRestriction) {
     if (gameData.turnIndex() == turnRestriction &&
         turnState!.turnPhase == TurnPhase.explain) {
@@ -517,10 +522,10 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
     final bottomWidgetSize = Size(bottomWidgetWidth, bottomWidgetHeight);
     final topPadding = switch (gameConfig.rules.variant) {
       GameVariant.standard => constraints.maxHeight * 0.18,
-      GameVariant.taboo => constraints.maxHeight * 0.06,
+      GameVariant.taboo => constraints.maxHeight * 0.08,
       _ => Assert.unexpectedValue(gameConfig.rules.variant),
     };
-    final forbiddenWordsHeight = 160.0;
+    final forbiddenWordsHeight = 172.0;
 
     gameProgressWidget() {
       final body = switch (gameData.gameProgress()) {
@@ -618,9 +623,32 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
         );
       case TurnPhase.explain:
         final wordContent = gameData.currentWordContent();
+        // TODO: Unnest layout, make sure Skip button is at a fixed distance
+        // from the word.
         return Column(children: [
-          SizedBox(
+          Container(
             height: topPadding,
+            alignment: Alignment.bottomCenter,
+            // TODO: Add an option to skip words in all modes.
+            child: (gameConfig.rules.variant == GameVariant.taboo)
+                ? Container(
+                    width: 140.0,
+                    height: 36.0,
+                    child: OutlinedButton(
+                      onPressed: _turnActive ? _wordSkipped : null,
+                      child: Text('⨉ ' + context.tr('skip_word')),
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        side:
+                            BorderSide(color: MyTheme.primary.withOpacity(0.7)),
+                        textStyle:
+                            TextStyle(color: MyTheme.primary.withOpacity(0.7)),
+                      ),
+                    ),
+                  )
+                : const SizedBox(),
           ),
           Expanded(
             child:

@@ -97,7 +97,7 @@ def stable_hash(word: str) -> int:
 
 
 def include_word(word: str) -> bool:
-    return stable_hash(word) % 16 == 0
+    return stable_hash(word) % 32 == 0
 
 
 async def generate_forbidden_words(
