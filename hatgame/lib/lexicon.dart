@@ -11,18 +11,27 @@ import 'package:hatgame/util/list_ext.dart';
 import 'package:hatgame/util/local_str.dart';
 import 'package:yaml/yaml.dart';
 
+enum DictionaryKind {
+  standard,
+  taboo,
+}
+
 class DictionaryMetadata {
   final String key;
   final String uiName;
+  final DictionaryKind kind;
   final int numWords;
 
   DictionaryMetadata(
-      {required this.key, required this.uiName, required this.numWords});
+      {required this.key,
+      required this.uiName,
+      required this.kind,
+      required this.numWords});
 }
 
 class Dictionary {
   final DictionaryMetadata metadata;
-  final List<String> words;
+  final List<WordContent> words;
 
   Dictionary(this.metadata, this.words);
 }
@@ -106,9 +115,11 @@ class Lexicon {
       'russian_medium',
       'russian_hard',
       'russian_neo',
+      'russian_taboo_easy',
       'english_easy',
       'english_medium',
       'english_hard',
+      'english_taboo_easy',
     ]) {
       _dictionaries[dictKey] = _parseDictionary(
         key: dictKey,
@@ -118,26 +129,41 @@ class Lexicon {
     }
   }
 
-  static DictionaryMetadata dictionaryMetadata(String dict) {
-    return _dictionaries[dict]!.metadata;
+  static Dictionary dictionary(String dictKey) {
+    if (!_dictionaries.containsKey(dictKey)) {
+      throw InvalidOperation(
+          LocalStr.tr('cannot_find_dictionary', args: [dictKey]),
+          isInternalError: true);
+    }
+    return _dictionaries[dictKey]!;
   }
 
-  static List<String> allDictionaries() {
-    return _dictionaries.keys.toList();
+  static DictionaryMetadata dictionaryMetadata(String dictKey) {
+    return dictionary(dictKey).metadata;
   }
 
-  static List<String> defaultDictionaries() {
+  static List<String> allDictionaries({DictionaryKind? kind}) {
+    return kind == null
+        ? _dictionaries.keys.toList()
+        : _dictionaries.keys
+            .where((d) => dictionaryMetadata(d).kind == kind)
+            .toList();
+  }
+
+  static List<String> defaultStandardDictionaries() {
     final List<String> result = ['russian_medium'];
     Assert.subset(result, allDictionaries().toSet());
+    Assert.holds(result
+        .every((d) => dictionaryMetadata(d).kind == DictionaryKind.standard));
     return result;
   }
 
-  static List<String> fixDictionaries(List<String>? dicts) {
-    final existingDicts =
-        (dicts ?? []).toSet().intersection(allDictionaries().toSet());
-    return existingDicts.isEmpty
-        ? defaultDictionaries()
-        : existingDicts.toList();
+  static List<String> defaultTabooDictionaries() {
+    final List<String> result = ['russian_taboo_easy'];
+    Assert.subset(result, allDictionaries().toSet());
+    Assert.holds(result
+        .every((d) => dictionaryMetadata(d).kind == DictionaryKind.taboo));
+    return result;
   }
 
   // TODO: Pre-compute relevant WordCollection when words are generated on the
@@ -148,105 +174,105 @@ class Lexicon {
     final key = _WordCollectionKey(BuiltList(dictionaries), pluralias);
     return _wordCollectionCache.putIfAbsent(key, () {
       final stopwatch = Stopwatch()..start();
-      final collection = _wordCollectionImpl(dictionaries, pluralias);
+      final collection = pluralias
+          ? _makePluraliasCollection(dictionaries)
+          : _makeUnionCollection(dictionaries);
       debugPrint("Took ${stopwatch.elapsed} to build WordCollection "
           "for $dictionaries, pluralias=$pluralias");
       return collection;
     });
   }
 
-  static WordCollection _wordCollectionImpl(
-      Iterable<String> dictionaries, bool pluralias) {
+  static WordCollection _makeUnionCollection(Iterable<String> dictionaries) {
+    return WordCollection(
+        dictionaries.map((d) => dictionary(d).words).flattened.toList());
+  }
+
+  static WordCollection _makePluraliasCollection(
+      Iterable<String> dictionaries) {
     Assert.holds(dictionaries.isNotEmpty);
     final List<String> words = [];
     for (final dictKey in dictionaries) {
-      if (!_dictionaries.containsKey(dictKey)) {
-        throw InvalidOperation(
-            LocalStr.tr('cannot_find_dictionary', args: [dictKey]),
-            isInternalError: true);
+      for (final w in dictionary(dictKey).words) {
+        Assert.eq(w.highlightFirst, null);
+        Assert.eq(w.highlightLast, null);
+        words.add(w.text);
       }
-      words.addAll(_dictionaries[dictKey]!.words);
     }
     Assert.holds(words.isNotEmpty, lazyMessage: () => dictionaries.toString());
 
-    if (pluralias) {
-      // TODO: Reduce to 2, but boost longer intersections.
-      const minIntersectionLength = 3;
-      final Set<String> allWordsSet =
-          universalCollection()._words.map((word) => word.text).toSet();
-      final Map<String, List<String>> prefixToWords = {};
-      for (final w in words) {
-        for (int i = minIntersectionLength; i <= w.length - 1; i++) {
-          final prefix = w.substring(0, i);
-          prefixToWords.putIfAbsent(prefix, () => []).add(w);
-        }
+    // TODO: Reduce to 2, but boost longer intersections.
+    const minIntersectionLength = 3;
+    final Set<String> allWordsSet =
+        universalCollection()._words.map((word) => word.text).toSet();
+    final Map<String, List<String>> prefixToWords = {};
+    for (final w in words) {
+      for (int i = minIntersectionLength; i <= w.length - 1; i++) {
+        final prefix = w.substring(0, i);
+        prefixToWords.putIfAbsent(prefix, () => []).add(w);
       }
-      final List<_DoubleWord> doubleWords = [];
-      for (final first in words) {
-        for (int i = 1; i <= first.length - minIntersectionLength; i++) {
-          final intersection = first.substring(i);
-          for (final second in prefixToWords[intersection].orEmpty()) {
-            final union = first.substring(0, i) + second;
-            // If the word could be constructed as a one-letter-intersection
-            // pluralias or as a pure concatenation, it is likely to be misread.
-            bool confusing = false;
-            for (int j = 1; j < union.length - 2; j++) {
-              if (allWordsSet.contains(union.substring(0, j + 1)) &&
-                  allWordsSet.contains(union.substring(j))) {
-                confusing = true;
-                break;
-              }
+    }
+    final List<_DoubleWord> doubleWords = [];
+    for (final first in words) {
+      for (int i = 1; i <= first.length - minIntersectionLength; i++) {
+        final intersection = first.substring(i);
+        for (final second in prefixToWords[intersection].orEmpty()) {
+          final union = first.substring(0, i) + second;
+          // If the word could be constructed as a one-letter-intersection
+          // pluralias or as a pure concatenation, it is likely to be misread.
+          bool confusing = false;
+          for (int j = 1; j < union.length - 2; j++) {
+            if (allWordsSet.contains(union.substring(0, j + 1)) &&
+                allWordsSet.contains(union.substring(j))) {
+              confusing = true;
+              break;
             }
-            for (int j = 1; j < union.length - 1; j++) {
-              if (allWordsSet.contains(union.substring(0, j)) &&
-                  allWordsSet.contains(union.substring(j))) {
-                confusing = true;
-                break;
-              }
+          }
+          for (int j = 1; j < union.length - 1; j++) {
+            if (allWordsSet.contains(union.substring(0, j)) &&
+                allWordsSet.contains(union.substring(j))) {
+              confusing = true;
+              break;
             }
-            if (!confusing) {
-              doubleWords.add(_DoubleWord(
-                  first: first,
-                  second: second,
-                  intersection: intersection,
-                  union: union));
-            }
+          }
+          if (!confusing) {
+            doubleWords.add(_DoubleWord(
+                first: first,
+                second: second,
+                intersection: intersection,
+                union: union));
           }
         }
       }
-      // Some words are easier to combine than others and they tend to overwhelm
-      // the distribution as the result. We fix this by promoting words and ways
-      // of combining words that appear less often.
-      final Map<String, int> wordFreq = {};
-      final Map<String, int> intersectionFreq = {};
-      for (final w in doubleWords) {
-        wordFreq.update(w.first, (x) => x + 1, ifAbsent: () => 1);
-        wordFreq.update(w.second, (x) => x + 1, ifAbsent: () => 1);
-        intersectionFreq.update(w.intersection, (x) => x + 1,
-            ifAbsent: () => 1);
-      }
-      final weights = doubleWords.map((w) {
-        // Power 1/3 was chosen empirically.
-        // Min ensures that unique pairings do not get overpromoted.
-        return min(
-            0.1,
-            1.0 /
-                pow(
-                    wordFreq[w.first]! *
-                        wordFreq[w.second]! *
-                        intersectionFreq[w.intersection]!,
-                    1.0 / 3.0));
-      }).toList();
-      return WordCollection(
-          doubleWords
-              .map((w) => WordContent.pluralias(
-                  w.union, w.first.length, w.second.length))
-              .toList(),
-          weights: weights);
-    } else {
-      return WordCollection(
-          words.map((w) => WordContent.plainWord(w)).toList());
     }
+    // Some words are easier to combine than others and they tend to overwhelm
+    // the distribution as the result. We fix this by promoting words and ways
+    // of combining words that appear less often.
+    final Map<String, int> wordFreq = {};
+    final Map<String, int> intersectionFreq = {};
+    for (final w in doubleWords) {
+      wordFreq.update(w.first, (x) => x + 1, ifAbsent: () => 1);
+      wordFreq.update(w.second, (x) => x + 1, ifAbsent: () => 1);
+      intersectionFreq.update(w.intersection, (x) => x + 1, ifAbsent: () => 1);
+    }
+    final weights = doubleWords.map((w) {
+      // Power 1/3 was chosen empirically.
+      // Min ensures that unique pairings do not get overpromoted.
+      return min(
+          0.1,
+          1.0 /
+              pow(
+                  wordFreq[w.first]! *
+                      wordFreq[w.second]! *
+                      intersectionFreq[w.intersection]!,
+                  1.0 / 3.0));
+    }).toList();
+    return WordCollection(
+        doubleWords
+            .map((w) =>
+                WordContent.pluralias(w.union, w.first.length, w.second.length))
+            .toList(),
+        weights: weights);
   }
 
   // Collection that contains most words. May blacklist some categories,
@@ -259,32 +285,41 @@ class Lexicon {
       {required String key, required String yaml}) {
     final List<YamlDocument> docs =
         loadYamlDocuments(yaml, sourceUrl: Uri.file(key));
-    Assert.holds(docs.isNotEmpty);
-    Assert.le(docs.length, 2);
-
-    final YamlDocument dataDoc = docs.last;
-    Assert.holds(dataDoc.contents is YamlList);
-    final dataList = dataDoc.contents as YamlList;
-    final int numWords = dataList.length;
+    Assert.eq(docs.length, 2);
 
     DictionaryMetadata metadata;
-    if (docs.length == 2) {
-      final YamlDocument metadataDoc = docs.first;
-      Assert.holds(metadataDoc.contents is YamlMap);
-      final metadataMap = metadataDoc.contents as YamlMap;
-      metadata = DictionaryMetadata(
-        key: key,
-        uiName: (metadataMap['name'] as String?) ?? key,
-        numWords: numWords,
-      );
-    } else {
-      metadata = DictionaryMetadata(
-        key: key,
-        uiName: key,
-        numWords: numWords,
-      );
+    final YamlDocument metadataDoc = docs[0];
+    Assert.holds(metadataDoc.contents is YamlMap);
+    final metadataMap = metadataDoc.contents as YamlMap;
+    final uiName = metadataMap['name'] as String;
+    final kind = DictionaryKind.values.byName(metadataMap['kind'] as String);
+
+    final YamlDocument dataDoc = docs[1];
+    final List<WordContent> words;
+    switch (kind) {
+      case DictionaryKind.standard:
+        words = (Assert.type<YamlList>(dataDoc.contents))
+            .map((e) => WordContent.standard(e as String))
+            .toList();
+        break;
+      case DictionaryKind.taboo:
+        words = Assert.type<YamlMap>(dataDoc.contents)
+            .entries
+            .map((e) => WordContent.taboo(
+                e.key as String,
+                Assert.type<YamlList>(e.value)
+                    .map((e) => e as String)
+                    .toBuiltList()))
+            .toList();
+        break;
     }
 
-    return Dictionary(metadata, List.from(dataList.value));
+    metadata = DictionaryMetadata(
+      key: key,
+      uiName: uiName,
+      kind: kind,
+      numWords: words.length,
+    );
+    return Dictionary(metadata, words);
   }
 }

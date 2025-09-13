@@ -151,6 +151,8 @@ variant_standard_description: Приложение берёт случайные
 variant_write_words: Писать слова
 variant_write_words_description: Каждый игрок пишет по несколько слов.
 variant_write_words_disabled_description: Каждый игрок пишет по несколько слов. Не поддерживается в офлайн-режиме.
+variant_taboo: Запретные слова
+variant_taboo_description: При объяснении нельзя использовать не только само слово, но и пять запрещённых слов.
 variant_pluralias: Шлакоблокунь
 variant_pluralias_description: Приложение генерирует каламбуры вместо обычных слов.
 extent_fixed_word_set: Фиксированный набор слов

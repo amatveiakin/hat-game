@@ -162,7 +162,7 @@ class TurnStateTransformer {
       final wordCollection = Lexicon.wordCollection(
           config.rules.dictionaries.toList(),
           config.rules.variant == GameVariant.pluralias);
-      final content = wordCollection.randomWord();
+      final content = _chooseForbiddenWords(wordCollection.randomWord());
       wordInTurn = WordInTurn((b) => b
         ..id.turnIndex = DerivedGameState.turnIndex(turnLog)
         ..id.index = turnState.wordsInThisTurn.length
@@ -586,7 +586,9 @@ class GameController {
     final wordCollection = Lexicon.wordCollection(
         config.rules.dictionaries.toList(),
         config.rules.variant == GameVariant.pluralias);
-    return List.generate(totalWords, (_) => wordCollection.randomWord());
+    return List.generate(totalWords, (_) {
+      return _chooseForbiddenWords(wordCollection.randomWord());
+    });
   }
 
   static List<WordContent> _collectWordsFromPlayers(
@@ -594,7 +596,7 @@ class GameController {
     final personalStates = _parsePersonalStates(snapshot);
     final total = <WordContent>[];
     for (final state in personalStates.values) {
-      total.addAll(state.words!.map((text) => WordContent.plainWord(text)));
+      total.addAll(state.words!.map((text) => WordContent.standard(text)));
     }
     return total;
   }
@@ -906,5 +908,16 @@ class GameController {
   Future<void> setWordFlag(WordId wordId, bool hasFlag) {
     return _updatePersonalState(
         (_personalTransformer..setWordFlag(wordId, hasFlag)).personalState);
+  }
+}
+
+WordContent _chooseForbiddenWords(WordContent content) {
+  if (content.forbiddenWords != null && content.forbiddenWords!.isNotEmpty) {
+    final availableForbidden = content.forbiddenWords!.toList();
+    availableForbidden.shuffle();
+    final selectedForbidden = availableForbidden.take(5).toBuiltList();
+    return content.rebuild((b) => b..forbiddenWords.replace(selectedForbidden));
+  } else {
+    return content;
   }
 }

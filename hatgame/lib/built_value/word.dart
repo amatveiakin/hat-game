@@ -22,11 +22,18 @@ abstract class WordId implements Built<WordId, WordIdBuilder> {
 
 abstract class WordContent implements Built<WordContent, WordContentBuilder> {
   String get text;
+  BuiltList<String>? get forbiddenWords; // for taboo
   int? get highlightFirst; // for pluralias
   int? get highlightLast; // for pluralias
 
-  factory WordContent.plainWord(String text) {
+  factory WordContent.standard(String text) {
     return WordContent((b) => b..text = text);
+  }
+
+  factory WordContent.taboo(String text, BuiltList<String> forbiddenWords) {
+    return WordContent((b) => b
+      ..text = text
+      ..forbiddenWords.replace(forbiddenWords));
   }
 
   factory WordContent.pluralias(String text, int firstLen, int secondLen) {

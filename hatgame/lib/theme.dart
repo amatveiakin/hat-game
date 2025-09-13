@@ -20,4 +20,5 @@ class MyTheme {
   static const secondary = Color(0xffafc3c4);
   static const secondaryIntense = Color(0xff78b8bc);
   static const secondarySemiIntense = Color(0xff94bec0);
+  static const secondaryDark = Color(0xff005156);
 }

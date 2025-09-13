@@ -82,6 +82,11 @@ class Assert {
     return fail('Unexpected ${T.toString()} value: $value');
   }
 
+  static T type<T>(dynamic value) {
+    holds(value is T, lazyMessage: () => 'Expected $T, got $value');
+    return value as T;
+  }
+
   static void eq<T>(T a, T b,
       {String? message,
       MessageProducer? lazyMessage,

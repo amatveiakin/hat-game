@@ -70,7 +70,7 @@ GameConfig twoVsTwoOfflineConfig() {
           .names
           .replace({0: 'PlayerA', 1: 'PlayerB', 2: 'PlayerC', 3: 'PlayerD'})
       ..teaming.teamingStyle = TeamingStyle.manualTeams
-      ..rules.dictionaries.replace(Lexicon.defaultDictionaries())
+      ..rules.dictionaries.replace(Lexicon.defaultStandardDictionaries())
       ..rules.wordsPerPlayer = 1,
   );
 }
@@ -177,7 +177,7 @@ void main() {
         config: GameConfigController.defaultConfig().rebuild((b) => b
           ..players.names.replace({0: 'PlayerA', 1: 'PlayerB'})
           ..teaming.teamingStyle = TeamingStyle.individual
-          ..rules.dictionaries.replace(Lexicon.defaultDictionaries())
+          ..rules.dictionaries.replace(Lexicon.defaultStandardDictionaries())
           ..rules.extent = GameExtent.fixedNumRounds
           ..rules.numRounds = 3),
         teamCompositions:

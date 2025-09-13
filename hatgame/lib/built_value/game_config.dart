@@ -3,6 +3,7 @@ library game_config;
 import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
+import 'package:hatgame/built_value/word.dart';
 import 'package:hatgame/util/assertion.dart';
 
 part 'game_config.g.dart';
@@ -26,6 +27,7 @@ class GameExtent extends EnumClass {
 class GameVariant extends EnumClass {
   static const GameVariant standard = _$standard;
   static const GameVariant writeWords = _$writeWords;
+  static const GameVariant taboo = _$taboo;
   static const GameVariant pluralias = _$pluralias;
 
   const GameVariant._(String name) : super(name);

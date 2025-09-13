@@ -32,10 +32,12 @@ check-all:
 
 .PHONY: lint-flutter
 lint-flutter:
+	cd hatgame && dart format -o none --set-exit-if-changed .
 	cd hatgame && flutter analyze
 
 .PHONY: fix-flutter
 fix-flutter:
+	cd hatgame && dart format .
 	cd hatgame && dart fix --apply
 
 .PHONY: test-flutter

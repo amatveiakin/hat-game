@@ -506,11 +506,21 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
   }
 
   Widget _buildActivePlayer(BuildContext context, BoxConstraints constraints) {
-    final double bottomWidgetHeight = min(500, constraints.maxHeight * 0.60);
+    // TODO: Fix drag detection in taboo mode.
+    final double bottomWidgetHeight = switch (gameConfig.rules.variant) {
+      GameVariant.standard => min(500, constraints.maxHeight * 0.60),
+      GameVariant.taboo => min(360, constraints.maxHeight * 0.40),
+      _ => Assert.unexpectedValue(gameConfig.rules.variant),
+    };
     final double bottomWidgetWidth =
         min(bottomWidgetHeight, min(200, constraints.maxWidth * 0.6));
     final bottomWidgetSize = Size(bottomWidgetWidth, bottomWidgetHeight);
-    final topPadding = constraints.maxHeight * 0.18;
+    final topPadding = switch (gameConfig.rules.variant) {
+      GameVariant.standard => constraints.maxHeight * 0.18,
+      GameVariant.taboo => constraints.maxHeight * 0.06,
+      _ => Assert.unexpectedValue(gameConfig.rules.variant),
+    };
+    final forbiddenWordsHeight = 160.0;
 
     gameProgressWidget() {
       final body = switch (gameData.gameProgress()) {
@@ -591,6 +601,8 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
                               ),
                             ));
                       }),
+                  if (gameConfig.rules.variant == GameVariant.taboo)
+                    SizedBox(height: forbiddenWordsHeight),
                   Padlock(
                     size: bottomWidgetSize,
                     onUnlocked: _startExplaning,
@@ -626,6 +638,42 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
                       .copyWith(fontSize: 24.0, fontWeight: FontWeight.w500),
                 ),
               ),
+              // Reserved space for forbidden words in taboo mode
+              if (gameConfig.rules.variant == GameVariant.taboo)
+                FractionallySizedBox(
+                  widthFactor: 0.8,
+                  child: Container(
+                    height: forbiddenWordsHeight,
+                    child: Container(
+                      margin: const EdgeInsets.only(top: 16),
+                      child: wordContent.forbiddenWords != null &&
+                              wordContent.forbiddenWords!.isNotEmpty
+                          ? Container(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12),
+                              decoration: BoxDecoration(
+                                color: MyTheme.secondary.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: wordContent.forbiddenWords!
+                                    .map((word) => Text(
+                                          word,
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w500,
+                                            color: MyTheme.secondaryDark,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ))
+                                    .toList(),
+                              ),
+                            )
+                          : const SizedBox(), // Empty space when no words yet
+                    ),
+                  ),
+                ),
               // Don't set start time and paused state from gameState for
               // smoother experience for explaining players and more precise
               // time tracking.
