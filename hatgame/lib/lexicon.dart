@@ -115,10 +115,11 @@ class Lexicon {
       'russian_medium',
       'russian_hard',
       'russian_neo',
-      'russian_taboo_easy',
       'english_easy',
       'english_medium',
       'english_hard',
+      'russian_taboo_easy',
+      'russian_taboo_medium',
       'english_taboo_easy',
     ]) {
       _dictionaries[dictKey] = _parseDictionary(
