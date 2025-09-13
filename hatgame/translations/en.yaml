@@ -149,6 +149,8 @@ variant_standard_description: The app takes random words from chosen dictionarie
 variant_write_words: Write words
 variant_write_words_description: Each player writes a few words.
 variant_write_words_disabled_description: Each player writes a few words. Not supported in offline mode.
+variant_taboo: Forbidden words
+variant_taboo_description: When explaining, you must avoid not only the main word, but also five forbidden words.
 variant_pluralias: Pluralias
 variant_pluralias_description: The app generates portmanteau words instead of regular words.
 extent_fixed_word_set: Fixed word set

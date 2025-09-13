@@ -31,6 +31,7 @@ class GameConfigController {
         ..rules.extent = GameExtent.fixedWordSet
         ..rules.wordsPerPlayer = 5
         ..rules.numRounds = 3
+        ..rules.dictionaries.replace(Lexicon.defaultStandardDictionaries())
         ..teaming.teamingStyle = TeamingStyle.individual
         ..teaming.numTeams = 2,
     );
@@ -49,6 +50,37 @@ class GameConfigController {
     return config.rebuild((b) {
       if (config.teaming.teamingStyle == TeamingStyle.manualTeams) {
         b.teaming.teamingStyle = TeamingStyle.randomTeams;
+      }
+    });
+  }
+
+  static GameConfig fixDictionariesForGameVariant(GameConfig config) {
+    return config.rebuild((b) {
+      final List<String> allDictionaries;
+      final List<String> defaultDictionaries;
+      switch (config.rules.variant) {
+        case GameVariant.taboo:
+          allDictionaries = Lexicon.allDictionaries(kind: DictionaryKind.taboo);
+          defaultDictionaries = Lexicon.defaultTabooDictionaries();
+          break;
+        case GameVariant.standard:
+        case GameVariant.pluralias:
+          allDictionaries =
+              Lexicon.allDictionaries(kind: DictionaryKind.standard);
+          defaultDictionaries = Lexicon.defaultStandardDictionaries();
+          break;
+        case GameVariant.writeWords:
+          allDictionaries = [];
+          defaultDictionaries = [];
+          break;
+        default:
+          Assert.unexpectedValue(config.rules.variant);
+      }
+      final existingDicts = (config.rules.dictionaries)
+          .toSet()
+          .intersection(allDictionaries.toSet());
+      if (existingDicts.isEmpty) {
+        b.rules.dictionaries.replace(defaultDictionaries);
       }
     });
   }
@@ -76,16 +108,9 @@ class GameConfigController {
     });
   }
 
-  static GameConfig _fixDictionaries(GameConfig config) {
-    return config.rebuild((b) {
-      b.rules.dictionaries
-          .replace(Lexicon.fixDictionaries(config.rules.dictionaries.toList()));
-    });
-  }
-
   static GameConfig _fix(GameConfig config) {
     return fixPlayersForTeamingStyle(
-        fixGameExtentForGameVariant(_fixDictionaries(config)));
+        fixGameExtentForGameVariant(fixDictionariesForGameVariant(config)));
   }
 
   static GameConfig initialConfig({required bool onlineMode}) {

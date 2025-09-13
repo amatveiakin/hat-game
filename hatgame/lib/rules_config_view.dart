@@ -30,6 +30,11 @@ List<OptionItem<GameVariant>> getGameVariantOptions(bool onlineMode) {
       enabled: onlineMode,
     ),
     OptionChoice(
+      value: GameVariant.taboo,
+      title: LocalStr.tr('variant_taboo'),
+      subtitle: LocalStr.tr('variant_taboo_description'),
+    ),
+    OptionChoice(
       value: GameVariant.pluralias,
       title: LocalStr.tr('variant_pluralias'),
       subtitle: LocalStr.tr('variant_pluralias_description'),
@@ -243,14 +248,25 @@ class RulesConfigViewState extends State<RulesConfigView> {
     final dictionariesOnTap = configController.isReadOnly
         ? null
         : () {
-            Navigator.of(context).push(MaterialPageRoute<void>(
-                builder: (context) => DictionarySelector(
-                      allValues: Lexicon.allDictionaries(),
-                      initialValues: config.dictionaries.toList(),
-                      onChanged: (List<String> newValue) => configController
-                          .updateRules((config) => config.rebuild(
-                              (b) => b..dictionaries.replace(newValue))),
-                    )));
+            Navigator.of(context)
+                .push(MaterialPageRoute<void>(builder: (context) {
+              isValidDictionary(DictionaryKind kind) {
+                return config.variant == GameVariant.taboo
+                    ? kind == DictionaryKind.taboo
+                    : kind == DictionaryKind.standard;
+              }
+
+              return DictionarySelector(
+                allValues: Lexicon.allDictionaries()
+                    .where((d) =>
+                        isValidDictionary(Lexicon.dictionaryMetadata(d).kind))
+                    .toList(),
+                initialValues: config.dictionaries.toList(),
+                onChanged: (List<String> newValue) =>
+                    configController.updateRules((config) => config
+                        .rebuild((b) => b..dictionaries.replace(newValue))),
+              );
+            }));
           };
     final dictionaryNames =
         config.dictionaries.map((d) => Lexicon.dictionaryMetadata(d).uiName);
@@ -305,6 +321,7 @@ class RulesConfigViewState extends State<RulesConfigView> {
             title: Text(switch (config.variant) {
               GameVariant.standard => context.tr('variant_standard'),
               GameVariant.writeWords => context.tr('variant_write_words'),
+              GameVariant.taboo => context.tr('variant_taboo'),
               GameVariant.pluralias => context.tr('variant_pluralias'),
               _ => Assert.unexpectedValue(config.variant),
             }),
@@ -314,9 +331,11 @@ class RulesConfigViewState extends State<RulesConfigView> {
                     Navigator.of(context).push(MaterialPageRoute<void>(
                         builder: (context) => GameVariantSelector(
                               config.variant,
-                              (GameVariant newValue) => configController
-                                  .updateRules((config) => config
-                                      .rebuild((b) => b..variant = newValue)),
+                              (GameVariant newValue) => configController.update(
+                                  (config) => GameConfigController
+                                      .fixDictionariesForGameVariant(
+                                          config.rebuild((b) =>
+                                              b..rules.variant = newValue))),
                               onlineMode: onlineMode,
                             )));
                   }),
