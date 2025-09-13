@@ -128,6 +128,13 @@ class TurnStateTransformer {
     drawNextWord();
   }
 
+  void wordSkipped() {
+    Assert.eq(turnState.turnPhase, TurnPhase.explain);
+    Assert.holds(turnState.wordsInThisTurn.isNotEmpty);
+    setWordStatus(turnState.wordsInThisTurn.last.id, WordStatus.discarded);
+    drawNextWord();
+  }
+
   void finishExplanation() {
     Assert.eq(turnState.turnPhase, TurnPhase.explain);
     turnState = turnState.rebuild(
@@ -875,6 +882,10 @@ class GameController {
 
   Future<void> wordGuessed() {
     return _updateTurnState((_transformer..wordGuessed()).turnState);
+  }
+
+  Future<void> wordSkipped() {
+    return _updateTurnState((_transformer..wordSkipped()).turnState);
   }
 
   Future<void> finishExplanation() {
