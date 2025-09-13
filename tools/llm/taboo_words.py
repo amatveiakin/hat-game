@@ -11,6 +11,7 @@ from litellm.cost_calculator import completion_cost
 from litellm.types.utils import ModelResponse
 from pydantic import BaseModel
 from rich.console import Console
+from tenacity import retry, stop_after_attempt, wait_exponential
 from tqdm.asyncio import tqdm
 
 from tools.utils.lexicon import TabooLexicon, lexicon_to_yaml, yaml_to_lexicon
@@ -53,9 +54,12 @@ async def gen_forbidden_words(
     language: str,
     word: str,
 ) -> ForbiddenWordsResult:
-    start_time = time.monotonic()
-    try:
-        response = await acompletion(
+    @retry(
+        wait=wait_exponential(min=2, max=30),
+        stop=stop_after_attempt(3),
+    )
+    async def do_gen():
+        return await acompletion(
             model=MODEL,
             reasoning_effort=REASONING_EFFORT,
             messages=[
@@ -65,9 +69,11 @@ async def gen_forbidden_words(
                 },
                 {"role": "user", "content": word},
             ],
-            max_retries=3,
-            retry_strategy="exponential_backoff_retry",
         )
+
+    start_time = time.monotonic()
+    try:
+        response = await do_gen()
     except Exception:
         duration = time.monotonic() - start_time
         return ForbiddenWordsResult(
@@ -97,7 +103,7 @@ def stable_hash(word: str) -> int:
 
 
 def include_word(word: str) -> bool:
-    return stable_hash(word) % 32 == 0
+    return stable_hash(word) % 16 == 0
 
 
 async def generate_forbidden_words(
