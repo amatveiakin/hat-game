@@ -16,7 +16,7 @@ class DecoratedText extends StatelessWidget {
   final TextStyle? textStyle;
 
   const DecoratedText({
-    Key? key,
+    super.key,
     required this.text,
     required this.highlightFirst,
     required this.highlightLast,
@@ -24,7 +24,7 @@ class DecoratedText extends StatelessWidget {
     this.lineThickness = 2.0,
     this.cornerRadius = 4.0,
     this.textStyle,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

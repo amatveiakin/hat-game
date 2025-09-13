@@ -135,7 +135,7 @@ class TeamingConfigViewState extends State<TeamingConfigView> {
 
   @override
   Widget build(BuildContext context) {
-    const _numericFieldPadding = EdgeInsets.symmetric(vertical: 2.0);
+    const numericFieldPadding = EdgeInsets.symmetric(vertical: 2.0);
     var items = <Widget>[];
     items.add(
       OptionSelectorHeader(
@@ -183,7 +183,7 @@ class TeamingConfigViewState extends State<TeamingConfigView> {
                 ),
               ),
               Padding(
-                padding: _numericFieldPadding,
+                padding: numericFieldPadding,
                 child: NumericField(
                   readOnly: configController.isReadOnly,
                   controller: viewController.numTeamsController,
@@ -209,6 +209,6 @@ String _playersPerTeamText(BuildContext context, int numPlayers, int numTeams) {
   if (min < 2) {
     return context.tr('not_enough_players');
   }
-  final value = (min == max) ? min.toString() : "${min}${enDash}${max}";
+  final value = (min == max) ? min.toString() : "$min$enDash$max";
   return context.plural('players_per_team', max, args: [value]);
 }

@@ -33,11 +33,11 @@ class _PadlockPainter extends CustomPainter {
         size.center(Offset.zero) - Size.square(side).center(Offset.zero);
     final hatRect = Rect.fromLTRB(0, spaceAbove, side, side).shift(center);
 
-    final drawHat = (ui.Image image) {
+    drawHat(ui.Image image) {
       paintImage(
           canvas: canvas, rect: hatRect, image: image, fit: BoxFit.scaleDown);
-    };
-    final drawPaper = (int? showThreshold, Offset pos, double angle) {
+    }
+    drawPaper(int? showThreshold, Offset pos, double angle) {
       if (showThreshold != null && wordsInHat != null) {
         if (wordsInHat! < showThreshold) {
           return;
@@ -55,7 +55,7 @@ class _PadlockPainter extends CustomPainter {
         ..strokeCap = StrokeCap.round
         ..strokeJoin = StrokeJoin.round;
       _drawRotatedRect(canvas, dstRect, angle, fill, stroke);
-    };
+    }
 
     final primaryAnimationProgress = panActive ? 0.0 : animationProgress;
     final primaryJump =
@@ -106,9 +106,9 @@ class Padlock extends StatefulWidget {
 
 class PadlockState extends State<Padlock> with SingleTickerProviderStateMixin {
   static const double _dragStartTolerance = 50.0;
-  late Future<ui.Image> _background =
+  late final Future<ui.Image> _background =
       loadAssetImage('images/hat_with_words_bg.png');
-  late Future<ui.Image> _foreground =
+  late final Future<ui.Image> _foreground =
       loadAssetImage('images/hat_with_words_fg.png');
   bool _panActive = false;
   bool _padlockOpen = false;

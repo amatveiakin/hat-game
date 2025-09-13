@@ -19,13 +19,13 @@ class RoundProgressIndicator extends StatelessWidget {
   final Color completionColor;
 
   RoundProgressIndicator({
-    Key? key,
+    super.key,
     required this.roundIndex,
     required this.numRounds,
     required this.roundProgress,
     required this.baseColor,
     required this.completionColor,
-  }) : super(key: key) {
+  }) {
     assert(roundIndex >= 0);
     assert(roundIndex < numRounds);
     assert(roundProgress >= 0.0);

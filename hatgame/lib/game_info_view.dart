@@ -23,7 +23,7 @@ class GameInfoView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final makeAction = (
+    makeAction(
         {required String title,
         required Icon icon,
         required VoidCallback? action}) {
@@ -47,7 +47,7 @@ class GameInfoView extends StatelessWidget {
           ),
         ],
       );
-    };
+    }
 
     return ConstrainedScaffold(
       appBar: AppBar(
@@ -120,15 +120,15 @@ String _describeGame(
 
   final info = <String>[];
 
-  final addParagraph = (String text) {
+  addParagraph(String text) {
     info.add(text);
-  };
-  final addTitle = (String title) {
+  }
+  addTitle(String title) {
     info.add('### ' + title);
-  };
-  final addUnorderedList = (Iterable<String> items) {
+  }
+  addUnorderedList(Iterable<String> items) {
     info.add(items.map((item) => '- $item').join('\n'));
-  };
+  }
 
   addTitle(context.tr('game_info_variant', args: [variantString]));
   addParagraph(context.tr('game_info_turn_times', args: [

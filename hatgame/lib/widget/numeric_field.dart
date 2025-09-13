@@ -85,14 +85,14 @@ class NumericFieldImpl extends StatefulWidget {
   final int? maxValue;
   final String? suffixText;
 
-  NumericFieldImpl({
+  const NumericFieldImpl({
     super.key,
     required this.controller,
     required this.goldenValues,
     required this.minValue,
     required this.maxValue,
     this.suffixText,
-  }) {}
+  });
 
   @override
   State<StatefulWidget> createState() => _NumericFieldImplState();

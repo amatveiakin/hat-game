@@ -593,8 +593,9 @@ class GameController {
       DBDocumentSnapshot snapshot) {
     final personalStates = _parsePersonalStates(snapshot);
     final total = <WordContent>[];
-    personalStates.values.forEach((state) =>
-        total.addAll(state.words!.map((text) => WordContent.plainWord(text))));
+    for (final state in personalStates.values) {
+      total.addAll(state.words!.map((text) => WordContent.plainWord(text)));
+    }
     return total;
   }
 

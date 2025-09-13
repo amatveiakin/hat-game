@@ -184,14 +184,14 @@ void main() {
             TeamCompositions((b) => b..individualOrder.replace([0, 1])),
       );
 
-      final playOneTurn = (int wordsGuessed) async {
+      playOneTurn(int wordsGuessed) async {
         await (await client.controller()).startExplaning();
         for (var i = 0; i < wordsGuessed; i++) {
           await (await client.controller()).wordGuessed();
         }
         await (await client.controller()).finishExplanation();
         await (await client.controller()).nextTurn();
-      };
+      }
 
       expect((await client.controller()).gameData.gameFinished(), isFalse);
       expect((await client.controller()).gameData.numWordsInHat(), isNull);

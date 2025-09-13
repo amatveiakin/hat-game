@@ -314,7 +314,7 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
   late AnimationController _glowAnimationController;
   late Animation<double> _glowAnimation;
   late AnimationController _padlockAnimationController;
-  ValueNotifier<bool> _padlockReadyToOpen = ValueNotifier(false);
+  final ValueNotifier<bool> _padlockReadyToOpen = ValueNotifier(false);
   bool _turnActive = false;
 
   void _startExplaning() {
@@ -412,7 +412,7 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
   }
 
   Widget _buildInactivePlayer(BuildContext context) {
-    final wordReviewView = () {
+    wordReviewView() {
       return ListView(
         children: gameData
             .wordsInThisTurnData()
@@ -440,7 +440,7 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
                   ))
             .toList(),
       );
-    };
+    }
 
     switch (turnState!.turnPhase) {
       case TurnPhase.prepare:
@@ -512,7 +512,7 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
     final bottomWidgetSize = Size(bottomWidgetWidth, bottomWidgetHeight);
     final topPadding = constraints.maxHeight * 0.18;
 
-    final gameProgressWidget = () {
+    gameProgressWidget() {
       final body = switch (gameData.gameProgress()) {
         FixedWordSetProgress(:final numWords) =>
           Text(context.tr('words_in_hat', args: [numWords.toString()])),
@@ -551,7 +551,7 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
         padding: const EdgeInsets.symmetric(vertical: 12.0),
         child: body,
       );
-    };
+    }
 
     switch (turnState!.turnPhase) {
       case TurnPhase.prepare:
