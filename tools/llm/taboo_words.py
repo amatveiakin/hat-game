@@ -1,3 +1,5 @@
+# TODO: Cleanup script to exclude abbreviations, digits, etc. !!!
+
 import asyncio
 import datetime
 import hashlib
@@ -39,6 +41,7 @@ Good forbidden words make the target word hard to explain and include:
 
 Requirements:
 - Single words only (hyphens OK, spaces not allowed).
+- No abbreviations (initialisms or acronyms).
 - Never include cognates of the target word or other forbidden words.
 - Match gender/number agreement for adjectives when relevant.
 - All words must be in lowercase, unless the word is a proper noun and is always capitalized.
