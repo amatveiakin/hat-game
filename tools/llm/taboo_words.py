@@ -1,40 +1,31 @@
-# TODO: Cleanup script to exclude abbreviations, digits, etc. !!!
-
 import asyncio
 import datetime
-import hashlib
-import time
-import traceback
 from pathlib import Path
 from typing import Literal
 
 import litellm
 import typer
-from litellm import Choices, acompletion
-from litellm.cost_calculator import completion_cost
-from litellm.types.utils import ModelResponse
 from pydantic import BaseModel
 from rich.console import Console
-from tenacity import retry, stop_after_attempt, wait_exponential
-from tqdm.asyncio import tqdm
 
 from tools.utils.lexicon import TabooLexicon, lexicon_to_yaml, yaml_to_lexicon
+from tools.utils.llm import simple_llm_request
+from tools.utils.parallel_process import parallel_process
 
 ReasoningEffort = Literal["none", "minimal", "low", "medium", "high", "default"]
 
 
 class ForbiddenWordsResult(BaseModel):
     word: str
-    forbidden_words: list[str] | None
-    duration: float
-    cost: float
+    forbidden_words: list[str]
+    cost_usd: float
 
 
 MODEL = "gemini/gemini-2.5-pro"
 # MODEL = "anthropic/claude-opus-4-1"
-REASONING_EFFORT = "low"
+REASONING_EFFORT: ReasoningEffort = "low"
 
-REQUEST_COLLATE = """
+REQUEST = """
 Generate 10 forbidden words for a Taboo-like game in {language}.
 
 Good forbidden words make the target word hard to explain and include:
@@ -52,8 +43,6 @@ Requirements:
 - Do not include any other text. NO bullets, NO numbering, NO comments, NO headers, NO nothing.
 """.strip()
 
-MAX_PARALLEL_REQUESTS = 16
-
 litellm.suppress_debug_info = True
 
 console = Console(highlight=False)
@@ -63,67 +52,19 @@ async def gen_forbidden_words(
     *,
     language: str,
     word: str,
-    semaphore: asyncio.Semaphore,
-    pbar: tqdm,
 ) -> ForbiddenWordsResult:
-    @retry(
-        wait=wait_exponential(min=2, max=30),
-        stop=stop_after_attempt(3),
+    response = await simple_llm_request(
+        model=MODEL,
+        reasoning_effort=REASONING_EFFORT,
+        system_message=REQUEST.format(language=language),
+        user_message=word,
     )
-    async def do_gen():
-        return await acompletion(
-            model=MODEL,
-            reasoning_effort=REASONING_EFFORT,
-            messages=[
-                {
-                    "role": "system",
-                    "content": REQUEST_COLLATE.format(language=language),
-                },
-                {"role": "user", "content": word},
-            ],
-        )
-
-    async with semaphore:
-        start_time = time.monotonic()
-
-        try:
-            response = await do_gen()
-            assert isinstance(response, ModelResponse)
-            assert len(response.choices) == 1
-            assert isinstance(response.choices[0], Choices)
-            message = response.choices[0].message
-            assert message.content is not None, response.model_dump_json(indent=2)
-            cost = completion_cost(completion_response=response, model=MODEL)
-            words = message.content.split("\n")
-            duration = time.monotonic() - start_time
-            return ForbiddenWordsResult(
-                word=word,
-                forbidden_words=words,
-                duration=duration,
-                cost=cost,
-            )
-
-        except Exception:
-            pbar.write(f"Error processing word '{word}':\n{traceback.format_exc()}")
-            duration = time.monotonic() - start_time
-            return ForbiddenWordsResult(
-                word=word,
-                forbidden_words=None,
-                duration=duration,
-                cost=0,
-            )
-
-        finally:
-            pbar.update(1)
-
-
-def stable_hash(word: str) -> int:
-    return int(hashlib.blake2b(word.encode("utf-8")).hexdigest(), 16)
-
-
-def include_word(word: str) -> bool:
-    # return stable_hash(word) % 16 == 0
-    return True
+    words = response.text.split("\n")
+    return ForbiddenWordsResult(
+        word=word,
+        forbidden_words=words,
+        cost_usd=response.cost_usd,
+    )
 
 
 async def generate_forbidden_words(
@@ -150,47 +91,27 @@ async def generate_forbidden_words(
             words={},
         )
 
-    semaphore = asyncio.Semaphore(MAX_PARALLEL_REQUESTS)
     words_to_process = [
-        word
-        for word in source_words
-        if include_word(word) and word not in target_lexicon.words
+        word for word in source_words if word not in target_lexicon.words
     ]
 
     if len(words_to_process) == 0:
         console.print("No words to process")
         return
 
-    pbar = tqdm(total=len(words_to_process), desc="Generating forbidden words")
-    tasks = [
-        asyncio.create_task(
-            gen_forbidden_words(
-                language=source_lexicon.language,
-                word=word,
-                semaphore=semaphore,
-                pbar=pbar,
-            )
-        )
-        for word in words_to_process
-    ]
-
-    try:
-        await asyncio.gather(*tasks, return_exceptions=True)
-        pbar.close()
-    except (KeyboardInterrupt, asyncio.CancelledError):
-        pbar.close()
-        console.print("\nInterrupted. Saving progress...")
-        for task in tasks:
-            if not task.done():
-                task.cancel()
+    results = await parallel_process(
+        words_to_process,
+        lambda word: gen_forbidden_words(language=source_lexicon.language, word=word),
+        console=console,
+        progress_description="Generating forbidden words",
+    )
 
     total_cost = 0
-    for task in tasks:
-        if task.done() and not task.cancelled():
-            r = await task
-            if r.forbidden_words is not None:
-                target_lexicon.words[r.word] = r.forbidden_words
-            total_cost += r.cost
+    for result in results:
+        if result.status == "success":
+            r = result.value
+            target_lexicon.words[r.word] = r.forbidden_words
+            total_cost += r.cost_usd
 
     target_lexicon.words = {k: v for k, v in sorted(target_lexicon.words.items())}
     target_lexicon_path.write_text(lexicon_to_yaml(target_lexicon), encoding="utf-8")
