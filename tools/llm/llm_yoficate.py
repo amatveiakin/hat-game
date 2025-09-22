@@ -126,6 +126,10 @@ litellm.suppress_debug_info = True
 console = Console(highlight=False)
 
 
+def is_yofication(yo_word: str, e_word: str) -> bool:
+    return yo_word.lower().replace("ё", "е") == e_word.lower()
+
+
 async def yoficate(word: str) -> YoficateResult:
     assert is_russian_word(word)
     responses = [
@@ -145,11 +149,7 @@ async def yoficate(word: str) -> YoficateResult:
 
     yoficated_words = yoficated_word_options[0]
     assert all(
-        is_russian_word(w) for w in yoficated_words
-    ), f"{word} => {yoficated_words}"
-
-    assert all(
-        word.lower() == w.lower().replace("ё", "е") for w in yoficated_words
+        is_yofication(w, word) for w in yoficated_words
     ), f"{word} => {yoficated_words}"
 
     return YoficateResult(
@@ -181,6 +181,10 @@ async def generate_yofication_dictionary(
         yofication_dictionary = YoficationDictionary.from_yaml(
             yofication_dictionary_path.read_text(encoding="utf-8")
         )
+        for word, yoficated_words in yofication_dictionary.yofications.items():
+            assert all(
+                is_yofication(w, word) for w in yoficated_words
+            ), f"{word} => {yoficated_words}"
     else:
         yofication_dictionary = YoficationDictionary(yofications={})
 
