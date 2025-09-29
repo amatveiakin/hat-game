@@ -261,6 +261,7 @@ dependencies = [
     { name = "pandas" },
     { name = "pydantic" },
     { name = "pymorphy3" },
+    { name = "pytest" },
     { name = "pyyaml" },
     { name = "rich" },
     { name = "tenacity" },
@@ -272,7 +273,6 @@ dependencies = [
 [package.optional-dependencies]
 dev = [
     { name = "pyright" },
-    { name = "pytest" },
     { name = "ruff" },
 ]
 
@@ -286,7 +286,7 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.0.0" },
     { name = "pymorphy3", specifier = ">=1.0.0" },
     { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.405" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0.0" },
+    { name = "pytest", specifier = ">=7.0.0" },
     { name = "pyyaml", specifier = ">=6.0.2" },
     { name = "rich", specifier = ">=14.1.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.13.0" },
