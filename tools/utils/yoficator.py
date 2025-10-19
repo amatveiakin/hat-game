@@ -1,11 +1,25 @@
+import re
+from pathlib import Path
 from zipfile import ZipFile
 
 import yaml
 from pydantic import TypeAdapter
 
-from tools.utils.defines import RU_WIKTIONARY_WORD_FORMS_ZIP, YOFICATION_DICTIONARY_YAML
-from tools.utils.linguistics import is_relaxed_russian_word, ru_sorted_ignore_case
+from tools.utils.defines import (
+    E2YO_KERNEL_NOT_SAFE_TXT,
+    E2YO_KERNEL_SAFE_TXT,
+    RU_WIKTIONARY_WORD_FORMS_ZIP,
+    YOFICATION_DICTIONARY_YAML,
+)
+from tools.utils.linguistics import (
+    is_relaxed_russian_word,
+    is_russian_word,
+    ru_sorted_ignore_case,
+)
 from tools.utils.yaml import FlowListDumper
+
+REMOVE_COMMENT_REGEXP = re.compile(r"#.*$")
+E2YO_MULTI_REGEXP = re.compile(r"^(.+)\((.*)\)$")
 
 
 def deyoficate(word: str) -> str:
@@ -15,6 +29,19 @@ def deyoficate(word: str) -> str:
 class Yoficator:
     def __init__(self, yofications: dict[str, list[str]]):
         self.yofications = yofications
+
+    @classmethod
+    def from_e2yo_kernel(cls) -> "Yoficator":
+        safe_words = set(_read_y2yo_kernel_file(E2YO_KERNEL_SAFE_TXT))
+        non_safe_words = set(_read_y2yo_kernel_file(E2YO_KERNEL_NOT_SAFE_TXT))
+        yofications: dict[str, list[str]] = {}
+        for w in safe_words:
+            assert is_russian_word(w), f'"{w}" is not a Russian word'
+            yofications.setdefault(deyoficate(w), []).append(w)
+        for w in non_safe_words:
+            assert is_russian_word(w), f'"{w}" is not a Russian word'
+            yofications.setdefault(deyoficate(w), []).extend([w, deyoficate(w)])
+        return cls(yofications=yofications)
 
     @classmethod
     def from_yofication_dictionary(cls) -> "Yoficator":
@@ -71,4 +98,26 @@ class Yoficator:
 
     def __call__(self, word: str) -> list[str]:
         assert is_relaxed_russian_word(word), f'"{word}" is not a Russian word'
-        return self.yofications[word.lower()]
+        return self.yofications.get(word.lower(), [word])
+
+
+def _read_y2yo_kernel_file(path: Path) -> list[str]:
+    lines = [
+        line.strip()
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    yo_forms: list[str] = []
+    for line in lines:
+        line = REMOVE_COMMENT_REGEXP.sub("", line)
+        if line.startswith("_"):
+            continue
+        multi_match = E2YO_MULTI_REGEXP.match(line)
+        if multi_match:
+            base = multi_match.group(1)
+            yo_forms.extend(
+                f"{base}{suffix}" for suffix in multi_match.group(2).split("|")
+            )
+        else:
+            yo_forms.append(line)
+    return yo_forms

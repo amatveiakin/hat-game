@@ -25,7 +25,7 @@ def word_to_yaml(w: Word) -> str:
 
 
 def yoficate(lexicon_path: Path):
-    yoficate = Yoficator.from_ru_wiktionary()
+    yoficate = Yoficator.from_e2yo_kernel()
     lexicon = yaml_to_lexicon(lexicon_path.read_text(encoding="utf-8"))
     assert lexicon.language == "Russian"
     assert lexicon.kind == "standard"
