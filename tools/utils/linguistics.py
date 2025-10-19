@@ -4,6 +4,7 @@ from collections.abc import Iterable
 
 # Allow apostrophes for words like "д'Артаньян"
 RUSSIAN_WORD_REGEXP = re.compile(r"^([а-яёА-ЯЁ][а-яёА-ЯЁ'-]*[а-яёА-ЯЁ]|[а-яёА-ЯЁ])$")
+RELAXED_RUSSIAN_WORD_REGEXP = re.compile(r"^[а-яёА-ЯЁ' -]+$")
 STRESSES_REGEXP = re.compile(r"[\u0300\u0301]")
 # TODO: Finish list
 ADDITIONAL_STRESS_REPLACEMENTS = {
@@ -18,6 +19,10 @@ ADDITIONAL_STRESS_REPLACEMENTS = {
 
 def is_russian_word(word: str) -> bool:
     return RUSSIAN_WORD_REGEXP.match(word) is not None
+
+
+def is_relaxed_russian_word(word: str) -> bool:
+    return RELAXED_RUSSIAN_WORD_REGEXP.match(word) is not None
 
 
 def remove_stresses(word: str) -> str:

@@ -10,14 +10,14 @@ from tqdm import tqdm
 
 from tools.lexicon_py.wiktextract_extra_ru_models import TitleEntry, parse_entry
 from tools.lexicon_py.wiktextract_ru_models import WordEntry
-from tools.utils.defines import LEXICON_ROOT
+from tools.utils.defines import WAREHOUSE_LEXICON_ROOT
 from tools.utils.linguistics import (
     is_russian_word,
     remove_stresses,
     ru_sorted_with_case,
 )
 
-OUTPUT_ROOT = LEXICON_ROOT / "ru" / "wikiextract"
+OUTPUT_ROOT = WAREHOUSE_LEXICON_ROOT / "ru" / "wikiextract"
 
 
 def clear_word(word: str, stats: defaultdict[str, int], key: str) -> list[str]:

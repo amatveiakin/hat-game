@@ -11,6 +11,7 @@ from tools.utils.lexicon import yaml_to_lexicon
 from tools.utils.linguistics import is_russian_word
 from tools.utils.llm import ReasoningEffort, simple_llm_request
 from tools.utils.parallel_process import parallel_process
+from tools.utils.yaml import FlowListDumper
 
 
 class YoficationDictionary(BaseModel):
@@ -25,16 +26,6 @@ class YoficationDictionary(BaseModel):
         return cls(yofications=yofications)
 
     def to_yaml(self) -> str:
-        class FlowListDumper(yaml.SafeDumper):
-            def represent_sequence(self, tag, sequence, flow_style=None):
-                processed_sequence = [self.represent_data(item) for item in sequence]
-                return yaml.SequenceNode(tag, processed_sequence, flow_style=True)
-
-            def represent_str(self, data):
-                return self.represent_scalar("tag:yaml.org,2002:str", data, style='"')
-
-        FlowListDumper.add_representer(str, FlowListDumper.represent_str)
-
         yofications = {
             k: sorted(["=" if v == k else v for v in vs])
             for k, vs in self.yofications.items()
