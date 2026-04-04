@@ -513,17 +513,15 @@ class PlayAreaState extends State<PlayArea> with TickerProviderStateMixin {
   Widget _buildActivePlayer(BuildContext context, BoxConstraints constraints) {
     // TODO: Fix drag detection in taboo mode.
     final double bottomWidgetHeight = switch (gameConfig.rules.variant) {
-      GameVariant.standard => min(500, constraints.maxHeight * 0.60),
       GameVariant.taboo => min(360, constraints.maxHeight * 0.40),
-      _ => Assert.unexpectedValue(gameConfig.rules.variant),
+      _ => min(500, constraints.maxHeight * 0.60),
     };
     final double bottomWidgetWidth =
         min(bottomWidgetHeight, min(200, constraints.maxWidth * 0.6));
     final bottomWidgetSize = Size(bottomWidgetWidth, bottomWidgetHeight);
     final topPadding = switch (gameConfig.rules.variant) {
-      GameVariant.standard => constraints.maxHeight * 0.18,
       GameVariant.taboo => constraints.maxHeight * 0.08,
-      _ => Assert.unexpectedValue(gameConfig.rules.variant),
+      _ => constraints.maxHeight * 0.18,
     };
     final forbiddenWordsHeight = 172.0;
 
